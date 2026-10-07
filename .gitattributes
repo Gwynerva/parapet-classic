@@ -1,0 +1,12 @@
+# Text files are stored and checked out with LF on every platform.
+* text=auto eol=lf
+
+# Binary assets.
+*.png binary
+*.jar binary
+*.mid binary
+*.gz binary
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary

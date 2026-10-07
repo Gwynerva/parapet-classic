@@ -1,0 +1,4 @@
+# level: 0
+# mission: 0
+# Sprint on Mill Brook with the rival replaying its recording: 2500 steps, no player input.
+2500 -

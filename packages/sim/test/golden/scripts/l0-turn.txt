@@ -1,0 +1,6 @@
+# level: 0
+# mission: 4
+# Run 20 steps, press LEFT (= BACK while facing right: turn), 80 more steps.
+20 -
+1 L
+80 -

@@ -1,0 +1,288 @@
+{
+  "level": 1,
+  "snapshot": [
+    0,
+    0,
+    0,
+    0,
+    2048,
+    19456,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "flags": [
+    1,
+    0
+  ],
+  "totalTime": 49950,
+  "entries": [
+    {
+      "ticks": 110,
+      "input": 0
+    },
+    {
+      "ticks": 1,
+      "input": 36
+    },
+    {
+      "ticks": 27,
+      "input": 0
+    },
+    {
+      "ticks": 1,
+      "input": 1
+    },
+    {
+      "ticks": 32,
+      "input": 0
+    },
+    {
+      "ticks": 1,
+      "input": 1
+    },
+    {
+      "ticks": 95,
+      "input": 0
+    },
+    {
+      "ticks": 1,
+      "input": 1
+    },
+    {
+      "ticks": 2,
+      "input": 0
+    },
+    {
+      "ticks": 1,
+      "input": 20
+    },
+    {
+      "ticks": 39,
+      "input": 0
+    },
+    {
+      "ticks": 1,
+      "input": 1
+    },
+    {
+      "ticks": 2,
+      "input": 0
+    },
+    {
+      "ticks": 1,
+      "input": 20
+    },
+    {
+      "ticks": 145,
+      "input": 0
+    },
+    {
+      "ticks": 1,
+      "input": 36
+    },
+    {
+      "ticks": 24,
+      "input": 0
+    },
+    {
+      "ticks": 1,
+      "input": 1
+    },
+    {
+      "ticks": 24,
+      "input": 0
+    },
+    {
+      "ticks": 1,
+      "input": 1
+    },
+    {
+      "ticks": 30,
+      "input": 0
+    },
+    {
+      "ticks": 1,
+      "input": 1
+    },
+    {
+      "ticks": 68,
+      "input": 0
+    },
+    {
+      "ticks": 1,
+      "input": 1
+    },
+    {
+      "ticks": 1,
+      "input": 0
+    },
+    {
+      "ticks": 1,
+      "input": 20
+    },
+    {
+      "ticks": 61,
+      "input": 0
+    },
+    {
+      "ticks": 1,
+      "input": 20
+    },
+    {
+      "ticks": 27,
+      "input": 0
+    },
+    {
+      "ticks": 1,
+      "input": 1
+    },
+    {
+      "ticks": 56,
+      "input": 0
+    },
+    {
+      "ticks": 1,
+      "input": 1
+    },
+    {
+      "ticks": 104,
+      "input": 0
+    },
+    {
+      "ticks": 1,
+      "input": 2
+    },
+    {
+      "ticks": 117,
+      "input": 0
+    },
+    {
+      "ticks": 1,
+      "input": 1
+    },
+    {
+      "ticks": 19,
+      "input": 0
+    },
+    {
+      "ticks": 1,
+      "input": 1
+    },
+    {
+      "ticks": 19,
+      "input": 0
+    },
+    {
+      "ticks": 1,
+      "input": 1
+    },
+    {
+      "ticks": 167,
+      "input": 0
+    },
+    {
+      "ticks": 1,
+      "input": 1
+    },
+    {
+      "ticks": 70,
+      "input": 0
+    },
+    {
+      "ticks": 1,
+      "input": 1
+    },
+    {
+      "ticks": 80,
+      "input": 0
+    },
+    {
+      "ticks": 1,
+      "input": 20
+    },
+    {
+      "ticks": 52,
+      "input": 0
+    },
+    {
+      "ticks": 1,
+      "input": 1
+    },
+    {
+      "ticks": 2,
+      "input": 0
+    },
+    {
+      "ticks": 1,
+      "input": 20
+    },
+    {
+      "ticks": 113,
+      "input": 0
+    },
+    {
+      "ticks": 1,
+      "input": 1
+    },
+    {
+      "ticks": 6,
+      "input": 0
+    },
+    {
+      "ticks": 1,
+      "input": 1
+    },
+    {
+      "ticks": 6,
+      "input": 0
+    },
+    {
+      "ticks": 1,
+      "input": 1
+    },
+    {
+      "ticks": 5,
+      "input": 0
+    },
+    {
+      "ticks": 1,
+      "input": 1
+    },
+    {
+      "ticks": 98,
+      "input": 0
+    },
+    {
+      "ticks": 1,
+      "input": 20
+    },
+    {
+      "ticks": 34,
+      "input": 0
+    },
+    {
+      "ticks": 34,
+      "input": 0
+    }
+  ]
+}

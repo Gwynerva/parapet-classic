@@ -1,0 +1,14 @@
+{
+  "name": "@parapet/runtime",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Browser runtime shared by the Parapet games: platform, rendering, UI toolkit",
+  "exports": {
+    "./*": "./src/*"
+  },
+  "dependencies": {
+    "@parapet/protocol": "*",
+    "@parapet/sim": "*"
+  }
+}

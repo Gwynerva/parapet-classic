@@ -1,0 +1,35 @@
+{
+  "name": "parapet",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Parapet - browser remake of the 2007 J2ME parkour game Playman Extreme Running",
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @parapet/classic",
+    "build": "npm run build -w @parapet/classic",
+    "preview": "npm run preview -w @parapet/classic",
+    "server": "npm run start -w @parapet/server",
+    "extract": "npm run extract -w @parapet/tools",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "node scripts/typecheck.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "decompile": "node scripts/decompile.mjs",
+    "check": "npm run format:check && npm run typecheck && npm test",
+    "build-font": "npm run build-font -w @parapet/tools"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.4",
+    "prettier": "^3.9.9",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.3",
+    "vitest": "^5.0.3"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

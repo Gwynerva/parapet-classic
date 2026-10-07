@@ -1,0 +1,5194 @@
+{
+  "file": 1,
+  "objects": [
+    {
+      "id": 2048,
+      "index": 0,
+      "frames": 1,
+      "pivotX": 0,
+      "pivotY": 1,
+      "width": 30,
+      "height": 59,
+      "primitives": [
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            3
+          ],
+          "y": [
+            3
+          ],
+          "value": [
+            12678
+          ],
+          "w": [
+            24
+          ],
+          "h": [
+            2
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            25
+          ],
+          "y": [
+            4
+          ],
+          "value": [
+            12678
+          ],
+          "w": [
+            2
+          ],
+          "h": [
+            52
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            3
+          ],
+          "y": [
+            4
+          ],
+          "value": [
+            12678
+          ],
+          "w": [
+            2
+          ],
+          "h": [
+            52
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            27
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            19018
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            59
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            19018
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            59
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            56
+          ],
+          "value": [
+            19018
+          ],
+          "w": [
+            30
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            19018
+          ],
+          "w": [
+            30
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            1
+          ],
+          "y": [
+            29
+          ],
+          "value": [
+            19018
+          ],
+          "w": [
+            28
+          ],
+          "h": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2049,
+      "index": 1,
+      "frames": 1,
+      "pivotX": 16,
+      "pivotY": 24,
+      "width": 57,
+      "height": 25,
+      "primitives": [
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            23
+          ],
+          "value": [
+            16904
+          ],
+          "w": [
+            57
+          ],
+          "h": [
+            2
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            2
+          ],
+          "y": [
+            2
+          ],
+          "value": [
+            31695
+          ],
+          "w": [
+            52
+          ],
+          "h": [
+            20
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            3
+          ],
+          "y": [
+            3
+          ],
+          "value": [
+            8195
+          ],
+          "w": [
+            50
+          ],
+          "h": [
+            18
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            16904
+          ],
+          "w": [
+            57
+          ],
+          "h": [
+            2
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            16904
+          ],
+          "w": [
+            2
+          ],
+          "h": [
+            24
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            55
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            16904
+          ],
+          "w": [
+            2
+          ],
+          "h": [
+            24
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2050,
+      "index": 2,
+      "frames": 1,
+      "pivotX": 15,
+      "pivotY": 30,
+      "width": 30,
+      "height": 59,
+      "primitives": [
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            3
+          ],
+          "y": [
+            3
+          ],
+          "value": [
+            -29387
+          ],
+          "w": [
+            24
+          ],
+          "h": [
+            2
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            25
+          ],
+          "y": [
+            4
+          ],
+          "value": [
+            -27209
+          ],
+          "w": [
+            2
+          ],
+          "h": [
+            52
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            3
+          ],
+          "y": [
+            4
+          ],
+          "value": [
+            -29387
+          ],
+          "w": [
+            2
+          ],
+          "h": [
+            52
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            27
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -12679
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            59
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -12679
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            59
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            56
+          ],
+          "value": [
+            -12679
+          ],
+          "w": [
+            30
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -12679
+          ],
+          "w": [
+            30
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            1
+          ],
+          "y": [
+            16
+          ],
+          "value": [
+            -12679
+          ],
+          "w": [
+            28
+          ],
+          "h": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2051,
+      "index": 3,
+      "frames": 1,
+      "pivotX": 15,
+      "pivotY": 44,
+      "width": 30,
+      "height": 73,
+      "primitives": [
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            3
+          ],
+          "y": [
+            17
+          ],
+          "value": [
+            -29387
+          ],
+          "w": [
+            24
+          ],
+          "h": [
+            2
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            25
+          ],
+          "y": [
+            18
+          ],
+          "value": [
+            -27209
+          ],
+          "w": [
+            2
+          ],
+          "h": [
+            52
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            3
+          ],
+          "y": [
+            18
+          ],
+          "value": [
+            -29387
+          ],
+          "w": [
+            2
+          ],
+          "h": [
+            52
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            27
+          ],
+          "y": [
+            14
+          ],
+          "value": [
+            -12679
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            59
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            14
+          ],
+          "value": [
+            -12679
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            59
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            70
+          ],
+          "value": [
+            -12679
+          ],
+          "w": [
+            30
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            14
+          ],
+          "value": [
+            -12679
+          ],
+          "w": [
+            30
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            3
+          ],
+          "y": [
+            42
+          ],
+          "value": [
+            -12679
+          ],
+          "w": [
+            24
+          ],
+          "h": [
+            2
+          ]
+        },
+        {
+          "type": 1,
+          "kind": "sprite",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 3,
+          "x": [
+            7
+          ],
+          "y": [
+            7
+          ],
+          "value": [
+            2504
+          ],
+          "w": [],
+          "h": []
+        },
+        {
+          "type": 1,
+          "kind": "sprite",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 3,
+          "x": [
+            22
+          ],
+          "y": [
+            7
+          ],
+          "value": [
+            2508
+          ],
+          "w": [],
+          "h": []
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            14
+          ],
+          "y": [
+            17
+          ],
+          "value": [
+            -12679
+          ],
+          "w": [
+            2
+          ],
+          "h": [
+            53
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2052,
+      "index": 4,
+      "frames": 1,
+      "pivotX": 31,
+      "pivotY": 30,
+      "width": 62,
+      "height": 59,
+      "primitives": [
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            3
+          ],
+          "y": [
+            3
+          ],
+          "value": [
+            -29387
+          ],
+          "w": [
+            56
+          ],
+          "h": [
+            2
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            57
+          ],
+          "y": [
+            4
+          ],
+          "value": [
+            -27209
+          ],
+          "w": [
+            2
+          ],
+          "h": [
+            52
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            3
+          ],
+          "y": [
+            4
+          ],
+          "value": [
+            -29387
+          ],
+          "w": [
+            2
+          ],
+          "h": [
+            52
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            59
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -12679
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            59
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -12679
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            59
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            3
+          ],
+          "y": [
+            56
+          ],
+          "value": [
+            -12679
+          ],
+          "w": [
+            56
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            3
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -12679
+          ],
+          "w": [
+            56
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            30
+          ],
+          "y": [
+            3
+          ],
+          "value": [
+            -12679
+          ],
+          "w": [
+            2
+          ],
+          "h": [
+            53
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2053,
+      "index": 5,
+      "frames": 1,
+      "pivotX": 1,
+      "pivotY": 30,
+      "width": 32,
+      "height": 59,
+      "primitives": [
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            2
+          ],
+          "y": [
+            3
+          ],
+          "value": [
+            -29387
+          ],
+          "w": [
+            27
+          ],
+          "h": [
+            1
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            29
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -12679
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            59
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            56
+          ],
+          "value": [
+            -12679
+          ],
+          "w": [
+            29
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -12679
+          ],
+          "w": [
+            29
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            3
+          ],
+          "value": [
+            -12679
+          ],
+          "w": [
+            2
+          ],
+          "h": [
+            53
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            3
+          ],
+          "y": [
+            6
+          ],
+          "value": [
+            -12679
+          ],
+          "w": [
+            25
+          ],
+          "h": [
+            4
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            3
+          ],
+          "y": [
+            13
+          ],
+          "value": [
+            -12679
+          ],
+          "w": [
+            25
+          ],
+          "h": [
+            4
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            3
+          ],
+          "y": [
+            20
+          ],
+          "value": [
+            -12679
+          ],
+          "w": [
+            25
+          ],
+          "h": [
+            4
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            3
+          ],
+          "y": [
+            27
+          ],
+          "value": [
+            -12679
+          ],
+          "w": [
+            25
+          ],
+          "h": [
+            4
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            3
+          ],
+          "y": [
+            34
+          ],
+          "value": [
+            -12679
+          ],
+          "w": [
+            25
+          ],
+          "h": [
+            4
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            3
+          ],
+          "y": [
+            41
+          ],
+          "value": [
+            -12679
+          ],
+          "w": [
+            25
+          ],
+          "h": [
+            4
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            3
+          ],
+          "y": [
+            48
+          ],
+          "value": [
+            -12679
+          ],
+          "w": [
+            25
+          ],
+          "h": [
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2054,
+      "index": 6,
+      "frames": 1,
+      "pivotX": 43,
+      "pivotY": 85,
+      "width": 90,
+      "height": 85,
+      "primitives": [
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            25
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -17265
+          ],
+          "w": [
+            24
+          ],
+          "h": [
+            13
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            45
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -29680
+          ],
+          "w": [
+            19
+          ],
+          "h": [
+            13
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            51
+          ],
+          "y": [
+            13
+          ],
+          "value": [
+            -29680
+          ],
+          "w": [
+            39
+          ],
+          "h": [
+            72
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            12
+          ],
+          "value": [
+            -13042
+          ],
+          "w": [
+            51
+          ],
+          "h": [
+            73
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            54
+          ],
+          "y": [
+            21
+          ],
+          "value": [
+            -31891
+          ],
+          "w": [
+            5
+          ],
+          "h": [
+            64
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            6
+          ],
+          "y": [
+            21
+          ],
+          "value": [
+            -21491
+          ],
+          "w": [
+            6
+          ],
+          "h": [
+            64
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            17
+          ],
+          "y": [
+            21
+          ],
+          "value": [
+            -21491
+          ],
+          "w": [
+            6
+          ],
+          "h": [
+            64
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            28
+          ],
+          "y": [
+            21
+          ],
+          "value": [
+            -21491
+          ],
+          "w": [
+            6
+          ],
+          "h": [
+            64
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            39
+          ],
+          "y": [
+            21
+          ],
+          "value": [
+            -21491
+          ],
+          "w": [
+            6
+          ],
+          "h": [
+            64
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            63
+          ],
+          "y": [
+            21
+          ],
+          "value": [
+            -31891
+          ],
+          "w": [
+            5
+          ],
+          "h": [
+            64
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            72
+          ],
+          "y": [
+            21
+          ],
+          "value": [
+            -31891
+          ],
+          "w": [
+            5
+          ],
+          "h": [
+            64
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            81
+          ],
+          "y": [
+            21
+          ],
+          "value": [
+            -31891
+          ],
+          "w": [
+            5
+          ],
+          "h": [
+            64
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2055,
+      "index": 7,
+      "frames": 1,
+      "pivotX": 17,
+      "pivotY": 73,
+      "width": 43,
+      "height": 73,
+      "primitives": [
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -12877
+          ],
+          "w": [
+            43
+          ],
+          "h": [
+            73
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            24
+          ],
+          "y": [
+            44
+          ],
+          "value": [
+            -19182
+          ],
+          "w": [
+            16
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            24
+          ],
+          "y": [
+            50
+          ],
+          "value": [
+            -19182
+          ],
+          "w": [
+            16
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            24
+          ],
+          "y": [
+            56
+          ],
+          "value": [
+            -19182
+          ],
+          "w": [
+            16
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            24
+          ],
+          "y": [
+            62
+          ],
+          "value": [
+            -19182
+          ],
+          "w": [
+            16
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            24
+          ],
+          "y": [
+            68
+          ],
+          "value": [
+            -19182
+          ],
+          "w": [
+            16
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            24
+          ],
+          "y": [
+            8
+          ],
+          "value": [
+            -19182
+          ],
+          "w": [
+            16
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            24
+          ],
+          "y": [
+            14
+          ],
+          "value": [
+            -19182
+          ],
+          "w": [
+            16
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            24
+          ],
+          "y": [
+            20
+          ],
+          "value": [
+            -19182
+          ],
+          "w": [
+            16
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            24
+          ],
+          "y": [
+            26
+          ],
+          "value": [
+            -19182
+          ],
+          "w": [
+            16
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            24
+          ],
+          "y": [
+            32
+          ],
+          "value": [
+            -19182
+          ],
+          "w": [
+            16
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            24
+          ],
+          "y": [
+            38
+          ],
+          "value": [
+            -19182
+          ],
+          "w": [
+            16
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            4
+          ],
+          "y": [
+            44
+          ],
+          "value": [
+            -19182
+          ],
+          "w": [
+            16
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            4
+          ],
+          "y": [
+            50
+          ],
+          "value": [
+            -19182
+          ],
+          "w": [
+            16
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            4
+          ],
+          "y": [
+            56
+          ],
+          "value": [
+            -19182
+          ],
+          "w": [
+            16
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            4
+          ],
+          "y": [
+            62
+          ],
+          "value": [
+            -19182
+          ],
+          "w": [
+            16
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            4
+          ],
+          "y": [
+            68
+          ],
+          "value": [
+            -19182
+          ],
+          "w": [
+            16
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            4
+          ],
+          "y": [
+            8
+          ],
+          "value": [
+            -19182
+          ],
+          "w": [
+            16
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            4
+          ],
+          "y": [
+            14
+          ],
+          "value": [
+            -19182
+          ],
+          "w": [
+            16
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            4
+          ],
+          "y": [
+            20
+          ],
+          "value": [
+            -19182
+          ],
+          "w": [
+            16
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            4
+          ],
+          "y": [
+            26
+          ],
+          "value": [
+            -19182
+          ],
+          "w": [
+            16
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            4
+          ],
+          "y": [
+            32
+          ],
+          "value": [
+            -19182
+          ],
+          "w": [
+            16
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            4
+          ],
+          "y": [
+            38
+          ],
+          "value": [
+            -19182
+          ],
+          "w": [
+            16
+          ],
+          "h": [
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2056,
+      "index": 8,
+      "frames": 1,
+      "pivotX": 30,
+      "pivotY": 73,
+      "width": 55,
+      "height": 73,
+      "primitives": [
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -14827
+          ],
+          "w": [
+            55
+          ],
+          "h": [
+            73
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2057,
+      "index": 9,
+      "frames": 1,
+      "pivotX": 30,
+      "pivotY": 108,
+      "width": 40,
+      "height": 109,
+      "primitives": [
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -17135
+          ],
+          "w": [
+            40
+          ],
+          "h": [
+            109
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            16
+          ],
+          "y": [
+            6
+          ],
+          "value": [
+            31596
+          ],
+          "w": [
+            8
+          ],
+          "h": [
+            102
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            79
+          ],
+          "value": [
+            -29680
+          ],
+          "w": [
+            40
+          ],
+          "h": [
+            30
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            4
+          ],
+          "y": [
+            9
+          ],
+          "value": [
+            -27700
+          ],
+          "w": [
+            32
+          ],
+          "h": [
+            4
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            4
+          ],
+          "y": [
+            17
+          ],
+          "value": [
+            -27700
+          ],
+          "w": [
+            32
+          ],
+          "h": [
+            4
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            4
+          ],
+          "y": [
+            81
+          ],
+          "value": [
+            -31957
+          ],
+          "w": [
+            32
+          ],
+          "h": [
+            4
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            4
+          ],
+          "y": [
+            25
+          ],
+          "value": [
+            -27700
+          ],
+          "w": [
+            32
+          ],
+          "h": [
+            4
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            4
+          ],
+          "y": [
+            89
+          ],
+          "value": [
+            -31957
+          ],
+          "w": [
+            32
+          ],
+          "h": [
+            4
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            4
+          ],
+          "y": [
+            41
+          ],
+          "value": [
+            -27700
+          ],
+          "w": [
+            32
+          ],
+          "h": [
+            4
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            4
+          ],
+          "y": [
+            33
+          ],
+          "value": [
+            -27700
+          ],
+          "w": [
+            32
+          ],
+          "h": [
+            4
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            71
+          ],
+          "value": [
+            -29680
+          ],
+          "w": [
+            16
+          ],
+          "h": [
+            8
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            4
+          ],
+          "y": [
+            97
+          ],
+          "value": [
+            -31957
+          ],
+          "w": [
+            32
+          ],
+          "h": [
+            4
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            4
+          ],
+          "y": [
+            65
+          ],
+          "value": [
+            -27700
+          ],
+          "w": [
+            32
+          ],
+          "h": [
+            4
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            16
+          ],
+          "y": [
+            73
+          ],
+          "value": [
+            -27700
+          ],
+          "w": [
+            20
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            4
+          ],
+          "y": [
+            57
+          ],
+          "value": [
+            -27700
+          ],
+          "w": [
+            32
+          ],
+          "h": [
+            4
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            4
+          ],
+          "y": [
+            49
+          ],
+          "value": [
+            -27700
+          ],
+          "w": [
+            32
+          ],
+          "h": [
+            4
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            4
+          ],
+          "y": [
+            105
+          ],
+          "value": [
+            -31957
+          ],
+          "w": [
+            32
+          ],
+          "h": [
+            4
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            13
+          ],
+          "y": [
+            8
+          ],
+          "value": [
+            -17135
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            63
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            24
+          ],
+          "y": [
+            8
+          ],
+          "value": [
+            -17135
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            70
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            4
+          ],
+          "y": [
+            73
+          ],
+          "value": [
+            -31957
+          ],
+          "w": [
+            9
+          ],
+          "h": [
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2058,
+      "index": 10,
+      "frames": 1,
+      "pivotX": 2,
+      "pivotY": 68,
+      "width": 4,
+      "height": 33,
+      "primitives": [
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -25389
+          ],
+          "w": [
+            4
+          ],
+          "h": [
+            33
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2059,
+      "index": 11,
+      "frames": 1,
+      "pivotX": 38,
+      "pivotY": 17,
+      "width": 72,
+      "height": 30,
+      "primitives": [
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            12
+          ],
+          "y": [
+            7
+          ],
+          "value": [
+            -31729
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            21
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            10
+          ],
+          "y": [
+            28
+          ],
+          "value": [
+            -31729
+          ],
+          "w": [
+            7
+          ],
+          "h": [
+            2
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            57
+          ],
+          "y": [
+            7
+          ],
+          "value": [
+            -31729
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            21
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            55
+          ],
+          "y": [
+            28
+          ],
+          "value": [
+            -31729
+          ],
+          "w": [
+            7
+          ],
+          "h": [
+            2
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            3
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            12967
+          ],
+          "w": [
+            66
+          ],
+          "h": [
+            11
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            14
+          ],
+          "value": [
+            12967
+          ],
+          "w": [
+            72
+          ],
+          "h": [
+            7
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            4
+          ],
+          "y": [
+            11
+          ],
+          "value": [
+            12841
+          ],
+          "w": [
+            64
+          ],
+          "h": [
+            1
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            4
+          ],
+          "y": [
+            13
+          ],
+          "value": [
+            12841
+          ],
+          "w": [
+            64
+          ],
+          "h": [
+            1
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            1
+          ],
+          "y": [
+            13
+          ],
+          "value": [
+            21415
+          ],
+          "w": [
+            70
+          ],
+          "h": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2060,
+      "index": 12,
+      "frames": 1,
+      "pivotX": 16,
+      "pivotY": 110,
+      "width": 32,
+      "height": 110,
+      "primitives": [
+        {
+          "type": 3,
+          "kind": "tiled",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            14
+          ],
+          "y": [
+            20
+          ],
+          "value": [
+            2488
+          ],
+          "w": [
+            4
+          ],
+          "h": [
+            90
+          ]
+        },
+        {
+          "type": 1,
+          "kind": "sprite",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 3,
+          "x": [
+            16
+          ],
+          "y": [
+            10
+          ],
+          "value": [
+            2264
+          ],
+          "w": [],
+          "h": []
+        },
+        {
+          "type": 3,
+          "kind": "tiled",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            12
+          ],
+          "y": [
+            104
+          ],
+          "value": [
+            2352
+          ],
+          "w": [
+            8
+          ],
+          "h": [
+            6
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2061,
+      "index": 13,
+      "frames": 1,
+      "pivotX": 48,
+      "pivotY": 30,
+      "width": 100,
+      "height": 30,
+      "primitives": [
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -19960
+          ],
+          "w": [
+            100
+          ],
+          "h": [
+            30
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            4
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -10663
+          ],
+          "w": [
+            10
+          ],
+          "h": [
+            30
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            20
+          ],
+          "value": [
+            -30490
+          ],
+          "w": [
+            100
+          ],
+          "h": [
+            9
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            4
+          ],
+          "y": [
+            20
+          ],
+          "value": [
+            -25453
+          ],
+          "w": [
+            10
+          ],
+          "h": [
+            9
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            24
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -10663
+          ],
+          "w": [
+            10
+          ],
+          "h": [
+            30
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            24
+          ],
+          "y": [
+            20
+          ],
+          "value": [
+            -25453
+          ],
+          "w": [
+            10
+          ],
+          "h": [
+            9
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            44
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -10663
+          ],
+          "w": [
+            10
+          ],
+          "h": [
+            30
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            44
+          ],
+          "y": [
+            20
+          ],
+          "value": [
+            -25453
+          ],
+          "w": [
+            10
+          ],
+          "h": [
+            9
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            65
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -10663
+          ],
+          "w": [
+            10
+          ],
+          "h": [
+            30
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            65
+          ],
+          "y": [
+            20
+          ],
+          "value": [
+            -25453
+          ],
+          "w": [
+            10
+          ],
+          "h": [
+            9
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            86
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -10663
+          ],
+          "w": [
+            10
+          ],
+          "h": [
+            30
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            86
+          ],
+          "y": [
+            20
+          ],
+          "value": [
+            -25453
+          ],
+          "w": [
+            10
+          ],
+          "h": [
+            9
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2062,
+      "index": 14,
+      "frames": 1,
+      "pivotX": 50,
+      "pivotY": 29,
+      "width": 100,
+      "height": 30,
+      "primitives": [
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -4698
+          ],
+          "w": [
+            100
+          ],
+          "h": [
+            30
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            20
+          ],
+          "value": [
+            -13276
+          ],
+          "w": [
+            100
+          ],
+          "h": [
+            9
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            76
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            12678
+          ],
+          "w": [
+            20
+          ],
+          "h": [
+            30
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            76
+          ],
+          "y": [
+            20
+          ],
+          "value": [
+            6340
+          ],
+          "w": [
+            20
+          ],
+          "h": [
+            9
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            4
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            12678
+          ],
+          "w": [
+            20
+          ],
+          "h": [
+            30
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            4
+          ],
+          "y": [
+            20
+          ],
+          "value": [
+            6340
+          ],
+          "w": [
+            20
+          ],
+          "h": [
+            9
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            41
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            12678
+          ],
+          "w": [
+            20
+          ],
+          "h": [
+            30
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            41
+          ],
+          "y": [
+            20
+          ],
+          "value": [
+            6340
+          ],
+          "w": [
+            20
+          ],
+          "h": [
+            9
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2063,
+      "index": 15,
+      "frames": 1,
+      "pivotX": 35,
+      "pivotY": 33,
+      "width": 68,
+      "height": 34,
+      "primitives": [
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            2
+          ],
+          "y": [
+            2
+          ],
+          "value": [
+            16838
+          ],
+          "w": [
+            64
+          ],
+          "h": [
+            32
+          ]
+        },
+        {
+          "type": 3,
+          "kind": "tiled",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            2
+          ],
+          "y": [
+            2
+          ],
+          "value": [
+            2456
+          ],
+          "w": [
+            64
+          ],
+          "h": [
+            11
+          ]
+        },
+        {
+          "type": 3,
+          "kind": "tiled",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            1
+          ],
+          "y": [
+            2
+          ],
+          "value": [
+            2320
+          ],
+          "w": [
+            66
+          ],
+          "h": [
+            6
+          ]
+        },
+        {
+          "type": 3,
+          "kind": "tiled",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            7
+          ],
+          "y": [
+            14
+          ],
+          "value": [
+            2152
+          ],
+          "w": [
+            14
+          ],
+          "h": [
+            15
+          ]
+        },
+        {
+          "type": 3,
+          "kind": "tiled",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            30
+          ],
+          "value": [
+            2352
+          ],
+          "w": [
+            68
+          ],
+          "h": [
+            4
+          ]
+        },
+        {
+          "type": 3,
+          "kind": "tiled",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            46
+          ],
+          "y": [
+            14
+          ],
+          "value": [
+            2152
+          ],
+          "w": [
+            14
+          ],
+          "h": [
+            15
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            22
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            16838
+          ],
+          "w": [
+            27
+          ],
+          "h": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2064,
+      "index": 16,
+      "frames": 1,
+      "pivotX": 20,
+      "pivotY": 79,
+      "width": 42,
+      "height": 79,
+      "primitives": [
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            2
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            12578
+          ],
+          "w": [
+            38
+          ],
+          "h": [
+            74
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            4
+          ],
+          "y": [
+            9
+          ],
+          "value": [
+            25388
+          ],
+          "w": [
+            34
+          ],
+          "h": [
+            63
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            7
+          ],
+          "y": [
+            9
+          ],
+          "value": [
+            8583
+          ],
+          "w": [
+            28
+          ],
+          "h": [
+            26
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            4
+          ],
+          "y": [
+            2
+          ],
+          "value": [
+            12678
+          ],
+          "w": [
+            34
+          ],
+          "h": [
+            9
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            7
+          ],
+          "y": [
+            4
+          ],
+          "value": [
+            4293
+          ],
+          "w": [
+            28
+          ],
+          "h": [
+            7
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            7
+          ],
+          "y": [
+            40
+          ],
+          "value": [
+            8583
+          ],
+          "w": [
+            28
+          ],
+          "h": [
+            27
+          ]
+        },
+        {
+          "type": 3,
+          "kind": "tiled",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            32
+          ],
+          "y": [
+            31
+          ],
+          "value": [
+            2488
+          ],
+          "w": [
+            4
+          ],
+          "h": [
+            16
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            74
+          ],
+          "value": [
+            25388
+          ],
+          "w": [
+            42
+          ],
+          "h": [
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2065,
+      "index": 17,
+      "frames": 1,
+      "pivotX": 79,
+      "pivotY": 39,
+      "width": 159,
+      "height": 74,
+      "primitives": [
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            3
+          ],
+          "y": [
+            10
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            153
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 1,
+          "kind": "sprite",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 3,
+          "x": [
+            79
+          ],
+          "y": [
+            38
+          ],
+          "value": [
+            1840
+          ],
+          "w": [],
+          "h": []
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            3
+          ],
+          "y": [
+            63
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            153
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            10
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            56
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            156
+          ],
+          "y": [
+            10
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            56
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            138
+          ],
+          "y": [
+            3
+          ],
+          "value": [
+            16871
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            7
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            135
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            9
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            134
+          ],
+          "y": [
+            3
+          ],
+          "value": [
+            -8453
+          ],
+          "w": [
+            11
+          ],
+          "h": [
+            2
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            78
+          ],
+          "y": [
+            3
+          ],
+          "value": [
+            16871
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            7
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            75
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            9
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            74
+          ],
+          "y": [
+            3
+          ],
+          "value": [
+            -8453
+          ],
+          "w": [
+            11
+          ],
+          "h": [
+            2
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            18
+          ],
+          "y": [
+            3
+          ],
+          "value": [
+            16871
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            7
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            15
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            9
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            14
+          ],
+          "y": [
+            3
+          ],
+          "value": [
+            -8453
+          ],
+          "w": [
+            11
+          ],
+          "h": [
+            2
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            116
+          ],
+          "y": [
+            69
+          ],
+          "value": [
+            16871
+          ],
+          "w": [
+            7
+          ],
+          "h": [
+            5
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            116
+          ],
+          "y": [
+            66
+          ],
+          "value": [
+            10564
+          ],
+          "w": [
+            7
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            35
+          ],
+          "y": [
+            69
+          ],
+          "value": [
+            16871
+          ],
+          "w": [
+            7
+          ],
+          "h": [
+            5
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            35
+          ],
+          "y": [
+            66
+          ],
+          "value": [
+            10564
+          ],
+          "w": [
+            7
+          ],
+          "h": [
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2066,
+      "index": 18,
+      "frames": 1,
+      "pivotX": 79,
+      "pivotY": 39,
+      "width": 159,
+      "height": 74,
+      "primitives": [
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            3
+          ],
+          "y": [
+            10
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            153
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 1,
+          "kind": "sprite",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 3,
+          "x": [
+            79
+          ],
+          "y": [
+            38
+          ],
+          "value": [
+            1848
+          ],
+          "w": [],
+          "h": []
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            3
+          ],
+          "y": [
+            63
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            153
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            10
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            56
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            156
+          ],
+          "y": [
+            10
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            56
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            138
+          ],
+          "y": [
+            3
+          ],
+          "value": [
+            16871
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            7
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            135
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            9
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            134
+          ],
+          "y": [
+            3
+          ],
+          "value": [
+            -8453
+          ],
+          "w": [
+            11
+          ],
+          "h": [
+            2
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            78
+          ],
+          "y": [
+            3
+          ],
+          "value": [
+            16871
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            7
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            75
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            9
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            74
+          ],
+          "y": [
+            3
+          ],
+          "value": [
+            -8453
+          ],
+          "w": [
+            11
+          ],
+          "h": [
+            2
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            18
+          ],
+          "y": [
+            3
+          ],
+          "value": [
+            16871
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            7
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            15
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            9
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            14
+          ],
+          "y": [
+            3
+          ],
+          "value": [
+            -8453
+          ],
+          "w": [
+            11
+          ],
+          "h": [
+            2
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            116
+          ],
+          "y": [
+            69
+          ],
+          "value": [
+            16871
+          ],
+          "w": [
+            7
+          ],
+          "h": [
+            5
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            116
+          ],
+          "y": [
+            66
+          ],
+          "value": [
+            10564
+          ],
+          "w": [
+            7
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            35
+          ],
+          "y": [
+            69
+          ],
+          "value": [
+            16871
+          ],
+          "w": [
+            7
+          ],
+          "h": [
+            5
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            35
+          ],
+          "y": [
+            66
+          ],
+          "value": [
+            10564
+          ],
+          "w": [
+            7
+          ],
+          "h": [
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2067,
+      "index": 19,
+      "frames": 1,
+      "pivotX": 79,
+      "pivotY": 39,
+      "width": 159,
+      "height": 74,
+      "primitives": [
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            3
+          ],
+          "y": [
+            10
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            153
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 1,
+          "kind": "sprite",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 3,
+          "x": [
+            79
+          ],
+          "y": [
+            38
+          ],
+          "value": [
+            1856
+          ],
+          "w": [],
+          "h": []
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            3
+          ],
+          "y": [
+            63
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            153
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            10
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            56
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            156
+          ],
+          "y": [
+            10
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            56
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            138
+          ],
+          "y": [
+            3
+          ],
+          "value": [
+            16871
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            7
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            135
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            9
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            134
+          ],
+          "y": [
+            3
+          ],
+          "value": [
+            -8453
+          ],
+          "w": [
+            11
+          ],
+          "h": [
+            2
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            78
+          ],
+          "y": [
+            3
+          ],
+          "value": [
+            16871
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            7
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            75
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            9
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            74
+          ],
+          "y": [
+            3
+          ],
+          "value": [
+            -8453
+          ],
+          "w": [
+            11
+          ],
+          "h": [
+            2
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            18
+          ],
+          "y": [
+            3
+          ],
+          "value": [
+            16871
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            7
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            15
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            9
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            14
+          ],
+          "y": [
+            3
+          ],
+          "value": [
+            -8453
+          ],
+          "w": [
+            11
+          ],
+          "h": [
+            2
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            116
+          ],
+          "y": [
+            69
+          ],
+          "value": [
+            16871
+          ],
+          "w": [
+            7
+          ],
+          "h": [
+            5
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            116
+          ],
+          "y": [
+            66
+          ],
+          "value": [
+            10564
+          ],
+          "w": [
+            7
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            35
+          ],
+          "y": [
+            69
+          ],
+          "value": [
+            16871
+          ],
+          "w": [
+            7
+          ],
+          "h": [
+            5
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            35
+          ],
+          "y": [
+            66
+          ],
+          "value": [
+            10564
+          ],
+          "w": [
+            7
+          ],
+          "h": [
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2068,
+      "index": 20,
+      "frames": 1,
+      "pivotX": 24,
+      "pivotY": 33,
+      "width": 37,
+      "height": 50,
+      "primitives": [
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            3
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            44
+          ]
+        },
+        {
+          "type": 1,
+          "kind": "sprite",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 3,
+          "x": [
+            18
+          ],
+          "y": [
+            25
+          ],
+          "value": [
+            1816
+          ],
+          "w": [],
+          "h": []
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            34
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            47
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            34
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            47
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            37
+          ],
+          "h": [
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2069,
+      "index": 21,
+      "frames": 1,
+      "pivotX": 24,
+      "pivotY": 33,
+      "width": 37,
+      "height": 50,
+      "primitives": [
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            3
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            44
+          ]
+        },
+        {
+          "type": 1,
+          "kind": "sprite",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 3,
+          "x": [
+            18
+          ],
+          "y": [
+            25
+          ],
+          "value": [
+            1824
+          ],
+          "w": [],
+          "h": []
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            34
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            47
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            34
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            47
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            37
+          ],
+          "h": [
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2070,
+      "index": 22,
+      "frames": 1,
+      "pivotX": 24,
+      "pivotY": 33,
+      "width": 37,
+      "height": 50,
+      "primitives": [
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            3
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            44
+          ]
+        },
+        {
+          "type": 1,
+          "kind": "sprite",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 3,
+          "x": [
+            18
+          ],
+          "y": [
+            25
+          ],
+          "value": [
+            1832
+          ],
+          "w": [],
+          "h": []
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            34
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            3
+          ],
+          "h": [
+            47
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            0
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            34
+          ],
+          "h": [
+            3
+          ]
+        },
+        {
+          "type": 0,
+          "kind": "rect",
+          "hidden": false,
+          "swapParts": false,
+          "paramCount": 5,
+          "x": [
+            0
+          ],
+          "y": [
+            47
+          ],
+          "value": [
+            -27503
+          ],
+          "w": [
+            37
+          ],
+          "h": [
+            3
+          ]
+        }
+      ]
+    }
+  ]
+}

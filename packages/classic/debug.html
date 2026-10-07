@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; connect-src 'self' ws: wss:"
+    />
+    <title>Parapet - render debug</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: #202020;
+        color: #ddd;
+        font: 13px/1.4 monospace;
+      }
+      #page {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 8px;
+      }
+      canvas {
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        width: 1280px;
+        height: 720px;
+        background: #000;
+      }
+      #help {
+        max-width: 1280px;
+      }
+      #help kbd {
+        background: #333;
+        padding: 0 4px;
+        border-radius: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="page">
+      <canvas id="view" width="640" height="360"></canvas>
+      <div id="help">
+        <kbd>Arrows</kbd> presses (up 1, down 2, right 4 | forward/back, left 8 | forward/back) ·
+        <kbd>T</kbd> tile outlines · <kbd>P</kbd> pause · <kbd>N</kbd> single step while paused ·
+        <kbd>R</kbd> restart · <kbd>C</kbd> next character skin · <kbd>G</kbd> ghost toggle
+      </div>
+      <div id="status">loading content…</div>
+    </div>
+    <script type="module" src="/src/debug.ts"></script>
+  </body>
+</html>

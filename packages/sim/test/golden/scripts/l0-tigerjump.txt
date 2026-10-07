@@ -1,0 +1,6 @@
+# level: 0
+# mission: 4
+# Run 20 steps, press RIGHT (= FWD while facing right: tiger jump), 100 more steps.
+20 -
+1 R
+100 -

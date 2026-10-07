@@ -1,0 +1,4321 @@
+{
+  "states": [
+    {
+      "id": 0,
+      "duration": 900,
+      "next": 2,
+      "impulseType": 19,
+      "paramB": 2800,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 399,
+      "animMode": 4,
+      "flags": 0,
+      "snapType": -1,
+      "parent": 1,
+      "transitionList": 1890,
+      "transitions": [
+        {
+          "conditions": [
+            69
+          ],
+          "target": 42
+        },
+        {
+          "conditions": [
+            68
+          ],
+          "target": 38
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 1,
+      "duration": 0,
+      "next": -1,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 0,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 1895,
+      "transitions": [
+        {
+          "conditions": [
+            3,
+            5
+          ],
+          "target": 71
+        },
+        {
+          "conditions": [
+            25
+          ],
+          "target": 99
+        },
+        {
+          "conditions": [
+            29
+          ],
+          "target": 118
+        },
+        {
+          "conditions": [
+            14
+          ],
+          "target": 15
+        },
+        {
+          "conditions": [
+            8
+          ],
+          "target": 18
+        },
+        {
+          "conditions": [
+            9,
+            34
+          ],
+          "target": 26
+        },
+        {
+          "conditions": [
+            9,
+            35,
+            38
+          ],
+          "target": 94
+        },
+        {
+          "conditions": [
+            9
+          ],
+          "target": 21
+        },
+        {
+          "conditions": [
+            6,
+            35,
+            38,
+            39
+          ],
+          "target": 96
+        },
+        {
+          "conditions": [
+            6,
+            62
+          ],
+          "target": 124
+        },
+        {
+          "conditions": [
+            6,
+            52
+          ],
+          "target": 8
+        },
+        {
+          "conditions": [
+            6
+          ],
+          "target": 6
+        },
+        {
+          "conditions": [
+            7,
+            71
+          ],
+          "target": 56
+        },
+        {
+          "conditions": [
+            25
+          ],
+          "target": 100
+        },
+        {
+          "conditions": [
+            48
+          ],
+          "target": 128
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 2,
+      "duration": 0,
+      "next": -1,
+      "impulseType": 19,
+      "paramB": 1000,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 277,
+      "animMode": 8,
+      "flags": 64,
+      "snapType": -1,
+      "parent": 1,
+      "transitionList": 1926,
+      "transitions": [
+        {
+          "conditions": [
+            69
+          ],
+          "target": 42
+        },
+        {
+          "conditions": [
+            68
+          ],
+          "target": 38
+        },
+        {
+          "conditions": [
+            15
+          ],
+          "target": 3
+        },
+        {
+          "conditions": [
+            17
+          ],
+          "target": 4
+        }
+      ],
+      "scoreType": 4,
+      "points": 0
+    },
+    {
+      "id": 3,
+      "duration": 0,
+      "next": -1,
+      "impulseType": 19,
+      "paramB": 600,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 56,
+      "animMode": 8,
+      "flags": 0,
+      "snapType": -1,
+      "parent": 1,
+      "transitionList": 1935,
+      "transitions": [
+        {
+          "conditions": [
+            69
+          ],
+          "target": 42
+        },
+        {
+          "conditions": [
+            68
+          ],
+          "target": 38
+        },
+        {
+          "conditions": [
+            16
+          ],
+          "target": 2
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 4,
+      "duration": 0,
+      "next": -1,
+      "impulseType": 19,
+      "paramB": 300,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 514,
+      "animMode": 8,
+      "flags": 512,
+      "snapType": -1,
+      "parent": 1,
+      "transitionList": 1942,
+      "transitions": [
+        {
+          "conditions": [
+            8
+          ],
+          "target": 19
+        },
+        {
+          "conditions": [
+            69
+          ],
+          "target": 42
+        },
+        {
+          "conditions": [
+            68
+          ],
+          "target": 38
+        },
+        {
+          "conditions": [
+            18
+          ],
+          "target": 2
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 5,
+      "duration": 0,
+      "next": -1,
+      "impulseType": 18,
+      "paramB": 0,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 421,
+      "animMode": 3,
+      "flags": 0,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 1951,
+      "transitions": [
+        {
+          "conditions": [
+            78
+          ],
+          "target": 2
+        },
+        {
+          "conditions": [
+            78
+          ],
+          "target": 5
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 6,
+      "duration": 600,
+      "next": 2,
+      "impulseType": 6,
+      "paramB": 0,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 471,
+      "animMode": 4,
+      "flags": 16,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 7,
+      "duration": 400,
+      "next": 2,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": 600,
+      "animMode": 4,
+      "flags": 16,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 8,
+      "duration": 390,
+      "next": 2,
+      "impulseType": 6,
+      "paramB": 0,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 458,
+      "animMode": 4,
+      "flags": 16,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 9,
+      "duration": 0,
+      "next": -1,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 0,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 1956,
+      "transitions": [
+        {
+          "conditions": [
+            47,
+            56
+          ],
+          "target": 131
+        },
+        {
+          "conditions": [
+            47
+          ],
+          "target": 128
+        },
+        {
+          "conditions": [
+            25,
+            60
+          ],
+          "target": 101
+        },
+        {
+          "conditions": [
+            26,
+            60
+          ],
+          "target": 101
+        },
+        {
+          "conditions": [
+            27,
+            60
+          ],
+          "target": 101
+        },
+        {
+          "conditions": [
+            29,
+            60
+          ],
+          "target": 104
+        },
+        {
+          "conditions": [
+            25
+          ],
+          "target": 100
+        },
+        {
+          "conditions": [
+            26
+          ],
+          "target": 100
+        },
+        {
+          "conditions": [
+            27
+          ],
+          "target": 107
+        },
+        {
+          "conditions": [
+            29
+          ],
+          "target": 103
+        },
+        {
+          "conditions": [
+            50
+          ],
+          "target": 132
+        },
+        {
+          "conditions": [
+            2,
+            57,
+            19
+          ],
+          "target": 82
+        },
+        {
+          "conditions": [
+            2,
+            57
+          ],
+          "target": 84
+        },
+        {
+          "conditions": [
+            2,
+            56
+          ],
+          "target": 82
+        },
+        {
+          "conditions": [
+            12,
+            75,
+            2
+          ],
+          "target": 62
+        },
+        {
+          "conditions": [
+            2
+          ],
+          "target": 2
+        },
+        {
+          "conditions": [
+            66,
+            67
+          ],
+          "target": 83
+        },
+        {
+          "conditions": [
+            66,
+            70
+          ],
+          "target": 81
+        },
+        {
+          "conditions": [
+            66,
+            1
+          ],
+          "target": 42
+        },
+        {
+          "conditions": [
+            66
+          ],
+          "target": 43
+        },
+        {
+          "conditions": [
+            3,
+            5
+          ],
+          "target": 71
+        },
+        {
+          "conditions": [
+            32
+          ],
+          "target": 13
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 10,
+      "duration": 0,
+      "next": -1,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 0,
+      "snapType": -1,
+      "parent": 9,
+      "transitionList": 2001,
+      "transitions": [
+        {
+          "conditions": [
+            7,
+            62
+          ],
+          "target": 122
+        },
+        {
+          "conditions": [
+            6,
+            62
+          ],
+          "target": 124
+        },
+        {
+          "conditions": [
+            6,
+            72
+          ],
+          "target": 29
+        },
+        {
+          "conditions": [
+            6,
+            68
+          ],
+          "target": 28
+        },
+        {
+          "conditions": [
+            7,
+            68
+          ],
+          "target": 47
+        },
+        {
+          "conditions": [
+            9,
+            62
+          ],
+          "target": 126
+        },
+        {
+          "conditions": [
+            9,
+            79
+          ],
+          "target": 22
+        },
+        {
+          "conditions": [
+            13,
+            79
+          ],
+          "target": 22
+        },
+        {
+          "conditions": [
+            8,
+            32,
+            28,
+            73
+          ],
+          "target": 33
+        },
+        {
+          "conditions": [
+            8,
+            68,
+            28,
+            80
+          ],
+          "target": 30
+        },
+        {
+          "conditions": [
+            7
+          ],
+          "target": 63
+        },
+        {
+          "conditions": [
+            6
+          ],
+          "target": 64
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 11,
+      "duration": 510,
+      "next": 12,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 66,
+      "snapType": 10,
+      "parent": 10,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 12,
+      "duration": 600,
+      "next": 16,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 322,
+      "snapType": 10,
+      "parent": 10,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 13,
+      "duration": 210,
+      "next": 14,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": 564,
+      "animMode": 3,
+      "flags": 1024,
+      "snapType": -1,
+      "parent": 9,
+      "transitionList": 2026,
+      "transitions": [
+        {
+          "conditions": [
+            8,
+            72,
+            73
+          ],
+          "target": 33
+        },
+        {
+          "conditions": [
+            6,
+            72
+          ],
+          "target": 29
+        },
+        {
+          "conditions": [
+            7,
+            72
+          ],
+          "target": 48
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 14,
+      "duration": 600,
+      "next": 11,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": 564,
+      "animMode": 3,
+      "flags": 1280,
+      "snapType": -1,
+      "parent": 9,
+      "transitionList": 2033,
+      "transitions": [
+        {
+          "conditions": [
+            6,
+            72
+          ],
+          "target": 29
+        },
+        {
+          "conditions": [
+            7,
+            72
+          ],
+          "target": 48
+        },
+        {
+          "conditions": [
+            30
+          ],
+          "target": 105
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 15,
+      "duration": 0,
+      "next": -1,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": 246,
+      "animMode": 3,
+      "flags": 17666,
+      "snapType": 13,
+      "parent": 10,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 16,
+      "duration": 210,
+      "next": 15,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": 246,
+      "animMode": 3,
+      "flags": 17666,
+      "snapType": -1,
+      "parent": 10,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 17,
+      "duration": 0,
+      "next": -1,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": 246,
+      "animMode": 3,
+      "flags": 17666,
+      "snapType": -1,
+      "parent": 10,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 18,
+      "duration": 600,
+      "next": 12,
+      "impulseType": 0,
+      "paramB": 5650,
+      "paramC": 1450,
+      "paramD": 0,
+      "clipOffset": 203,
+      "animMode": 4,
+      "flags": 258,
+      "snapType": 12,
+      "parent": 10,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 19,
+      "duration": 600,
+      "next": 11,
+      "impulseType": 0,
+      "paramB": 4400,
+      "paramC": 50,
+      "paramD": 1,
+      "clipOffset": 203,
+      "animMode": 4,
+      "flags": 258,
+      "snapType": 12,
+      "parent": 10,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 20,
+      "duration": 600,
+      "next": 17,
+      "impulseType": 15,
+      "paramB": 5850,
+      "paramC": 150,
+      "paramD": 0,
+      "clipOffset": 555,
+      "animMode": 4,
+      "flags": 8450,
+      "snapType": 12,
+      "parent": 10,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 21,
+      "duration": 850,
+      "next": 2,
+      "impulseType": 14,
+      "paramB": 2750,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 382,
+      "animMode": 4,
+      "flags": 0,
+      "snapType": 7,
+      "parent": -1,
+      "transitionList": 2040,
+      "transitions": [
+        {
+          "conditions": [
+            47
+          ],
+          "target": 131
+        },
+        {
+          "conditions": [
+            9,
+            34
+          ],
+          "target": 26
+        }
+      ],
+      "scoreType": 1,
+      "points": 20
+    },
+    {
+      "id": 22,
+      "duration": 210,
+      "next": 23,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": 324,
+      "animMode": 4,
+      "flags": 8256,
+      "snapType": -1,
+      "parent": 23,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 23,
+      "duration": 0,
+      "next": -1,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 320,
+      "snapType": 14,
+      "parent": 9,
+      "transitionList": 2045,
+      "transitions": [
+        {
+          "conditions": [
+            47
+          ],
+          "target": 131
+        },
+        {
+          "conditions": [
+            1,
+            59
+          ],
+          "target": 84
+        },
+        {
+          "conditions": [
+            1,
+            58
+          ],
+          "target": 24
+        },
+        {
+          "conditions": [
+            1
+          ],
+          "target": 25
+        },
+        {
+          "conditions": [
+            7,
+            62
+          ],
+          "target": 122
+        },
+        {
+          "conditions": [
+            6,
+            62
+          ],
+          "target": 124
+        },
+        {
+          "conditions": [
+            9,
+            62
+          ],
+          "target": 126
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 24,
+      "duration": 210,
+      "next": 21,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": 327,
+      "animMode": 4,
+      "flags": 0,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": 1,
+      "points": 50
+    },
+    {
+      "id": 25,
+      "duration": 210,
+      "next": 2,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": 327,
+      "animMode": 4,
+      "flags": 0,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": 1,
+      "points": 25
+    },
+    {
+      "id": 26,
+      "duration": 90,
+      "next": 16,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 0,
+      "snapType": 1,
+      "parent": 10,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 27,
+      "duration": 360,
+      "next": 16,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": 246,
+      "animMode": 3,
+      "flags": 16386,
+      "snapType": 1,
+      "parent": 10,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 28,
+      "duration": 0,
+      "next": -1,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 2,
+      "snapType": -1,
+      "parent": 9,
+      "transitionList": 2060,
+      "transitions": [
+        {
+          "conditions": [
+            29
+          ],
+          "target": 103
+        },
+        {
+          "conditions": [
+            1,
+            56
+          ],
+          "target": 82
+        },
+        {
+          "conditions": [
+            1
+          ],
+          "target": 2
+        },
+        {
+          "conditions": [
+            32
+          ],
+          "target": 29
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 29,
+      "duration": 0,
+      "next": 20,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 18,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": 1,
+      "points": 50
+    },
+    {
+      "id": 30,
+      "duration": 0,
+      "next": -1,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 0,
+      "snapType": -1,
+      "parent": 9,
+      "transitionList": 2069,
+      "transitions": [
+        {
+          "conditions": [
+            29
+          ],
+          "target": 31
+        },
+        {
+          "conditions": [
+            32,
+            73
+          ],
+          "target": 33
+        },
+        {
+          "conditions": [
+            32
+          ],
+          "target": 12
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 31,
+      "duration": 600,
+      "next": 32,
+      "impulseType": 9,
+      "paramB": 0,
+      "paramC": -5100,
+      "paramD": 0,
+      "clipOffset": 528,
+      "animMode": 3,
+      "flags": 1280,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2076,
+      "transitions": [
+        {
+          "conditions": [
+            6,
+            72
+          ],
+          "target": 29
+        },
+        {
+          "conditions": [
+            7,
+            72
+          ],
+          "target": 48
+        },
+        {
+          "conditions": [
+            25
+          ],
+          "target": 100
+        },
+        {
+          "conditions": [
+            26
+          ],
+          "target": 100
+        },
+        {
+          "conditions": [
+            27
+          ],
+          "target": 107
+        }
+      ],
+      "scoreType": 1,
+      "points": 50
+    },
+    {
+      "id": 32,
+      "duration": 0,
+      "next": -1,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 0,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2087,
+      "transitions": [
+        {
+          "conditions": [
+            30
+          ],
+          "target": 106
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 33,
+      "duration": 600,
+      "next": 14,
+      "impulseType": 9,
+      "paramB": 0,
+      "paramC": -4380,
+      "paramD": 0,
+      "clipOffset": 528,
+      "animMode": 3,
+      "flags": 1344,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2090,
+      "transitions": [
+        {
+          "conditions": [
+            8,
+            73,
+            53
+          ],
+          "target": 34
+        },
+        {
+          "conditions": [
+            12,
+            73,
+            53
+          ],
+          "target": 34
+        },
+        {
+          "conditions": [
+            6,
+            72
+          ],
+          "target": 29
+        },
+        {
+          "conditions": [
+            7,
+            72
+          ],
+          "target": 48
+        },
+        {
+          "conditions": [
+            25
+          ],
+          "target": 100
+        },
+        {
+          "conditions": [
+            26
+          ],
+          "target": 100
+        },
+        {
+          "conditions": [
+            27
+          ],
+          "target": 107
+        }
+      ],
+      "scoreType": 5,
+      "points": 2
+    },
+    {
+      "id": 34,
+      "duration": 0,
+      "next": -1,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 0,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2105,
+      "transitions": [
+        {
+          "conditions": [],
+          "target": 36
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 35,
+      "duration": 0,
+      "next": -1,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 0,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2108,
+      "transitions": [
+        {
+          "conditions": [],
+          "target": 37
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 36,
+      "duration": 600,
+      "next": 14,
+      "impulseType": 9,
+      "paramB": 0,
+      "paramC": -3550,
+      "paramD": 0,
+      "clipOffset": 523,
+      "animMode": 3,
+      "flags": 1344,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2111,
+      "transitions": [
+        {
+          "conditions": [
+            8,
+            73,
+            53
+          ],
+          "target": 35
+        },
+        {
+          "conditions": [
+            12,
+            73,
+            53
+          ],
+          "target": 35
+        },
+        {
+          "conditions": [
+            6,
+            72
+          ],
+          "target": 29
+        },
+        {
+          "conditions": [
+            7,
+            72
+          ],
+          "target": 48
+        },
+        {
+          "conditions": [
+            25
+          ],
+          "target": 100
+        },
+        {
+          "conditions": [
+            26
+          ],
+          "target": 100
+        },
+        {
+          "conditions": [
+            27
+          ],
+          "target": 107
+        }
+      ],
+      "scoreType": 5,
+      "points": 2
+    },
+    {
+      "id": 37,
+      "duration": 600,
+      "next": 14,
+      "impulseType": 9,
+      "paramB": 0,
+      "paramC": -3400,
+      "paramD": 0,
+      "clipOffset": 523,
+      "animMode": 3,
+      "flags": 1280,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2126,
+      "transitions": [
+        {
+          "conditions": [
+            6,
+            72
+          ],
+          "target": 29
+        },
+        {
+          "conditions": [
+            7,
+            72
+          ],
+          "target": 48
+        },
+        {
+          "conditions": [
+            25
+          ],
+          "target": 100
+        },
+        {
+          "conditions": [
+            26
+          ],
+          "target": 100
+        },
+        {
+          "conditions": [
+            27
+          ],
+          "target": 107
+        }
+      ],
+      "scoreType": 5,
+      "points": 2
+    },
+    {
+      "id": 38,
+      "duration": 390,
+      "next": 2,
+      "impulseType": 19,
+      "paramB": 300,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 551,
+      "animMode": 4,
+      "flags": 0,
+      "snapType": -1,
+      "parent": 1,
+      "transitionList": 2137,
+      "transitions": [
+        {
+          "conditions": [
+            29
+          ],
+          "target": 118
+        },
+        {
+          "conditions": [
+            32
+          ],
+          "target": 40
+        },
+        {
+          "conditions": [
+            6
+          ],
+          "target": 39
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 39,
+      "duration": 390,
+      "next": 2,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 0,
+      "snapType": -1,
+      "parent": 1,
+      "transitionList": 2144,
+      "transitions": [
+        {
+          "conditions": [
+            32
+          ],
+          "target": 41
+        },
+        {
+          "conditions": [
+            20
+          ],
+          "target": 41
+        }
+      ],
+      "scoreType": 1,
+      "points": 50
+    },
+    {
+      "id": 40,
+      "duration": 910,
+      "next": 2,
+      "impulseType": 11,
+      "paramB": -2450,
+      "paramC": 0,
+      "paramD": 580,
+      "clipOffset": 538,
+      "animMode": 4,
+      "flags": 16,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 41,
+      "duration": 710,
+      "next": 2,
+      "impulseType": 11,
+      "paramB": -4000,
+      "paramC": 0,
+      "paramD": 300,
+      "clipOffset": 143,
+      "animMode": 4,
+      "flags": 16,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 42,
+      "duration": 0,
+      "next": 45,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": 210,
+      "animMode": 1,
+      "flags": 1,
+      "snapType": 21,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 43,
+      "duration": 0,
+      "next": 44,
+      "impulseType": 6,
+      "paramB": 0,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 210,
+      "animMode": 1,
+      "flags": 1,
+      "snapType": 18,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 44,
+      "duration": 600,
+      "next": 46,
+      "impulseType": 5,
+      "paramB": 1024,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 210,
+      "animMode": 4,
+      "flags": 9,
+      "snapType": 8,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 45,
+      "duration": 910,
+      "next": 46,
+      "impulseType": 5,
+      "paramB": 1024,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 210,
+      "animMode": 4,
+      "flags": 9,
+      "snapType": 8,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 46,
+      "duration": 0,
+      "next": 2,
+      "impulseType": 2,
+      "paramB": 2000,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 0,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 47,
+      "duration": 0,
+      "next": -1,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 0,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2149,
+      "transitions": [
+        {
+          "conditions": [
+            32
+          ],
+          "target": 48
+        },
+        {
+          "conditions": [
+            1
+          ],
+          "target": 2
+        },
+        {
+          "conditions": [
+            20
+          ],
+          "target": 74
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 48,
+      "duration": 750,
+      "next": 49,
+      "impulseType": 10,
+      "paramB": -2480,
+      "paramC": -3100,
+      "paramD": 0,
+      "clipOffset": 577,
+      "animMode": 4,
+      "flags": 2048,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2156,
+      "transitions": [
+        {
+          "conditions": [
+            33
+          ],
+          "target": 85
+        }
+      ],
+      "scoreType": 1,
+      "points": 250
+    },
+    {
+      "id": 49,
+      "duration": 210,
+      "next": 52,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 2112,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2159,
+      "transitions": [
+        {
+          "conditions": [
+            13
+          ],
+          "target": 53
+        },
+        {
+          "conditions": [
+            9
+          ],
+          "target": 53
+        },
+        {
+          "conditions": [
+            1
+          ],
+          "target": 50
+        },
+        {
+          "conditions": [
+            33
+          ],
+          "target": 85
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 50,
+      "duration": 90,
+      "next": 7,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": 587,
+      "animMode": 1,
+      "flags": 2048,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2168,
+      "transitions": [
+        {
+          "conditions": [
+            33
+          ],
+          "target": 85
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 51,
+      "duration": 690,
+      "next": 7,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": 589,
+      "animMode": 4,
+      "flags": 2048,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2171,
+      "transitions": [
+        {
+          "conditions": [
+            33
+          ],
+          "target": 85
+        }
+      ],
+      "scoreType": 1,
+      "points": 100
+    },
+    {
+      "id": 52,
+      "duration": 0,
+      "next": -1,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 2112,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2174,
+      "transitions": [
+        {
+          "conditions": [
+            13
+          ],
+          "target": 53
+        },
+        {
+          "conditions": [
+            9
+          ],
+          "target": 53
+        },
+        {
+          "conditions": [
+            33
+          ],
+          "target": 85
+        },
+        {
+          "conditions": [
+            1
+          ],
+          "target": 54
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 53,
+      "duration": 0,
+      "next": -1,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 2048,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2183,
+      "transitions": [
+        {
+          "conditions": [
+            1
+          ],
+          "target": 51
+        },
+        {
+          "conditions": [
+            33
+          ],
+          "target": 85
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 54,
+      "duration": 390,
+      "next": 75,
+      "impulseType": 6,
+      "paramB": 0,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 10,
+      "animMode": 4,
+      "flags": 0,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": 0,
+      "points": 0
+    },
+    {
+      "id": 55,
+      "duration": 0,
+      "next": -1,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 0,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2188,
+      "transitions": [
+        {
+          "conditions": [
+            25
+          ],
+          "target": 102
+        },
+        {
+          "conditions": [
+            26
+          ],
+          "target": 102
+        },
+        {
+          "conditions": [
+            31
+          ],
+          "target": 102
+        },
+        {
+          "conditions": [
+            27
+          ],
+          "target": 107
+        },
+        {
+          "conditions": [
+            32,
+            54
+          ],
+          "target": 73
+        },
+        {
+          "conditions": [
+            32
+          ],
+          "target": 87
+        },
+        {
+          "conditions": [
+            37
+          ],
+          "target": 59
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 56,
+      "duration": 510,
+      "next": 57,
+      "impulseType": 12,
+      "paramB": 400,
+      "paramC": 1400,
+      "paramD": 190,
+      "clipOffset": 433,
+      "animMode": 4,
+      "flags": 67,
+      "snapType": 16,
+      "parent": 55,
+      "transitionList": 2203,
+      "transitions": [
+        {
+          "conditions": [
+            12,
+            55,
+            77,
+            76
+          ],
+          "target": 66
+        },
+        {
+          "conditions": [
+            13,
+            55,
+            77,
+            76
+          ],
+          "target": 68
+        }
+      ],
+      "scoreType": 1,
+      "points": 100
+    },
+    {
+      "id": 57,
+      "duration": 0,
+      "next": 61,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 1,
+      "snapType": 10,
+      "parent": -1,
+      "transitionList": 2208,
+      "transitions": [
+        {
+          "conditions": [
+            45
+          ],
+          "target": 58
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 58,
+      "duration": 390,
+      "next": 59,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": 439,
+      "animMode": 4,
+      "flags": 193,
+      "snapType": 17,
+      "parent": 55,
+      "transitionList": 2211,
+      "transitions": [
+        {
+          "conditions": [
+            4
+          ],
+          "target": 59
+        },
+        {
+          "conditions": [
+            32
+          ],
+          "target": 59
+        },
+        {
+          "conditions": [
+            8,
+            55
+          ],
+          "target": 66
+        },
+        {
+          "conditions": [
+            55,
+            77,
+            76,
+            12
+          ],
+          "target": 66
+        },
+        {
+          "conditions": [
+            13,
+            55,
+            77,
+            76
+          ],
+          "target": 68
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 59,
+      "duration": 0,
+      "next": 60,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": 443,
+      "animMode": 1,
+      "flags": 8,
+      "snapType": 6,
+      "parent": 21,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 60,
+      "duration": 600,
+      "next": 2,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": 443,
+      "animMode": 4,
+      "flags": 0,
+      "snapType": 6,
+      "parent": 21,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 61,
+      "duration": 390,
+      "next": 15,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": 452,
+      "animMode": 4,
+      "flags": 8192,
+      "snapType": 11,
+      "parent": 9,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 62,
+      "duration": 510,
+      "next": 11,
+      "impulseType": 20,
+      "paramB": 400,
+      "paramC": 400,
+      "paramD": 0,
+      "clipOffset": 254,
+      "animMode": 4,
+      "flags": 0,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": 1,
+      "points": 200
+    },
+    {
+      "id": 63,
+      "duration": 640,
+      "next": 65,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": 63,
+      "animMode": 4,
+      "flags": 0,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2222,
+      "transitions": [
+        {
+          "conditions": [
+            1
+          ],
+          "target": 82
+        },
+        {
+          "conditions": [
+            21
+          ],
+          "target": 72
+        }
+      ],
+      "scoreType": 3,
+      "points": 100
+    },
+    {
+      "id": 64,
+      "duration": 750,
+      "next": 65,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": 374,
+      "animMode": 4,
+      "flags": 0,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2227,
+      "transitions": [
+        {
+          "conditions": [
+            1
+          ],
+          "target": 82
+        },
+        {
+          "conditions": [
+            21
+          ],
+          "target": 72
+        }
+      ],
+      "scoreType": 3,
+      "points": 150
+    },
+    {
+      "id": 65,
+      "duration": 0,
+      "next": 15,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 64,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2232,
+      "transitions": [
+        {
+          "conditions": [
+            11
+          ],
+          "target": 63
+        },
+        {
+          "conditions": [
+            10
+          ],
+          "target": 64
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 66,
+      "duration": 0,
+      "next": 67,
+      "impulseType": 6,
+      "paramB": 0,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 0,
+      "animMode": 1,
+      "flags": 1,
+      "snapType": 25,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 67,
+      "duration": 690,
+      "next": 70,
+      "impulseType": 8,
+      "paramB": 2800,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 0,
+      "animMode": 4,
+      "flags": 9,
+      "snapType": 10,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": 1,
+      "points": 250
+    },
+    {
+      "id": 68,
+      "duration": 0,
+      "next": 69,
+      "impulseType": 6,
+      "paramB": 0,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 159,
+      "animMode": 9,
+      "flags": 1,
+      "snapType": 25,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 69,
+      "duration": 650,
+      "next": 70,
+      "impulseType": 8,
+      "paramB": 2800,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 159,
+      "animMode": 4,
+      "flags": 9,
+      "snapType": 10,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": 1,
+      "points": 250
+    },
+    {
+      "id": 70,
+      "duration": 0,
+      "next": 2,
+      "impulseType": 8,
+      "paramB": 4000,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 1,
+      "snapType": 26,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 71,
+      "duration": 0,
+      "next": 72,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 32768,
+      "snapType": 7,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 72,
+      "duration": 810,
+      "next": 74,
+      "impulseType": 7,
+      "paramB": 900,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 178,
+      "animMode": 4,
+      "flags": 0,
+      "snapType": 7,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": 0,
+      "points": 0
+    },
+    {
+      "id": 73,
+      "duration": 810,
+      "next": 74,
+      "impulseType": 6,
+      "paramB": 0,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 178,
+      "animMode": 4,
+      "flags": 0,
+      "snapType": 19,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": 0,
+      "points": 0
+    },
+    {
+      "id": 74,
+      "duration": 0,
+      "next": 75,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 0,
+      "snapType": 10,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": 0,
+      "points": 0
+    },
+    {
+      "id": 75,
+      "duration": 0,
+      "next": -1,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 32768,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2237,
+      "transitions": [
+        {
+          "conditions": [
+            47
+          ],
+          "target": 78
+        },
+        {
+          "conditions": [
+            46
+          ],
+          "target": 76
+        },
+        {
+          "conditions": [
+            38
+          ],
+          "target": 76
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 76,
+      "duration": 250,
+      "next": 77,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": 262,
+      "animMode": 4,
+      "flags": 0,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 77,
+      "duration": -1,
+      "next": 79,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 0,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 78,
+      "duration": 0,
+      "next": 74,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 0,
+      "snapType": 1,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 79,
+      "duration": 810,
+      "next": 80,
+      "impulseType": 6,
+      "paramB": 0,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 266,
+      "animMode": 4,
+      "flags": 0,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 80,
+      "duration": 0,
+      "next": -1,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 0,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2244,
+      "transitions": [
+        {
+          "conditions": [
+            74
+          ],
+          "target": 6
+        },
+        {
+          "conditions": [],
+          "target": 0
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 81,
+      "duration": 0,
+      "next": 82,
+      "impulseType": 8,
+      "paramB": 2000,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 0,
+      "snapType": 30,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 82,
+      "duration": 810,
+      "next": 2,
+      "impulseType": 14,
+      "paramB": 50,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 410,
+      "animMode": 4,
+      "flags": 0,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2249,
+      "transitions": [
+        {
+          "conditions": [
+            47
+          ],
+          "target": 131
+        },
+        {
+          "conditions": [
+            48
+          ],
+          "target": 131
+        },
+        {
+          "conditions": [
+            14
+          ],
+          "target": 15
+        }
+      ],
+      "scoreType": 0,
+      "points": 0
+    },
+    {
+      "id": 83,
+      "duration": 0,
+      "next": 86,
+      "impulseType": 6,
+      "paramB": 0,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 73,
+      "animMode": 1,
+      "flags": 1,
+      "snapType": 22,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": 0,
+      "points": 0
+    },
+    {
+      "id": 84,
+      "duration": 0,
+      "next": 86,
+      "impulseType": 6,
+      "paramB": 0,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 73,
+      "animMode": 1,
+      "flags": 32769,
+      "snapType": 18,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": 0,
+      "points": 0
+    },
+    {
+      "id": 85,
+      "duration": 510,
+      "next": 88,
+      "impulseType": 8,
+      "paramB": 0,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 73,
+      "animMode": 4,
+      "flags": 0,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": 0,
+      "points": 0
+    },
+    {
+      "id": 86,
+      "duration": 510,
+      "next": 88,
+      "impulseType": 5,
+      "paramB": 128,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 73,
+      "animMode": 4,
+      "flags": 9,
+      "snapType": 8,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 87,
+      "duration": 0,
+      "next": 88,
+      "impulseType": 6,
+      "paramB": 0,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 73,
+      "animMode": 2,
+      "flags": 0,
+      "snapType": 19,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": 0,
+      "points": 0
+    },
+    {
+      "id": 88,
+      "duration": 0,
+      "next": -1,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 0,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2256,
+      "transitions": [
+        {
+          "conditions": [
+            1
+          ],
+          "target": 89
+        },
+        {
+          "conditions": [
+            20
+          ],
+          "target": 89
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 89,
+      "duration": 390,
+      "next": 90,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": 80,
+      "animMode": 4,
+      "flags": 0,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 90,
+      "duration": -1,
+      "next": 91,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 0,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 91,
+      "duration": 0,
+      "next": -1,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 0,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2261,
+      "transitions": [
+        {
+          "conditions": [
+            74
+          ],
+          "target": 93
+        },
+        {
+          "conditions": [],
+          "target": 92
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 92,
+      "duration": 990,
+      "next": 2,
+      "impulseType": 19,
+      "paramB": 300,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 85,
+      "animMode": 4,
+      "flags": 0,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 93,
+      "duration": 990,
+      "next": 2,
+      "impulseType": 19,
+      "paramB": -150,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 102,
+      "animMode": 4,
+      "flags": 16,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 94,
+      "duration": 450,
+      "next": 95,
+      "impulseType": 6,
+      "paramB": 0,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 47,
+      "animMode": 4,
+      "flags": 0,
+      "snapType": 27,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": 1,
+      "points": 100
+    },
+    {
+      "id": 95,
+      "duration": 0,
+      "next": 22,
+      "impulseType": 9,
+      "paramB": 4055,
+      "paramC": 1000,
+      "paramD": 0,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 8192,
+      "snapType": 29,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": 1,
+      "points": 100
+    },
+    {
+      "id": 96,
+      "duration": 510,
+      "next": 97,
+      "impulseType": 6,
+      "paramB": 0,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 471,
+      "animMode": 4,
+      "flags": 16,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 97,
+      "duration": 200,
+      "next": 98,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": 17,
+      "animMode": 4,
+      "flags": 0,
+      "snapType": 10,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 98,
+      "duration": 510,
+      "next": 112,
+      "impulseType": 3,
+      "paramB": 0,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 38,
+      "animMode": 4,
+      "flags": 8201,
+      "snapType": 0,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 99,
+      "duration": 60,
+      "next": 110,
+      "impulseType": 6,
+      "paramB": 0,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 168,
+      "animMode": 1,
+      "flags": 1,
+      "snapType": 4,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 100,
+      "duration": 0,
+      "next": 112,
+      "impulseType": 6,
+      "paramB": 0,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 168,
+      "animMode": 2,
+      "flags": 8193,
+      "snapType": 4,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": 1,
+      "points": 50
+    },
+    {
+      "id": 101,
+      "duration": 0,
+      "next": 111,
+      "impulseType": 6,
+      "paramB": 0,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 168,
+      "animMode": 2,
+      "flags": 8193,
+      "snapType": 4,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 102,
+      "duration": 60,
+      "next": 112,
+      "impulseType": 6,
+      "paramB": 0,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 168,
+      "animMode": 2,
+      "flags": 8193,
+      "snapType": 18,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": 1,
+      "points": 100
+    },
+    {
+      "id": 103,
+      "duration": 0,
+      "next": 112,
+      "impulseType": 6,
+      "paramB": 0,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 168,
+      "animMode": 2,
+      "flags": 8193,
+      "snapType": 15,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": 1,
+      "points": 50
+    },
+    {
+      "id": 104,
+      "duration": 0,
+      "next": 111,
+      "impulseType": 6,
+      "paramB": 0,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 168,
+      "animMode": 2,
+      "flags": 8193,
+      "snapType": 15,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 105,
+      "duration": 0,
+      "next": 112,
+      "impulseType": 6,
+      "paramB": 0,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 168,
+      "animMode": 2,
+      "flags": 8193,
+      "snapType": 23,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 106,
+      "duration": 0,
+      "next": 119,
+      "impulseType": 6,
+      "paramB": 0,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 168,
+      "animMode": 2,
+      "flags": 8193,
+      "snapType": 23,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 107,
+      "duration": 60,
+      "next": 112,
+      "impulseType": 6,
+      "paramB": 0,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 168,
+      "animMode": 2,
+      "flags": 8193,
+      "snapType": 9,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 108,
+      "duration": 0,
+      "next": 112,
+      "impulseType": 6,
+      "paramB": 0,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 168,
+      "animMode": 2,
+      "flags": 8193,
+      "snapType": 2,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 109,
+      "duration": 0,
+      "next": -1,
+      "impulseType": 6,
+      "paramB": 0,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 1,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2266,
+      "transitions": [
+        {
+          "conditions": [
+            9
+          ],
+          "target": 27
+        },
+        {
+          "conditions": [
+            8
+          ],
+          "target": 110
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 110,
+      "duration": 510,
+      "next": 112,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": 168,
+      "animMode": 4,
+      "flags": 1,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 111,
+      "duration": 510,
+      "next": 109,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": 168,
+      "animMode": 7,
+      "flags": 1,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 112,
+      "duration": 3990,
+      "next": 111,
+      "impulseType": 6,
+      "paramB": 0,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 1,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2271,
+      "transitions": [
+        {
+          "conditions": [
+            8,
+            22,
+            23
+          ],
+          "target": 115
+        },
+        {
+          "conditions": [
+            8,
+            41,
+            24
+          ],
+          "target": 119
+        },
+        {
+          "conditions": [
+            8,
+            42
+          ],
+          "target": 119
+        },
+        {
+          "conditions": [
+            9,
+            41
+          ],
+          "target": 120
+        },
+        {
+          "conditions": [
+            9
+          ],
+          "target": 27
+        },
+        {
+          "conditions": [
+            7,
+            64,
+            65
+          ],
+          "target": 114
+        },
+        {
+          "conditions": [
+            6
+          ],
+          "target": 117
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 113,
+      "duration": 0,
+      "next": 112,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": 168,
+      "animMode": 10,
+      "flags": 1,
+      "snapType": 20,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 114,
+      "duration": 990,
+      "next": 113,
+      "impulseType": 16,
+      "paramB": 0,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 330,
+      "animMode": 4,
+      "flags": 25,
+      "snapType": 3,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 115,
+      "duration": 750,
+      "next": 116,
+      "impulseType": 5,
+      "paramB": 512,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 30,
+      "animMode": 4,
+      "flags": 8201,
+      "snapType": 8,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 116,
+      "duration": 900,
+      "next": 2,
+      "impulseType": 10,
+      "paramB": 2500,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 21,
+      "animMode": 4,
+      "flags": 0,
+      "snapType": -1,
+      "parent": 1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 117,
+      "duration": 300,
+      "next": 15,
+      "impulseType": 13,
+      "paramB": -3200,
+      "paramC": -4150,
+      "paramD": 125,
+      "clipOffset": 286,
+      "animMode": 4,
+      "flags": 8210,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 118,
+      "duration": 0,
+      "next": 119,
+      "impulseType": 6,
+      "paramB": 0,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 219,
+      "animMode": 1,
+      "flags": 97,
+      "snapType": 15,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 119,
+      "duration": 0,
+      "next": -1,
+      "impulseType": 21,
+      "paramB": 2250,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 219,
+      "animMode": 5,
+      "flags": 1,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2286,
+      "transitions": [
+        {
+          "conditions": [
+            44
+          ],
+          "target": 108
+        },
+        {
+          "conditions": [
+            43
+          ],
+          "target": 121
+        },
+        {
+          "conditions": [
+            9
+          ],
+          "target": 120
+        },
+        {
+          "conditions": [
+            6
+          ],
+          "target": 117
+        }
+      ],
+      "scoreType": 2,
+      "points": 2
+    },
+    {
+      "id": 120,
+      "duration": 0,
+      "next": -1,
+      "impulseType": 21,
+      "paramB": -4050,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 394,
+      "animMode": 3,
+      "flags": 1,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2295,
+      "transitions": [
+        {
+          "conditions": [
+            36
+          ],
+          "target": 6
+        },
+        {
+          "conditions": [
+            40
+          ],
+          "target": 15
+        },
+        {
+          "conditions": [
+            8
+          ],
+          "target": 119
+        },
+        {
+          "conditions": [
+            6
+          ],
+          "target": 117
+        }
+      ],
+      "scoreType": 2,
+      "points": 2
+    },
+    {
+      "id": 121,
+      "duration": 510,
+      "next": 11,
+      "impulseType": 4,
+      "paramB": 625,
+      "paramC": 1250,
+      "paramD": 0,
+      "clipOffset": 203,
+      "animMode": 4,
+      "flags": 8,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 122,
+      "duration": 0,
+      "next": -1,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 0,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2304,
+      "transitions": [
+        {
+          "conditions": [
+            63
+          ],
+          "target": 123
+        },
+        {
+          "conditions": [
+            61
+          ],
+          "target": 15
+        },
+        {
+          "conditions": [
+            21
+          ],
+          "target": 15
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 123,
+      "duration": 600,
+      "next": 15,
+      "impulseType": 13,
+      "paramB": 3500,
+      "paramC": -4000,
+      "paramD": 210,
+      "clipOffset": 297,
+      "animMode": 4,
+      "flags": 0,
+      "snapType": -1,
+      "parent": 9,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": 1,
+      "points": 50
+    },
+    {
+      "id": 124,
+      "duration": 0,
+      "next": -1,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 0,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2311,
+      "transitions": [
+        {
+          "conditions": [
+            63
+          ],
+          "target": 125
+        },
+        {
+          "conditions": [
+            61
+          ],
+          "target": 15
+        },
+        {
+          "conditions": [
+            21
+          ],
+          "target": 15
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 125,
+      "duration": 390,
+      "next": 15,
+      "impulseType": 13,
+      "paramB": -3900,
+      "paramC": -2900,
+      "paramD": 360,
+      "clipOffset": 309,
+      "animMode": 4,
+      "flags": 4130,
+      "snapType": -1,
+      "parent": 9,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": 1,
+      "points": 50
+    },
+    {
+      "id": 126,
+      "duration": 0,
+      "next": -1,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 0,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2318,
+      "transitions": [
+        {
+          "conditions": [
+            63
+          ],
+          "target": 127
+        },
+        {
+          "conditions": [
+            61
+          ],
+          "target": 15
+        },
+        {
+          "conditions": [
+            1,
+            57
+          ],
+          "target": 84
+        },
+        {
+          "conditions": [
+            1,
+            56
+          ],
+          "target": 24
+        },
+        {
+          "conditions": [
+            1
+          ],
+          "target": 25
+        },
+        {
+          "conditions": [
+            21
+          ],
+          "target": 15
+        }
+      ],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 127,
+      "duration": 0,
+      "next": -1,
+      "impulseType": 17,
+      "paramB": 500,
+      "paramC": 3000,
+      "paramD": 0,
+      "clipOffset": 307,
+      "animMode": 1,
+      "flags": 0,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2331,
+      "transitions": [
+        {
+          "conditions": [
+            1
+          ],
+          "target": 2
+        },
+        {
+          "conditions": [
+            7
+          ],
+          "target": 123
+        },
+        {
+          "conditions": [
+            6
+          ],
+          "target": 125
+        },
+        {
+          "conditions": [
+            21
+          ],
+          "target": 15
+        },
+        {
+          "conditions": [
+            61
+          ],
+          "target": 15
+        }
+      ],
+      "scoreType": 2,
+      "points": 2
+    },
+    {
+      "id": 128,
+      "duration": 0,
+      "next": 129,
+      "impulseType": 6,
+      "paramB": 0,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 362,
+      "animMode": 1,
+      "flags": 32,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 129,
+      "duration": 0,
+      "next": -1,
+      "impulseType": 8,
+      "paramB": 2500,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 362,
+      "animMode": 5,
+      "flags": 0,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2342,
+      "transitions": [
+        {
+          "conditions": [
+            14
+          ],
+          "target": 15
+        },
+        {
+          "conditions": [
+            6
+          ],
+          "target": 130
+        },
+        {
+          "conditions": [
+            8
+          ],
+          "target": 18
+        },
+        {
+          "conditions": [
+            9
+          ],
+          "target": 26
+        },
+        {
+          "conditions": [
+            25
+          ],
+          "target": 100
+        },
+        {
+          "conditions": [
+            29
+          ],
+          "target": 118
+        },
+        {
+          "conditions": [
+            49
+          ],
+          "target": 2
+        },
+        {
+          "conditions": [
+            21
+          ],
+          "target": 130
+        }
+      ],
+      "scoreType": 2,
+      "points": 2
+    },
+    {
+      "id": 130,
+      "duration": 210,
+      "next": 128,
+      "impulseType": 1,
+      "paramB": 1000,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 369,
+      "animMode": 4,
+      "flags": 48,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    },
+    {
+      "id": 131,
+      "duration": 90,
+      "next": 16,
+      "impulseType": -1,
+      "paramB": -1,
+      "paramC": -1,
+      "paramD": -1,
+      "clipOffset": 327,
+      "animMode": 4,
+      "flags": 0,
+      "snapType": 1,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": 1,
+      "points": 50
+    },
+    {
+      "id": 132,
+      "duration": 0,
+      "next": 133,
+      "impulseType": 6,
+      "paramB": 0,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 347,
+      "animMode": 1,
+      "flags": 1,
+      "snapType": 24,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": 1,
+      "points": 50
+    },
+    {
+      "id": 133,
+      "duration": 0,
+      "next": -1,
+      "impulseType": 8,
+      "paramB": 1800,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": 347,
+      "animMode": 5,
+      "flags": 1,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": 2359,
+      "transitions": [
+        {
+          "conditions": [
+            6
+          ],
+          "target": 134
+        },
+        {
+          "conditions": [
+            9
+          ],
+          "target": 27
+        },
+        {
+          "conditions": [
+            51
+          ],
+          "target": 15
+        }
+      ],
+      "scoreType": 2,
+      "points": 2
+    },
+    {
+      "id": 134,
+      "duration": 210,
+      "next": 132,
+      "impulseType": 1,
+      "paramB": 1000,
+      "paramC": 0,
+      "paramD": 0,
+      "clipOffset": -1,
+      "animMode": -1,
+      "flags": 17,
+      "snapType": -1,
+      "parent": -1,
+      "transitionList": -1,
+      "transitions": [],
+      "scoreType": -1,
+      "points": -1
+    }
+  ],
+  "rawTransitionLists": [
+    2,
+    69,
+    42,
+    68,
+    38,
+    15,
+    1283,
+    71,
+    25,
+    99,
+    29,
+    118,
+    14,
+    15,
+    8,
+    18,
+    8713,
+    26,
+    2499337,
+    94,
+    9,
+    21,
+    656810758,
+    96,
+    15878,
+    124,
+    13318,
+    8,
+    6,
+    6,
+    18183,
+    56,
+    25,
+    100,
+    48,
+    128,
+    4,
+    69,
+    42,
+    68,
+    38,
+    15,
+    3,
+    17,
+    4,
+    3,
+    69,
+    42,
+    68,
+    38,
+    16,
+    2,
+    4,
+    8,
+    19,
+    69,
+    42,
+    68,
+    38,
+    18,
+    2,
+    2,
+    78,
+    2,
+    78,
+    5,
+    22,
+    14383,
+    131,
+    47,
+    128,
+    15385,
+    101,
+    15386,
+    101,
+    15387,
+    101,
+    15389,
+    104,
+    25,
+    100,
+    26,
+    100,
+    27,
+    107,
+    29,
+    103,
+    50,
+    132,
+    1259778,
+    82,
+    14594,
+    84,
+    14338,
+    82,
+    150284,
+    62,
+    2,
+    2,
+    17218,
+    83,
+    17986,
+    81,
+    322,
+    42,
+    66,
+    43,
+    1283,
+    71,
+    32,
+    13,
+    12,
+    15879,
+    122,
+    15878,
+    124,
+    18438,
+    29,
+    17414,
+    28,
+    17415,
+    47,
+    15881,
+    126,
+    20233,
+    22,
+    20237,
+    22,
+    1226579976,
+    33,
+    1344029704,
+    30,
+    7,
+    63,
+    6,
+    64,
+    3,
+    4802568,
+    33,
+    18438,
+    29,
+    18439,
+    48,
+    3,
+    18438,
+    29,
+    18439,
+    48,
+    30,
+    105,
+    2,
+    47,
+    131,
+    8713,
+    26,
+    7,
+    47,
+    131,
+    15105,
+    84,
+    14849,
+    24,
+    1,
+    25,
+    15879,
+    122,
+    15878,
+    124,
+    15881,
+    126,
+    4,
+    29,
+    103,
+    14337,
+    82,
+    1,
+    2,
+    32,
+    29,
+    3,
+    29,
+    31,
+    18720,
+    33,
+    32,
+    12,
+    5,
+    18438,
+    29,
+    18439,
+    48,
+    25,
+    100,
+    26,
+    100,
+    27,
+    107,
+    1,
+    30,
+    106,
+    7,
+    3492104,
+    34,
+    3492108,
+    34,
+    18438,
+    29,
+    18439,
+    48,
+    25,
+    100,
+    26,
+    100,
+    27,
+    107,
+    1,
+    0,
+    36,
+    1,
+    0,
+    37,
+    7,
+    3492104,
+    35,
+    3492108,
+    35,
+    18438,
+    29,
+    18439,
+    48,
+    25,
+    100,
+    26,
+    100,
+    27,
+    107,
+    5,
+    18438,
+    29,
+    18439,
+    48,
+    25,
+    100,
+    26,
+    100,
+    27,
+    107,
+    3,
+    29,
+    118,
+    32,
+    40,
+    6,
+    39,
+    2,
+    32,
+    41,
+    20,
+    41,
+    3,
+    32,
+    48,
+    1,
+    2,
+    20,
+    74,
+    1,
+    33,
+    85,
+    4,
+    13,
+    53,
+    9,
+    53,
+    1,
+    50,
+    33,
+    85,
+    1,
+    33,
+    85,
+    1,
+    33,
+    85,
+    4,
+    13,
+    53,
+    9,
+    53,
+    33,
+    85,
+    1,
+    54,
+    2,
+    1,
+    51,
+    33,
+    85,
+    7,
+    25,
+    102,
+    26,
+    102,
+    31,
+    102,
+    27,
+    107,
+    13856,
+    73,
+    32,
+    87,
+    37,
+    59,
+    2,
+    1280128780,
+    66,
+    1280128781,
+    68,
+    1,
+    45,
+    58,
+    5,
+    4,
+    59,
+    32,
+    59,
+    14088,
+    66,
+    206327095,
+    66,
+    1280128781,
+    68,
+    2,
+    1,
+    82,
+    21,
+    72,
+    2,
+    1,
+    82,
+    21,
+    72,
+    2,
+    11,
+    63,
+    10,
+    64,
+    3,
+    47,
+    78,
+    46,
+    76,
+    38,
+    76,
+    2,
+    74,
+    6,
+    0,
+    0,
+    3,
+    47,
+    131,
+    48,
+    131,
+    14,
+    15,
+    2,
+    1,
+    89,
+    20,
+    89,
+    2,
+    74,
+    93,
+    0,
+    92,
+    2,
+    9,
+    27,
+    8,
+    110,
+    7,
+    1512968,
+    115,
+    1583368,
+    119,
+    10760,
+    119,
+    10505,
+    120,
+    9,
+    27,
+    4276231,
+    114,
+    6,
+    117,
+    4,
+    44,
+    108,
+    43,
+    121,
+    9,
+    120,
+    6,
+    117,
+    4,
+    36,
+    6,
+    40,
+    15,
+    8,
+    119,
+    6,
+    117,
+    3,
+    63,
+    123,
+    61,
+    15,
+    21,
+    15,
+    3,
+    63,
+    125,
+    61,
+    15,
+    21,
+    15,
+    6,
+    63,
+    127,
+    61,
+    15,
+    14593,
+    84,
+    14337,
+    24,
+    1,
+    25,
+    21,
+    15,
+    5,
+    1,
+    2,
+    7,
+    123,
+    6,
+    125,
+    21,
+    15,
+    61,
+    15,
+    8,
+    14,
+    15,
+    6,
+    130,
+    8,
+    18,
+    9,
+    26,
+    25,
+    100,
+    29,
+    118,
+    49,
+    2,
+    21,
+    130,
+    3,
+    6,
+    134,
+    9,
+    27,
+    51,
+    15
+  ]
+}

@@ -1,0 +1,116 @@
+{
+  "tracks": [
+    {
+      "id": 0,
+      "file": "music/0.mid",
+      "offset": 0,
+      "length": 23854,
+      "duration": 0,
+      "soundType": 1
+    },
+    {
+      "id": 1,
+      "file": "music/1.mid",
+      "offset": 23854,
+      "length": 6414,
+      "duration": 127067,
+      "soundType": 1
+    },
+    {
+      "id": 2,
+      "file": "music/2.mid",
+      "offset": 30268,
+      "length": 14088,
+      "duration": 43157,
+      "soundType": 1
+    },
+    {
+      "id": 3,
+      "file": "music/3.mid",
+      "offset": 44356,
+      "length": 9398,
+      "duration": 43157,
+      "soundType": 1
+    },
+    {
+      "id": 4,
+      "file": "music/4.mid",
+      "offset": 53754,
+      "length": 11942,
+      "duration": 43157,
+      "soundType": 1
+    },
+    {
+      "id": 5,
+      "file": "music/5.mid",
+      "offset": 65696,
+      "length": 25255,
+      "duration": 43157,
+      "soundType": 1
+    },
+    {
+      "id": 6,
+      "file": "music/6.mid",
+      "offset": 90951,
+      "length": 15516,
+      "duration": 43157,
+      "soundType": 1
+    },
+    {
+      "id": 7,
+      "file": "music/7.mid",
+      "offset": 106467,
+      "length": 28690,
+      "duration": 43157,
+      "soundType": 1
+    },
+    {
+      "id": 8,
+      "file": "music/8.mid",
+      "offset": 135157,
+      "length": 16870,
+      "duration": 43157,
+      "soundType": 1
+    },
+    {
+      "id": 9,
+      "file": "music/9.mid",
+      "offset": 152027,
+      "length": 9931,
+      "duration": 43157,
+      "soundType": 1
+    },
+    {
+      "id": 10,
+      "file": "music/10.mid",
+      "offset": 161958,
+      "length": 16422,
+      "duration": 43157,
+      "soundType": 1
+    },
+    {
+      "id": 11,
+      "file": "music/11.mid",
+      "offset": 178380,
+      "length": 11334,
+      "duration": 43157,
+      "soundType": 1
+    },
+    {
+      "id": 12,
+      "file": "music/12.mid",
+      "offset": 189714,
+      "length": 10882,
+      "duration": 43157,
+      "soundType": 1
+    },
+    {
+      "id": 13,
+      "file": "music/13.mid",
+      "offset": 200596,
+      "length": 12366,
+      "duration": 43157,
+      "soundType": 1
+    }
+  ]
+}

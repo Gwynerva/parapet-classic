@@ -1,0 +1,10 @@
+{
+  "name": "@parapet/tools",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "extract": "node src/cli.ts extract",
+    "build-font": "node src/fontCli.ts"
+  }
+}

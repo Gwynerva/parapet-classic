@@ -1,0 +1,14 @@
+{
+  "skins": [
+    { "id": "blaise", "name": "Blaise", "character": 0 },
+    { "id": "playman", "name": "Playman", "character": 1 },
+    { "id": "spike", "name": "Spike", "character": 2 },
+    { "id": "trix", "name": "Trix", "character": 3 },
+    { "id": "dart", "name": "Dart", "character": 4 },
+    { "id": "viper", "name": "Viper", "character": 5 },
+    { "id": "ninja", "name": "Ninja", "character": 6 },
+    { "id": "bigd", "name": "Big D", "character": 7 },
+    { "id": "chili", "name": "Chili", "character": 8 },
+    { "id": "tung", "name": "Tung", "character": 9 }
+  ]
+}

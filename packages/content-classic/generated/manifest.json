@@ -1,0 +1,1513 @@
+{
+  "jar": "Playman_Extreme_Running_240x320.jar",
+  "files": [
+    {
+      "path": "index.json",
+      "size": 10260
+    },
+    {
+      "path": "palettes.json",
+      "size": 151860
+    },
+    {
+      "path": "sprites/0.png",
+      "size": 174
+    },
+    {
+      "path": "sprites/1.png",
+      "size": 114
+    },
+    {
+      "path": "sprites/2.png",
+      "size": 116
+    },
+    {
+      "path": "sprites/3.png",
+      "size": 112
+    },
+    {
+      "path": "sprites/4.png",
+      "size": 120
+    },
+    {
+      "path": "sprites/5.png",
+      "size": 120
+    },
+    {
+      "path": "sprites/6.png",
+      "size": 128
+    },
+    {
+      "path": "sprites/7.png",
+      "size": 131
+    },
+    {
+      "path": "sprites/8.png",
+      "size": 134
+    },
+    {
+      "path": "sprites/9.png",
+      "size": 120
+    },
+    {
+      "path": "sprites/10.png",
+      "size": 120
+    },
+    {
+      "path": "sprites/11.png",
+      "size": 127
+    },
+    {
+      "path": "sprites/12.png",
+      "size": 130
+    },
+    {
+      "path": "sprites/13.png",
+      "size": 144
+    },
+    {
+      "path": "sprites/14.png",
+      "size": 159
+    },
+    {
+      "path": "sprites/15.png",
+      "size": 151
+    },
+    {
+      "path": "sprites/16.png",
+      "size": 153
+    },
+    {
+      "path": "sprites/17.png",
+      "size": 125
+    },
+    {
+      "path": "sprites/18.png",
+      "size": 131
+    },
+    {
+      "path": "sprites/19.png",
+      "size": 131
+    },
+    {
+      "path": "sprites/20.png",
+      "size": 142
+    },
+    {
+      "path": "sprites/21.png",
+      "size": 135
+    },
+    {
+      "path": "sprites/22.png",
+      "size": 141
+    },
+    {
+      "path": "sprites/23.png",
+      "size": 139
+    },
+    {
+      "path": "sprites/24.png",
+      "size": 154
+    },
+    {
+      "path": "sprites/25.png",
+      "size": 408
+    },
+    {
+      "path": "sprites/26.png",
+      "size": 469
+    },
+    {
+      "path": "sprites/27.png",
+      "size": 474
+    },
+    {
+      "path": "sprites/28.png",
+      "size": 460
+    },
+    {
+      "path": "sprites/29.png",
+      "size": 406
+    },
+    {
+      "path": "sprites/30.png",
+      "size": 117
+    },
+    {
+      "path": "sprites/31.png",
+      "size": 122
+    },
+    {
+      "path": "sprites/32.png",
+      "size": 118
+    },
+    {
+      "path": "sprites/33.png",
+      "size": 116
+    },
+    {
+      "path": "sprites/34.png",
+      "size": 196
+    },
+    {
+      "path": "sprites/35.png",
+      "size": 206
+    },
+    {
+      "path": "sprites/36.png",
+      "size": 195
+    },
+    {
+      "path": "sprites/37.png",
+      "size": 198
+    },
+    {
+      "path": "sprites/38.png",
+      "size": 206
+    },
+    {
+      "path": "sprites/39.png",
+      "size": 148
+    },
+    {
+      "path": "sprites/40.png",
+      "size": 155
+    },
+    {
+      "path": "sprites/41.png",
+      "size": 153
+    },
+    {
+      "path": "sprites/42.png",
+      "size": 152
+    },
+    {
+      "path": "sprites/43.png",
+      "size": 137
+    },
+    {
+      "path": "sprites/44.png",
+      "size": 148
+    },
+    {
+      "path": "sprites/45.png",
+      "size": 146
+    },
+    {
+      "path": "sprites/46.png",
+      "size": 145
+    },
+    {
+      "path": "sprites/47.png",
+      "size": 130
+    },
+    {
+      "path": "sprites/48.png",
+      "size": 122
+    },
+    {
+      "path": "sprites/49.png",
+      "size": 149
+    },
+    {
+      "path": "sprites/50.png",
+      "size": 148
+    },
+    {
+      "path": "sprites/51.png",
+      "size": 148
+    },
+    {
+      "path": "sprites/52.png",
+      "size": 142
+    },
+    {
+      "path": "sprites/53.png",
+      "size": 151
+    },
+    {
+      "path": "sprites/54.png",
+      "size": 151
+    },
+    {
+      "path": "sprites/55.png",
+      "size": 157
+    },
+    {
+      "path": "sprites/56.png",
+      "size": 141
+    },
+    {
+      "path": "sprites/57.png",
+      "size": 152
+    },
+    {
+      "path": "sprites/58.png",
+      "size": 156
+    },
+    {
+      "path": "sprites/59.png",
+      "size": 157
+    },
+    {
+      "path": "sprites/60.png",
+      "size": 153
+    },
+    {
+      "path": "sprites/61.png",
+      "size": 168
+    },
+    {
+      "path": "sprites/62.png",
+      "size": 132
+    },
+    {
+      "path": "sprites/63.png",
+      "size": 134
+    },
+    {
+      "path": "sprites/64.png",
+      "size": 147
+    },
+    {
+      "path": "sprites/65.png",
+      "size": 142
+    },
+    {
+      "path": "sprites/66.png",
+      "size": 850
+    },
+    {
+      "path": "sprites/67.png",
+      "size": 791
+    },
+    {
+      "path": "sprites/68.png",
+      "size": 1159
+    },
+    {
+      "path": "sprites/69.png",
+      "size": 1525
+    },
+    {
+      "path": "sprites/70.png",
+      "size": 1167
+    },
+    {
+      "path": "sprites/71.png",
+      "size": 1602
+    },
+    {
+      "path": "sprites/72.png",
+      "size": 1850
+    },
+    {
+      "path": "sprites/73.png",
+      "size": 1871
+    },
+    {
+      "path": "sprites/74.png",
+      "size": 1678
+    },
+    {
+      "path": "sprites/75.png",
+      "size": 475
+    },
+    {
+      "path": "sprites/76.png",
+      "size": 397
+    },
+    {
+      "path": "sprites/77.png",
+      "size": 408
+    },
+    {
+      "path": "sprites/78.png",
+      "size": 386
+    },
+    {
+      "path": "sprites/79.png",
+      "size": 408
+    },
+    {
+      "path": "sprites/80.png",
+      "size": 219
+    },
+    {
+      "path": "sprites/81.png",
+      "size": 427
+    },
+    {
+      "path": "sprites/82.png",
+      "size": 418
+    },
+    {
+      "path": "sprites/83.png",
+      "size": 429
+    },
+    {
+      "path": "sprites/84.png",
+      "size": 422
+    },
+    {
+      "path": "sprites/85.png",
+      "size": 412
+    },
+    {
+      "path": "sprites/86.png",
+      "size": 403
+    },
+    {
+      "path": "sprites/87.png",
+      "size": 352
+    },
+    {
+      "path": "sprites/88.png",
+      "size": 387
+    },
+    {
+      "path": "sprites/89.png",
+      "size": 362
+    },
+    {
+      "path": "sprites/90.png",
+      "size": 350
+    },
+    {
+      "path": "sprites/91.png",
+      "size": 344
+    },
+    {
+      "path": "sprites/92.png",
+      "size": 365
+    },
+    {
+      "path": "sprites/93.png",
+      "size": 354
+    },
+    {
+      "path": "sprites/94.png",
+      "size": 360
+    },
+    {
+      "path": "sprites/95.png",
+      "size": 354
+    },
+    {
+      "path": "sprites/96.png",
+      "size": 350
+    },
+    {
+      "path": "sprites/97.png",
+      "size": 345
+    },
+    {
+      "path": "sprites/98.png",
+      "size": 382
+    },
+    {
+      "path": "sprites/99.png",
+      "size": 372
+    },
+    {
+      "path": "sprites/100.png",
+      "size": 363
+    },
+    {
+      "path": "sprites/101.png",
+      "size": 324
+    },
+    {
+      "path": "sprites/102.png",
+      "size": 411
+    },
+    {
+      "path": "sprites/103.png",
+      "size": 425
+    },
+    {
+      "path": "sprites/104.png",
+      "size": 413
+    },
+    {
+      "path": "sprites/105.png",
+      "size": 412
+    },
+    {
+      "path": "sprites/106.png",
+      "size": 381
+    },
+    {
+      "path": "sprites/107.png",
+      "size": 342
+    },
+    {
+      "path": "sprites/108.png",
+      "size": 344
+    },
+    {
+      "path": "sprites/109.png",
+      "size": 321
+    },
+    {
+      "path": "sprites/110.png",
+      "size": 356
+    },
+    {
+      "path": "sprites/111.png",
+      "size": 331
+    },
+    {
+      "path": "sprites/112.png",
+      "size": 337
+    },
+    {
+      "path": "sprites/113.png",
+      "size": 336
+    },
+    {
+      "path": "sprites/114.png",
+      "size": 326
+    },
+    {
+      "path": "sprites/115.png",
+      "size": 352
+    },
+    {
+      "path": "sprites/116.png",
+      "size": 333
+    },
+    {
+      "path": "sprites/117.png",
+      "size": 408
+    },
+    {
+      "path": "sprites/118.png",
+      "size": 405
+    },
+    {
+      "path": "sprites/119.png",
+      "size": 381
+    },
+    {
+      "path": "sprites/120.png",
+      "size": 387
+    },
+    {
+      "path": "sprites/121.png",
+      "size": 394
+    },
+    {
+      "path": "sprites/122.png",
+      "size": 307
+    },
+    {
+      "path": "sprites/123.png",
+      "size": 461
+    },
+    {
+      "path": "sprites/124.png",
+      "size": 437
+    },
+    {
+      "path": "sprites/125.png",
+      "size": 462
+    },
+    {
+      "path": "sprites/126.png",
+      "size": 304
+    },
+    {
+      "path": "sprites/127.png",
+      "size": 185
+    },
+    {
+      "path": "sprites/128.png",
+      "size": 195
+    },
+    {
+      "path": "sprites/129.png",
+      "size": 182
+    },
+    {
+      "path": "sprites/130.png",
+      "size": 184
+    },
+    {
+      "path": "sprites/131.png",
+      "size": 203
+    },
+    {
+      "path": "sprites/132.png",
+      "size": 141
+    },
+    {
+      "path": "sprites/133.png",
+      "size": 144
+    },
+    {
+      "path": "sprites/134.png",
+      "size": 153
+    },
+    {
+      "path": "sprites/135.png",
+      "size": 146
+    },
+    {
+      "path": "sprites/136.png",
+      "size": 158
+    },
+    {
+      "path": "sprites/137.png",
+      "size": 805
+    },
+    {
+      "path": "sprites/138.png",
+      "size": 1058
+    },
+    {
+      "path": "sprites/139.png",
+      "size": 1149
+    },
+    {
+      "path": "sprites/140.png",
+      "size": 784
+    },
+    {
+      "path": "sprites/141.png",
+      "size": 277
+    },
+    {
+      "path": "sprites/142.png",
+      "size": 323
+    },
+    {
+      "path": "sprites/143.png",
+      "size": 260
+    },
+    {
+      "path": "sprites/144.png",
+      "size": 300
+    },
+    {
+      "path": "sprites/145.png",
+      "size": 236
+    },
+    {
+      "path": "sprites/146.png",
+      "size": 298
+    },
+    {
+      "path": "sprites/147.png",
+      "size": 204
+    },
+    {
+      "path": "sprites/148.png",
+      "size": 270
+    },
+    {
+      "path": "sprites/149.png",
+      "size": 205
+    },
+    {
+      "path": "sprites/150.png",
+      "size": 275
+    },
+    {
+      "path": "sprites/151.png",
+      "size": 2055
+    },
+    {
+      "path": "sprites/152.png",
+      "size": 1296
+    },
+    {
+      "path": "sprites/153.png",
+      "size": 1987
+    },
+    {
+      "path": "sprites/154.png",
+      "size": 1718
+    },
+    {
+      "path": "sprites/155.png",
+      "size": 1964
+    },
+    {
+      "path": "sprites/156.png",
+      "size": 1802
+    },
+    {
+      "path": "sprites/157.png",
+      "size": 1092
+    },
+    {
+      "path": "sprites/158.png",
+      "size": 1864
+    },
+    {
+      "path": "sprites/159.png",
+      "size": 1910
+    },
+    {
+      "path": "sprites/160.png",
+      "size": 1318
+    },
+    {
+      "path": "sprites/161.png",
+      "size": 1462
+    },
+    {
+      "path": "sprites/162.png",
+      "size": 212
+    },
+    {
+      "path": "sprites/163.png",
+      "size": 1000
+    },
+    {
+      "path": "sprites/164.png",
+      "size": 1454
+    },
+    {
+      "path": "sprites/165.png",
+      "size": 2098
+    },
+    {
+      "path": "sprites/166.png",
+      "size": 1929
+    },
+    {
+      "path": "sprites/167.png",
+      "size": 1954
+    },
+    {
+      "path": "sprites/168.png",
+      "size": 1592
+    },
+    {
+      "path": "sprites/169.png",
+      "size": 1534
+    },
+    {
+      "path": "sprites/170.png",
+      "size": 1768
+    },
+    {
+      "path": "sprites/171.png",
+      "size": 1537
+    },
+    {
+      "path": "sprites/172.png",
+      "size": 1767
+    },
+    {
+      "path": "sprites/173.png",
+      "size": 2844
+    },
+    {
+      "path": "sprites/174.png",
+      "size": 2548
+    },
+    {
+      "path": "sprites/175.png",
+      "size": 1551
+    },
+    {
+      "path": "sprites/176.png",
+      "size": 168
+    },
+    {
+      "path": "sprites/177.png",
+      "size": 245
+    },
+    {
+      "path": "sprites/178.png",
+      "size": 456
+    },
+    {
+      "path": "sprites/179.png",
+      "size": 96
+    },
+    {
+      "path": "sprites/180.png",
+      "size": 150
+    },
+    {
+      "path": "sprites/181.png",
+      "size": 168
+    },
+    {
+      "path": "sprites/182.png",
+      "size": 467
+    },
+    {
+      "path": "sprites/183.png",
+      "size": 412
+    },
+    {
+      "path": "sprites/184.png",
+      "size": 1640
+    },
+    {
+      "path": "sprites/185.png",
+      "size": 731
+    },
+    {
+      "path": "sprites/186.png",
+      "size": 977
+    },
+    {
+      "path": "sprites/187.png",
+      "size": 975
+    },
+    {
+      "path": "sprites/188.png",
+      "size": 1090
+    },
+    {
+      "path": "sprites/189.png",
+      "size": 1085
+    },
+    {
+      "path": "sprites/190.png",
+      "size": 1254
+    },
+    {
+      "path": "sprites/191.png",
+      "size": 976
+    },
+    {
+      "path": "sprites/192.png",
+      "size": 155
+    },
+    {
+      "path": "sprites/193.png",
+      "size": 162
+    },
+    {
+      "path": "sprites/194.png",
+      "size": 568
+    },
+    {
+      "path": "sprites/195.png",
+      "size": 440
+    },
+    {
+      "path": "sprites/196.png",
+      "size": 663
+    },
+    {
+      "path": "sprites/197.png",
+      "size": 617
+    },
+    {
+      "path": "sprites/198.png",
+      "size": 514
+    },
+    {
+      "path": "sprites/199.png",
+      "size": 550
+    },
+    {
+      "path": "sprites/200.png",
+      "size": 509
+    },
+    {
+      "path": "sprites/201.png",
+      "size": 567
+    },
+    {
+      "path": "sprites/202.png",
+      "size": 534
+    },
+    {
+      "path": "sprites/203.png",
+      "size": 532
+    },
+    {
+      "path": "sprites/204.png",
+      "size": 344
+    },
+    {
+      "path": "sprites/205.png",
+      "size": 273
+    },
+    {
+      "path": "sprites/206.png",
+      "size": 458
+    },
+    {
+      "path": "sprites/207.png",
+      "size": 535
+    },
+    {
+      "path": "sprites/208.png",
+      "size": 539
+    },
+    {
+      "path": "sprites/209.png",
+      "size": 546
+    },
+    {
+      "path": "sprites/210.png",
+      "size": 419
+    },
+    {
+      "path": "sprites/211.png",
+      "size": 250
+    },
+    {
+      "path": "sprites/212.png",
+      "size": 662
+    },
+    {
+      "path": "sprites/213.png",
+      "size": 757
+    },
+    {
+      "path": "sprites/214.png",
+      "size": 1164
+    },
+    {
+      "path": "sprites/215.png",
+      "size": 757
+    },
+    {
+      "path": "sprites/216.png",
+      "size": 669
+    },
+    {
+      "path": "sprites/217.png",
+      "size": 616
+    },
+    {
+      "path": "sprites/218.png",
+      "size": 1034
+    },
+    {
+      "path": "sprites/219.png",
+      "size": 636
+    },
+    {
+      "path": "sprites/220.png",
+      "size": 3665
+    },
+    {
+      "path": "sprites/221.png",
+      "size": 1625
+    },
+    {
+      "path": "sprites/222.png",
+      "size": 5771
+    },
+    {
+      "path": "sprites/223.png",
+      "size": 187
+    },
+    {
+      "path": "sprites/224.png",
+      "size": 110
+    },
+    {
+      "path": "sprites/225.png",
+      "size": 326
+    },
+    {
+      "path": "sprites/226.png",
+      "size": 353
+    },
+    {
+      "path": "sprites/227.png",
+      "size": 1524
+    },
+    {
+      "path": "sprites/228.png",
+      "size": 982
+    },
+    {
+      "path": "sprites/229.png",
+      "size": 893
+    },
+    {
+      "path": "sprites/230.png",
+      "size": 5382
+    },
+    {
+      "path": "sprites/231.png",
+      "size": 1703
+    },
+    {
+      "path": "sprites/232.png",
+      "size": 1963
+    },
+    {
+      "path": "sprites/233.png",
+      "size": 317
+    },
+    {
+      "path": "sprites/234.png",
+      "size": 340
+    },
+    {
+      "path": "sprites/235.png",
+      "size": 300
+    },
+    {
+      "path": "sprites/236.png",
+      "size": 467
+    },
+    {
+      "path": "sprites/237.png",
+      "size": 726
+    },
+    {
+      "path": "sprites/238.png",
+      "size": 392
+    },
+    {
+      "path": "sprites/239.png",
+      "size": 355
+    },
+    {
+      "path": "sprites/240.png",
+      "size": 230
+    },
+    {
+      "path": "sprites/241.png",
+      "size": 198
+    },
+    {
+      "path": "sprites/242.png",
+      "size": 138
+    },
+    {
+      "path": "sprites/243.png",
+      "size": 207
+    },
+    {
+      "path": "sprites/244.png",
+      "size": 225
+    },
+    {
+      "path": "sprites/245.png",
+      "size": 931
+    },
+    {
+      "path": "sprites/246.png",
+      "size": 197
+    },
+    {
+      "path": "sprites/247.png",
+      "size": 174
+    },
+    {
+      "path": "sprites/248.png",
+      "size": 161
+    },
+    {
+      "path": "sprites/249.png",
+      "size": 131
+    },
+    {
+      "path": "sprites/250.png",
+      "size": 147
+    },
+    {
+      "path": "sprites/251.png",
+      "size": 159
+    },
+    {
+      "path": "sprites/252.png",
+      "size": 147
+    },
+    {
+      "path": "sprites/253.png",
+      "size": 153
+    },
+    {
+      "path": "sprites/254.png",
+      "size": 177
+    },
+    {
+      "path": "sprites/255.png",
+      "size": 131
+    },
+    {
+      "path": "sprites/256.png",
+      "size": 173
+    },
+    {
+      "path": "sprites/257.png",
+      "size": 182
+    },
+    {
+      "path": "sprites/258.png",
+      "size": 195
+    },
+    {
+      "path": "sprites/259.png",
+      "size": 183
+    },
+    {
+      "path": "sprites/260.png",
+      "size": 178
+    },
+    {
+      "path": "sprites/261.png",
+      "size": 184
+    },
+    {
+      "path": "sprites/262.png",
+      "size": 158
+    },
+    {
+      "path": "sprites/263.png",
+      "size": 114
+    },
+    {
+      "path": "sprites/264.png",
+      "size": 176
+    },
+    {
+      "path": "sprites/265.png",
+      "size": 196
+    },
+    {
+      "path": "sprites/266.png",
+      "size": 162
+    },
+    {
+      "path": "sprites/267.png",
+      "size": 170
+    },
+    {
+      "path": "sprites/268.png",
+      "size": 161
+    },
+    {
+      "path": "sprites/269.png",
+      "size": 104
+    },
+    {
+      "path": "sprites/270.png",
+      "size": 342
+    },
+    {
+      "path": "sprites/271.png",
+      "size": 283
+    },
+    {
+      "path": "sprites/272.png",
+      "size": 303
+    },
+    {
+      "path": "sprites/273.png",
+      "size": 247
+    },
+    {
+      "path": "sprites/274.png",
+      "size": 240
+    },
+    {
+      "path": "sprites/275.png",
+      "size": 323
+    },
+    {
+      "path": "sprites/276.png",
+      "size": 116
+    },
+    {
+      "path": "sprites/277.png",
+      "size": 138
+    },
+    {
+      "path": "sprites/278.png",
+      "size": 834
+    },
+    {
+      "path": "sprites/279.png",
+      "size": 123
+    },
+    {
+      "path": "sprites/280.png",
+      "size": 650
+    },
+    {
+      "path": "sprites/281.png",
+      "size": 137
+    },
+    {
+      "path": "sprites/282.png",
+      "size": 124
+    },
+    {
+      "path": "sprites/283.png",
+      "size": 338
+    },
+    {
+      "path": "sprites/284.png",
+      "size": 445
+    },
+    {
+      "path": "sprites/285.png",
+      "size": 165
+    },
+    {
+      "path": "sprites/286.png",
+      "size": 321
+    },
+    {
+      "path": "sprites/287.png",
+      "size": 370
+    },
+    {
+      "path": "sprites/288.png",
+      "size": 346
+    },
+    {
+      "path": "sprites/289.png",
+      "size": 304
+    },
+    {
+      "path": "sprites/290.png",
+      "size": 171
+    },
+    {
+      "path": "sprites/291.png",
+      "size": 408
+    },
+    {
+      "path": "sprites/292.png",
+      "size": 111
+    },
+    {
+      "path": "sprites/293.png",
+      "size": 288
+    },
+    {
+      "path": "sprites/294.png",
+      "size": 166
+    },
+    {
+      "path": "sprites/295.png",
+      "size": 106
+    },
+    {
+      "path": "sprites/296.png",
+      "size": 235
+    },
+    {
+      "path": "sprites/297.png",
+      "size": 288
+    },
+    {
+      "path": "sprites/298.png",
+      "size": 194
+    },
+    {
+      "path": "sprites/299.png",
+      "size": 600
+    },
+    {
+      "path": "sprites/300.png",
+      "size": 1322
+    },
+    {
+      "path": "sprites/301.png",
+      "size": 149
+    },
+    {
+      "path": "sprites/302.png",
+      "size": 527
+    },
+    {
+      "path": "sprites/303.png",
+      "size": 114
+    },
+    {
+      "path": "sprites/304.png",
+      "size": 436
+    },
+    {
+      "path": "sprites/305.png",
+      "size": 2008
+    },
+    {
+      "path": "sprites/306.png",
+      "size": 205
+    },
+    {
+      "path": "sprites/307.png",
+      "size": 358
+    },
+    {
+      "path": "sprites/308.png",
+      "size": 768
+    },
+    {
+      "path": "sprites/309.png",
+      "size": 106
+    },
+    {
+      "path": "sprites/310.png",
+      "size": 371
+    },
+    {
+      "path": "sprites/311.png",
+      "size": 87
+    },
+    {
+      "path": "sprites/312.png",
+      "size": 271
+    },
+    {
+      "path": "sprites/313.png",
+      "size": 137
+    },
+    {
+      "path": "sprites.json",
+      "size": 49603
+    },
+    {
+      "path": "atlas.png",
+      "size": 162119
+    },
+    {
+      "path": "atlas.json",
+      "size": 25231
+    },
+    {
+      "path": "scenes/k0.json",
+      "size": 435148
+    },
+    {
+      "path": "scenes/k1.json",
+      "size": 89929
+    },
+    {
+      "path": "scenes/k2.json",
+      "size": 243808
+    },
+    {
+      "path": "scenes/k3.json",
+      "size": 186223
+    },
+    {
+      "path": "scenes/k4.json",
+      "size": 258967
+    },
+    {
+      "path": "scenes/k5.json",
+      "size": 224801
+    },
+    {
+      "path": "scenes/k6.json",
+      "size": 162001
+    },
+    {
+      "path": "scenes/k7.json",
+      "size": 226107
+    },
+    {
+      "path": "scenes/k8.json",
+      "size": 483157
+    },
+    {
+      "path": "scenes/k9.json",
+      "size": 104289
+    },
+    {
+      "path": "scenes/k10.json",
+      "size": 112272
+    },
+    {
+      "path": "scenes/k11.json",
+      "size": 268767
+    },
+    {
+      "path": "scenes/k12.json",
+      "size": 393484
+    },
+    {
+      "path": "scenes/k13.json",
+      "size": 213922
+    },
+    {
+      "path": "moves.json",
+      "size": 74508
+    },
+    {
+      "path": "anims.json",
+      "size": 38137
+    },
+    {
+      "path": "tables.json",
+      "size": 3249
+    },
+    {
+      "path": "levels/0.json",
+      "size": 11336
+    },
+    {
+      "path": "rivals/0.json",
+      "size": 4304
+    },
+    {
+      "path": "levels/1.json",
+      "size": 15325
+    },
+    {
+      "path": "rivals/1.json",
+      "size": 3328
+    },
+    {
+      "path": "levels/2.json",
+      "size": 15559
+    },
+    {
+      "path": "rivals/2.json",
+      "size": 4012
+    },
+    {
+      "path": "levels/3.json",
+      "size": 10567
+    },
+    {
+      "path": "rivals/3.json",
+      "size": 3426
+    },
+    {
+      "path": "levels/4.json",
+      "size": 11797
+    },
+    {
+      "path": "rivals/4.json",
+      "size": 3516
+    },
+    {
+      "path": "levels/5.json",
+      "size": 15206
+    },
+    {
+      "path": "rivals/5.json",
+      "size": 4001
+    },
+    {
+      "path": "levels/6.json",
+      "size": 12620
+    },
+    {
+      "path": "rivals/6.json",
+      "size": 3521
+    },
+    {
+      "path": "levels/7.json",
+      "size": 15349
+    },
+    {
+      "path": "rivals/7.json",
+      "size": 2450
+    },
+    {
+      "path": "levels/8.json",
+      "size": 13093
+    },
+    {
+      "path": "rivals/8.json",
+      "size": 3564
+    },
+    {
+      "path": "levels/9.json",
+      "size": 18183
+    },
+    {
+      "path": "rivals/9.json",
+      "size": 4779
+    },
+    {
+      "path": "levels/10.json",
+      "size": 31107
+    },
+    {
+      "path": "rivals/10.json",
+      "size": 6681
+    },
+    {
+      "path": "levels/11.json",
+      "size": 36179
+    },
+    {
+      "path": "rivals/11.json",
+      "size": 4447
+    },
+    {
+      "path": "missions.json",
+      "size": 17442
+    },
+    {
+      "path": "strings/ru.json",
+      "size": 23996
+    },
+    {
+      "path": "music/0.mid",
+      "size": 23854
+    },
+    {
+      "path": "music/1.mid",
+      "size": 6414
+    },
+    {
+      "path": "music/2.mid",
+      "size": 14088
+    },
+    {
+      "path": "music/3.mid",
+      "size": 9398
+    },
+    {
+      "path": "music/4.mid",
+      "size": 11942
+    },
+    {
+      "path": "music/5.mid",
+      "size": 25255
+    },
+    {
+      "path": "music/6.mid",
+      "size": 15516
+    },
+    {
+      "path": "music/7.mid",
+      "size": 28690
+    },
+    {
+      "path": "music/8.mid",
+      "size": 16870
+    },
+    {
+      "path": "music/9.mid",
+      "size": 9931
+    },
+    {
+      "path": "music/10.mid",
+      "size": 16422
+    },
+    {
+      "path": "music/11.mid",
+      "size": 11334
+    },
+    {
+      "path": "music/12.mid",
+      "size": 10882
+    },
+    {
+      "path": "music/13.mid",
+      "size": 12366
+    },
+    {
+      "path": "music.json",
+      "size": 2112
+    }
+  ]
+}
