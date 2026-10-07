@@ -52,8 +52,10 @@ atomically (temporary file plus rename).
 
 ## Environment
 
-`PORT` (8787), `ALLOWED_ORIGINS` (comma-separated CORS origins, default the Vite dev server),
-`DATA_DIR` (default `packages/server/data`).
+`PORT` (8787), `HOST` (default every interface), `ALLOWED_ORIGINS` (comma-separated CORS
+origins, default the Vite dev server), `DATA_DIR` (default `packages/server/data`), `STATIC_DIR`
+(the built client to serve next to the API, as the test server does; unset, only `/api` is
+served).
 
 ## Command line
 

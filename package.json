@@ -20,7 +20,8 @@
     "format:check": "prettier --check .",
     "decompile": "node scripts/decompile.mjs",
     "check": "npm run format:check && npm run typecheck && npm test",
-    "build-font": "npm run build-font -w @parapet/tools"
+    "build-font": "npm run build-font -w @parapet/tools",
+    "deploy": "node scripts/deploy.mjs"
   },
   "devDependencies": {
     "@types/node": "^26.6.4",

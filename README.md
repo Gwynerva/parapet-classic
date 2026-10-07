@@ -34,6 +34,7 @@ npm run extract      # decode the original jar into packages/content-classic/gen
 npm run dev          # client on http://localhost:5173
 npm run server       # API on http://localhost:8787 (the client proxies /api to it)
 npm run check        # prettier, typecheck, tests
+npm run deploy       # build and ship to the test server (see deploy/README.md)
 ```
 
 Requires Node 24+. The original jar lives in `packages/content-classic/original/`.

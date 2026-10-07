@@ -1,0 +1,12 @@
+# Virtual host for the Caddy that already runs on the server (in Docker).
+# Lives in the sites/ directory that its Caddyfile imports.
+parapet.gwynerva.net {
+  encode zstd gzip
+  reverse_proxy 172.18.0.1:8787
+  header {
+    -Server
+    Strict-Transport-Security "max-age=31536000"
+    X-Content-Type-Options "nosniff"
+    Referrer-Policy "strict-origin-when-cross-origin"
+  }
+}
