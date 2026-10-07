@@ -13,14 +13,12 @@ import { fitWidth, inset, rowHeight, safeRect } from '@parapet/runtime/ui/layout
 import { AVAILABLE_LOCALES } from '../../i18n/locales.ts';
 import {
   clearRecords,
-  loadIdentity,
   saveOptions,
   type TouchControlsSetting,
 } from '@parapet/runtime/storage/profile.ts';
 import { isScaleMode, type ScaleMode } from '@parapet/runtime/render/Viewport.ts';
 import { setVibrationEnabled } from '@parapet/runtime/input/InputManager.ts';
 import { VOLUME_STEPS } from '@parapet/runtime/audio/MusicDirector.ts';
-import { IdentityScreen } from './IdentityScreen.ts';
 
 const SCALE_MODES: ScaleMode[] = ['auto', 1, 2, 3, 4, 5, 6, 7, 8];
 const TOUCH_SETTINGS: TouchControlsSetting[] = ['auto', 'on', 'off'];
@@ -135,11 +133,6 @@ export class OptionsScreen implements Screen {
           }
           this.rebuild();
         },
-      },
-      {
-        label: i18n.t('options.identity'),
-        value: loadIdentity()?.name ?? '-',
-        onSelect: () => this.ctx.screens.push(new IdentityScreen(this.ctx)),
       },
     ];
     const cursor = this.menu.cursor;

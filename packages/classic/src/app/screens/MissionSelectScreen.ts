@@ -1,10 +1,10 @@
 /**
  * Mission select of one level (reference/notes/08 §9): the level's missions in the original
- * order with their icons and local records, our free run, and the rival-ghost toggle for the
- * sprint; the description of the highlighted mode scrolls along the bottom like the original
- * ticker.
+ * order with their icons and local records, our free run, the rival toggle for the sprint and
+ * the switch for racing the ghost of one's own record; the description of the highlighted
+ * mode scrolls along the bottom like the original ticker.
  */
-import { modeForMissionType, type RunMode } from '@parapet/sim';
+import { modeForMissionType, rankingSort, type RunMode } from '@parapet/sim';
 import { formatTime, Theme, type GameContext } from '../Context.ts';
 import type { Screen, UiKey, UiPointer } from '@parapet/runtime/app/Screen.ts';
 import { Menu, type MenuItem } from '@parapet/runtime/ui/Menu.ts';
@@ -28,9 +28,10 @@ import {
   isMissionCompleted,
   loadProgress,
   loadRecord,
+  saveOptions,
   type Progress,
 } from '@parapet/runtime/storage/profile.ts';
-import { defaultLeaderboardSort } from '@parapet/protocol';
+import { missionSetup } from '../ghosts.ts';
 import { drawMissionIcon, ICON_TILE } from '../ui/icons.ts';
 import { PlayScreen } from './PlayScreen.ts';
 
@@ -41,6 +42,8 @@ interface Row {
   /** Mission type of the icon, or -1 for rows without one. */
   missionType: number;
   done: boolean;
+  /** Dictionary key of the ticker text for rows without a mode. */
+  desc?: string;
 }
 
 export class MissionSelectScreen implements Screen {
@@ -97,6 +100,15 @@ export class MissionSelectScreen implements Screen {
         },
       });
     }
+    this.rows.push({ mode: null, missionType: -1, done: false, desc: 'mission.bestGhost.desc' });
+    items.push({
+      label: i18n.t('mission.bestGhost'),
+      value: this.ctx.options.bestGhost ? i18n.t('options.on') : i18n.t('options.off'),
+      onAdjust: () => {
+        this.ctx.options = saveOptions({ bestGhost: !this.ctx.options.bestGhost });
+        this.rebuild();
+      },
+    });
     const cursor = this.menu.cursor;
     this.menu.setItems(items);
     this.menu.cursor = Math.min(cursor, items.length - 1);
@@ -106,20 +118,14 @@ export class MissionSelectScreen implements Screen {
   private recordLabel(mode: RunMode): string {
     const record = loadRecord(this.levelId, mode);
     if (!record || !record.finished) return '-';
-    return defaultLeaderboardSort(mode, this.levelId) === 'score'
+    return rankingSort(mode, this.levelId) === 'score'
       ? String(record.score)
       : formatTime(record.time);
   }
 
   private start(mode: RunMode): void {
     this.ctx.screens.push(
-      new PlayScreen(this.ctx, {
-        levelId: this.levelId,
-        mode,
-        withRival: mode === 'sprint' && this.withRival,
-        playerName: this.ctx.player.name,
-        character: this.ctx.player.character,
-      }),
+      new PlayScreen(this.ctx, missionSetup(this.ctx, this.levelId, mode, this.withRival)),
     );
   }
 
@@ -141,8 +147,8 @@ export class MissionSelectScreen implements Screen {
 
   update(dt: number): void {
     const row = this.rows[this.menu.cursor];
-    const mode = row?.mode;
-    this.ticker.setText(mode ? this.ctx.i18n.t(`mode.desc.${mode}`) : '');
+    const key = row?.mode ? `mode.desc.${row.mode}` : row?.desc;
+    this.ticker.setText(key ? this.ctx.i18n.t(key) : '');
     this.ticker.advance(dt);
   }
 
@@ -176,9 +182,10 @@ export class MissionSelectScreen implements Screen {
     );
     this.menu.draw(c);
     const { x, y, rowHeight: row } = this.menu.layout;
+    const first = this.menu.firstVisible;
     this.rows.forEach((r, i) => {
-      if (r.missionType < 0) return;
-      const iy = y + i * row + ((row - ICON_SIZE) >> 1);
+      if (r.missionType < 0 || i < first || i >= first + this.menu.maxVisible) return;
+      const iy = y + (i - first) * row + ((row - ICON_SIZE) >> 1);
       drawMissionIcon(c, render.sheet, r.missionType, r.done, x - ICON_SIZE - 6, iy);
     });
     this.ticker.draw(c, fonts.small, this.tickerRect, Theme.muted);

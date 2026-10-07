@@ -16,6 +16,8 @@ export interface TextInputOptions {
   placeholder?: string;
   /** CSS font family of the field (a locally bundled face registered with `installWebFont`). */
   fontFamily?: string;
+  /** Show `initial` for copying only (selected, not editable). */
+  readOnly?: boolean;
   onCommit: (value: string) => void;
   onCancel: () => void;
 }
@@ -55,6 +57,7 @@ export class TextInputOverlay {
     input.autocapitalize = 'off';
     input.spellcheck = false;
     input.setAttribute('enterkeyhint', 'done');
+    input.readOnly = this.opts.readOnly ?? false;
     const s = input.style;
     s.position = 'fixed';
     s.boxSizing = 'border-box';
@@ -74,7 +77,8 @@ export class TextInputOverlay {
     this.place();
     this.unsubscribe = this.viewport.onResize(() => this.place());
     input.focus();
-    input.setSelectionRange(input.value.length, input.value.length);
+    if (this.opts.readOnly) input.setSelectionRange(0, input.value.length);
+    else input.setSelectionRange(input.value.length, input.value.length);
   }
 
   reposition(rect: Rect): void {

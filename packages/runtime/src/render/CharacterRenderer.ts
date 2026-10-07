@@ -1,7 +1,8 @@
 /**
  * Draws runners (the player, rivals, ghosts) with the character object of `k0` and the
  * per-runner `Animator`. Port of `aj()` (d.java line 5886) and of the skin logic of
- * `a(int,int[])` (line 5931).
+ * `a(int,int[])` (line 5931). Echo runners (rivals and ghosts) are animated here too but
+ * drawn by `EchoRenderer`, which asks for their `pose`.
  *
  * The character object has its pivot (50, 76) on the feet point, so the runner's render
  * position (or the hands point while a move anchors there) is passed as the pivot position.
@@ -10,9 +11,6 @@ import type { MoveTable, RunnerState, WorldEvent } from '@parapet/sim';
 import { Animator, HEAD_SPRITE } from '../anim/Animator.ts';
 import { CHARACTER_OBJECT, type SceneRenderer, type SpriteSwap } from './SceneRenderer.ts';
 import { toScreen, type CameraPos } from './View.ts';
-
-/** Sprite every body part of a ghost becomes (line 3348). */
-export const GHOST_SPRITE = 80;
 
 /** Male characters get the male torso/arm parts (`a(int,int[])`: n2 ∈ {0, 1, 3, 6, 8}). */
 const MALE_CHARACTERS = new Set([1, 2, 4, 7, 9]);
@@ -41,16 +39,47 @@ export function skinSwap(character: number, face = -1): SpriteSwap {
   };
 }
 
-/** Ghosts: every part becomes the 8×8 dot, the ponytail (13–16) disappears. */
-export const ghostSwap: SpriteSwap = (id) => (id < 13 || id > 16 ? GHOST_SPRITE : -1);
-
 const identitySwap: SpriteSwap = (id) => id;
+
+/** A runner's draw origin (world units) and keyframe tween for one frame. */
+export interface CharacterPose {
+  x: number;
+  y: number;
+  /** Keyframes tweened from `a` to `b` by `t` (0..65536). */
+  a: number;
+  b: number;
+  t: number;
+  flipX: boolean;
+  /** The origin is the hands point (hanging, climbing) rather than the feet. */
+  anchored: boolean;
+}
+
+/** Draws the character object in `pose` with `scene`'s sprites. */
+export function drawPose(
+  ctx: CanvasRenderingContext2D,
+  scene: SceneRenderer,
+  pose: CharacterPose,
+  cam: CameraPos,
+  swap: SpriteSwap,
+): void {
+  scene.drawObject(
+    ctx,
+    CHARACTER_OBJECT,
+    pose.a,
+    pose.b,
+    pose.t,
+    toScreen(pose.x, cam.x),
+    toScreen(pose.y, cam.y),
+    pose.flipX,
+    swap,
+  );
+}
 
 export interface RunnerVisualOptions {
   /** Character id: 0 Blaise, 1..9 the other skins. */
   character?: number;
-  /** Draw as a ghost (hot-seat players of earlier rounds). */
-  ghost?: boolean;
+  /** Drawn by `EchoRenderer` (rivals and ghosts), not by `drawAll`. */
+  echo?: boolean;
   /** Seed of the blink PRNG. */
   seed?: number;
 }
@@ -60,7 +89,7 @@ export interface RunnerVisual {
   readonly runner: RunnerState;
   readonly animator: Animator;
   character: number;
-  ghost: boolean;
+  echo: boolean;
   /** Draw positions (units) captured at the previous and the current step. */
   prevX: number;
   prevY: number;
@@ -127,7 +156,7 @@ export class CharacterRenderer {
       runner,
       animator,
       character: options.character ?? 0,
-      ghost: options.ghost ?? false,
+      echo: options.echo ?? false,
       prevX: p.x,
       prevY: p.y,
       x: p.x,
@@ -187,6 +216,32 @@ export class CharacterRenderer {
   }
 
   /**
+   * Where and how a runner is drawn this frame: the draw origin in world units, interpolated
+   * by `alpha` between the previous and the current step, and the keyframe tween.
+   */
+  pose(runner: RunnerState, alpha: number): CharacterPose | null {
+    const v = this.visuals.get(runner);
+    if (!v) return null;
+    const f = v.animator.frames();
+    return {
+      x: Math.round(v.prevX + (v.x - v.prevX) * alpha),
+      y: Math.round(v.prevY + (v.y - v.prevY) * alpha),
+      a: f.a,
+      b: f.b,
+      t: f.t,
+      flipX: v.flipX,
+      anchored: v.anchored,
+    };
+  }
+
+  /** Body-part swap of a runner's skin this frame (`clock` drives the blinking face). */
+  swapFor(runner: RunnerState, clock: number): SpriteSwap {
+    const v = this.visuals.get(runner);
+    if (!v) return identitySwap;
+    return skinSwap(v.character, v.animator.faceSprite(clock));
+  }
+
+  /**
    * Draw one runner. `alpha` interpolates the draw position between the previous and the
    * current step; `clock` is the game clock in ms (face timers).
    */
@@ -197,23 +252,9 @@ export class CharacterRenderer {
     alpha: number,
     clock: number,
   ): void {
-    const v = this.visuals.get(runner);
-    if (!v) return;
-    const x = Math.round(v.prevX + (v.x - v.prevX) * alpha);
-    const y = Math.round(v.prevY + (v.y - v.prevY) * alpha);
-    const f = v.animator.frames();
-    const swap = v.ghost ? ghostSwap : skinSwap(v.character, v.animator.faceSprite(clock));
-    this.scene.drawObject(
-      ctx,
-      CHARACTER_OBJECT,
-      f.a,
-      f.b,
-      f.t,
-      toScreen(x, cam.x),
-      toScreen(y, cam.y),
-      v.flipX,
-      swap,
-    );
+    const p = this.pose(runner, alpha);
+    if (!p) return;
+    drawPose(ctx, this.scene, p, cam, this.swapFor(runner, clock));
   }
 
   attachNpc(id: string, opts: NpcOptions): NpcVisual {
@@ -273,7 +314,7 @@ export class CharacterRenderer {
     }
   }
 
-  /** Draw every tracked runner, ghosts and rivals first and `last` (the player) on top. */
+  /** Draw every tracked runner except the echoes, `last` (the player) on top. */
   drawAll(
     ctx: CanvasRenderingContext2D,
     cam: CameraPos,
@@ -282,9 +323,9 @@ export class CharacterRenderer {
     last?: RunnerState,
   ): void {
     for (const v of this.visuals.values()) {
-      if (v.runner === last) continue;
+      if (v.runner === last || v.echo) continue;
       this.draw(ctx, v.runner, cam, alpha, clock);
     }
-    if (last) this.draw(ctx, last, cam, alpha, clock);
+    if (last && !this.visuals.get(last)?.echo) this.draw(ctx, last, cam, alpha, clock);
   }
 }

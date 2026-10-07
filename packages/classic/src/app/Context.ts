@@ -13,6 +13,7 @@ import type { GameContent } from '../assets/content.ts';
 import type { SpriteSheet } from '@parapet/runtime/render/SpriteSheet.ts';
 import type { SceneRenderer } from '@parapet/runtime/render/SceneRenderer.ts';
 import type { LevelRenderer } from '@parapet/runtime/render/LevelRenderer.ts';
+import type { EchoSheets } from '@parapet/runtime/render/EchoSkin.ts';
 import type { ScreenStack } from '@parapet/runtime/app/Screen.ts';
 import type { MusicDirector } from '@parapet/runtime/audio/MusicDirector.ts';
 
@@ -39,6 +40,8 @@ export interface Renderers {
   sheet: SpriteSheet;
   scene: SceneRenderer;
   level: LevelRenderer;
+  /** Recoloured atlases of the ghosts and rivals, made on first use and kept. */
+  echo: EchoSheets;
   moves: MoveTable;
   clips: Int16Array;
   sine: Int16Array;

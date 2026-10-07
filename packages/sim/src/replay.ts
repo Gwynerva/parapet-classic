@@ -82,6 +82,34 @@ export class InputPlayer {
   }
 }
 
+/** Upper bound on the steps an input log may cover (100 minutes of game clock). */
+export const MAX_STEPS = 200000;
+/** Largest press byte: UP | DOWN | RIGHT | LEFT | FORWARD | BACK. */
+export const MAX_INPUT_BITS = 63;
+
+/**
+ * Validates an untrusted input log (parsed JSON or decoded bytes): an array of runs with
+ * 1..MAX_STEPS ticks and press bits 0..MAX_INPUT_BITS, covering at most `MAX_STEPS` steps.
+ * Returns a normalised copy, or null.
+ */
+export function parseInputRuns(raw: unknown): InputRun[] | null {
+  if (!Array.isArray(raw)) return null;
+  const out: InputRun[] = [];
+  let total = 0;
+  for (const run of raw as unknown[]) {
+    if (typeof run !== 'object' || run === null) return null;
+    const { ticks, bits } = run as { ticks?: unknown; bits?: unknown };
+    if (!Number.isInteger(ticks) || !Number.isInteger(bits)) return null;
+    const t = ticks as number;
+    const b = bits as number;
+    if (t < 1 || t > MAX_STEPS || b < 0 || b > MAX_INPUT_BITS) return null;
+    total += t;
+    if (total > MAX_STEPS) return null;
+    out.push({ ticks: t, bits: b });
+  }
+  return out;
+}
+
 /** Expand runs into one value per step (helper for tests and tools). */
 export function expandRuns(runs: readonly InputRun[]): number[] {
   const out: number[] = [];

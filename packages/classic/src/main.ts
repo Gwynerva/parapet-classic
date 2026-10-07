@@ -15,11 +15,13 @@ import { Viewport } from '@parapet/runtime/render/Viewport.ts';
 import { SpriteSheet } from '@parapet/runtime/render/SpriteSheet.ts';
 import { SceneRenderer } from '@parapet/runtime/render/SceneRenderer.ts';
 import { LevelRenderer } from '@parapet/runtime/render/LevelRenderer.ts';
+import { EchoSheets } from '@parapet/runtime/render/EchoSkin.ts';
 import { BitmapFont, type BitmapFontData } from '@parapet/runtime/text/BitmapFont.ts';
 import { createI18n } from './i18n/locales.ts';
 import { InputManager, setVibrationEnabled } from '@parapet/runtime/input/InputManager.ts';
 import { TouchControls } from '@parapet/runtime/input/TouchControls.ts';
-import { loadOptions, loadPlayer } from '@parapet/runtime/storage/profile.ts';
+import { dropLegacyEntries, loadOptions, loadPlayer } from '@parapet/runtime/storage/profile.ts';
+import { installReplayInputs, openReplayCode, takeReplayFromLocation } from './app/ghosts.ts';
 import { installWebFont } from '@parapet/runtime/ui/TextInputOverlay.ts';
 import { parseMidi } from '@parapet/runtime/audio/MidiFile.ts';
 import { MusicPlayer, unlockOnGesture } from '@parapet/runtime/audio/MusicPlayer.ts';
@@ -46,6 +48,7 @@ async function loadFonts(): Promise<Fonts> {
 }
 
 async function main(): Promise<void> {
+  dropLegacyEntries();
   const options = loadOptions();
   const playerInfo = loadPlayer();
   const viewport = new Viewport({ scaleMode: options.scaleMode });
@@ -104,6 +107,7 @@ async function main(): Promise<void> {
       sheet,
       scene,
       level: new LevelRenderer(content, sheet, scene, sine),
+      echo: new EchoSheets(scene),
       moves,
       clips: buildClipTable(content.anims.clips),
       sine,
@@ -115,6 +119,8 @@ async function main(): Promise<void> {
     facingRight: () => true,
   };
   ctx.input = new InputManager({ viewport, facingRight: () => ctx.facingRight(), touch });
+  // Clipboard, downloads and file dialogs must run inside the browser's input handler.
+  ctx.input.gestureHandler = (g) => screens.onGesture(g);
 
   viewport.onResize(() => {
     scene.setViewport(viewport.width, viewport.height);
@@ -126,7 +132,11 @@ async function main(): Promise<void> {
     (window as unknown as { parapet: unknown }).parapet = { ctx, music, player };
   }
   screens.clear(new TitleScreen(ctx));
-  await startFromQuery(ctx);
+  installReplayInputs(ctx);
+  // A challenge link (`#r=<code>`) goes straight into the race, over the title screen.
+  const shared = takeReplayFromLocation();
+  if (shared) openReplayCode(ctx, shared);
+  else await startFromQuery(ctx);
 
   const loop = new GameLoop((dt) => {
     ctx.input.pollGamepads();

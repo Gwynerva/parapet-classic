@@ -1,16 +1,18 @@
 /**
  * Player profile in `localStorage` under the `parapet.` prefix: options, the best run per
- * level and mode (with its input log, so it can be replayed or submitted later) and the last
- * player name/character. Every entry is wrapped in `{ v, data }` so the schema can evolve; every
+ * level and mode (with its input log, so it can be watched, raced as a ghost or shared) and the
+ * last player name/character. Every entry is wrapped in `{ v, data }` so the schema can evolve; every
  * read is guarded, because storage may be disabled, full or hold garbage.
  */
 import {
-  defaultLeaderboardSort,
-  isLeaderboardMode,
+  compareRuns,
+  isRankedMode,
   isRunMode,
+  parseInputRuns,
+  rankingSort,
   type InputRun,
   type RunMode,
-} from '@parapet/protocol';
+} from '@parapet/sim';
 import { isTouchLayout, type TouchLayout } from '../input/TouchControls.ts';
 import { isScaleMode, type ScaleMode } from '../render/Viewport.ts';
 
@@ -28,6 +30,8 @@ export interface Options {
   musicVolume: number;
   touchControls: TouchControlsSetting;
   touchLayout: TouchLayout;
+  /** Race the ghost of the local record when starting a mission that has one. */
+  bestGhost: boolean;
 }
 
 export const DEFAULT_OPTIONS: Readonly<Options> = {
@@ -37,6 +41,7 @@ export const DEFAULT_OPTIONS: Readonly<Options> = {
   musicVolume: 4,
   touchControls: 'auto',
   touchLayout: 'move-left',
+  bestGhost: true,
 };
 
 export interface RecordEntry {
@@ -45,7 +50,7 @@ export interface RecordEntry {
   score: number;
   finished: boolean;
   timeUp: boolean;
-  /** The full input log (`InputRecorder.finish()`), replayable and submittable. */
+  /** The full input log (`InputRecorder.finish()`), replayable and shareable. */
   input: InputRun[];
   playerName: string;
   character: number;
@@ -165,6 +170,7 @@ function validateOptions(raw: unknown): Partial<Options> | null {
     out.touchControls = touchControls;
   }
   if (isTouchLayout(raw['touchLayout'])) out.touchLayout = raw['touchLayout'];
+  if (typeof raw['bestGhost'] === 'boolean') out.bestGhost = raw['bestGhost'];
   return out;
 }
 
@@ -200,25 +206,11 @@ export function savePlayer(player: PlayerInfo): boolean {
   return write(PLAYER_KEY, player);
 }
 
-function validateInput(raw: unknown): InputRun[] | null {
-  if (!Array.isArray(raw)) return null;
-  const input: InputRun[] = [];
-  for (const run of raw) {
-    if (!isRecordObject(run)) return null;
-    const ticks = run['ticks'];
-    const bits = run['bits'];
-    if (typeof ticks !== 'number' || typeof bits !== 'number') return null;
-    if (!Number.isInteger(ticks) || !Number.isInteger(bits)) return null;
-    input.push({ ticks, bits });
-  }
-  return input;
-}
-
 function validateRecord(raw: unknown): RecordEntry | null {
   if (!isRecordObject(raw)) return null;
   const time = raw['time'];
   const score = raw['score'];
-  const input = validateInput(raw['input']);
+  const input: InputRun[] | null = parseInputRuns(raw['input']);
   if (typeof time !== 'number' || typeof score !== 'number' || !input) return null;
   const character = raw['character'];
   return {
@@ -262,12 +254,10 @@ export function isBetterRecord(
   existing: RecordEntry | null,
   levelId = -1,
 ): boolean {
-  if (!isLeaderboardMode(mode)) return false;
-  if (defaultLeaderboardSort(mode, levelId) === 'score') {
-    return existing === null || candidate.score > existing.score;
-  }
-  if (!candidate.finished) return false;
-  return existing === null || !existing.finished || candidate.time < existing.time;
+  if (!isRankedMode(mode)) return false;
+  const sort = rankingSort(mode, levelId);
+  if (sort === 'time' && !candidate.finished) return false;
+  return existing === null || compareRuns(sort, candidate, existing) < 0;
 }
 
 /** Stores `entry` when it beats the current record; returns whether it did. */
@@ -402,37 +392,16 @@ export function clearRecords(): void {
 }
 
 // ---------------------------------------------------------------------------------------------
-// Identity (a claimed public name and the secrets that prove it)
+// Entries of earlier builds
 // ---------------------------------------------------------------------------------------------
 
-export interface StoredIdentity {
-  name: string;
-  token: string;
-  /** Shown once when the name was claimed; kept so Options can show it again. */
-  recoveryCode: string;
-}
+/**
+ * Keys written by earlier builds that nothing reads any more: `identity` held the claimed
+ * public name and its token from the time Parapet had an online leaderboard.
+ */
+const LEGACY_KEYS = ['identity'];
 
-const IDENTITY_KEY = 'identity';
-
-function validateIdentity(raw: unknown): StoredIdentity | null {
-  if (!isRecordObject(raw)) return null;
-  const name = raw['name'];
-  const token = raw['token'];
-  const recoveryCode = raw['recoveryCode'];
-  if (typeof name !== 'string' || typeof token !== 'string' || name === '' || token === '') {
-    return null;
-  }
-  return { name, token, recoveryCode: typeof recoveryCode === 'string' ? recoveryCode : '' };
-}
-
-export function loadIdentity(): StoredIdentity | null {
-  return read(IDENTITY_KEY, validateIdentity);
-}
-
-export function saveIdentity(identity: StoredIdentity): boolean {
-  return write(IDENTITY_KEY, identity);
-}
-
-export function clearIdentity(): void {
-  remove(IDENTITY_KEY);
+/** Removes the entries of earlier builds (call once at start-up). */
+export function dropLegacyEntries(): void {
+  for (const key of LEGACY_KEYS) remove(key);
 }

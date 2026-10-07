@@ -8,10 +8,10 @@
       "port": 5173
     },
     {
-      "name": "server",
+      "name": "pages",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["packages/server/src/main.ts"],
-      "port": 8787
+      "runtimeArgs": ["scripts/preview-pages.mjs", "4173"],
+      "port": 4173
     }
   ]
 }

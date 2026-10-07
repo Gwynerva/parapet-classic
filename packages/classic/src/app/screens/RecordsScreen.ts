@@ -1,153 +1,119 @@
 /**
- * Records: the local bests of a level next to the online board of one of its modes, with the
- * player's own position when a public name is claimed. Left/right change the level, up/down
- * the mode, confirm watches the best run as a replay. Wide viewports show the two panels side
- * by side, narrow ones stack them.
+ * Records: the local bests of a level, one row per mode that has records. Left/right (or a
+ * tap on the header) change the level; a record opens its actions (watch, race it as a
+ * ghost, share it as a challenge link or a file). "Open replay" races a replay file; files
+ * can also be dropped onto the window and links pasted with Ctrl+V.
  */
 import {
-  defaultLeaderboardSort,
-  isLeaderboardMode,
+  isRankedMode,
   LEVEL_COUNT,
+  modeForMissionType,
+  rankingSort,
   type RunMode,
-  type RunRecord,
-} from '@parapet/protocol';
-import { modeForMissionType } from '@parapet/sim';
+} from '@parapet/sim';
 import { formatTime, Theme, type GameContext } from '../Context.ts';
-import type { Screen, UiKey, UiPointer } from '@parapet/runtime/app/Screen.ts';
+import type { Screen, UiGesture, UiKey, UiPointer } from '@parapet/runtime/app/Screen.ts';
+import { Menu, type MenuItem } from '@parapet/runtime/ui/Menu.ts';
 import {
   clear,
   heading,
-  panel,
   drawBackButton,
   hitBackButton,
   headingCenterY,
 } from '@parapet/runtime/ui/draw.ts';
 import {
-  classify,
-  columns,
+  fitWidth,
   inset,
+  rowHeight,
   safeRect,
   stack,
   type Rect,
 } from '@parapet/runtime/ui/layout.ts';
-import { listRecords, loadIdentity } from '@parapet/runtime/storage/profile.ts';
-import { ApiError, fetchLeaderboard, fetchPlayer, fetchReplay } from '@parapet/runtime/net/api.ts';
-import { PlayScreen } from './PlayScreen.ts';
+import { loadRecord, type RecordEntry } from '@parapet/runtime/storage/profile.ts';
+import { pickReplayFile } from '../ghosts.ts';
+import { RecordActionsScreen } from './RecordActionsScreen.ts';
 
 export class RecordsScreen implements Screen {
   private levelId = 0;
-  private modeIndex = 0;
-  private online: RunRecord[] | null = null;
-  private onlineError: string | null = null;
-  private personal: RunRecord | null = null;
-  private loading = false;
-  private loadingReplay = false;
-  private requestId = 0;
-  private localRect: Rect = { x: 0, y: 0, w: 0, h: 0 };
-  private onlineRect: Rect = { x: 0, y: 0, w: 0, h: 0 };
+  private readonly menu: Menu;
   private headerBottom = 0;
-
+  private hintRect: Rect = { x: 0, y: 0, w: 0, h: 0 };
   private readonly ctx: GameContext;
 
   constructor(ctx: GameContext) {
     this.ctx = ctx;
-    this.onResize();
+    this.menu = new Menu(ctx.fonts.text, ctx.fonts.small);
   }
 
-  /** Leaderboard modes of the current level, in the original's mission order. */
+  enter(): void {
+    this.rebuild();
+  }
+
+  /** Modes of the current level that keep records, in the original's mission order. */
   private modes(): RunMode[] {
     const level = this.ctx.content.missions.levels[this.levelId];
     const out: RunMode[] = [];
     for (const type of level?.missionTypes ?? []) {
       const mode = modeForMissionType(type);
-      if (mode && isLeaderboardMode(mode)) out.push(mode);
+      if (mode && isRankedMode(mode)) out.push(mode);
     }
-    return out.length > 0 ? out : ['sprint'];
+    return out;
   }
 
-  private get mode(): RunMode {
-    const modes = this.modes();
-    return modes[this.modeIndex % modes.length] ?? 'sprint';
+  private rebuild(): void {
+    const { i18n } = this.ctx;
+    const items: MenuItem[] = this.modes().map((mode) => {
+      const record = loadRecord(this.levelId, mode);
+      return {
+        label: i18n.t(`mode.${mode}`),
+        value: record ? this.valueOf(record, mode) : '-',
+        disabled: !record,
+        onSelect: () => {
+          if (record) {
+            this.ctx.screens.push(new RecordActionsScreen(this.ctx, this.levelId, mode, record));
+          }
+        },
+      };
+    });
+    items.push({
+      label: i18n.t('replayFile.open'),
+      gesture: true,
+      onSelect: () => pickReplayFile(this.ctx),
+    });
+    const cursor = this.menu.cursor;
+    this.menu.setItems(items);
+    this.menu.cursor = Math.min(cursor, items.length - 1);
+    if (this.menu.items[this.menu.cursor]?.disabled) this.menu.move(1);
+    this.onResize();
   }
 
-  enter(): void {
-    this.load();
+  private valueOf(record: RecordEntry, mode: RunMode): string {
+    if (rankingSort(mode, this.levelId) === 'score') return String(record.score);
+    return record.finished ? formatTime(record.time) : '-';
   }
 
-  private load(): void {
-    const id = ++this.requestId;
-    const mode = this.mode;
-    const sort = defaultLeaderboardSort(mode, this.levelId);
-    this.loading = true;
-    this.online = null;
-    this.onlineError = null;
-    this.personal = null;
-    fetchLeaderboard(this.levelId, mode, sort, { limit: 10, timeoutMs: 5000 })
-      .then((res) => {
-        if (id !== this.requestId) return;
-        this.online = res.entries;
-        const identity = loadIdentity();
-        if (!identity) return;
-        return fetchPlayer(identity.name, { timeoutMs: 5000 }).then((player) => {
-          if (id !== this.requestId) return;
-          this.personal =
-            player.bests.find((r) => r.levelId === this.levelId && r.mode === mode) ?? null;
-        });
-      })
-      .catch((err: unknown) => {
-        if (id !== this.requestId) return;
-        if (err instanceof ApiError && err.code === 'not-found') return;
-        this.onlineError =
-          err instanceof ApiError ? this.ctx.i18n.t('net.offline') : this.ctx.i18n.t('net.error');
-      })
-      .finally(() => {
-        if (id === this.requestId) this.loading = false;
-      });
-  }
-
-  private watchBest(): void {
-    const best = this.online?.[0];
-    if (!best || this.loadingReplay) return;
-    this.loadingReplay = true;
-    fetchReplay(best.id, { timeoutMs: 8000 })
-      .then((replay) => {
-        this.ctx.screens.push(
-          new PlayScreen(this.ctx, {
-            levelId: replay.levelId,
-            mode: replay.mode,
-            withRival: replay.withRival,
-            playerName: best.playerName,
-            character: best.character,
-            script: replay.input,
-          }),
-        );
-      })
-      .catch(() => {
-        this.onlineError = this.ctx.i18n.t('net.error');
-      })
-      .finally(() => {
-        this.loadingReplay = false;
-      });
+  private changeLevel(delta: number): void {
+    this.levelId = (this.levelId + delta + LEVEL_COUNT) % LEVEL_COUNT;
+    this.menu.cursor = 0;
+    this.rebuild();
   }
 
   onResize(): void {
     const { viewport, fonts } = this.ctx;
     const safe = inset(safeRect(viewport), 8, 0);
     const header = fonts.display.lineHeight + fonts.small.lineHeight + 20;
-    const [, body] = stack(safe, [header, -1], 4);
+    const hint = viewport.isCoarsePointer ? 0 : 2 * fonts.small.lineHeight + 8;
+    const [, body, footer] = stack(safe, [header, -1, hint], 4);
     const area = body ?? safe;
     this.headerBottom = safe.y + header;
-    const wide = classify(viewport.width, viewport.height) === 'regular' && area.w >= 480;
-    if (wide) {
-      const [left, right] = columns(area, [-1, -1], 8);
-      this.localRect = left ?? area;
-      this.onlineRect = right ?? area;
-    } else {
-      const localH = Math.min(96, Math.max(60, area.h >> 2));
-      const [top, bottom] = stack(area, [localH, -1], 6);
-      this.localRect = top ?? area;
-      this.onlineRect = bottom ?? area;
-    }
+    const col = fitWidth(area, 400);
+    const row = rowHeight(24, viewport.isCoarsePointer);
+    this.menu.layout.x = col.x;
+    this.menu.layout.width = col.w;
+    this.menu.layout.rowHeight = row;
+    this.menu.layout.y = col.y;
+    this.menu.maxVisible = Math.max(3, Math.floor(area.h / row));
+    this.hintRect = footer ?? { x: safe.x, y: safe.y + safe.h, w: safe.w, h: 0 };
   }
 
   update(): void {}
@@ -158,47 +124,30 @@ export class RecordsScreen implements Screen {
         this.ctx.screens.pop();
         return;
       case 'left':
-        this.levelId = (this.levelId + LEVEL_COUNT - 1) % LEVEL_COUNT;
-        this.modeIndex = 0;
-        this.load();
+        this.changeLevel(-1);
         return;
       case 'right':
-        this.levelId = (this.levelId + 1) % LEVEL_COUNT;
-        this.modeIndex = 0;
-        this.load();
-        return;
-      case 'up':
-        this.modeIndex = (this.modeIndex + this.modes().length - 1) % this.modes().length;
-        this.load();
-        return;
-      case 'down':
-        this.modeIndex = (this.modeIndex + 1) % this.modes().length;
-        this.load();
-        return;
-      case 'confirm':
-        this.watchBest();
+        this.changeLevel(1);
         return;
       default:
-        return;
+        this.menu.onKey(key);
     }
   }
 
   onPointer(p: UiPointer): void {
-    if (p.type !== 'down') return;
-    const { width } = this.ctx.viewport;
-    if (hitBackButton(this.ctx.viewport, p.x, p.y)) {
+    if (p.type === 'down' && hitBackButton(this.ctx.viewport, p.x, p.y)) {
       this.ctx.screens.pop();
       return;
     }
-    if (p.y < this.headerBottom) {
-      this.onKey({ action: p.x < width / 2 ? 'left' : 'right' });
+    if (p.type === 'down' && p.y < this.headerBottom) {
+      this.changeLevel(p.x < this.ctx.viewport.width / 2 ? -1 : 1);
       return;
     }
-    const r = this.onlineRect;
-    if (p.x >= r.x && p.x < r.x + r.w && p.y >= r.y && p.y < r.y + r.h) {
-      if (p.y < r.y + 24) this.onKey({ action: 'down' });
-      else this.watchBest();
-    }
+    this.menu.onPointer(p);
+  }
+
+  onGesture(g: UiGesture): boolean {
+    return this.menu.onGesture(g);
   }
 
   render(c: CanvasRenderingContext2D): void {
@@ -221,97 +170,13 @@ export class RecordsScreen implements Screen {
       this.headerBottom - fonts.small.lineHeight - 4,
       { align: 'center', color: Theme.muted, tabular: true },
     );
-
-    this.drawLocal(c, this.localRect);
-    this.drawOnline(c, this.onlineRect);
-  }
-
-  private valueOf(
-    record: { time: number; score: number; finished?: boolean },
-    mode: RunMode,
-  ): string {
-    if (defaultLeaderboardSort(mode, this.levelId) === 'score') return String(record.score);
-    return record.finished === false ? '-' : formatTime(record.time);
-  }
-
-  private drawLocal(c: CanvasRenderingContext2D, r: Rect): void {
-    const { fonts, i18n } = this.ctx;
-    panel(c, r.x, r.y, r.w, r.h);
-    fonts.text.draw(c, i18n.t('records.local'), r.x + 8, r.y + 6, { color: Theme.accent });
-    const local = listRecords().filter((rec) => rec.levelId === this.levelId);
-    let rowY = r.y + 6 + fonts.text.lineHeight + 4;
-    if (local.length === 0) {
-      fonts.small.draw(c, i18n.t('records.empty'), r.x + 8, rowY, { color: Theme.muted });
-    }
-    for (const rec of local) {
-      if (rowY + fonts.small.lineHeight > r.y + r.h - 4) break;
-      fonts.small.draw(c, i18n.t(`mode.${rec.mode}`), r.x + 8, rowY, { color: Theme.text });
-      fonts.small.draw(
-        c,
-        `${this.valueOf(rec.entry, rec.mode)}   ${rec.entry.score}`,
-        r.x + r.w - 8,
-        rowY,
-        {
-          align: 'right',
-          color: Theme.text,
-          tabular: true,
-        },
-      );
-      rowY += fonts.small.lineHeight + 2;
-    }
-  }
-
-  private drawOnline(c: CanvasRenderingContext2D, r: Rect): void {
-    const { fonts, i18n } = this.ctx;
-    const mode = this.mode;
-    panel(c, r.x, r.y, r.w, r.h);
-    fonts.text.draw(c, i18n.t('records.online'), r.x + 8, r.y + 6, { color: Theme.accent });
-    fonts.small.draw(c, `^ ${i18n.t(`mode.${mode}`)} v`, r.x + r.w - 8, r.y + 8, {
-      align: 'right',
-      color: Theme.muted,
-    });
-    let rowY = r.y + 6 + fonts.text.lineHeight + 4;
-    if (this.loading || this.loadingReplay) {
-      const text = this.loadingReplay ? i18n.t('records.loadingReplay') : i18n.t('records.loading');
-      fonts.small.draw(c, text, r.x + 8, rowY, { color: Theme.muted });
-      return;
-    }
-    if (this.onlineError) {
-      fonts.small.draw(c, this.onlineError, r.x + 8, rowY, { color: Theme.muted });
-      return;
-    }
-    if (!this.online || this.online.length === 0) {
-      fonts.small.draw(c, i18n.t('records.empty'), r.x + 8, rowY, { color: Theme.muted });
-      rowY += fonts.small.lineHeight + 2;
-    } else {
-      for (const [i, rec] of this.online.entries()) {
-        if (rowY + 2 * fonts.small.lineHeight > r.y + r.h - 4) break;
-        fonts.small.draw(c, `${i + 1}. ${rec.playerName}`, r.x + 8, rowY, { color: Theme.text });
-        fonts.small.draw(c, `${this.valueOf(rec, mode)}   ${rec.score}`, r.x + r.w - 8, rowY, {
-          align: 'right',
-          color: Theme.text,
-          tabular: true,
-        });
-        rowY += fonts.small.lineHeight + 2;
-      }
-    }
-    const identity = loadIdentity();
-    const footerY = r.y + r.h - fonts.small.lineHeight - 4;
-    if (!identity) {
-      const lines = fonts.small.wrap(i18n.t('records.noName'), r.w - 16).slice(0, 1);
-      fonts.small.draw(c, lines.join('\n'), r.x + 8, footerY, { color: Theme.muted });
-    } else if (this.personal) {
-      const rank = this.online ? this.online.findIndex((e) => e.id === this.personal?.id) + 1 : 0;
-      fonts.small.draw(
-        c,
-        i18n.t('records.personalBest', {
-          value: this.valueOf(this.personal, mode),
-          rank: rank > 0 ? String(rank) : '>10',
-        }),
-        r.x + 8,
-        footerY,
-        { color: Theme.success },
-      );
+    this.menu.draw(c);
+    if (this.hintRect.h > 0) {
+      const lines = fonts.small.wrap(i18n.t('replayFile.dropHint'), this.hintRect.w).slice(0, 2);
+      fonts.small.draw(c, lines.join('\n'), cx, this.hintRect.y + 4, {
+        align: 'center',
+        color: Theme.muted,
+      });
     }
   }
 }

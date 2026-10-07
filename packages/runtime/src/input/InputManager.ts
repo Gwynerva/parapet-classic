@@ -5,7 +5,7 @@
  * together. Keyboard, gamepad (polled, edge-detected) and the on-screen touch buttons all feed
  * the same accumulator. Menus read a separate UI stream (`consumeUi`).
  */
-import type { UiKey, UiPointer } from '../app/Screen.ts';
+import type { UiGesture, UiKey, UiPointer } from '../app/Screen.ts';
 import type { Viewport } from '../render/Viewport.ts';
 import type { TouchControls } from './TouchControls.ts';
 
@@ -118,6 +118,11 @@ export class InputManager {
   private readonly facingRight: () => boolean;
   private touch: TouchControls | null;
   private readonly keyTarget: EventTarget;
+  /**
+   * Receives gestures synchronously inside the native event handler (see `UiGesture`);
+   * returning true consumes the event, which is then not queued for `consumeUi`.
+   */
+  gestureHandler: ((g: UiGesture) => boolean) | null = null;
 
   constructor(opts: InputManagerOptions) {
     this.viewport = opts.viewport;
@@ -252,6 +257,10 @@ export class InputManager {
     const action = KEY_ACTIONS[event.code];
     if (action) {
       if (event.code === 'Space' || event.code === 'Backspace') event.preventDefault();
+      if (action === 'confirm' && this.gesture({ kind: 'key', action })) {
+        event.preventDefault();
+        return;
+      }
       this.action(action, 'keyboard');
     }
   };
@@ -269,6 +278,8 @@ export class InputManager {
         return;
       }
     }
+    if (this.gesture({ kind: 'pointer', x, y, type: 'down', pointerType: event.pointerType }))
+      return;
     this.pushPointer(event, x, y, 'down');
   };
 
@@ -293,8 +304,23 @@ export class InputManager {
       return;
     }
     const { x, y } = this.viewport.toLogical(event.clientX, event.clientY);
+    if (
+      event.type === 'pointerup' &&
+      this.gesture({ kind: 'pointer', x, y, type: 'up', pointerType: event.pointerType })
+    ) {
+      return;
+    }
     this.pushPointer(event, x, y, 'up');
   };
+
+  private gesture(g: UiGesture): boolean {
+    try {
+      return this.gestureHandler?.(g) ?? false;
+    } catch (err) {
+      console.error(err);
+      return true;
+    }
+  }
 
   private readonly onContextMenu = (event: Event): void => {
     event.preventDefault();

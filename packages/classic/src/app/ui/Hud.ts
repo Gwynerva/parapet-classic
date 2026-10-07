@@ -28,6 +28,8 @@ export interface HudOptions {
   limitMs: number;
   /** Mode label under the timer (free run), or an empty string. */
   label: string;
+  /** Gap to the ghost at the last checkpoint (`-0.42` ahead, `+1.10` behind), shown briefly. */
+  split?: { text: string; ahead: boolean } | null;
 }
 
 export class Hud {
@@ -132,6 +134,14 @@ export class Hud {
       ctx.fillRect(left, dotsY, DOT_SIZE, DOT_SIZE);
     } else if (opts.label) {
       outlined(ctx, small, opts.label, left, dotsY, { color: Theme.muted });
+    }
+
+    if (opts.split) {
+      const splitY = dotsY + DOT_SIZE + 4 + (opts.label ? small.lineHeight + 2 : 0);
+      outlined(ctx, display, opts.split.text, left, splitY, {
+        color: opts.split.ahead ? Theme.success : Theme.danger,
+        tabular: true,
+      });
     }
   }
 }

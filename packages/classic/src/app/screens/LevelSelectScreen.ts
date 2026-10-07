@@ -4,7 +4,7 @@
  * the level description, or the "complete N more missions" note for a locked level (shown
  * dimmed under a lock instead of the original's placeholder picture).
  */
-import { LEVEL_COUNT } from '@parapet/protocol';
+import { LEVEL_COUNT } from '@parapet/sim';
 import { Theme, type GameContext } from '../Context.ts';
 import type { Screen, UiKey, UiPointer } from '@parapet/runtime/app/Screen.ts';
 import {

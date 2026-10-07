@@ -46,9 +46,15 @@ export class AboutScreen implements Screen {
       viewport.safeArea.top + HEADING_TOP,
     );
     const col = column(viewport.width, 420);
-    const text = [i18n.t('about.text'), '', i18n.t('about.fonts'), '', i18n.t('rules.text')].join(
-      '\n',
-    );
+    const text = [
+      i18n.t('about.text'),
+      '',
+      i18n.t('about.original'),
+      '',
+      i18n.t('about.fonts'),
+      '',
+      i18n.t('rules.text'),
+    ].join('\n');
     const lines = fonts.small.wrap(text, col.w);
     const lineH = fonts.small.lineHeight + 1;
     const maxLines = Math.floor((viewport.height - 70) / lineH);

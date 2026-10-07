@@ -1,5 +1,5 @@
 import type { GameContext } from '../Context.ts';
-import type { Screen, UiKey, UiPointer } from '@parapet/runtime/app/Screen.ts';
+import type { Screen, UiGesture, UiKey, UiPointer } from '@parapet/runtime/app/Screen.ts';
 import { Menu, type MenuItem } from '@parapet/runtime/ui/Menu.ts';
 import { clear, heading } from '@parapet/runtime/ui/draw.ts';
 import { fitWidth, inset, rowHeight, safeRect } from '@parapet/runtime/ui/layout.ts';
@@ -11,6 +11,7 @@ import { RecordsScreen } from './RecordsScreen.ts';
 import { AboutScreen } from './AboutScreen.ts';
 import { MovesScreen } from './MovesScreen.ts';
 import { PrizeScreen } from './PrizeScreen.ts';
+import { pickReplayFile } from '../ghosts.ts';
 
 export class TitleScreen implements Screen {
   private readonly menu: Menu;
@@ -33,6 +34,11 @@ export class TitleScreen implements Screen {
       },
       { label: i18n.t('menu.moves'), onSelect: () => screens.push(new MovesScreen(this.ctx)) },
       { label: i18n.t('menu.records'), onSelect: () => screens.push(new RecordsScreen(this.ctx)) },
+      {
+        label: i18n.t('replayFile.open'),
+        gesture: true,
+        onSelect: () => pickReplayFile(this.ctx),
+      },
       { label: i18n.t('menu.options'), onSelect: () => screens.push(new OptionsScreen(this.ctx)) },
       { label: i18n.t('menu.about'), onSelect: () => screens.push(new AboutScreen(this.ctx)) },
     ];
@@ -75,6 +81,10 @@ export class TitleScreen implements Screen {
 
   onPointer(p: UiPointer): void {
     this.menu.onPointer(p);
+  }
+
+  onGesture(g: UiGesture): boolean {
+    return this.menu.onGesture(g);
   }
 
   render(c: CanvasRenderingContext2D): void {

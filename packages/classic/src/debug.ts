@@ -7,7 +7,9 @@ import { loadContent, type GameContent } from './assets/content.ts';
 import { buildClipTable } from '@parapet/runtime/anim/Animator.ts';
 import { FixedStepClock, GameLoop } from '@parapet/runtime/app/GameLoop.ts';
 import { Camera } from '@parapet/runtime/render/Camera.ts';
-import { CharacterRenderer } from '@parapet/runtime/render/CharacterRenderer.ts';
+import { CharacterRenderer, skinSwap } from '@parapet/runtime/render/CharacterRenderer.ts';
+import { EchoRenderer } from '@parapet/runtime/render/EchoRenderer.ts';
+import { ECHO_GREY, EchoSheets, echoColor } from '@parapet/runtime/render/EchoSkin.ts';
 import {
   defaultLevelArtFrame,
   LevelRenderer,
@@ -21,11 +23,14 @@ import type { ViewSize } from '@parapet/runtime/render/View.ts';
 
 const LEVEL_ID = 0;
 const VIEW: ViewSize = { width: 640, height: 360 };
+/** How the runner is drawn: as itself, as a player's echo, as the grey echo of a rival. */
+const LOOKS = ['normal', 'echo', 'rival echo'] as const;
 
 interface Session {
   world: World;
   camera: Camera;
   characters: CharacterRenderer;
+  echo: EchoRenderer;
   particles: Particles;
   bounce: MarkerBounce;
   clock: FixedStepClock;
@@ -36,8 +41,9 @@ function startSession(
   scene: SceneRenderer,
   sheet: SpriteSheet,
   levelRenderer: LevelRenderer,
+  echoSheets: EchoSheets,
   character: number,
-  ghost: boolean,
+  look: number,
 ): Session {
   const level = content.levels[LEVEL_ID];
   const mission = content.missions.levels[LEVEL_ID];
@@ -52,7 +58,17 @@ function startSession(
   const camera = new Camera(VIEW.width, VIEW.height);
   camera.reset(world.player, world.level);
   const characters = new CharacterRenderer(scene, world.moves, buildClipTable(content.anims.clips));
-  characters.attach(world.player, { character, ghost });
+  characters.attach(world.player, { character, echo: look > 0 });
+  const echo = new EchoRenderer(characters, echoSheets);
+  if (look > 0) {
+    const player = world.player;
+    echo.add(player, {
+      color: look === 1 ? echoColor('Parapet') : ECHO_GREY,
+      textured: look === 1,
+      swap: look === 1 ? (clock) => characters.swapFor(player, clock) : () => skinSwap(1),
+    });
+    echo.reveal(performance.now());
+  }
   const particles = new Particles(sheet, world.sine);
   particles.setLevel(world.level);
   levelRenderer.setLevel(LEVEL_ID, world.level);
@@ -60,6 +76,7 @@ function startSession(
     world,
     camera,
     characters,
+    echo,
     particles,
     bounce: new MarkerBounce(),
     clock: new FixedStepClock(),
@@ -79,12 +96,15 @@ async function main(): Promise<void> {
   const scene = new SceneRenderer(sheet, content.scenes.values());
   scene.setViewport(VIEW.width, VIEW.height);
   const levelRenderer = new LevelRenderer(content, sheet, scene, buildSine());
+  const echoSheets = new EchoSheets(scene);
   const theme = themeOfLevel(LEVEL_ID);
   const artFrame = defaultLevelArtFrame(LEVEL_ID);
 
   let character = 0;
-  let ghost = false;
-  let session = startSession(content, scene, sheet, levelRenderer, character, ghost);
+  let look = 0;
+  const restart = (): Session =>
+    startSession(content, scene, sheet, levelRenderer, echoSheets, character, look);
+  let session = restart();
   let pending = 0;
   let showTiles = false;
   let paused = false;
@@ -123,7 +143,7 @@ async function main(): Promise<void> {
         break;
       case 'r':
       case 'R':
-        session = startSession(content, scene, sheet, levelRenderer, character, ghost);
+        session = restart();
         pending = 0;
         break;
       case 'c':
@@ -134,12 +154,11 @@ async function main(): Promise<void> {
         break;
       }
       case 'g':
-      case 'G': {
-        ghost = !ghost;
-        const v = session.characters.get(session.world.player);
-        if (v) v.ghost = ghost;
+      case 'G':
+        look = (look + 1) % LOOKS.length;
+        session = restart();
+        pending = 0;
         break;
-      }
       default:
         return;
     }
@@ -158,6 +177,7 @@ async function main(): Promise<void> {
         if (ev.type === 'checkpoint' || ev.type === 'flag') bounce.trigger(ev.index);
       }
       characters.step(world.clock, STEP);
+      session.echo.step();
       particles.update(STEP, world.player);
       bounce.advance(STEP);
       camera.update(world.player, world.level);
@@ -166,7 +186,7 @@ async function main(): Promise<void> {
   };
 
   const render = (alpha: number): void => {
-    const { world, camera, characters, particles, bounce } = session;
+    const { world, camera, characters, echo, particles, bounce } = session;
     const now = performance.now();
     const cam = { x: camera.renderX(alpha), y: camera.renderY(alpha) };
     ctx.imageSmoothingEnabled = false;
@@ -175,6 +195,7 @@ async function main(): Promise<void> {
     levelRenderer.drawMarkers(ctx, cam, VIEW, world.level, world.rules, now, bounce);
     particles.draw(ctx, cam, VIEW, world.clock, false);
     if (showTiles) levelRenderer.drawDebugTiles(ctx, cam, VIEW, world.level);
+    echo.draw(ctx, cam, alpha, world.clock, now, VIEW);
     characters.drawAll(ctx, cam, alpha, world.clock, world.player);
     particles.draw(ctx, cam, VIEW, world.clock, true);
 
@@ -188,7 +209,7 @@ async function main(): Promise<void> {
       anim
         ? `clip ${anim.clipStart - 1} mode ${anim.mode} frame ${anim.frame}/${anim.clipLength} prev ${anim.prevFrame} tween ${anim.tween} face ${anim.faceSprite(world.clock)}`
         : '',
-      `skin ${character}${ghost ? ' ghost' : ''}  ${paused ? 'PAUSED' : ''}`,
+      `skin ${character}  look ${LOOKS[look]}  ${paused ? 'PAUSED' : ''}`,
     ];
     ctx.font = '11px monospace';
     ctx.textBaseline = 'top';

@@ -1,11 +1,19 @@
 /**
  * One run of a level: owns the `World`, paces it with the fixed-step clock, collects presses
- * between steps and produces the submission for the leaderboard when the run ends.
+ * between steps and produces the replay of the run when it ends.
+ *
+ * A run may race a ghost: a recorded run (someone's shared replay or the player's own best)
+ * re-simulated in a second `World` of its own, stepped in lockstep right after the player's.
+ * The two worlds never touch each other, so a ghost can change nothing about the player's
+ * run: same input, same result, with or without one.
  */
 import {
+  cleanReplayName,
   contentHashes,
+  createReplayWorld,
   createRun,
   InputPlayer,
+  isSplitEvent,
   NO_INPUT,
   RULESET_ID,
   SIM_VERSION,
@@ -15,13 +23,25 @@ import {
   type MissionInfo,
   type MoveTableData,
   type PhysicsTables,
+  type Replay,
+  type ReplayOutcome,
   type RivalRecording,
   type RunMode,
   type World,
   type WorldEvent,
 } from '@parapet/sim';
-import { PROTOCOL_VERSION, type RunSubmission } from '@parapet/protocol';
 import { FixedStepClock } from './GameLoop.ts';
+
+/** Whose run a ghost is. */
+export type GhostKind = 'challenger' | 'best';
+
+export interface GhostSetup {
+  kind: GhostKind;
+  /** The recorded run; its level and mode match the run it races. */
+  replay: Replay;
+  /** What the replay produces (`simulateReplay`): final result and splits. */
+  outcome: ReplayOutcome;
+}
 
 export interface RunSetup {
   levelId: number;
@@ -31,6 +51,8 @@ export interface RunSetup {
   character: number;
   /** Dev/replay mode: feed this input log instead of the player's presses. */
   script?: InputRun[];
+  /** A recorded run to race. */
+  ghost?: GhostSetup;
 }
 
 export interface RunData {
@@ -47,9 +69,16 @@ export class RunSession {
   readonly world: World;
   readonly setup: RunSetup;
   readonly clock = new FixedStepClock();
+  /** The ghost's world, or null when the run has no ghost. */
+  readonly ghostWorld: World | null;
+  /** Game clock at every checkpoint or flag the player reached, in order (see `splits`). */
+  readonly splits: number[] = [];
   private pendingBits = 0;
   private readonly script: InputPlayer | null;
+  private readonly ghostInput: InputPlayer | null;
+  private ghostExhausted = false;
   private readonly listeners: StepListener[] = [];
+  private readonly ghostListeners: StepListener[] = [];
   private readonly data: RunData;
   private hashes: ContentHash | null = null;
   /** Wall-clock milliseconds spent in the run (for display only). */
@@ -68,14 +97,28 @@ export class RunSession {
       tables: data.tables,
       rival: setup.withRival ? data.rival : null,
     });
+    const ghost = setup.ghost;
+    this.ghostWorld = ghost ? createReplayWorld(ghost.replay, data) : null;
+    this.ghostInput = ghost ? new InputPlayer(ghost.replay.input) : null;
   }
 
   get finished(): boolean {
     return this.world.finished;
   }
 
+  /** Whether the ghost has run out of input or reached the end of its run. */
+  get ghostDone(): boolean {
+    return this.ghostWorld === null || this.ghostWorld.finished || this.ghostExhausted;
+  }
+
+  /** Called after every player step with the events of that step. */
   onStep(listener: StepListener): void {
     this.listeners.push(listener);
+  }
+
+  /** Called after every ghost step, before the player's listeners of the same step. */
+  onGhostStep(listener: StepListener): void {
+    this.ghostListeners.push(listener);
   }
 
   /** Presses are OR-ed together until the next simulation step consumes them. */
@@ -96,10 +139,24 @@ export class RunSession {
           bits = scripted === NO_INPUT ? 0 : scripted;
         }
         const running = this.world.step(bits);
+        for (const e of this.world.events) if (isSplitEvent(e)) this.splits.push(this.world.clock);
+        this.stepGhost();
         for (const l of this.listeners) l(this.world.events, this.world);
         return running;
       },
     });
+  }
+
+  private stepGhost(): void {
+    const ghost = this.ghostWorld;
+    if (!ghost || !this.ghostInput || this.ghostDone) return;
+    const bits = this.ghostInput.next();
+    if (bits === NO_INPUT) {
+      this.ghostExhausted = true;
+      return;
+    }
+    ghost.step(bits);
+    for (const l of this.ghostListeners) l(ghost.events, ghost);
   }
 
   get alpha(): number {
@@ -112,29 +169,20 @@ export class RunSession {
     return this.hashes;
   }
 
-  /** Build the leaderboard submission; null while the run is still going. */
-  buildSubmission(): RunSubmission | null {
-    const result = this.world.rules.result;
-    if (!result) return null;
+  /** The replay of this run; null while the run is still going. */
+  buildReplay(): Replay | null {
+    if (!this.world.rules.result) return null;
     return {
-      protocolVersion: PROTOCOL_VERSION,
       simVersion: SIM_VERSION,
       rulesetId: RULESET_ID,
       contentHash: this.contentHash,
       levelId: this.setup.levelId,
       mode: this.setup.mode,
-      withRival: this.setup.withRival,
-      playerName: this.setup.playerName,
+      // Only a sprint has a rival; the flag may be left over from the sprint before.
+      withRival: this.setup.mode === 'sprint' && this.setup.withRival,
       character: this.setup.character,
+      playerName: cleanReplayName(this.setup.playerName),
       input: this.world.recorder.finish(),
-      claimed: {
-        finished: result.finished,
-        timeUp: result.timeUp,
-        time: result.time,
-        score: this.world.player.score?.score ?? 0,
-        steps: this.world.stepCount,
-        hash: this.world.hash(),
-      },
     };
   }
 }

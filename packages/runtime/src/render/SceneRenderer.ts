@@ -77,6 +77,18 @@ export class SceneRenderer {
     }
   }
 
+  /**
+   * A renderer of the same scenes that draws its sprites from `sheet` (a recoloured copy of
+   * the atlas with the same frames, such as the echo skins of the ghosts).
+   */
+  withSheet(sheet: SpriteSheet): SceneRenderer {
+    const copy = new SceneRenderer(sheet, []);
+    for (const [id, object] of this.objects) copy.objects.set(id, object);
+    copy.viewWidth = this.viewWidth;
+    copy.viewHeight = this.viewHeight;
+    return copy;
+  }
+
   getObject(id: number): SceneObject | undefined {
     return this.objects.get(id);
   }

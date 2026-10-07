@@ -16,6 +16,16 @@ export interface UiKey {
   action: 'up' | 'down' | 'left' | 'right' | 'confirm' | 'back' | 'pause';
 }
 
+/**
+ * A press delivered synchronously, inside the browser's own input event handler. Browsers
+ * allow clipboard writes, downloads and file dialogs only there ("user activation"); the
+ * regular UI events are queued until the next frame, which is too late on Safari and iOS.
+ * Keyboard confirm, mouse presses and touch/pen releases arrive here first.
+ */
+export type UiGesture =
+  | { kind: 'key'; action: UiKey['action'] }
+  | { kind: 'pointer'; x: number; y: number; type: 'down' | 'up'; pointerType: string };
+
 export interface Screen {
   /** Called when the screen becomes the top of the stack. */
   enter?(): void;
@@ -29,6 +39,11 @@ export interface Screen {
   readonly translucent?: boolean;
   onKey?(key: UiKey): void;
   onPointer?(p: UiPointer): void;
+  /**
+   * Handle a gesture synchronously; return true to consume it (it is then not queued as a
+   * regular UI event). Only screens with actions that need user activation implement it.
+   */
+  onGesture?(g: UiGesture): boolean;
   onResize?(): void;
 }
 
@@ -91,6 +106,10 @@ export class ScreenStack {
 
   onPointer(p: UiPointer): void {
     this.top?.onPointer?.(p);
+  }
+
+  onGesture(g: UiGesture): boolean {
+    return this.top?.onGesture?.(g) ?? false;
   }
 
   onResize(): void {

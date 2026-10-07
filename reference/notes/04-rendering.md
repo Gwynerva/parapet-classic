@@ -65,6 +65,9 @@ Background objects have 1, 3 or 5 frames that encode mission state: frame pairs 
 - Character c ≥ 1 swaps those heads for `82 + 5(c−1) … +4`.
 - Male characters (1, 2, 4, 7, 9) also swap body parts 34–38 → 127–131 and 57–61 → 132–136, and hide sprites 13–16 (Blaise's ponytail).
 - Ghosts (earlier hot-seat players) replace every body part with the 8×8 sprite 80 (line 3348).
+  Parapet Classic does not use the dots: rivals and the ghosts of recorded runs are drawn as
+  "echoes" (`packages/runtime/src/render/EchoRenderer.ts`), a recoloured hologram of the same
+  skeleton.
 - Faces: a blink (sprites 76/77, 250 ms, roughly 1 in 64 chance per tick) and a pain face (78, 400 ms) (line 5755).
 
 ## HUD (`aW`, line 9862)

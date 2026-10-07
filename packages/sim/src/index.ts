@@ -1,6 +1,4 @@
-export const SIM_VERSION = 'parapet-sim@0.2.0';
-/** Identifier of the rule set replays are recorded under: the original game's move table and rules. */
-export const RULESET_ID = 'classic';
+export { SIM_VERSION, RULESET_ID } from './version.ts';
 
 export { idiv, iabs, imin, isqrt, approxLength, buildSineTable } from './math/int.ts';
 export { Level, TILE, TILE_SHIFT, CHECKPOINT_TILE_BASE, BIRD_TILE } from './level/level.ts';
@@ -42,7 +40,15 @@ export {
 export type { StepContext, SimEvent, MoveEntrySnapshot } from './runner/step.ts';
 export { ScoreState } from './scoring.ts';
 export type { ScorePopup } from './scoring.ts';
-export { InputRecorder, InputPlayer, expandRuns, NO_INPUT } from './replay.ts';
+export {
+  InputRecorder,
+  InputPlayer,
+  expandRuns,
+  NO_INPUT,
+  MAX_STEPS,
+  MAX_INPUT_BITS,
+  parseInputRuns,
+} from './replay.ts';
 export type { InputRun, RivalRecording } from './replay.ts';
 export { MissionRules, MissionType } from './rules.ts';
 export type { RulesOptions, RunResult, RulesEvent } from './rules.ts';
@@ -78,3 +84,31 @@ export {
   sameContentHash,
 } from './content/hash.ts';
 export type { ContentHash } from './content/hash.ts';
+export {
+  LEVEL_COUNT,
+  SCORE_CHALLENGE_LEVELS,
+  RANKED_MODES,
+  isRankedMode,
+  rankingSort,
+  compareRuns,
+} from './ranking.ts';
+export type { RankingSort, RankedOutcome } from './ranking.ts';
+export {
+  REPLAY_FORMAT,
+  MAX_REPLAY_NAME_LENGTH,
+  encodeReplay,
+  decodeReplay,
+  cleanReplayName,
+  hasControlChars,
+  toBase64Url,
+  fromBase64Url,
+} from './replayCodec.ts';
+export type { Replay, DecodeResult } from './replayCodec.ts';
+export {
+  simulateReplay,
+  createReplayWorld,
+  replayCompatibility,
+  runContentHash,
+  isSplitEvent,
+} from './verify.ts';
+export type { RunContent, ReplayOutcome, Compatibility } from './verify.ts';

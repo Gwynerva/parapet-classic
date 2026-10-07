@@ -1,39 +1,50 @@
 /**
  * End-of-run screen (the original's state 7, d.java line 5349): the outcome judged by
  * `evaluateMission`, the goal line, time and score, the local record with name entry, the
- * unlock bookkeeping, and retry / next mission / main menu.
+ * unlock bookkeeping, and retry / next mission / main menu. After a ghost race it also tells
+ * who won and by how much; every ranked run can go out as a challenge link or a replay file.
  */
-import { evaluateMission, missionSlot, type MissionOutcome, type RunMode } from '@parapet/sim';
+import {
+  cleanReplayName,
+  compareRuns,
+  evaluateMission,
+  isRankedMode,
+  LEVEL_COUNT,
+  MAX_REPLAY_NAME_LENGTH,
+  missionSlot,
+  rankingSort,
+  type MissionOutcome,
+  type Replay,
+  type RunMode,
+} from '@parapet/sim';
 import { formatTime, Theme, type GameContext } from '../Context.ts';
-import type { Screen, UiKey, UiPointer } from '@parapet/runtime/app/Screen.ts';
+import type { Screen, UiGesture, UiKey, UiPointer } from '@parapet/runtime/app/Screen.ts';
 import { Menu, type MenuItem } from '@parapet/runtime/ui/Menu.ts';
-import { heading, panel } from '@parapet/runtime/ui/draw.ts';
+import { panel } from '@parapet/runtime/ui/draw.ts';
 import { fitWidth, inset, rowHeight, safeRect, type Rect } from '@parapet/runtime/ui/layout.ts';
 import { MessageBox } from '@parapet/runtime/ui/MessageBox.ts';
 import { TextInputOverlay } from '@parapet/runtime/ui/TextInputOverlay.ts';
 import {
   completeMission,
   isBetterRecord,
-  loadIdentity,
+  isLevelUnlocked,
   loadProgress,
   loadRecord,
   savePlayer,
   saveRecord,
   type RecordEntry,
 } from '@parapet/runtime/storage/profile.ts';
-import { ApiError, submitRun } from '@parapet/runtime/net/api.ts';
-import {
-  defaultLeaderboardSort,
-  isLeaderboardMode,
-  LEVEL_COUNT,
-  MAX_NAME_LENGTH,
-} from '@parapet/protocol';
+import { copyChallengeLink, missionSetup, saveReplayFile, watchSetup } from '../ghosts.ts';
+import { formatGap } from '../ui/GhostOverlay.ts';
 import { PlayScreen } from './PlayScreen.ts';
-import { IdentityScreen } from './IdentityScreen.ts';
 import { TitleScreen } from './TitleScreen.ts';
 import { PrizeScreen } from './PrizeScreen.ts';
 
 const NAME_PATTERN = /[\p{L}\p{N} _.-]/u;
+/** How long a status line ("link copied") stays, in ms. */
+const STATUS_MS = 4000;
+
+type RaceVerdict = 'won' | 'lost' | 'draw';
 
 export class ResultsScreen implements Screen {
   readonly translucent = true;
@@ -43,10 +54,11 @@ export class ResultsScreen implements Screen {
   private readonly outcome: MissionOutcome;
   private readonly time: number;
   private readonly score: number;
+  private readonly finished: boolean;
+  private readonly race: RaceVerdict | null;
   private newRecord = false;
-  private netStatus = '';
-  private publishing = false;
-  private published = false;
+  private status = '';
+  private statusUntil = 0;
   private nameInput: TextInputOverlay | null = null;
   private nameRect: Rect = { x: 0, y: 0, w: 0, h: 0 };
   private unlockedLevel = -1;
@@ -63,6 +75,7 @@ export class ResultsScreen implements Screen {
     const result = world.rules.result;
     this.time = result?.time ?? world.clock;
     this.score = world.player.score?.score ?? 0;
+    this.finished = result?.finished ?? false;
     this.outcome = evaluateMission(
       mission,
       play.setup.mode,
@@ -70,10 +83,24 @@ export class ResultsScreen implements Screen {
       this.score,
       world.player.moveBits,
     );
-    this.lines = this.describe();
+    this.race = this.judgeRace();
     this.updateProgress();
     this.storeRecord();
+    this.lines = this.describe();
     this.buildMenu();
+  }
+
+  private get sort(): 'time' | 'score' {
+    return rankingSort(this.play.setup.mode, this.play.setup.levelId);
+  }
+
+  /** Who won the ghost race, by the rules the mode is ranked on. */
+  private judgeRace(): RaceVerdict | null {
+    const ghost = this.play.setup.ghost;
+    if (!ghost) return null;
+    const mine = { finished: this.finished, time: this.time, score: this.score };
+    const order = compareRuns(this.sort, mine, ghost.outcome);
+    return order < 0 ? 'won' : order > 0 ? 'lost' : 'draw';
   }
 
   private describe(): string[] {
@@ -103,15 +130,50 @@ export class ResultsScreen implements Screen {
       default:
         break;
     }
+    out.push(...this.describeRace());
     return out;
   }
 
-  /** `n(ci, cj)` on success: mission bits, the "level unlocked" check and the prize. */
+  /** The ghost race in two lines: what the ghost did, and the verdict with the margin. */
+  private describeRace(): string[] {
+    const ghost = this.play.setup.ghost;
+    if (!ghost || !this.race) return [];
+    const { i18n } = this.ctx;
+    const theirs = ghost.outcome;
+    const byScore = this.sort === 'score';
+    const value = byScore ? String(theirs.score) : formatTime(theirs.time);
+    const comparable = byScore || (this.finished && theirs.finished);
+    const margin = !comparable
+      ? ''
+      : byScore
+        ? `${this.score - theirs.score > 0 ? '+' : ''}${this.score - theirs.score}`
+        : formatGap(this.time - theirs.time, 2);
+    if (ghost.kind === 'best') {
+      return [
+        i18n.t('ghost.result.best', { value }),
+        i18n.t(`ghost.verdict.best.${this.race}`, { margin }),
+      ];
+    }
+    const name = ghost.replay.playerName || i18n.t('player.name');
+    return [
+      i18n.t('ghost.result.challenger', { name, value }),
+      i18n.t(`ghost.verdict.challenger.${this.race}`, { name, margin }),
+    ];
+  }
+
+  /**
+   * `n(ci, cj)` on success: mission bits, the "level unlocked" check and the prize. A race
+   * from a shared link may be on a level the player has not opened yet; it counts only once
+   * the level is open.
+   */
   private updateProgress(): void {
-    if (!this.outcome.won) return;
     const { setup } = this.play;
+    // Watching a recorded run (someone else's, or one's own) is not playing it.
+    if (!this.outcome.won || setup.script) return;
     const missions = this.ctx.content.missions.levels;
-    const slot = missionSlot(missions[setup.levelId]!, setup.mode);
+    const level = missions[setup.levelId]!;
+    if (!isLevelUnlocked(loadProgress(), level.unlockThreshold)) return;
+    const slot = missionSlot(level, setup.mode);
     if (slot < 0) return;
     const { firstTime, total, progress } = completeMission(setup.levelId, slot);
     if (!firstTime) return;
@@ -123,7 +185,8 @@ export class ResultsScreen implements Screen {
 
   private storeRecord(): void {
     const { setup, session } = this.play;
-    if (!isLeaderboardMode(setup.mode) || !this.outcome.won) return;
+    if (!isRankedMode(setup.mode) || !this.outcome.won || setup.script) return;
+    const replay = session.buildReplay();
     const entry: RecordEntry = {
       time: this.time,
       score: this.score,
@@ -133,7 +196,7 @@ export class ResultsScreen implements Screen {
       playerName: setup.playerName,
       character: setup.character,
       withRival: setup.withRival,
-      simVersion: session.buildSubmission()?.simVersion ?? '',
+      simVersion: replay?.simVersion ?? '',
       date: new Date().toISOString(),
     };
     const previous = loadRecord(setup.levelId, setup.mode);
@@ -143,71 +206,33 @@ export class ResultsScreen implements Screen {
     }
   }
 
-  /** Publish the run under the device's public name (claim one first when there is none). */
-  private publish(): void {
-    const { setup, session } = this.play;
-    const { i18n, screens } = this.ctx;
-    if (!isLeaderboardMode(setup.mode) || !this.outcome.won || this.publishing) return;
-    const identity = loadIdentity();
-    if (!identity) {
-      screens.push(
-        new IdentityScreen(this.ctx, (claimed) => {
-          if (claimed) this.publish();
-        }),
-      );
-      return;
-    }
-    const submission = session.buildSubmission();
-    if (!submission) return;
-    submission.playerName = identity.name;
-    submission.identity = { name: identity.name, token: identity.token };
-    this.publishing = true;
-    this.netStatus = i18n.t('net.publishing');
-    submitRun(submission, { timeoutMs: 10000 })
-      .then((res) => {
-        const byScore = defaultLeaderboardSort(setup.mode, setup.levelId) === 'score';
-        const rank = (byScore ? res.rank.byScore : res.rank.byTime) ?? 0;
-        switch (res.outcome) {
-          case 'stored':
-            this.netStatus = i18n.t('results.published', { rank });
-            this.published = true;
-            break;
-          case 'not-best':
-            this.netStatus = i18n.t('net.notBest', { rank });
-            this.published = true;
-            break;
-          case 'flagged':
-            this.netStatus = i18n.t('net.flagged');
-            this.published = true;
-            break;
-          default:
-            this.netStatus = i18n.t('net.submitted');
-            break;
-        }
-      })
-      .catch((err: unknown) => {
-        this.netStatus = this.describeError(err);
-      })
-      .finally(() => {
-        this.publishing = false;
-        this.buildMenu();
-      });
+  /** This run as a replay, under the name the player has now (it may just have been typed). */
+  private replay(): Replay | null {
+    const replay = this.play.session.buildReplay();
+    if (!replay || !isRankedMode(replay.mode)) return null;
+    return { ...replay, playerName: cleanReplayName(this.ctx.player.name) };
   }
 
-  private describeError(err: unknown): string {
-    const { i18n } = this.ctx;
-    if (!(err instanceof ApiError)) return i18n.t('net.error');
-    switch (err.code) {
-      case 'unauthorized':
-        return i18n.t('net.unauthorized');
-      case 'rate-limited':
-        return i18n.t('net.rateLimited');
-      case 'network':
-      case 'timeout':
-        return i18n.t('net.offline');
-      default:
-        return i18n.t('net.error');
-    }
+  private setStatus(text: string): void {
+    this.status = text;
+    this.statusUntil = performance.now() + STATUS_MS;
+  }
+
+  /** Called from a gesture: the browser allows the clipboard only there. */
+  private copyLink(): void {
+    this.closeNameInput(true);
+    const replay = this.replay();
+    if (!replay) return;
+    copyChallengeLink(this.ctx, replay, () => this.setStatus(this.ctx.i18n.t('share.copied')));
+  }
+
+  /** Called from a gesture: downloads start only there on some browsers. */
+  private saveFile(): void {
+    this.closeNameInput(true);
+    const replay = this.replay();
+    if (!replay) return;
+    saveReplayFile(replay, { time: this.time, score: this.score });
+    this.setStatus(this.ctx.i18n.t('replayFile.saved'));
   }
 
   /** The mission to offer next: the next one of this level not yet done, else the next level. */
@@ -226,10 +251,7 @@ export class ResultsScreen implements Screen {
     const next = setup.levelId + 1;
     if (next < LEVEL_COUNT) {
       const nextLevel = missions[next]!;
-      if (
-        nextLevel.unlockThreshold <=
-        Object.values(progress.completed).length * 0 + totalOf(progress)
-      ) {
+      if (isLevelUnlocked(progress, nextLevel.unlockThreshold)) {
         const mode = modeOf(nextLevel.missionTypes[0] ?? 0);
         if (mode) return { levelId: next, mode };
       }
@@ -239,20 +261,26 @@ export class ResultsScreen implements Screen {
 
   private buildMenu(): void {
     const { i18n, screens } = this.ctx;
+    const { setup } = this.play;
     const items: MenuItem[] = [
       {
-        label: i18n.t('results.retry'),
+        label: setup.ghost ? i18n.t('ghost.again') : i18n.t('results.retry'),
         onSelect: () => this.leave(() => this.play.restart()),
       },
     ];
     const next = this.nextMission();
-    if (next) {
+    if (next && setup.ghost?.kind !== 'challenger') {
       items.push({
         label: i18n.t('results.nextMission'),
         onSelect: () =>
           this.leave(() => {
             screens.pop();
-            screens.push(new PlayScreen(this.ctx, { ...this.play.setup, ...next }));
+            screens.push(
+              new PlayScreen(
+                this.ctx,
+                missionSetup(this.ctx, next.levelId, next.mode, setup.withRival),
+              ),
+            );
           }),
       });
     }
@@ -262,14 +290,29 @@ export class ResultsScreen implements Screen {
         onSelect: () => this.leave(() => screens.clear(new PrizeScreen(this.ctx))),
       });
     }
-    if (isLeaderboardMode(this.play.setup.mode) && this.outcome.won && !this.published) {
-      items.push({ label: i18n.t('results.publish'), onSelect: () => this.publish() });
+    if (isRankedMode(setup.mode) && !setup.script && this.play.session.buildReplay()) {
+      items.push(
+        { label: i18n.t('share.copyLink'), gesture: true, onSelect: () => this.copyLink() },
+        { label: i18n.t('replayFile.save'), gesture: true, onSelect: () => this.saveFile() },
+      );
+    }
+    const ghost = setup.ghost;
+    if (ghost && ghost.kind === 'challenger') {
+      items.push({
+        label: i18n.t('ghost.watch'),
+        onSelect: () =>
+          this.leave(() => {
+            screens.pop();
+            screens.push(new PlayScreen(this.ctx, watchSetup(ghost.replay)));
+          }),
+      });
     }
     items.push({
       label: i18n.t('menu.mainMenu'),
       onSelect: () => this.leave(() => screens.clear(new TitleScreen(this.ctx))),
     });
     this.menu.setItems(items);
+    this.menu.maxVisible = items.length;
     this.onResize();
   }
 
@@ -313,7 +356,7 @@ export class ResultsScreen implements Screen {
   private openNameInput(): void {
     const { player } = this.ctx;
     this.nameInput = new TextInputOverlay(this.ctx.viewport, {
-      maxLength: MAX_NAME_LENGTH,
+      maxLength: MAX_REPLAY_NAME_LENGTH,
       allowed: NAME_PATTERN,
       initial: player.name,
       placeholder: this.ctx.i18n.t('player.name'),
@@ -401,6 +444,28 @@ export class ResultsScreen implements Screen {
     this.menu.onPointer(p);
   }
 
+  onGesture(g: UiGesture): boolean {
+    if (this.nameInput?.isOpen && g.kind === 'key') return false;
+    return this.menu.onGesture(g);
+  }
+
+  private title(): { text: string; color: string } {
+    const { i18n } = this.ctx;
+    if (this.race === 'won' && this.play.setup.ghost?.kind === 'challenger') {
+      return { text: i18n.t('ghost.title.won'), color: Theme.accent };
+    }
+    if (this.outcome.won) {
+      return {
+        text: this.newRecord ? i18n.t('results.newRecord') : i18n.t('results.done'),
+        color: Theme.accent,
+      };
+    }
+    return {
+      text: this.outcome.reason === 'timeUp' ? i18n.t('results.timeUp') : i18n.t('results.failed'),
+      color: Theme.danger,
+    };
+  }
+
   render(c: CanvasRenderingContext2D): void {
     const { viewport, fonts, i18n } = this.ctx;
     c.fillStyle = Theme.overlay;
@@ -409,26 +474,20 @@ export class ResultsScreen implements Screen {
     const headerH = this.headerHeight();
     const top = y - headerH;
     panel(c, x - 8, top, width + 16, headerH + this.menu.items.length * row + 16);
-    const title = this.outcome.won
-      ? this.newRecord
-        ? i18n.t('results.newRecord')
-        : i18n.t('results.done')
-      : this.outcome.reason === 'timeUp'
-        ? i18n.t('results.timeUp')
-        : i18n.t('results.failed');
+    const title = this.title();
     const cx = x + (width >> 1);
-    const titleColor = this.outcome.won ? Theme.accent : Theme.danger;
-    fonts.display.draw(c, title, cx + 1, top + 9, { align: 'center', color: '#000000' });
-    fonts.display.draw(c, title, cx, top + 8, { align: 'center', color: titleColor });
+    fonts.display.draw(c, title.text, cx + 1, top + 9, { align: 'center', color: '#000000' });
+    fonts.display.draw(c, title.text, cx, top + 8, { align: 'center', color: title.color });
     let ly = top + 8 + fonts.display.lineHeight + 6;
     for (const line of this.lines) {
       fonts.small.draw(c, line, cx, ly, { align: 'center', color: Theme.text, tabular: true });
       ly += fonts.small.lineHeight + 2;
     }
     // Blink the status for the first two seconds like the results icon of the original.
-    const blink = performance.now() - this.shownAt < 2000 && ((performance.now() >> 8) & 1) === 1;
-    if (this.netStatus && !blink) {
-      fonts.small.draw(c, this.netStatus, cx, ly + 4, { align: 'center', color: Theme.muted });
+    const now = performance.now();
+    const blink = now - this.shownAt < 2000 && ((now >> 8) & 1) === 1;
+    if (this.status && now < this.statusUntil && !blink) {
+      fonts.small.draw(c, this.status, cx, ly + 4, { align: 'center', color: Theme.success });
     }
     if (this.newRecord) {
       fonts.small.draw(
@@ -475,10 +534,4 @@ function modeOf(type: number): RunMode | null {
     default:
       return null;
   }
-}
-
-function totalOf(progress: { completed: number[] }): number {
-  let n = 0;
-  for (const bits of progress.completed) for (let b = bits; b !== 0; b >>>= 1) n += b & 1;
-  return n;
 }

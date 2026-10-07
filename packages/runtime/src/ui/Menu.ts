@@ -4,7 +4,7 @@
  * right (used by the options screen) and react to left/right to change it.
  */
 import type { BitmapFont } from '../text/BitmapFont.ts';
-import type { UiKey, UiPointer } from '../app/Screen.ts';
+import type { UiGesture, UiKey, UiPointer } from '../app/Screen.ts';
 import { Theme } from './theme.ts';
 
 export interface MenuItem {
@@ -17,6 +17,12 @@ export interface MenuItem {
   onSelect?: () => void;
   /** Called with -1 / +1 on left/right presses. */
   onAdjust?: (delta: number) => void;
+  /**
+   * `onSelect` needs user activation (clipboard, downloads, file dialogs): keyboard and
+   * pointer select it from `onGesture`, inside the browser's event handler. A gamepad
+   * confirm still selects it from the queue; the action then needs a fallback.
+   */
+  gesture?: boolean;
 }
 
 export interface MenuLayout {
@@ -35,6 +41,13 @@ export class Menu {
   /** First visible row when the list is longer than the available height. */
   private scroll = 0;
   maxVisible = 8;
+
+  /** Index of the first visible item (the list scrolls when it is longer than `maxVisible`). */
+  get firstVisible(): number {
+    return this.scroll;
+  }
+  /** Row of a gesture item pressed by touch or pen, selected on release. */
+  private armed = -1;
 
   constructor(font: BitmapFont, small: BitmapFont) {
     this.font = font;
@@ -117,6 +130,8 @@ export class Menu {
       const item = this.items[row];
       if (!item || item.disabled) return false;
       this.cursor = row;
+      // Gesture items are selected from `onGesture`; a queued press only moves the cursor.
+      if (item.gesture) return true;
       if (item.onSelect) {
         item.onSelect();
       } else if (item.onAdjust) {
@@ -129,6 +144,35 @@ export class Menu {
       return true;
     }
     return false;
+  }
+
+  /**
+   * Selects gesture items synchronously: keyboard confirm and mouse presses at once, touch
+   * and pen on release over the same row (browsers grant activation on touch release).
+   * Returns true when the gesture was consumed.
+   */
+  onGesture(g: UiGesture): boolean {
+    if (g.kind === 'key') {
+      const item = this.items[this.cursor];
+      if (g.action !== 'confirm' || !item?.gesture || item.disabled) return false;
+      item.onSelect?.();
+      return true;
+    }
+    const row = this.hitTest(g.x, g.y);
+    const item = row >= 0 ? this.items[row] : undefined;
+    if (g.type === 'down') {
+      this.armed = -1;
+      if (!item?.gesture || item.disabled) return false;
+      this.cursor = row;
+      if (g.pointerType === 'mouse') item.onSelect?.();
+      else this.armed = row;
+      return true;
+    }
+    const armed = this.armed;
+    this.armed = -1;
+    if (armed < 0) return false;
+    if (row === armed && item?.gesture && !item.disabled) item.onSelect?.();
+    return true;
   }
 
   /** Left edge, width and arrow width of a row's right-aligned value label. */
