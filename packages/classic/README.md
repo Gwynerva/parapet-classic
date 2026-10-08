@@ -14,6 +14,9 @@ own Free run and races against ghosts: your record, or anyone's run shared as a 
   sprite ids of the menu graphics.
 - `src/app/ghosts.ts` checks incoming replays, re-runs them and starts ghost races and the
   boss contests; it also sends runs out as challenge links and replay files.
+  `screens/OpenReplayScreen.ts` takes a link or code pasted into a real text field (phones have
+  no Ctrl+V), the clipboard or a file, and shows the challenger's card (name, level, mission,
+  character, the verified time) before the race.
 - `src/app/bosses.ts` is the bosses' data (`packages/content/bosses`): their records per level
   and mode, outfits, effects and worlds, which character number each version is (with its
   effect, or plain) and what a player has won. On the level a boss is `ui/BossPresence.ts`; on

@@ -18,7 +18,7 @@ import { Button } from '@parapet/runtime/ui/Button.ts';
 import { fitWidth, rowHeight, type Rect } from '@parapet/runtime/ui/layout.ts';
 import { ScreenFrame } from '../ui/ScreenFrame.ts';
 import { loadRecord, type RecordEntry } from '@parapet/runtime/storage/profile.ts';
-import { pickReplayFile } from '../ghosts.ts';
+import { OpenReplayScreen } from './OpenReplayScreen.ts';
 import { RecordActionsScreen } from './RecordActionsScreen.ts';
 
 export class RecordsScreen implements Screen {
@@ -71,8 +71,7 @@ export class RecordsScreen implements Screen {
     });
     items.push({
       label: i18n.t('replayFile.open'),
-      gesture: true,
-      onSelect: () => pickReplayFile(this.ctx),
+      onSelect: () => this.ctx.screens.push(new OpenReplayScreen(this.ctx)),
     });
     const cursor = this.menu.cursor;
     this.menu.setItems(items);

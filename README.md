@@ -28,8 +28,8 @@ new, a readable reference for this kind of game.
   Sprint against the rival, Flag hunt, Score run, the Challenges), unlocks and the Prize, the
   Moves menu and the original music.
 - **Ghost races.** Every record keeps its run. Race your best as a ghost, or send a run as a
-  challenge link: whoever opens it races your ghost at once, and their browser re-runs it, so
-  a link cannot claim a time the run did not make.
+  challenge link: whoever opens it (or pastes it into "Open replay") races your ghost, and
+  their browser re-runs it, so a link cannot claim a time the run did not make.
 - **Twelve bosses.** A character on every level with a record far below the original's. Beat
   its Sprint and it is yours to play; beat its Flag hunt and it brings its effect. See
   [`packages/content/bosses`](packages/content/bosses/README.md).

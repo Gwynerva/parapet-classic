@@ -218,28 +218,44 @@ export function runnerName(ctx: GameContext, replay: Replay): string {
   return replay.playerName || ctx.i18n.t('player.name');
 }
 
-/** Starts a race against a decoded replay code, or explains why it cannot run. */
-export function openReplayCode(ctx: GameContext, code: string): void {
+/** What a text holds: no replay at all, one that cannot run here, or one ready to race. */
+export type ReplayCheck =
+  | { kind: 'none' }
+  | { kind: 'problem'; problem: GhostProblem }
+  | { kind: 'ok'; code: string; ghost: GhostSetup };
+
+/** Finds the replay in a file's text, a link or a bare code and re-runs it for its result. */
+export function checkReplayText(ctx: GameContext, text: string): ReplayCheck {
+  const code = extractReplayCode(text);
+  if (!code) return { kind: 'none' };
   const decoded = decodeReplay(code);
-  if (!decoded.ok) {
-    showProblem(ctx, 'invalid');
-    return;
-  }
+  if (!decoded.ok) return { kind: 'problem', problem: 'invalid' };
   const prepared = prepareGhost(ctx, decoded.replay, 'challenger');
-  if (!prepared.ok) {
-    showProblem(ctx, prepared.problem);
-    return;
-  }
-  ctx.input.clear();
-  countEvent('race/link');
-  ctx.screens.push(new PlayScreen(ctx, raceSetup(ctx, prepared.ghost)));
+  if (!prepared.ok) return { kind: 'problem', problem: prepared.problem };
+  return { kind: 'ok', code, ghost: prepared.ghost };
 }
 
-/** Starts a race against the replay in a file's text, a link or a bare code. */
+/** Starts the race against a checked replay. */
+export function startRace(ctx: GameContext, ghost: GhostSetup): void {
+  ctx.input.clear();
+  countEvent('race/link');
+  // A screen that only led here (the one for opening a replay) gives way to the race.
+  while ((ctx.screens.top as { closesOnReplay?: boolean } | undefined)?.closesOnReplay) {
+    ctx.screens.pop();
+  }
+  ctx.screens.push(new PlayScreen(ctx, raceSetup(ctx, ghost)));
+}
+
+/** Starts a race against the replay in a file's text, a link or a bare code, or says why not. */
 export function openReplayText(ctx: GameContext, text: string): void {
-  const code = extractReplayCode(text);
-  if (code) openReplayCode(ctx, code);
-  else showProblem(ctx, 'invalid');
+  const check = checkReplayText(ctx, text);
+  if (check.kind === 'ok') startRace(ctx, check.ghost);
+  else showProblem(ctx, check.kind === 'problem' ? check.problem : 'invalid');
+}
+
+/** Starts a race against a replay code (from a challenge link), or says why it cannot run. */
+export function openReplayCode(ctx: GameContext, code: string): void {
+  openReplayText(ctx, code);
 }
 
 function showProblem(ctx: GameContext, problem: GhostProblem): void {
@@ -282,14 +298,16 @@ export function saveReplayFile(replay: Replay, result: { time: number; score: nu
   downloadText(replayFileName(replay.levelId, replay.mode, replay.playerName), text);
 }
 
-/** Opens the file dialog and races the chosen replay; call from a gesture. */
-export function pickReplayFile(ctx: GameContext): void {
+/** Opens the file dialog and hands the chosen file's text on (null: unreadable); a gesture. */
+export function pickReplayFile(onText: (text: string | null) => void): void {
   pickFile(REPLAY_FILE_ACCEPT, (file) => {
-    void readText(file).then((text) => {
-      if (text === null) showProblem(ctx, 'invalid');
-      else openReplayText(ctx, text);
-    });
+    void readText(file).then(onText);
   });
+}
+
+/** A screen that takes replays dropped or pasted while it is up, instead of racing them. */
+interface ReplayTaker {
+  takeReplayText?: (text: string) => void;
 }
 
 /**
@@ -298,15 +316,20 @@ export function pickReplayFile(ctx: GameContext): void {
  */
 export function installReplayInputs(ctx: GameContext): void {
   const accepting = (): boolean => !(ctx.screens.top instanceof PlayScreen);
+  const take = (text: string): void => {
+    const taker = ctx.screens.top as ReplayTaker | undefined;
+    if (taker?.takeReplayText) taker.takeReplayText(text);
+    else openReplayText(ctx, text);
+  };
   onFileDrop((file) => {
     if (!accepting()) return;
     void readText(file).then((text) => {
       if (text === null) showProblem(ctx, 'invalid');
-      else openReplayText(ctx, text);
+      else take(text);
     });
   });
   onPasteText((text) => {
-    if (accepting() && extractReplayCode(text)) openReplayText(ctx, text);
+    if (accepting() && extractReplayCode(text)) take(text);
   });
   // A challenge link opened in a tab that already runs the game only changes the fragment.
   window.addEventListener('hashchange', () => {

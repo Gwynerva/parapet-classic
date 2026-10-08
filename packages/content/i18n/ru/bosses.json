@@ -12,7 +12,6 @@
   "contest.verdict.won": "Рекорд побит! {margin}",
   "contest.verdict.lost": "Рекорд устоял. {margin}",
   "contest.verdict.draw": "Ровно то же время. Нужно быстрее.",
-  "contest.quote": "{boss}: «{text}»",
   "contest.title.won": "Рекорд побит!",
   "contest.unlocked": "Новый персонаж: {boss}!",
   "contest.unlockedFx": "Новый персонаж: {boss} с эффектом «{fx}»!",

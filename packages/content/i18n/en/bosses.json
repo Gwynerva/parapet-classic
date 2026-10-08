@@ -12,7 +12,6 @@
   "contest.verdict.won": "Record beaten! {margin}",
   "contest.verdict.lost": "The record holds. {margin}",
   "contest.verdict.draw": "Exactly the same time. It takes a faster one.",
-  "contest.quote": "{boss}: “{text}”",
   "contest.title.won": "Record beaten!",
   "contest.unlocked": "New character: {boss}!",
   "contest.unlockedFx": "New character: {boss}, with the {fx} effect!",

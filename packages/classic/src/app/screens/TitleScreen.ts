@@ -15,7 +15,7 @@ import { RecordsScreen } from './RecordsScreen.ts';
 import { AboutScreen } from './AboutScreen.ts';
 import { MovesScreen } from './MovesScreen.ts';
 import { PrizeScreen } from './PrizeScreen.ts';
-import { pickReplayFile } from '../ghosts.ts';
+import { OpenReplayScreen } from './OpenReplayScreen.ts';
 import { titleLayout } from '../layouts.ts';
 
 export class TitleScreen implements Screen {
@@ -42,8 +42,7 @@ export class TitleScreen implements Screen {
       { label: i18n.t('menu.records'), onSelect: () => screens.push(new RecordsScreen(this.ctx)) },
       {
         label: i18n.t('replayFile.open'),
-        gesture: true,
-        onSelect: () => pickReplayFile(this.ctx),
+        onSelect: () => screens.push(new OpenReplayScreen(this.ctx)),
       },
       { label: i18n.t('menu.options'), onSelect: () => screens.push(new OptionsScreen(this.ctx)) },
       { label: i18n.t('menu.about'), onSelect: () => screens.push(new AboutScreen(this.ctx)) },

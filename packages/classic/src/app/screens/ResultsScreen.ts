@@ -87,6 +87,11 @@ export class ResultsScreen implements Screen {
   private prizeUnlocked = false;
   private shownAt = 0;
   private lines: string[] = [];
+  /** The lines wrapped to the panel's width (`onResize`). */
+  private wrapped: string[] = [];
+  /** The boss's word on the race, set apart as a quote, and its lines wrapped. */
+  private quote: { text: string; boss: string; color: string } | null = null;
+  private quoteLines: string[] = [];
   /** A boss character opened by this run (character id), or -1. */
   private wonLook = -1;
   /** The win gave a boss the player already had its effect. */
@@ -198,8 +203,9 @@ export class ResultsScreen implements Screen {
     out.push(i18n.t(`contest.verdict.${race}`, { margin }));
     // The boss has a word on it: impressed or smug.
     const quoteKey = `boss.${id}.${race === 'won' ? 'won' : 'lost'}`;
-    if (id && i18n.has(quoteKey))
-      out.push(i18n.t('contest.quote', { boss, text: i18n.t(quoteKey) }));
+    if (found && i18n.has(quoteKey)) {
+      this.quote = { text: i18n.t(quoteKey), boss, color: found.boss.color.css };
+    }
     if (this.wonLook >= 0 && found) {
       const fx = i18n.t(effectNameKey(found.boss));
       let key = 'contest.unlocked';
@@ -521,6 +527,11 @@ export class ResultsScreen implements Screen {
     const safe = safeRect(viewport);
     const col = fitWidth(inset(safe, 8, 0), 300);
     const row = rowHeight(22, viewport.isCoarsePointer);
+    // Every line within the panel, the quote within its own box.
+    this.wrapped = this.lines.flatMap((line) => fonts.small.wrap(line, col.w - 8));
+    this.quoteLines = this.quote
+      ? fonts.small.wrap(this.quote.text, col.w - 8 - QUOTE_INDENT - QUOTE_PAD)
+      : [];
     const headerH = this.headerHeight();
     this.menu.layout.x = col.x;
     this.menu.layout.width = col.w;
@@ -547,12 +558,46 @@ export class ResultsScreen implements Screen {
       8 +
       fonts.display.lineHeight +
       6 +
-      this.lines.length * (fonts.small.lineHeight + 2) +
+      this.wrapped.length * (fonts.small.lineHeight + 2) +
+      this.quoteHeight() +
       6 +
       fonts.small.lineHeight +
       4 +
       nameRow
     );
+  }
+
+  /** The quote's box with the gap above it, or 0 without a quote. */
+  private quoteHeight(): number {
+    if (!this.quote) return 0;
+    const small = this.ctx.fonts.small;
+    return 4 + QUOTE_PAD + (this.quoteLines.length + 1) * (small.lineHeight + 2) + QUOTE_PAD;
+  }
+
+  /**
+   * The boss's word in a box of its own: a bar and opening marks in the boss's colour, the
+   * words wrapped beside them, the boss's name under them on the right.
+   */
+  private drawQuote(c: CanvasRenderingContext2D, x: number, y: number, w: number): void {
+    const quote = this.quote;
+    if (!quote) return;
+    const small = this.ctx.fonts.small;
+    const h = this.quoteHeight() - 4;
+    const top = y + 4;
+    c.fillStyle = QUOTE_BACKGROUND;
+    c.fillRect(x, top, w, h);
+    c.fillStyle = quote.color;
+    c.fillRect(x, top, 2, h);
+    // Two opening marks, pixel by pixel ("66").
+    for (const dx of [0, 4]) {
+      for (const [px, py] of QUOTE_MARK) c.fillRect(x + 5 + dx + px, top + QUOTE_PAD + py, 1, 1);
+    }
+    let ly = top + QUOTE_PAD;
+    for (const line of this.quoteLines) {
+      small.draw(c, line, x + QUOTE_INDENT, ly, { color: Theme.text });
+      ly += small.lineHeight + 2;
+    }
+    small.draw(c, `— ${quote.boss}`, x + w - QUOTE_PAD, ly, { align: 'right', color: quote.color });
   }
 
   update(): void {}
@@ -614,9 +659,13 @@ export class ResultsScreen implements Screen {
     fonts.display.draw(c, title.text, cx + 1, top + 9, { align: 'center', color: '#000000' });
     fonts.display.draw(c, title.text, cx, top + 8, { align: 'center', color: title.color });
     let ly = top + 8 + fonts.display.lineHeight + 6;
-    for (const line of this.lines) {
+    for (const line of this.wrapped) {
       fonts.small.draw(c, line, cx, ly, { align: 'center', color: Theme.text, tabular: true });
       ly += fonts.small.lineHeight + 2;
+    }
+    if (this.quote) {
+      this.drawQuote(c, x, ly - 2, width);
+      ly += this.quoteHeight();
     }
     // Blink the status for the first two seconds like the results icon of the original.
     const now = performance.now();
@@ -651,6 +700,22 @@ export class ResultsScreen implements Screen {
     this.menu.draw(c);
   }
 }
+
+/** Room left of a quote's words for its marks, and the padding inside its box. */
+const QUOTE_INDENT = 16;
+const QUOTE_PAD = 5;
+const QUOTE_BACKGROUND = '#12171d';
+/** One opening quotation mark, 3×4 pixels. */
+const QUOTE_MARK: readonly (readonly [number, number])[] = [
+  [1, 0],
+  [2, 0],
+  [0, 1],
+  [0, 2],
+  [1, 2],
+  [2, 2],
+  [1, 3],
+  [2, 3],
+];
 
 function modeOf(type: number): RunMode | null {
   switch (type) {

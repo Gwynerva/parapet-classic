@@ -20,6 +20,8 @@ export interface TextInputOptions {
   readOnly?: boolean;
   onCommit: (value: string) => void;
   onCancel: () => void;
+  /** Every change of the text (typed, pasted, cut). */
+  onInput?: (value: string) => void;
 }
 
 export class TextInputOverlay {
@@ -114,12 +116,15 @@ export class TextInputOverlay {
 
   private readonly onInput = (): void => {
     const input = this.input;
+    if (!input) return;
     const allowed = this.opts.allowed;
-    if (!input || !allowed) return;
-    const filtered = Array.from(input.value)
-      .filter((ch) => allowed.test(ch))
-      .join('');
-    if (filtered !== input.value) input.value = filtered;
+    if (allowed) {
+      const filtered = Array.from(input.value)
+        .filter((ch) => allowed.test(ch))
+        .join('');
+      if (filtered !== input.value) input.value = filtered;
+    }
+    this.opts.onInput?.(input.value);
   };
 
   private readonly onKeyDown = (event: KeyboardEvent): void => {
