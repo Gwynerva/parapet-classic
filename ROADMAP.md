@@ -117,6 +117,10 @@ instead:
   deployment: no cookies, nothing personal.
 - **A looks page for artists** on the dev server (`/dev/looks.html`), and the bosses' art
   generators in the repository (`packages/tools/art`).
+- **Challenges that travel well.** Links of half the length (`<site>/r/#<code>`, replay format
+  2: bits, versions and content as short keys, adaptive codes for the pauses, a prefix code for
+  the presses; format 1 still opens), a preview of their own (a runner racing its echo), and
+  "Open replay" with a field to paste into and the challenger's card before the race.
 
 ## Next
 
@@ -124,8 +128,6 @@ instead:
 
 - **Offline play.** A service worker caching the build makes the site playable without a
   connection (it already installs as an app); nothing in the game needs the network.
-- **Shorter links.** The replay format has a version byte; a deflated variant
-  (`CompressionStream`) would roughly halve the links of long runs.
 - **Hot-seat.** The original's multiplayer (players take turns, earlier players run as
   ghosts) is now cheap: every turn is a replay and every earlier player a ghost world.
 - **Readable Java reconstruction.** A deobfuscated, commented reconstruction of the original

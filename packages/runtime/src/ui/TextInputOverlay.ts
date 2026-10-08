@@ -10,8 +10,13 @@ import type { Rect } from './layout.ts';
 
 export interface TextInputOptions {
   maxLength: number;
-  /** Characters allowed, tested one by one; others are dropped on input. */
-  allowed?: RegExp;
+  /**
+   * Characters allowed, tested one by one: others are dropped as they are typed or pasted, the
+   * caret staying where it was among the characters kept.
+   */
+  allowed?: (ch: string) => boolean;
+  /** No space at the start, none twice in a row (pasted runs of them fold into one). */
+  singleSpaces?: boolean;
   initial?: string;
   placeholder?: string;
   /** CSS font family of the field (a locally bundled face registered with `installWebFont`). */
@@ -22,6 +27,30 @@ export interface TextInputOptions {
   onCancel: () => void;
   /** Every change of the text (typed, pasted, cut). */
   onInput?: (value: string) => void;
+}
+
+/**
+ * `value` with the characters `allowed` refuses dropped (and with `singleSpaces` no leading
+ * space and no two in a row), and where the caret at `caret` (UTF-16 index) lands in it.
+ */
+export function filterText(
+  value: string,
+  caret: number,
+  allowed: (ch: string) => boolean,
+  singleSpaces: boolean,
+): { value: string; caret: number } {
+  let out = '';
+  let at = 0;
+  let index = 0;
+  for (const ch of value) {
+    const space = /\s/.test(ch);
+    let keep = space ? !singleSpaces || (out.length > 0 && !out.endsWith(' ')) : allowed(ch);
+    if (keep && space && !allowed(' ')) keep = false;
+    if (keep) out += space ? ' ' : ch;
+    index += ch.length;
+    if (index <= caret) at = out.length;
+  }
+  return { value: out, caret: Math.min(at, out.length) };
 }
 
 export class TextInputOverlay {
@@ -117,12 +146,14 @@ export class TextInputOverlay {
   private readonly onInput = (): void => {
     const input = this.input;
     if (!input) return;
-    const allowed = this.opts.allowed;
-    if (allowed) {
-      const filtered = Array.from(input.value)
-        .filter((ch) => allowed.test(ch))
-        .join('');
-      if (filtered !== input.value) input.value = filtered;
+    const { allowed, singleSpaces } = this.opts;
+    if (allowed || singleSpaces) {
+      const caret = input.selectionStart ?? input.value.length;
+      const kept = filterText(input.value, caret, allowed ?? (() => true), singleSpaces ?? false);
+      if (kept.value !== input.value) {
+        input.value = kept.value;
+        input.setSelectionRange(kept.caret, kept.caret);
+      }
     }
     this.opts.onInput?.(input.value);
   };

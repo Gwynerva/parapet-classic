@@ -26,7 +26,7 @@ import {
 } from '../ghosts.ts';
 import { dialogLayout } from '../layouts.ts';
 
-/** Longer than any link a long run makes (about a kilobyte a minute). */
+/** Longer than any link a long run makes (a few hundred characters a minute). */
 const MAX_TEXT = 65536;
 const WIDTH = 300;
 /** The card's figure: a column for the character standing in it. */
@@ -105,17 +105,19 @@ export class OpenReplayScreen implements Screen {
   takeReplayText(text: string): void {
     const check = checkReplayText(this.ctx, text);
     // A file's whole text is not for the field: its code is.
-    const shown = check.kind === 'ok' ? check.code : text.trim();
-    this.show(shown, check);
-    if (this.ctx.screens.top === this) this.openField();
+    this.show(check.kind === 'ok' ? check.code : text.trim(), check);
   }
 
+  /** Puts `text` into the field (a fresh one) and its check on the card and the menu. */
   private show(text: string, check: ReplayCheck): void {
+    this.field?.close();
+    this.field = null;
     this.text = text;
     this.checked = { text, check };
     this.buildMenu();
     // The race is the obvious next step once there is one.
     if (check.kind === 'ok') this.menu.setCursor(0);
+    if (this.ctx.screens.top === this) this.openField();
   }
 
   /** What the field's text holds, checked once per text. */

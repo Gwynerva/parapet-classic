@@ -102,8 +102,11 @@ export {
   hasControlChars,
   toBase64Url,
   fromBase64Url,
+  versionKey,
+  contentKey,
+  replayKeys,
 } from './replayCodec.ts';
-export type { Replay, DecodeResult } from './replayCodec.ts';
+export type { Replay, ReplayKeys, DecodeResult } from './replayCodec.ts';
 export {
   simulateReplay,
   createReplayWorld,

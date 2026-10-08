@@ -62,7 +62,9 @@ import { PlayScreen } from './PlayScreen.ts';
 import { TitleScreen } from './TitleScreen.ts';
 import { PrizeScreen } from './PrizeScreen.ts';
 
-const NAME_PATTERN = /[\p{L}\p{N} _.-]/u;
+/** A runner's name: letters and digits, spaces, a few joiners. */
+const NAME_LETTER = /^[\p{L}\p{N}]$/u;
+const NAME_JOINERS = ' -_.';
 /** How long a status line ("link copied") stays, in ms. */
 const STATUS_MS = 4000;
 
@@ -487,7 +489,14 @@ export class ResultsScreen implements Screen {
     const { player } = this.ctx;
     this.nameInput = new TextInputOverlay(this.ctx.viewport, {
       maxLength: MAX_REPLAY_NAME_LENGTH,
-      allowed: NAME_PATTERN,
+      // Only what the game's fonts draw (Latin and Cyrillic letters, digits), so a name never
+      // shows up as gaps on someone's screen; anything else is dropped as it is typed or pasted.
+      allowed: (ch) => {
+        if (NAME_JOINERS.includes(ch)) return true;
+        const cp = ch.codePointAt(0) ?? 0;
+        return NAME_LETTER.test(ch) && this.ctx.fonts.text.has(cp) && this.ctx.fonts.small.has(cp);
+      },
+      singleSpaces: true,
       initial: player.name,
       placeholder: this.ctx.i18n.t('player.name'),
       fontFamily: 'Terminus',

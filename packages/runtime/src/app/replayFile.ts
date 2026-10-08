@@ -14,10 +14,10 @@ export const REPLAY_FILE_EXTENSION = '.parapet-replay';
 export const REPLAY_FILE_ACCEPT = `${REPLAY_FILE_EXTENSION},application/json,.json,.txt`;
 
 /** A challenge link: `…/r/#<code>`. */
-const RACE_LINK = /\/r\/#([A-Za-z0-9_-]{16,})/;
+const RACE_LINK = /\/r\/#([A-Za-z0-9_-]{12,})/;
 /** The older form and the query: `#r=<code>`, `?r=<code>`. */
 const LINK_PATTERN = /(?:^|[#&?])r=([A-Za-z0-9_-]+)/;
-const BARE_CODE = /^[A-Za-z0-9_-]{16,}$/;
+const BARE_CODE = /^[A-Za-z0-9_-]{12,}$/;
 
 export interface ReplayFileInfo {
   level: number;

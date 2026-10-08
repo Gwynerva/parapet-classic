@@ -8,7 +8,7 @@ import { contentHashes, sameContentHash, type ContentHash } from './content/hash
 import type { LevelData } from './level/level.ts';
 import { evaluateMission } from './mission/evaluate.ts';
 import { InputPlayer, NO_INPUT, type RivalRecording } from './replay.ts';
-import type { Replay } from './replayCodec.ts';
+import { contentKey, versionKey, type Replay } from './replayCodec.ts';
 import type { MoveTableData } from './runner/moves.ts';
 import { createRun, type MissionInfo } from './run.ts';
 import type { PhysicsTables } from './tables.ts';
@@ -44,8 +44,15 @@ export interface ReplayOutcome {
 
 export type Compatibility = 'ok' | 'version' | 'content';
 
-/** Whether a replay can be re-run here: same simulation and ruleset, same level data. */
+/**
+ * Whether a replay can be re-run here: same simulation and ruleset, same level data (by their
+ * keys for a replay decoded from a compact code).
+ */
 export function replayCompatibility(replay: Replay, content: ContentHash): Compatibility {
+  if (replay.keys) {
+    if (replay.keys.version !== versionKey(SIM_VERSION, RULESET_ID)) return 'version';
+    return replay.keys.content === contentKey(content) ? 'ok' : 'content';
+  }
   if (replay.simVersion !== SIM_VERSION || replay.rulesetId !== RULESET_ID) return 'version';
   return sameContentHash(replay.contentHash, content) ? 'ok' : 'content';
 }
