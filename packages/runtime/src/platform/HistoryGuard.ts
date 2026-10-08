@@ -34,9 +34,9 @@ function isGuard(state: unknown): boolean {
   );
 }
 
-/** A challenge link (`#r=<code>`) is a navigation the game handles itself. */
+/** A challenge link (`#<code>`, `#r=<code>`) is a navigation the game handles itself. */
 function isChallengeHash(hash: string): boolean {
-  return hash.startsWith('#r=');
+  return hash.startsWith('#r=') || /^#[A-Za-z0-9_-]{16,}$/.test(hash);
 }
 
 export class HistoryGuard {

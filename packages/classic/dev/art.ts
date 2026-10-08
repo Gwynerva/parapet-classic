@@ -9,7 +9,8 @@
 import { buildSineTable, Level, type LevelData } from '@parapet/sim';
 import { buildClipTable } from '@parapet/runtime/anim/Animator.ts';
 import { drawPose, type CharacterPose } from '@parapet/runtime/render/CharacterRenderer.ts';
-import { EchoSheets } from '@parapet/runtime/render/EchoSkin.ts';
+import { applyScanlines } from '@parapet/runtime/render/EchoRenderer.ts';
+import { EchoSheets, makeEchoColor } from '@parapet/runtime/render/EchoSkin.ts';
 import { CharacterFx } from '@parapet/runtime/render/fx/CharacterFx.ts';
 import {
   defaultLevelArtFrame,
@@ -63,7 +64,29 @@ interface Shot {
   shift?: [number, number];
   /** Running left. */
   left?: boolean;
+  /** Drawn this many times bigger (a scene to read in a small preview). */
+  zoom?: number;
+  /** A rival racing alongside as an echo, the game's hologram of a recorded run. */
+  rival?: Rival;
 }
+
+/** The echo a runner races: a boss in an outfit and pose, `ahead` px in front of it. */
+interface Rival {
+  boss: string;
+  outfit: number;
+  frame: number;
+  ahead: number;
+  /** Up from the floor, in px (in the air). */
+  rise?: number;
+}
+
+/** The rival's hologram colour (the game's cyan echo) and its afterimages. */
+const RIVAL_COLOR = makeEchoColor('cyan', '#2ee6ff');
+const RIVAL_TRAIL = [
+  { back: 15, alpha: 0.1 },
+  { back: 10, alpha: 0.2 },
+  { back: 5, alpha: 0.35 },
+] as const;
 
 /** Keyframes of tricks in mid-air (the Moves menu's demos). */
 const JUMP = 135;
@@ -79,12 +102,23 @@ const BANNER_SHOTS: Shot[] = [
   { level: 4, mission: 0, at: -1, boss: 'b2', outfit: 0, frame: FLIP, feet: [0.55, 0.84], shift: [0, 20] },
   { level: 7, mission: 0, at: -1, boss: 'azure', outfit: 0, frame: JUMP, feet: [0.5, 0.84], shift: [0, 12] },
 ];
-/** The challenge links' preview: runners mid-race. */
+/**
+ * The challenge links' preview: a runner and the echo it races, side by side on a roof, drawn
+ * big enough to read in a chat's small preview.
+ */
 const RACE_SHOTS: Shot[] = [
   { level: 10, mission: 1, at: 3, boss: '', outfit: 0, frame: -1, feet: [0.5, 0.84] },
-  { level: 3, mission: 0, at: -1, boss: 'vera', outfit: 1, frame: JUMP, feet: [0.5, 0.84], shift: [0, 12] },
-  { level: 8, mission: 0, at: -1, boss: 'five', outfit: 0, frame: -1, feet: [0.5, 0.84] },
-  { level: 6, mission: 0, at: -1, boss: 'granger', outfit: 1, frame: FLIP, feet: [0.5, 0.84], shift: [0, 18] },
+  {
+    level: 9,
+    mission: 0,
+    at: -1,
+    boss: 'vera',
+    outfit: 0,
+    frame: -1,
+    feet: [0.24, 0.86],
+    zoom: 2,
+    rival: { boss: 'pierre', outfit: 0, frame: JUMP, ahead: 58, rise: 16 },
+  },
 ];
 /** The link preview: the place under the pennant, then the cards. */
 const OG_SHOTS: Shot[] = [
@@ -208,6 +242,58 @@ async function main(): Promise<void> {
     fx.drawFront(c, cam);
   };
 
+  /**
+   * The rival as the game draws a ghost: its look recoloured into a hologram, a trail of
+   * afterimages behind it, all in a layer that gets scanlines and is laid over slightly
+   * transparent.
+   */
+  const drawRival = (
+    c: CanvasRenderingContext2D,
+    s: Shot,
+    rival: Rival,
+    w: number,
+    h: number,
+  ): void => {
+    const boss = bosses.get(rival.boss);
+    if (!boss) return;
+    const character = contestCharacter(boss.levelId, 'flags');
+    const scene = echo.scene(RIVAL_COLOR, true, skins.sceneFor(character, rival.outfit));
+    const swap = skins.swapFor(character, -1, rival.outfit);
+    const p = placeOf(s);
+    const cam = {
+      x: Math.round(p.x - s.feet[0] * w * UNITS),
+      y: Math.round(p.y - s.feet[1] * h * UNITS),
+    };
+    const layer = document.createElement('canvas');
+    layer.width = w;
+    layer.height = h;
+    const lc = layer.getContext('2d')!;
+    lc.imageSmoothingEnabled = false;
+    scene.setViewport(w, h);
+    const x = p.x + rival.ahead * UNITS;
+    const y = p.y - (rival.rise ?? 0) * UNITS;
+    const pose = (back: number): CharacterPose => ({
+      x: x - back * UNITS,
+      y,
+      a: rival.frame,
+      b: rival.frame,
+      t: 0,
+      flipX: false,
+      anchored: false,
+    });
+    for (const { back, alpha } of RIVAL_TRAIL) {
+      lc.globalAlpha = alpha;
+      drawPose(lc, scene, pose(back), cam, swap);
+    }
+    lc.globalAlpha = 1;
+    drawPose(lc, scene, pose(0), cam, swap);
+    applyScanlines(lc, w, h, 0);
+    c.save();
+    c.globalAlpha = 0.85;
+    c.drawImage(layer, 0, 0);
+    c.restore();
+  };
+
   /** A card: a level with its boss, clipped to a parallelogram leaning right, pixel-stepped. */
   const card = (
     c: CanvasRenderingContext2D,
@@ -229,8 +315,13 @@ async function main(): Promise<void> {
     for (let y = 0; y < h; y++) c.rect(x0 + edge(y), top + y, x1 - x0, 1);
     c.clip();
     c.translate(x0, top);
-    drawPlace(c, s, w, h);
-    drawRunner(c, s, w, h);
+    const zoom = s.zoom ?? 1;
+    c.scale(zoom, zoom);
+    const vw = Math.ceil(w / zoom);
+    const vh = Math.ceil(h / zoom);
+    drawPlace(c, s, vw, vh);
+    if (s.rival) drawRival(c, s, s.rival, vw, vh);
+    drawRunner(c, s, vw, vh);
     c.restore();
     // A dark rim and a light one along its left edge and top.
     for (let y = 0; y < h; y++) {

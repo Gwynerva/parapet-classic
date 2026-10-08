@@ -205,13 +205,17 @@ function pagePlugin(site: string, counter: string): Plugin {
     configureServer(server) {
       // The challenge page is the game itself (the build writes it from index.html).
       server.middlewares.use((req, _res, next) => {
-        if (req.url?.startsWith('/race.html')) req.url = '/' + req.url.slice('/race.html'.length);
+        if (req.url?.startsWith('/r/')) req.url = req.url.slice('/r'.length);
         next();
       });
     },
     async writeBundle() {
       const page = join(outDir, 'index.html');
-      await writeFile(join(outDir, 'race.html'), racePage(await readFile(page, 'utf8'), site));
+      await mkdir(join(outDir, 'r'), { recursive: true });
+      await writeFile(
+        join(outDir, 'r', 'index.html'),
+        racePage(await readFile(page, 'utf8'), site),
+      );
     },
     transformIndexHtml: {
       order: 'pre',
@@ -251,8 +255,8 @@ function pagePlugin(site: string, counter: string): Plugin {
 }
 
 /**
- * The page challenge links open (`race.html#r=<code>`): the game itself, with its own link
- * preview (a race, a call to beat the run). Link previews come from a page's HTML as served:
+ * The page challenge links open (`r/#<code>`): the game itself one folder down (its files'
+ * relative paths one level up), with its own link preview (a race, a call to beat the run). Link previews come from a page's HTML as served:
  * the replay sits in the fragment, which never reaches a server, so the preview is one for
  * every challenge. Out of search engines: the game's page is the one to find.
  */
@@ -263,12 +267,14 @@ function racePage(html: string, site: string): string {
     'Can you beat my time? Open the link and race my ghost over the rooftops. Free, in the browser.';
   const meta = (attr: 'name' | 'property', key: string, value: string) => (text: string) => {
     const pattern = new RegExp(`(<meta\\s+${attr}="${key}"\\s+content=")[^"]*(")`);
-    if (!pattern.test(text)) throw new Error(`race.html: no ${key} in index.html`);
+    if (!pattern.test(text)) throw new Error(`r/index.html: no ${key} in index.html`);
     return text.replace(pattern, `$1${value}$2`);
   };
   const steps: ((text: string) => string)[] = [
     (text) => text.replace(/<title>[^<]*<\/title>/, `<title>${title}</title>`),
-    (text) => text.replace(/(<link rel="canonical" href=")[^"]*(")/, `$1${site}race.html$2`),
+    (text) => text.replace(/(<link rel="canonical" href=")[^"]*(")/, `$1${site}r/$2`),
+    // The page's own files (scripts, styles, icons, the manifest) are one folder up.
+    (text) => text.replace(/((?:src|href)=")\.\//g, '$1../'),
     (text) =>
       text.replace(
         '<meta charset="utf-8" />',
@@ -277,7 +283,7 @@ function racePage(html: string, site: string): string {
     meta('name', 'description', description),
     meta('property', 'og:title', ogTitle),
     meta('property', 'og:description', description),
-    meta('property', 'og:url', `${site}race.html`),
+    meta('property', 'og:url', `${site}r/`),
     meta('property', 'og:image', `${site}og-race.png`),
     meta('property', 'og:image:alt', 'Two runners racing over the rooftops of Parapet Classic'),
     meta('name', 'twitter:title', ogTitle),

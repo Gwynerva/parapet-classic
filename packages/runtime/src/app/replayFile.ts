@@ -1,10 +1,10 @@
 /**
- * How replays travel: as a link (`<site>/race.html#r=<code>`: the game, with a link preview of
- * its own), as a file (`*.parapet-replay`, a small JSON document around the same code) or as
- * pasted text containing either. The code is the `encodeReplay` output; everything else in a
- * file is there for people reading it and is ignored on import, because the game re-runs the
- * replay and computes the result itself. The code rides in the fragment: it never reaches a
- * server and has no length limit. `?r=<code>` and links to the game's own page work too.
+ * How replays travel: as a link (`<site>/r/#<code>`: the game, with a link preview of its own),
+ * as a file (`*.parapet-replay`, a small JSON document around the same code) or as pasted text
+ * containing either. The code is the `encodeReplay` output; everything else in a file is there
+ * for people reading it and is ignored on import, because the game re-runs the replay and
+ * computes the result itself. The code rides in the fragment: it never reaches a server and has
+ * no length limit. The game's own page takes `#r=<code>` and `?r=<code>` too (older links).
  */
 
 export const REPLAY_FILE_FORMAT = 'parapet-classic-replay';
@@ -13,7 +13,9 @@ export const REPLAY_FILE_EXTENSION = '.parapet-replay';
 /** What the file dialog offers. */
 export const REPLAY_FILE_ACCEPT = `${REPLAY_FILE_EXTENSION},application/json,.json,.txt`;
 
-/** The link fragment key: `#r=<code>`. */
+/** A challenge link: `…/r/#<code>`. */
+const RACE_LINK = /\/r\/#([A-Za-z0-9_-]{16,})/;
+/** The older form and the query: `#r=<code>`, `?r=<code>`. */
 const LINK_PATTERN = /(?:^|[#&?])r=([A-Za-z0-9_-]+)/;
 const BARE_CODE = /^[A-Za-z0-9_-]{16,}$/;
 
@@ -26,13 +28,14 @@ export interface ReplayFileInfo {
   score?: number;
 }
 
-/** The page challenge links open, next to the game's own (see `vite.config.ts`). */
-export const RACE_PAGE = 'race.html';
+/** The folder challenge links open, under the game's own (see `vite.config.ts`). */
+export const RACE_FOLDER = 'r/';
 
-/** The link that opens a replay, made on the game's page at `pageUrl`. */
+/** The link that opens a replay, made on the game's page at `pageUrl` (or its race page). */
 export function replayLink(pageUrl: string, code: string): string {
   const folder = pageUrl.replace(/[?#].*$/, '').replace(/[^/]*$/, '');
-  return `${folder}${RACE_PAGE}#r=${code}`;
+  const site = folder.endsWith(`/${RACE_FOLDER}`) ? folder.slice(0, -RACE_FOLDER.length) : folder;
+  return `${site}${RACE_FOLDER}#${code}`;
 }
 
 /** The contents of a replay file. */
@@ -72,6 +75,8 @@ export function extractReplayCode(text: string): string | null {
     }
     return null;
   }
+  const race = RACE_LINK.exec(trimmed);
+  if (race?.[1]) return race[1];
   const link = LINK_PATTERN.exec(trimmed);
   if (link?.[1]) return link[1];
   return BARE_CODE.test(trimmed) ? trimmed : null;
