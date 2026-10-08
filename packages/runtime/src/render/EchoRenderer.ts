@@ -16,9 +16,11 @@
  * this class only asks for their poses.
  */
 import type { RunnerState } from '@parapet/sim';
-import { drawPose, type CharacterPose, type CharacterRenderer } from './CharacterRenderer.ts';
+import { drawPose, type CharacterRenderer } from './CharacterRenderer.ts';
 import type { EchoColor, EchoSheets } from './EchoSkin.ts';
-import type { SpriteSwap } from './SceneRenderer.ts';
+import type { SceneRenderer, SpriteSwap } from './SceneRenderer.ts';
+import { PoseHistory } from './PoseHistory.ts';
+import { Sparks, sparkColors } from './Sparks.ts';
 import { toScreen, type CameraPos, type ViewSize } from './View.ts';
 
 /** Pivot and size of the character object (feet at y = 76 of a 142 px tall box). */
@@ -38,16 +40,26 @@ const TRAIL = [
   { back: 4, alpha: 0.2 },
   { back: 2, alpha: 0.35 },
 ] as const;
-const TRAIL_LENGTH = 7;
-/** Distance (world units) covered over six steps above which the trail shows. */
-const TRAIL_MIN_UNITS = 900;
 const REVEAL_MS = 320;
-const SPARK_COUNT = 28;
-/** Body centre above the feet, in world units (32 per pixel). */
-const BURST_HEIGHT = 900;
+
+/** Dims every third row of a hologram layer, the phase crawling downwards with time. */
+export function applyScanlines(
+  lctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  nowMs: number,
+): void {
+  lctx.globalCompositeOperation = 'destination-out';
+  lctx.fillStyle = SCAN_DIM;
+  const phase = Math.floor(nowMs / SCAN_STEP_MS) % SCAN_PERIOD;
+  for (let y = phase; y < height; y += SCAN_PERIOD) lctx.fillRect(0, y, width, 1);
+  lctx.globalCompositeOperation = 'source-over';
+}
 
 export interface EchoStyle {
   color: EchoColor;
+  /** Atlas the echo is recoloured from: a look's (`SkinLibrary.sceneFor`), or the base one. */
+  source?: SceneRenderer;
   /** Keep the sprite detail (players) or draw a flat silhouette (the original's rivals). */
   textured: boolean;
   /** Body-part swap for the frame (`clock` in ms of game clock). */
@@ -65,27 +77,16 @@ export interface EchoMarker {
 interface Entry {
   runner: RunnerState;
   style: EchoStyle;
-  trail: (CharacterPose | null)[];
-  steps: number;
+  history: PoseHistory;
   revealAt: number;
   gone: boolean;
-}
-
-interface Spark {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  age: number;
-  life: number;
-  color: string;
 }
 
 export class EchoRenderer {
   private readonly characters: CharacterRenderer;
   private readonly sheets: EchoSheets;
   private readonly entries = new Map<RunnerState, Entry>();
-  private readonly sparks: Spark[] = [];
+  private readonly sparks = new Sparks();
   private readonly markerList: EchoMarker[] = [];
   private layer: HTMLCanvasElement | null = null;
   private lastDrawAt = -1;
@@ -100,8 +101,7 @@ export class EchoRenderer {
     this.entries.set(runner, {
       runner,
       style,
-      trail: new Array<CharacterPose | null>(TRAIL_LENGTH).fill(null),
-      steps: 0,
+      history: new PoseHistory(),
       revealAt: -1,
       gone: false,
     });
@@ -129,8 +129,7 @@ export class EchoRenderer {
   /** Record the step's poses for the trails; call after `CharacterRenderer.step`. */
   step(): void {
     for (const e of this.entries.values()) {
-      e.trail[e.steps % TRAIL_LENGTH] = this.characters.pose(e.runner, 1);
-      e.steps++;
+      e.history.push(this.characters.pose(e.runner, 1));
     }
   }
 
@@ -141,23 +140,7 @@ export class EchoRenderer {
     e.gone = true;
     const pose = this.characters.pose(runner, 1);
     if (!pose || e.revealAt < 0) return;
-    const { ramp } = e.style.color;
-    const colors = [e.style.color.css, e.style.color.light, rgbCss(ramp.highlight)];
-    const x = runner.x;
-    const y = runner.y - BURST_HEIGHT;
-    for (let i = 0; i < SPARK_COUNT; i++) {
-      const angle = (i / SPARK_COUNT) * Math.PI * 2 + Math.random() * 0.4;
-      const speed = 1.6 + Math.random() * 3.2;
-      this.sparks.push({
-        x,
-        y: y + (Math.random() - 0.5) * 1200,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 1.5,
-        age: 0,
-        life: 550 + Math.random() * 450,
-        color: colors[i % colors.length]!,
-      });
-    }
+    this.sparks.burst(runner.x, runner.y, sparkColors(e.style.color));
     this.markerList.push({ runner, x: runner.x, y: runner.y, color: e.style.color });
   }
 
@@ -201,18 +184,14 @@ export class EchoRenderer {
         drawn = this.drawEntry(lctx, e, cam, alpha, clock, nowMs, view) || drawn;
       }
       if (drawn) {
-        lctx.globalCompositeOperation = 'destination-out';
-        lctx.fillStyle = SCAN_DIM;
-        const phase = Math.floor(nowMs / SCAN_STEP_MS) % SCAN_PERIOD;
-        for (let y = phase; y < layer.height; y += SCAN_PERIOD) lctx.fillRect(0, y, layer.width, 1);
-        lctx.globalCompositeOperation = 'source-over';
+        applyScanlines(lctx, layer.width, layer.height, nowMs);
         ctx.save();
         ctx.globalAlpha = LAYER_ALPHA;
         ctx.drawImage(layer, 0, 0);
         ctx.restore();
       }
     }
-    this.drawSparks(ctx, cam, dt);
+    this.sparks.draw(ctx, cam, dt);
   }
 
   private drawEntry(
@@ -226,14 +205,14 @@ export class EchoRenderer {
   ): boolean {
     const pose = this.characters.pose(e.runner, alpha);
     if (!pose) return false;
-    const scene = this.sheets.scene(e.style.color, e.style.textured);
+    const scene = this.sheets.scene(e.style.color, e.style.textured, e.style.source);
     scene.setViewport(view.width, view.height);
     const swap = e.style.swap(clock);
     const revealed = (nowMs - e.revealAt) / REVEAL_MS;
 
-    if (revealed >= 1 && this.isFast(e)) {
+    if (revealed >= 1 && e.history.fast) {
       for (const { back, alpha: a } of TRAIL) {
-        const past = e.trail[(e.steps - 1 - back + TRAIL_LENGTH * 4) % TRAIL_LENGTH];
+        const past = e.history.back(back);
         if (!past) continue;
         lctx.globalAlpha = a;
         drawPose(lctx, scene, past, cam, swap);
@@ -260,14 +239,6 @@ export class EchoRenderer {
     return true;
   }
 
-  private isFast(e: Entry): boolean {
-    if (e.steps < TRAIL_LENGTH) return false;
-    const now = e.trail[(e.steps - 1) % TRAIL_LENGTH];
-    const then = e.trail[e.steps % TRAIL_LENGTH];
-    if (!now || !then) return false;
-    return Math.abs(now.x - then.x) + Math.abs(now.y - then.y) > TRAIL_MIN_UNITS;
-  }
-
   /** A small flag at every place a ghost's run ended: pole in the rim tone, cloth in the body. */
   private drawMarkers(ctx: CanvasRenderingContext2D, cam: CameraPos): void {
     for (const m of this.markerList) {
@@ -285,22 +256,6 @@ export class EchoRenderer {
     }
   }
 
-  private drawSparks(ctx: CanvasRenderingContext2D, cam: CameraPos, dt: number): void {
-    let alive = 0;
-    for (const s of this.sparks) {
-      s.age += dt;
-      if (s.age >= s.life) continue;
-      s.vy += 0.008 * dt;
-      s.x += s.vx * dt;
-      s.y += s.vy * dt;
-      this.sparks[alive++] = s;
-      const size = s.age < s.life * 0.6 ? 2 : 1;
-      ctx.fillStyle = s.color;
-      ctx.fillRect(toScreen(s.x, cam.x), toScreen(s.y, cam.y), size, size);
-    }
-    this.sparks.length = alive;
-  }
-
   private ensureLayer(view: ViewSize): HTMLCanvasElement | null {
     if (typeof document === 'undefined') return null;
     if (!this.layer) this.layer = document.createElement('canvas');
@@ -310,8 +265,4 @@ export class EchoRenderer {
     if (lctx) lctx.imageSmoothingEnabled = false;
     return this.layer;
   }
-}
-
-function rgbCss(c: readonly [number, number, number]): string {
-  return `rgb(${c[0]}, ${c[1]}, ${c[2]})`;
 }

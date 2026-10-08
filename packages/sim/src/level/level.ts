@@ -16,7 +16,7 @@ export interface MissionSection {
   checkpoints: Point[];
 }
 
-/** Shape of `packages/content-classic/generated/levels/<n>.json`. */
+/** Shape of `packages/content/playman/extracted/levels/<n>.json`. */
 export interface LevelData {
   id: number;
   nameStringId: number;

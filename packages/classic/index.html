@@ -11,7 +11,71 @@
       content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; connect-src 'self'; worker-src 'self' blob:"
     />
     <meta name="theme-color" content="#000000" />
-    <title>Parapet Classic</title>
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Parapet" />
+    <title>Parapet Classic: Playman Extreme Running remake in the browser</title>
+    <meta
+      name="description"
+      content="Run, vault and flip across the rooftops of the 2007 mobile parkour classic, remade for the browser: twelve levels, ghost races, challenge links and twelve bosses. Free, no install."
+    />
+    <link rel="canonical" href="%SITE_URL%" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Parapet Classic" />
+    <meta property="og:title" content="Parapet Classic: rooftop parkour in the browser" />
+    <meta
+      property="og:description"
+      content="The 2007 mobile parkour classic Playman Extreme Running, remade for the browser: twelve levels, ghost races, challenge links and twelve bosses. Free, no install."
+    />
+    <meta property="og:url" content="%SITE_URL%" />
+    <meta property="og:image" content="%SITE_URL%og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Parapet Classic: bosses running and flipping over the rooftops of the levels"
+    />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="ru_RU" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Parapet Classic: rooftop parkour in the browser" />
+    <meta
+      name="twitter:description"
+      content="The 2007 mobile parkour classic, remade for the browser. Free, no install."
+    />
+    <meta name="twitter:image" content="%SITE_URL%og-image.png" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./favicon.ico" sizes="32x32" />
+    <link rel="icon" type="image/svg+xml" href="./icons/icon.svg" />
+    <link rel="icon" type="image/png" sizes="96x96" href="./icons/favicon-96.png" />
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "VideoGame",
+        "name": "Parapet Classic",
+        "url": "%SITE_URL%",
+        "image": "%SITE_URL%og-image.png",
+        "description": "A browser remake of the 2007 J2ME parkour game Playman Extreme Running: twelve rooftop levels with their missions, ghost races, challenge links and twelve bosses.",
+        "genre": ["Platform", "Parkour", "Runner"],
+        "gamePlatform": "Web browser",
+        "applicationCategory": "Game",
+        "operatingSystem": "Any",
+        "playMode": "SinglePlayer",
+        "inLanguage": ["en", "ru"],
+        "isAccessibleForFree": true,
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "author": { "@type": "Person", "name": "Gwynerva" },
+        "codeRepository": "https://github.com/Gwynerva/parapet-classic",
+        "isBasedOn": {
+          "@type": "VideoGame",
+          "name": "Playman Extreme Running",
+          "datePublished": "2007",
+          "author": { "@type": "Organization", "name": "Mr.Goodliving" }
+        }
+      }
+    </script>
     <style>
       html,
       body {
@@ -41,6 +105,15 @@
   </head>
   <body>
     <div id="game"></div>
+    <noscript>
+      <p style="color: #e8eef4; font: 16px sans-serif; padding: 24px">
+        Parapet Classic is a browser remake of the 2007 parkour game Playman Extreme Running. It
+        needs JavaScript to run. Source:
+        <a style="color: #ffb000" href="https://github.com/Gwynerva/parapet-classic"
+          >github.com/Gwynerva/parapet-classic</a
+        >.
+      </p>
+    </noscript>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

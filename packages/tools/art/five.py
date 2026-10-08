@@ -1,0 +1,54 @@
+"""Five: the looks (fv_looks.py), the effects (glitch, overdrive) and the outfits in boss.json."""
+from lookgen import *
+from tricks import tricks
+import json
+
+import fv_looks  # noqa: F401  (the looks)
+
+fx = {
+    'palette': {'c': '#3fe8ff', 'C': '#bff8ff', 'm': '#ff2fa6', 'M': '#ffa0d8', 'y': '#fff060', 'w': '#ffffff', 'k': '#16161a'},
+    'sprites': {
+        'block1': ['cc', 'cc'], 'block2': ['mm'], 'block3': ['m', 'm', 'c'], 'line': ['cccc'], 'line2': ['mmmmm'],
+        'chip': ['ckc', 'kck', 'ckc'],
+    },
+    'emitters': {
+        'glitch': {
+            'while': ['run', 'air', 'wall'], 'perSecond': 30, 'minSpeed': 30, 'anchor': 'body', 'jitter': [4, 8],
+            'speed': [0, 15], 'angle': [-20, 20], 'life': [80, 220], 'fadeOut': 60,
+            'sprite': {'frames': ['block1', 'block2', 'block3', 'line', 'line2'], 'random': True}, 'blend': 'add', 'max': 30,
+        },
+        'tear': {
+            'enter': ['land', 'flip', 'jump', 'dash'], 'burst': [4, 7], 'anchor': 'body', 'jitter': [2, 10],
+            'speed': [30, 60], 'angle': [-5, 5], 'drag': 6, 'life': [120, 260], 'fadeOut': 100,
+            'sprite': {'frames': ['line', 'line2'], 'random': True}, 'blend': 'add',
+        },
+        'chips': {
+            'while': ['run'], 'every': 40, 'minSpeed': 80, 'anchor': 'hand.near', 'speed': [10, 20],
+            'angle': [30, 90], 'gravity': 100, 'life': [400, 600], 'fadeOut': 200, 'sprite': {'frames': ['chip'], 'fps': 1},
+        },
+        'burst': {
+            'burst': 26, 'anchor': 'body', 'jitter': [4, 10], 'speed': [10, 70], 'angle': [-15, 15], 'drag': 3,
+            'life': [150, 400], 'fadeOut': 120, 'sprite': {'frames': ['block1', 'block2', 'block3', 'line', 'line2'], 'random': True},
+            'blend': 'add',
+        },
+        'idle': {
+            'perSecond': 6, 'anchor': 'body', 'jitter': [5, 9], 'speed': 0, 'life': [60, 160], 'fadeOut': 40,
+            'sprite': {'frames': ['block1', 'block2', 'line'], 'random': True}, 'blend': 'add',
+        },
+    },
+    'variants': {
+        'glitch': {'emitters': ['glitch', 'tear']},
+        'overdrive': {'emitters': ['chips'],
+                      'afterimage': {'steps': [{'back': 6, 'alpha': 0.25}, {'back': 5, 'alpha': 0.3}, {'back': 4, 'alpha': 0.35},
+                                               {'back': 3, 'alpha': 0.4}, {'back': 2, 'alpha': 0.5}, {'back': 1, 'alpha': 0.55}],
+                                     'colors': 'rainbow', 'textured': False, 'while': 'running'}},
+    },
+    'presence': {'idle': ['idle'], 'vanish': ['burst'], 'appear': ['burst']},
+}
+write_json(BOSSES + '/five/fx.json', tricks(fx, 'five'))
+
+# Its outfits in boss.json (its world, stage.json, is drawn in stages.py / stages2.py).
+b = json.load(open(BOSSES + '/five/boss.json', encoding='utf-8'))
+b['looks'] = ['five-her', 'five-him']
+write_json(BOSSES + '/five/boss.json', b)
+print('five written')

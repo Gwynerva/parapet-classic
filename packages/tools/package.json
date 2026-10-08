@@ -1,10 +1,19 @@
 {
   "name": "@parapet/tools",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
     "extract": "node src/cli.ts extract",
-    "build-font": "node src/fontCli.ts"
+    "build-font": "node src/fontCli.ts",
+    "tas": "node src/tas/cli.ts",
+    "i18n": "node src/i18nCli.ts",
+    "look": "node src/lookCli.ts",
+    "icons": "node src/iconCli.ts",
+    "demo": "node src/demoCli.ts"
+  },
+  "dependencies": {
+    "@parapet/sim": "*",
+    "@parapet/runtime": "*"
   }
 }

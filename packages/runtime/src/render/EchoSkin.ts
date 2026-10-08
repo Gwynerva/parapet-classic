@@ -14,6 +14,7 @@ import { fnv1a } from '@parapet/sim';
 import type { AtlasFrame } from '../content/types.ts';
 import type { SceneRenderer } from './SceneRenderer.ts';
 import { SpriteSheet } from './SpriteSheet.ts';
+import { readPixels } from './SkinLibrary.ts';
 
 export type Rgb = readonly [number, number, number];
 
@@ -53,7 +54,8 @@ function css(c: Rgb): string {
 const BLACK: Rgb = [0, 0, 0];
 const WHITE: Rgb = [255, 255, 255];
 
-function neon(id: string, hex: string): EchoColor {
+/** An echo colour ramp built around one saturated tone (`id` names it in caches). */
+export function makeEchoColor(id: string, hex: string): EchoColor {
   const body = hexRgb(hex);
   const rim = mix(body, WHITE, 0.8);
   return {
@@ -66,18 +68,18 @@ function neon(id: string, hex: string): EchoColor {
 
 /** Twelve saturated hues around the colour wheel, bright enough for every level's sky. */
 export const ECHO_PALETTE: readonly EchoColor[] = [
-  neon('coral', '#ff4d4d'),
-  neon('orange', '#ff8a1f'),
-  neon('gold', '#ffd21f'),
-  neon('lime', '#b8ff2e'),
-  neon('green', '#3dff6e'),
-  neon('aqua', '#2effc8'),
-  neon('cyan', '#2ee6ff'),
-  neon('azure', '#3d9eff'),
-  neon('periwinkle', '#8a7dff'),
-  neon('violet', '#c45cff'),
-  neon('magenta', '#ff4fe1'),
-  neon('pink', '#ff4f8f'),
+  makeEchoColor('coral', '#ff4d4d'),
+  makeEchoColor('orange', '#ff8a1f'),
+  makeEchoColor('gold', '#ffd21f'),
+  makeEchoColor('lime', '#b8ff2e'),
+  makeEchoColor('green', '#3dff6e'),
+  makeEchoColor('aqua', '#2effc8'),
+  makeEchoColor('cyan', '#2ee6ff'),
+  makeEchoColor('azure', '#3d9eff'),
+  makeEchoColor('periwinkle', '#8a7dff'),
+  makeEchoColor('violet', '#c45cff'),
+  makeEchoColor('magenta', '#ff4fe1'),
+  makeEchoColor('pink', '#ff4f8f'),
 ];
 
 /** Grey of the original's rivals; never handed out to a name. */
@@ -156,52 +158,67 @@ export function recolorEcho(
   return out;
 }
 
-/** Recoloured copies of the atlas, one scene renderer per (colour, variant), made on demand. */
+/**
+ * Recoloured copies of atlases, one per (sheet, colour, variant), made on demand. A look's
+ * sheet is a small layer over the base atlas: only the layer is recoloured, its fallback is the
+ * recoloured base atlas shared by every look, so the echo of a runner in a look keeps the
+ * look's shapes and costs little.
+ */
 export class EchoSheets {
   private readonly base: SceneRenderer;
-  private readonly scenes = new Map<string, SceneRenderer>();
-  private pixels: ImageData | null = null;
+  private readonly scenes = new Map<SceneRenderer, Map<string, SceneRenderer>>();
+  private readonly sheets = new Map<SpriteSheet, Map<string, SpriteSheet>>();
 
   constructor(base: SceneRenderer) {
     this.base = base;
   }
 
-  scene(color: EchoColor, textured: boolean): SceneRenderer {
+  scene(color: EchoColor, textured: boolean, source: SceneRenderer = this.base): SceneRenderer {
     const key = `${color.id}:${textured ? 't' : 'f'}`;
-    let scene = this.scenes.get(key);
+    let byKey = this.scenes.get(source);
+    if (!byKey) {
+      byKey = new Map();
+      this.scenes.set(source, byKey);
+    }
+    let scene = byKey.get(key);
     if (!scene) {
-      scene = this.build(color, textured);
-      this.scenes.set(key, scene);
+      const sheet = this.sheetFor(color, textured, source.sheet);
+      scene = sheet === source.sheet ? source : source.withSheet(sheet);
+      byKey.set(key, scene);
     }
     return scene;
   }
 
-  private source(): ImageData | null {
-    if (this.pixels) return this.pixels;
-    const image = this.base.sheet.image as CanvasImageSource & { width: number; height: number };
-    const canvas = document.createElement('canvas');
-    canvas.width = image.width;
-    canvas.height = image.height;
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    if (!ctx) return null;
-    ctx.drawImage(image, 0, 0);
-    this.pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    return this.pixels;
+  /** `sheet` recoloured (and its fallbacks); the sheet itself without a canvas. */
+  sheetFor(color: EchoColor, textured: boolean, sheet: SpriteSheet): SpriteSheet {
+    const key = `${color.id}:${textured ? 't' : 'f'}`;
+    let byKey = this.sheets.get(sheet);
+    if (!byKey) {
+      byKey = new Map();
+      this.sheets.set(sheet, byKey);
+    }
+    let out = byKey.get(key);
+    if (!out) {
+      out = this.build(color, textured, sheet);
+      byKey.set(key, out);
+    }
+    return out;
   }
 
-  private build(color: EchoColor, textured: boolean): SceneRenderer {
-    const src = this.source();
-    if (!src) return this.base;
-    const frames = this.base.sheet.frames;
-    const data = recolorEcho(src.data, src.width, src.height, color.ramp, textured, frames);
+  private build(color: EchoColor, textured: boolean, sheet: SpriteSheet): SpriteSheet {
+    const fallback = sheet.fallback ? this.sheetFor(color, textured, sheet.fallback) : null;
+    const image = sheet.image as CanvasImageSource & { width: number; height: number };
+    const src = readPixels(image);
+    if (!src) return sheet;
+    const data = recolorEcho(src.data, src.width, src.height, color.ramp, textured, sheet.frames);
     const canvas = document.createElement('canvas');
     canvas.width = src.width;
     canvas.height = src.height;
     const ctx = canvas.getContext('2d');
-    if (!ctx) return this.base;
-    const image = ctx.createImageData(src.width, src.height);
-    image.data.set(data);
-    ctx.putImageData(image, 0, 0);
-    return this.base.withSheet(new SpriteSheet(canvas, frames));
+    if (!ctx) return sheet;
+    const out = ctx.createImageData(src.width, src.height);
+    out.data.set(data);
+    ctx.putImageData(out, 0, 0);
+    return new SpriteSheet(canvas, sheet.frames, fallback);
   }
 }

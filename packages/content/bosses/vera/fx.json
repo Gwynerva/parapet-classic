@@ -1,0 +1,128 @@
+{
+  "palette": {
+    "r": "#ff3a2e",
+    "R": "#c01c18",
+    "w": "#ffffff",
+    "c": "#bfe8ff",
+    "C": "#7ac8f0",
+    "g": "#e8f6ff",
+    "a": "#ffffffc0",
+    "b": "#e4f4ff80",
+    "d": "#c8e6ff60"
+  },
+  "sprites": {
+    "gust1": ["ddbbaaaaaa"],
+    "gust2": ["...ddbbaa", "dbbaaa..."],
+    "gust3": ["ddbbbaaaaaaa"],
+    "gust4": ["dbbaa....", "....dbbaa"],
+    "gust5": ["ddbaaaa"],
+    "shard1": ["w..", "cw.", "Ccw"],
+    "shard2": [".w.", "cwc", "C.C"],
+    "shard3": ["wc", "cC", "C."]
+  },
+  "emitters": {
+    "gusts": {
+      "while": ["run", "air", "wall"],
+      "every": 4,
+      "minSpeed": 70,
+      "anchor": "body",
+      "jitter": [2, 9],
+      "offset": [3, 0],
+      "speed": [25, 60],
+      "angle": [-4, 4],
+      "life": [180, 320],
+      "fadeIn": 30,
+      "fadeOut": 140,
+      "face": true,
+      "sprite": {
+        "frames": ["gust1", "gust2", "gust3", "gust4", "gust5"],
+        "random": true
+      },
+      "max": 40
+    },
+    "gust-burst": {
+      "enter": ["jump", "flip", "vault", "wall"],
+      "burst": [4, 6],
+      "anchor": "body",
+      "jitter": [3, 8],
+      "speed": [50, 90],
+      "angle": [-8, 8],
+      "life": [220, 360],
+      "fadeOut": 160,
+      "face": true,
+      "sprite": {
+        "frames": ["gust1", "gust3", "gust5"],
+        "random": true
+      }
+    },
+    "rare-glass": {
+      "enter": ["flip", "vault", "wall", "roll", "land"],
+      "chance": 0.3,
+      "burst": [5, 8],
+      "anchor": "feet",
+      "speed": [40, 90],
+      "angle": [0, 360],
+      "gravity": 280,
+      "life": [400, 700],
+      "fadeOut": 250,
+      "tumble": [2, 5],
+      "sprite": {
+        "frames": ["shard1", "shard2", "shard3"],
+        "random": true
+      }
+    },
+    "shatter": {
+      "burst": [6, 9],
+      "anchor": "feet",
+      "speed": [30, 70],
+      "angle": [20, 160],
+      "gravity": 280,
+      "life": [400, 700],
+      "fadeOut": 250,
+      "tumble": [2, 5],
+      "sprite": {
+        "frames": ["shard1", "shard2", "shard3"],
+        "random": true
+      }
+    },
+    "burst": {
+      "burst": 18,
+      "anchor": "body",
+      "jitter": [4, 10],
+      "speed": [60, 120],
+      "angle": [-10, 10],
+      "drag": 2,
+      "life": [250, 450],
+      "fadeOut": 200,
+      "sprite": {
+        "frames": ["gust1", "gust3", "gust5"],
+        "random": true
+      }
+    },
+    "idle": {
+      "perSecond": 3,
+      "anchor": "body",
+      "jitter": [6, 10],
+      "offset": [6, 0],
+      "speed": [15, 30],
+      "angle": [-5, 5],
+      "life": [300, 500],
+      "fadeIn": 80,
+      "fadeOut": 200,
+      "sprite": {
+        "frames": ["gust1", "gust5"],
+        "random": true
+      }
+    }
+  },
+  "variants": {
+    "wind": {
+      "emitters": ["gusts", "gust-burst", "rare-glass"]
+    }
+  },
+  "presence": {
+    "idle": ["idle"],
+    "vanish": ["burst", "shatter"],
+    "appear": ["burst", "shatter"]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "briefing.sprint": "Collect all 5 flags and reach the goal before me. If the route gets too hard, follow me.",
+  "briefing.flags": "Collect 5 flags before the time runs out. Collect them in any order!",
+  "briefing.score": "Score target: {target} points.\n\nBuild up your SCORE on the way to the goal for a high result.",
+  "briefing.challenge.2": "Learn to jump off walls, get the flag and return to the goal!",
+  "briefing.challenge.3": "Now you will learn a new trick: the WALL FLIP. Get the flag and return to the goal!",
+  "briefing.challenge.5": "Now you will learn to clear small objects with the MONKEY VAULT, the SPIDER JUMP and the MONKEY FLIP. The arrows will help you on the way.",
+  "briefing.challenge.6": "Time to dance on the pole! Do a few POLE JUMPS, come down with a POLE SLIDE and turn around with a POLE SPIN.",
+  "briefing.challenge.score": "Score {target} points in {seconds, plural, one {# second} other {# seconds}} to pass this challenge.",
+  "tutorial.1.0": "Learn the basic controls! Use UP, LEFT, RIGHT and DOWN to move. Running is automatic.",
+  "tutorial.1.1": "Once you are comfortable with the controls, get the flag and come back to me.",
+  "tutorial.1.2": "There is no time limit, so practise as long as you like.",
+  "tutorial.1.done": "Cool! Looks like you are ready for the next challenge! Come back if you want more practice.",
+  "tutorial.2.0": "Now I will teach you to use the terrain to speed up and move more easily. To help you, I have placed arrows along your path. When you reach an arrow, press the matching key to do the right move.",
+  "tutorial.2.1": "Get the flag once more and come back to me.",
+  "tutorial.2.2": "If you miss an arrow, don't worry. Just remember the direction and keep your speed up.",
+  "tutorial.2.done": "Great! Now you can try the other game modes. Remember to use your surroundings to get an edge. That is what extreme running is all about!",
+  "tutorial.2.ps": "P.S. You can find every move in the Moves menu."
+}

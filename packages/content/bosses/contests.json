@@ -1,0 +1,370 @@
+{
+  "simVersion": "parapet-sim@0.2.0",
+  "rulesetId": "classic",
+  "constraints": {
+    "minGap": 3,
+    "toleranceMs": 300
+  },
+  "levels": [
+    {
+      "levelId": 0,
+      "contentHash": {
+        "level": 4078864823,
+        "moves": 3534806784,
+        "tables": 1193975815
+      },
+      "flags": {
+        "timeMs": 14370,
+        "splitsMs": [
+          2550,
+          4110,
+          6510,
+          10380,
+          14370
+        ],
+        "runSha256": "7967f1064c76a38eec2ab5dbf38f6cb3f5c1cc19c1d935ecb4d4faa303807e63"
+      },
+      "sprint": {
+        "timeMs": 28140,
+        "splitsMs": [
+          3720,
+          7920,
+          10680,
+          11910,
+          14310
+        ],
+        "runSha256": "5a0bb4124ea6bbc8016f0ca3cca1f53fa4261ed73a4e819bbf46ab73a7c2671d"
+      }
+    },
+    {
+      "levelId": 1,
+      "contentHash": {
+        "level": 575162164,
+        "moves": 3534806784,
+        "tables": 1193975815
+      },
+      "flags": {
+        "timeMs": 34530,
+        "splitsMs": [
+          4110,
+          12030,
+          18840,
+          26070,
+          34530
+        ],
+        "runSha256": "8428959742c809ece4b4a997b9ede77fa7ae070bb5869bcf35f3f653629d23e4"
+      },
+      "sprint": {
+        "timeMs": 28770,
+        "splitsMs": [
+          3570,
+          12180,
+          15090,
+          23160,
+          25710
+        ],
+        "runSha256": "80597b82d15bd4e7f9a811df0eba6af730d5167e099206366a1d4853f51a190e"
+      }
+    },
+    {
+      "levelId": 2,
+      "contentHash": {
+        "level": 281439602,
+        "moves": 3534806784,
+        "tables": 1193975815
+      },
+      "flags": {
+        "timeMs": 25380,
+        "splitsMs": [
+          3360,
+          8700,
+          15000,
+          22020,
+          25380
+        ],
+        "runSha256": "f6d339aad1a5f1a3e101a010a9552d24b288d07355b701d810b3d6497cf4cebd"
+      },
+      "sprint": {
+        "timeMs": 30660,
+        "splitsMs": [
+          4620,
+          7680,
+          21330,
+          25440,
+          30090
+        ],
+        "runSha256": "8fd07effceac5e41cfad6d2224dc77200a4dfc0e50493ed5f3b23f8682ea090e"
+      }
+    },
+    {
+      "levelId": 3,
+      "contentHash": {
+        "level": 2483206816,
+        "moves": 3534806784,
+        "tables": 1193975815
+      },
+      "flags": {
+        "timeMs": 39000,
+        "splitsMs": [
+          3810,
+          15600,
+          23850,
+          25560,
+          39000
+        ],
+        "runSha256": "6c54aaa1a838375dcb9af18207d7707562f1eaa5ba520b00d3ceb70344004776"
+      },
+      "sprint": {
+        "timeMs": 27690,
+        "splitsMs": [
+          5880,
+          12720,
+          16080,
+          20760,
+          26220
+        ],
+        "runSha256": "c7f1a3865f8528b4344e23c845529ffa24a4491643186f4e0a0d3baa470cae0f"
+      }
+    },
+    {
+      "levelId": 4,
+      "contentHash": {
+        "level": 2475576463,
+        "moves": 3534806784,
+        "tables": 1193975815
+      },
+      "flags": {
+        "timeMs": 33750,
+        "splitsMs": [
+          14550,
+          21360,
+          26670,
+          30330,
+          33750
+        ],
+        "runSha256": "d474a29f5e80eaff8858da689a369fcbe06d58ac79aa8931f8330b3be106b7ce"
+      },
+      "sprint": {
+        "timeMs": 34530,
+        "splitsMs": [
+          3000,
+          20790,
+          21930,
+          23970,
+          30270
+        ],
+        "runSha256": "a7f35bea671e84b308f0c8fc2c157013305d1dc1bc28b1347a2dfe8ff1d69e9d"
+      }
+    },
+    {
+      "levelId": 5,
+      "contentHash": {
+        "level": 3053036673,
+        "moves": 3534806784,
+        "tables": 1193975815
+      },
+      "flags": {
+        "timeMs": 41910,
+        "splitsMs": [
+          5760,
+          13950,
+          22020,
+          37110,
+          41910
+        ],
+        "runSha256": "0b51c31955e32b4dcb6a83fb25c2d48d46fe8885d84811b3f3749259c11db24b"
+      },
+      "sprint": {
+        "timeMs": 40710,
+        "splitsMs": [
+          11880,
+          19950,
+          23130,
+          28710,
+          35850
+        ],
+        "runSha256": "23d7e41cdb352f856d3dec1d24b7493cab54ab69eb8a729e9d76ce9b6f55f822"
+      }
+    },
+    {
+      "levelId": 6,
+      "contentHash": {
+        "level": 2769953024,
+        "moves": 3534806784,
+        "tables": 1193975815
+      },
+      "flags": {
+        "timeMs": 34230,
+        "splitsMs": [
+          3060,
+          12720,
+          19710,
+          25230,
+          34230
+        ],
+        "runSha256": "e13276d5c111436ae345ba4db8f9e9f1465250b4b5180c4a911b733782bbf670"
+      },
+      "sprint": {
+        "timeMs": 33090,
+        "splitsMs": [
+          5760,
+          9480,
+          15360,
+          27030,
+          32820
+        ],
+        "runSha256": "bf24103def161808de1a751ec5714b083049e88830bc159b4a26972a1cc44245"
+      }
+    },
+    {
+      "levelId": 7,
+      "contentHash": {
+        "level": 1619455356,
+        "moves": 3534806784,
+        "tables": 1193975815
+      },
+      "flags": {
+        "timeMs": 36510,
+        "splitsMs": [
+          7080,
+          16110,
+          27600,
+          34350,
+          36510
+        ],
+        "runSha256": "de5e54e3995ea677f6dd96f79697e8f0050a75cf34d70f0b22850776a9ef9fda"
+      },
+      "sprint": {
+        "timeMs": 21930,
+        "splitsMs": [
+          2820,
+          6870,
+          10650,
+          17310,
+          21330
+        ],
+        "runSha256": "8a541a7972f2b8e201a5f7848ffb65645a884dfe1b227ba64f6d14c882687e8a"
+      }
+    },
+    {
+      "levelId": 8,
+      "contentHash": {
+        "level": 302581296,
+        "moves": 3534806784,
+        "tables": 1193975815
+      },
+      "flags": {
+        "timeMs": 27630,
+        "splitsMs": [
+          3090,
+          9750,
+          19020,
+          23010,
+          27630
+        ],
+        "runSha256": "af490f036c7a15440053bbc66246b288ce4f02a5b25706a9af58d8002828760c"
+      },
+      "sprint": {
+        "timeMs": 31410,
+        "splitsMs": [
+          3360,
+          8550,
+          12330,
+          24510,
+          28800
+        ],
+        "runSha256": "d46900c054fa8bbd40e9472087af9af3dcca9bd68f57edc7da9538200afcf13b"
+      }
+    },
+    {
+      "levelId": 9,
+      "contentHash": {
+        "level": 4190474913,
+        "moves": 3534806784,
+        "tables": 1193975815
+      },
+      "flags": {
+        "timeMs": 40380,
+        "splitsMs": [
+          13140,
+          22200,
+          24630,
+          30810,
+          40380
+        ],
+        "runSha256": "11f97630c48fda089530cff4ea9559ec9288dc0d668b53efe9cd803c1cb7f5bb"
+      },
+      "sprint": {
+        "timeMs": 40710,
+        "splitsMs": [
+          1650,
+          15120,
+          25800,
+          32760,
+          37980
+        ],
+        "runSha256": "b16718103151b811e4e695259f0a6e217514e05654d3e25fc2805c78de697085"
+      }
+    },
+    {
+      "levelId": 10,
+      "contentHash": {
+        "level": 3160659897,
+        "moves": 3534806784,
+        "tables": 1193975815
+      },
+      "flags": {
+        "timeMs": 40590,
+        "splitsMs": [
+          9840,
+          29130,
+          33870,
+          36000,
+          40590
+        ],
+        "runSha256": "f2297e6cef252b724403b37b8f07fe441af09b5283da9f31bc9d8d8fec65c677"
+      },
+      "sprint": {
+        "timeMs": 66330,
+        "splitsMs": [
+          15420,
+          19110,
+          31500,
+          41190,
+          55170
+        ],
+        "runSha256": "19ff2127e4270022bdb36f825ac2002b88bb5e1e69947d790482ebc7f76ed9b3"
+      }
+    },
+    {
+      "levelId": 11,
+      "contentHash": {
+        "level": 3229606679,
+        "moves": 3534806784,
+        "tables": 1193975815
+      },
+      "flags": {
+        "timeMs": 25920,
+        "splitsMs": [
+          5370,
+          10140,
+          12690,
+          17790,
+          25920
+        ],
+        "runSha256": "07b461331e73b4064be61a21ea58824eb3766c62a6fc7382a8e9c5a2ce938c63"
+      },
+      "sprint": {
+        "timeMs": 36120,
+        "splitsMs": [
+          7890,
+          14820,
+          23160,
+          32760,
+          35580
+        ],
+        "runSha256": "75d209dc651171743af43ac62fedea36b1f8d3ea7d551d374d41aadb881c18f8"
+      }
+    }
+  ]
+}

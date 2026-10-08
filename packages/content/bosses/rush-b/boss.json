@@ -1,0 +1,16 @@
+{
+  "id": "rush-b",
+  "color": "#e0a040",
+  "gender": "neutral",
+  "looks": [
+    "balaclava",
+    "shades",
+    "bandana",
+    "arctic",
+    "gas-mask",
+    "helmet",
+    "blue-squad",
+    "jungle"
+  ],
+  "effect": ["casings", "smoke"]
+}

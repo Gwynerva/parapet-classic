@@ -1,0 +1,79 @@
+"""Shahzada: the looks (sh_looks.py), the effects (sands, dark sands) and his outfits in boss.json."""
+import json
+
+from lookgen import *
+from tricks import tricks
+
+import sh_looks  # noqa: F401  (the looks)
+
+fx = {
+    'palette': {
+        'y': '#ffd060', 'Y': '#fff2b0', 'o': '#e8a33a', 'O': '#b8781e', 'w': '#ffffff',
+        'k': '#1c1a22', 'K': '#3a2e4a', 'r': '#ff9a2a', 'R': '#ff5a1a',
+    },
+    'sprites': {
+        'glint1': ['.Y.', 'YwY', '.Y.'],
+        'glint2': ['..y..', '..Y..', 'yYwYy', '..Y..', '..y..'],
+        'hourglass': ['ooooo', '.yYy.', '..y..', '.y.y.', '.yyy.', 'ooooo'],
+        'wisp1': ['.KK.', 'KkkK', '.KK.'],
+        'wisp2': ['..KK..', '.KkkK.', 'KkkkkK', '.KkkK.', '..KK..'],
+    },
+    'emitters': {
+        'sand': {
+            'while': ['run', 'air', 'wall'], 'every': 2.5, 'minSpeed': 40, 'anchor': 'body', 'jitter': [2, 2],
+            'speed': [10, 35], 'angle': [-10, 50], 'inherit': 0.1, 'gravity': 60, 'drag': 1.2,
+            'life': [400, 900], 'fadeOut': 300, 'rect': {'size': 1, 'colors': ['y', 'o', 'Y', 'O']},
+            'max': 120, 'reduced': 0.2,
+        },
+        'glints': {
+            'while': ['run', 'air'], 'perSecond': 4, 'minSpeed': 40, 'anchor': 'body', 'jitter': [4, 6],
+            'speed': [2, 6], 'angle': [80, 100], 'life': [250, 450], 'fadeIn': 80, 'fadeOut': 200,
+            'sprite': {'frames': ['glint1', 'glint2', 'glint1'], 'fps': 10, 'loop': False}, 'blend': 'add',
+        },
+        'swirl': {
+            'enter': ['flip', 'wall', 'roll', 'land'], 'burst': [14, 20], 'anchor': 'body', 'speed': [30, 70],
+            'angle': [0, 360], 'gravity': 40, 'drag': 2, 'life': [500, 800], 'fadeOut': 300,
+            'rect': {'size': [1, 2], 'colors': ['y', 'Y', 'o']},
+        },
+        'dark-sand': {
+            'while': ['run', 'air', 'wall'], 'every': 2.5, 'minSpeed': 40, 'anchor': 'body', 'jitter': [2, 2],
+            'speed': [10, 35], 'angle': [-10, 50], 'inherit': 0.1, 'gravity': 50, 'drag': 1.2,
+            'life': [400, 900], 'fadeOut': 300, 'rect': {'size': 1, 'colors': ['k', 'K', 'k', 'r']},
+            'max': 120, 'reduced': 0.2,
+        },
+        'embers': {
+            'while': ['run', 'air'], 'perSecond': 10, 'minSpeed': 40, 'anchor': 'hand.far',
+            'speed': [15, 40], 'angle': [60, 120], 'gravity': -30, 'life': [300, 600], 'fadeOut': 200,
+            'rect': {'size': 1, 'colors': ['r', 'R', 'y']}, 'blend': 'add',
+        },
+        'wisps': {
+            'enter': ['flip', 'wall', 'roll', 'land'], 'burst': [3, 5], 'anchor': 'body', 'speed': [8, 20],
+            'angle': [0, 360], 'gravity': -20, 'drag': 2, 'life': [500, 800], 'fadeOut': 400,
+            'sprite': {'frames': ['wisp1', 'wisp2'], 'fps': 4, 'loop': False},
+        },
+        'burst': {
+            'burst': 40, 'anchor': 'body', 'speed': [30, 110], 'angle': [0, 360], 'gravity': 50, 'drag': 1.5,
+            'life': [600, 1100], 'fadeOut': 400, 'rect': {'size': [1, 2], 'colors': ['y', 'Y', 'o', 'O']},
+        },
+        'hourglass': {
+            'burst': 1, 'anchor': 'head', 'offset': [0, -10], 'speed': 4, 'angle': 90, 'life': 900,
+            'fadeIn': 150, 'fadeOut': 400, 'sprite': {'frames': ['hourglass'], 'fps': 1}, 'tumble': 2,
+        },
+        'idle': {
+            'perSecond': 6, 'anchor': 'feet', 'jitter': [8, 0], 'speed': [6, 14], 'angle': [70, 110],
+            'gravity': 20, 'life': [500, 900], 'fadeOut': 300, 'rect': {'size': 1, 'colors': ['y', 'o']},
+        },
+    },
+    'variants': {
+        'sands': {'emitters': ['sand', 'glints', 'swirl']},
+        'dark-sands': {'emitters': ['dark-sand', 'embers', 'wisps']},
+    },
+    'presence': {'idle': ['idle'], 'vanish': ['burst', 'hourglass'], 'appear': ['burst', 'hourglass']},
+}
+write_json(BOSSES + '/shahzada/fx.json', tricks(fx, 'shahzada'))
+
+# Its outfits in boss.json (its world, stage.json, is drawn in stages.py / stages2.py).
+b = json.load(open(BOSSES + '/shahzada/boss.json', encoding='utf-8'))
+b['looks'] = ['sands', 'warrior', 'wanderer', 'dark-prince']
+write_json(BOSSES + '/shahzada/boss.json', b)
+print('shahzada written')

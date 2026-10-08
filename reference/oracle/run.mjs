@@ -29,7 +29,8 @@ const root = resolve(here, '..', '..');
 const jar = join(
   root,
   'packages',
-  'content-classic',
+  'content',
+  'playman',
   'original',
   'Playman_Extreme_Running_240x320.jar',
 );

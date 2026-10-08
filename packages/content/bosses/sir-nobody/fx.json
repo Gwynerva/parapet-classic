@@ -1,0 +1,163 @@
+{
+  "palette": {
+    "y": "#ffe08a",
+    "o": "#ffa030",
+    "w": "#ffffff",
+    "r": "#e02a2a",
+    "R": "#a01818",
+    "l": "#ff7a6a"
+  },
+  "sprites": {
+    "feather1": ["..rl", ".rr.", "rr..", "R..."],
+    "feather2": [".lr.", ".rr.", ".rr.", ".R.."],
+    "feather3": ["....", "lrrR", "Rrrl", "...."]
+  },
+  "emitters": {
+    "scrape": {
+      "while": ["slide", "wall", "roll"],
+      "perSecond": 60,
+      "anchor": "feet",
+      "jitter": [2, 0],
+      "speed": [30, 90],
+      "angle": [10, 70],
+      "gravity": 300,
+      "life": [200, 400],
+      "fadeOut": 150,
+      "rect": {
+        "size": 1,
+        "colors": ["y", "o", "w"]
+      },
+      "blend": "add"
+    },
+    "clang": {
+      "enter": ["land", "vault", "wall", "hang"],
+      "burst": [8, 14],
+      "anchor": "feet",
+      "speed": [40, 110],
+      "angle": [0, 180],
+      "gravity": 320,
+      "life": [250, 450],
+      "fadeOut": 150,
+      "rect": {
+        "size": [1, 2],
+        "colors": ["y", "o", "w"]
+      },
+      "blend": "add",
+      "chance": 0.6
+    },
+    "steps": {
+      "while": ["run"],
+      "every": 22,
+      "minSpeed": 80,
+      "anchor": "feet",
+      "speed": [20, 50],
+      "angle": [20, 80],
+      "gravity": 300,
+      "life": [150, 300],
+      "rect": {
+        "size": 1,
+        "colors": ["y", "o"]
+      },
+      "blend": "add"
+    },
+    "feathers": {
+      "while": ["run", "air"],
+      "every": 20,
+      "minSpeed": 50,
+      "anchor": "head",
+      "jitter": [2, 2],
+      "speed": [8, 20],
+      "angle": [30, 100],
+      "inherit": 0.1,
+      "gravity": 30,
+      "drag": 2,
+      "life": [900, 1400],
+      "fadeOut": 400,
+      "flutter": {
+        "amp": 3,
+        "freq": 1.5
+      },
+      "sprite": {
+        "frames": ["feather1", "feather2", "feather3", "feather2"],
+        "fps": 4
+      },
+      "max": 12
+    },
+    "burst": {
+      "burst": 26,
+      "anchor": "body",
+      "speed": [40, 120],
+      "angle": [0, 360],
+      "gravity": 200,
+      "life": [300, 600],
+      "fadeOut": 200,
+      "rect": {
+        "size": [1, 2],
+        "colors": ["y", "o", "w"]
+      },
+      "blend": "add"
+    },
+    "plumes": {
+      "burst": 8,
+      "anchor": "head",
+      "speed": [15, 40],
+      "angle": [30, 150],
+      "gravity": 30,
+      "drag": 2,
+      "life": [900, 1400],
+      "fadeOut": 400,
+      "flutter": {
+        "amp": 3,
+        "freq": 1.5
+      },
+      "sprite": {
+        "frames": ["feather1", "feather2", "feather3", "feather2"],
+        "fps": 4
+      }
+    },
+    "idle": {
+      "perSecond": 1,
+      "anchor": "head",
+      "speed": [4, 10],
+      "angle": [60, 120],
+      "gravity": 20,
+      "drag": 2,
+      "life": [1200, 1600],
+      "fadeOut": 400,
+      "flutter": {
+        "amp": 3,
+        "freq": 1.5
+      },
+      "sprite": {
+        "frames": ["feather1", "feather2", "feather3", "feather2"],
+        "fps": 4
+      }
+    }
+  },
+  "ribbons": {
+    "banner": {
+      "anchor": "chest",
+      "offset": [3, -2],
+      "segments": 6,
+      "length": 3,
+      "width": [4, 2],
+      "colors": ["#c01c1c", "#e02a2a", "#c9a85a"],
+      "gravity": 200,
+      "drag": 2.5
+    }
+  },
+  "variants": {
+    "sparks": {
+      "emitters": ["scrape", "clang", "steps"]
+    },
+    "plume": {
+      "emitters": ["feathers"],
+      "ribbons": ["banner"]
+    }
+  },
+  "presence": {
+    "idle": ["idle"],
+    "vanish": ["burst", "plumes"],
+    "appear": ["burst", "plumes"]
+  }
+}

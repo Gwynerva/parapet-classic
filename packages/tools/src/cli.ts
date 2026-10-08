@@ -7,18 +7,19 @@ const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '
 const DEFAULT_JAR = resolve(
   REPO_ROOT,
   'packages',
-  'content-classic',
+  'content',
+  'playman',
   'original',
   'Playman_Extreme_Running_240x320.jar',
 );
-const DEFAULT_OUT = resolve(REPO_ROOT, 'packages', 'content-classic', 'generated');
+const DEFAULT_OUT = resolve(REPO_ROOT, 'packages', 'content', 'playman', 'extracted');
 
 const USAGE = `usage: node src/cli.ts extract [--jar <path>] [--out <dir>]
 
 Decodes the original J2ME jar into JSON, PNG and MIDI files.
 
-  --jar <path>   jar to read      (default: packages/content-classic/original/Playman_Extreme_Running_240x320.jar)
-  --out <dir>    output directory (default: packages/content-classic/generated)
+  --jar <path>   jar to read      (default: packages/content/playman/original/Playman_Extreme_Running_240x320.jar)
+  --out <dir>    output directory (default: packages/content/playman/extracted)
   --help         show this text`;
 
 interface CliArgs {

@@ -19,6 +19,7 @@ const TYPES = {
   '.ttf': 'font/ttf',
   '.mid': 'audio/midi',
   '.svg': 'image/svg+xml',
+  '.webmanifest': 'application/manifest+json',
 };
 
 if (!existsSync(join(root, 'index.html'))) {

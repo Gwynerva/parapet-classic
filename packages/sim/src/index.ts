@@ -53,7 +53,7 @@ export type { InputRun, RivalRecording } from './replay.ts';
 export { MissionRules, MissionType } from './rules.ts';
 export type { RulesOptions, RunResult, RulesEvent } from './rules.ts';
 export { World } from './world.ts';
-export type { WorldOptions, WorldEvent, RivalOptions } from './world.ts';
+export type { WorldOptions, WorldEvent, RivalOptions, WorldState } from './world.ts';
 export {
   createRun,
   missionTypeForMode,

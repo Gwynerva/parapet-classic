@@ -10,7 +10,7 @@ import { Camera } from '@parapet/runtime/render/Camera.ts';
 import { CharacterRenderer } from '@parapet/runtime/render/CharacterRenderer.ts';
 import { Particles } from '@parapet/runtime/render/Particles.ts';
 import { themeOfLevel } from '@parapet/runtime/render/LevelRenderer.ts';
-import type { ViewSize } from '@parapet/runtime/render/View.ts';
+import { screenPixels, worldGrid, type ViewSize } from '@parapet/runtime/render/View.ts';
 import { smoothstep } from '@parapet/runtime/render/CameraTour.ts';
 import { IDLE_CLIP_OFFSET } from '@parapet/runtime/anim/Animator.ts';
 import { outlined, panel } from '@parapet/runtime/ui/draw.ts';
@@ -46,7 +46,12 @@ export class PrizeScreen implements Screen {
     if (!data) throw new Error('level 11 is missing');
     this.level = new Level(data, 0);
     this.camera = new Camera(this.view.width, this.view.height);
-    this.characters = new CharacterRenderer(ctx.render.scene, ctx.render.moves, ctx.render.clips);
+    this.characters = new CharacterRenderer(
+      ctx.render.scene,
+      ctx.render.moves,
+      ctx.render.clips,
+      ctx.render.skins,
+    );
     const idle = ctx.render.clips[IDLE_CLIP_OFFSET + 1] ?? 0;
     this.characters.attachNpc('playman', {
       x: (PLAYMAN_CELL.x << 10) + 512,
@@ -133,10 +138,10 @@ export class PrizeScreen implements Screen {
 
   render(c: CanvasRenderingContext2D): void {
     const { render, viewport, fonts, i18n } = this.ctx;
-    const cam = { x: this.camera.renderX(1), y: this.camera.renderY(1) };
+    const exact = { x: this.camera.renderX(1), y: this.camera.renderY(1) };
     const now = performance.now();
     c.imageSmoothingEnabled = false;
-    render.level.drawBackground(c, cam, this.view, now, this.theme);
+    render.level.drawBackground(c, exact, this.view, now, this.theme);
     const sinceBurst =
       this.particles.lastBurstAt >= 0 ? this.elapsed - this.particles.lastBurstAt : -1;
     if (sinceBurst >= 0 && sinceBurst < SKY_FLASH_MS) {
@@ -146,10 +151,16 @@ export class PrizeScreen implements Screen {
       c.fillRect(0, 0, viewport.width, viewport.height);
       c.restore();
     }
+    // The world on whole pixels, moved by the rest to a screen pixel (as in a run).
+    const grid = worldGrid(exact, screenPixels(c));
+    const cam = grid.cam;
+    c.save();
+    c.translate(grid.dx, grid.dy);
     render.level.drawLevelArt(c, cam, this.view, 0);
     this.particles.draw(c, cam, this.view, this.elapsed, false);
     this.characters.drawNpcs(c, cam, now);
     this.particles.draw(c, cam, this.view, this.elapsed, true);
+    c.restore();
     const safe = inset(safeRect(viewport), 8, 0);
     if (this.elapsed >= 14000) {
       outlined(c, fonts.title, i18n.t('prize.title'), safe.x + (safe.w >> 1), safe.y + 24, {

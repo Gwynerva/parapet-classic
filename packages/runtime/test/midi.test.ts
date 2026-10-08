@@ -1,12 +1,10 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { parseMidi, type MidiNote, type MidiSong } from '../src/audio/MidiFile.ts';
+import { parseMidi, songEvents, stripEndMarker, type MidiSong } from '../src/audio/MidiFile.ts';
 import { estimateLoudness, normalisationGain } from '../src/audio/Loudness.ts';
-
-type Due = { note: MidiNote; at: number };
 import { drumFor, PATCH_COUNT, patchFor } from '../src/audio/Instruments.ts';
-import { SongCursor } from '../src/audio/MusicPlayer.ts';
+import { SongCursor, type DueEvent } from '../src/audio/MusicPlayer.ts';
 import { MENU_TRACK, MusicDirector } from '../src/audio/MusicDirector.ts';
 import type { MusicPlayer } from '../src/audio/MusicPlayer.ts';
 import { CONTENT_DIR, hasContent } from './helpers/content.ts';
@@ -120,6 +118,26 @@ describe('parseMidi', () => {
   });
 });
 
+describe('channel volume', () => {
+  it('keeps the changes of channel volume in time order', () => {
+    const song = parseMidi(tinyMidi());
+    expect(song.controls).toEqual([{ time: 0, channel: 0, volume: 64 / 127 }]);
+    const events = songEvents(song);
+    expect(events[0]!.control).toBeDefined();
+    expect(events.filter((e) => e.note).length).toBe(song.notes.length);
+  });
+
+  it.skipIf(!hasContent())('follows the swells of the menu pad and drops the end marker', () => {
+    const song = parseMidi(new Uint8Array(readFileSync(join(CONTENT_DIR, 'music', '1.mid'))));
+    // The pad swells through hundreds of volume changes; the note-on volume alone misses them.
+    expect(song.controls!.length).toBeGreaterThan(500);
+    const stripped = stripEndMarker(song);
+    expect(stripped.durationMs).toBe(song.durationMs);
+    expect(stripped.notes.some((n) => n.velocity <= 1)).toBe(false);
+    expect(song.notes.length - stripped.notes.length).toBeGreaterThan(0);
+  });
+});
+
 describe('instruments', () => {
   it('has a patch for every program and a drum for every key', () => {
     for (let p = 0; p < PATCH_COUNT; p++) {
@@ -136,22 +154,26 @@ describe('SongCursor', () => {
 
   it('yields the notes inside the lookahead and loops the song', () => {
     const cursor = new SongCursor(song, true, 10);
-    const out: Due[] = [];
+    const out: DueEvent[] = [];
+    const notes = (): number[] => out.filter((d) => d.note).map((d) => d.at);
     expect(cursor.due(10, 0.3, out)).toBe(true);
-    expect(out.map((d) => d.at)).toEqual([10]);
+    expect(notes()).toEqual([10]);
+    // The volume change comes before the note it applies to.
+    expect(out[0]!.control?.volume).toBeCloseTo(64 / 127, 6);
     out.length = 0;
     cursor.due(10.4, 0.3, out);
-    expect(out.map((d) => d.at)).toEqual([10.5]);
+    expect(notes()).toEqual([10.5]);
     out.length = 0;
-    // Past the end (0.75 s) the song starts again at 10.75.
+    // Past the end (0.75 s) the song starts again at 10.75, as the next pass.
     cursor.due(10.7, 0.3, out);
-    expect(out.map((d) => d.at)).toEqual([10.75]);
+    expect(notes()).toEqual([10.75]);
+    expect(out.every((d) => d.pass === 1)).toBe(true);
     expect(cursor.startTime).toBeCloseTo(10.75, 6);
   });
 
   it('ends a non-looping song after its last note', () => {
     const cursor = new SongCursor(song, false, 0);
-    const out: Due[] = [];
+    const out: DueEvent[] = [];
     expect(cursor.due(0, 1, out)).toBe(true);
     expect(cursor.due(0.8, 0.3, out)).toBe(false);
   });
@@ -159,9 +181,9 @@ describe('SongCursor', () => {
   it('seeks to a position for resuming', () => {
     const cursor = new SongCursor(song, true, 0);
     cursor.seek(400, 100);
-    const out: Due[] = [];
+    const out: DueEvent[] = [];
     cursor.due(100, 0.3, out);
-    expect(out.map((d) => d.at)).toEqual([100.1]);
+    expect(out.filter((d) => d.note).map((d) => d.at)).toEqual([100.1]);
   });
 });
 
@@ -227,7 +249,7 @@ describe('MusicDirector', () => {
     expect(player.playing).toBe(true);
     director.setVolume(0);
     expect(player.playing).toBe(false);
-    director.setVolume(4);
+    director.setVolume(70);
     await Promise.resolve();
     expect(player.playing).toBe(true);
   });

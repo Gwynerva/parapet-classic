@@ -1,5 +1,5 @@
 /**
- * Shapes of the generated content files (`packages/content-classic/generated`). Loaders live
+ * Shapes of the generated content files (`packages/content/playman/extracted`). Loaders live
  * in the apps; the runtime only needs the types.
  */
 import type {

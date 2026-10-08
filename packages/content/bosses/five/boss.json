@@ -1,0 +1,7 @@
+{
+  "id": "five",
+  "color": "#ff2fa6",
+  "gender": "neutral",
+  "looks": ["five-her", "five-him"],
+  "effect": ["glitch", "overdrive"]
+}

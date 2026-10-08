@@ -1,5 +1,5 @@
 // Entry point: `node src/fontCli.ts [--only <name>] [--out <dir>]` (npm run build-font).
-// Rasterises the bundled vector fonts in packages/content-classic/fonts/src into bitmap font atlases.
+// Rasterises the bundled vector fonts in packages/content/fonts/src into bitmap font atlases.
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -7,7 +7,7 @@ import { buildFont, REQUIRED_CHARSET } from './buildFont.ts';
 import { TrueTypeFont } from './ttf.ts';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
-const FONTS_DIR = resolve(REPO_ROOT, 'packages', 'content-classic', 'fonts');
+const FONTS_DIR = resolve(REPO_ROOT, 'packages', 'content', 'fonts');
 const SOURCES_DIR = join(FONTS_DIR, 'src');
 
 interface FontSpec {
@@ -31,10 +31,10 @@ export const FONT_SPECS: readonly FontSpec[] = [
 
 const USAGE = `usage: node src/fontCli.ts [--only <name>] [--out <dir>]
 
-Rasterises the vector fonts in packages/content-classic/fonts/src into <name>.png + <name>.json.
+Rasterises the vector fonts in packages/content/fonts/src into <name>.png + <name>.json.
 
   --only <name>  build a single font (${FONT_SPECS.map((f) => f.name).join(', ')})
-  --out <dir>    output directory (default: packages/content-classic/fonts)
+  --out <dir>    output directory (default: packages/content/fonts)
   --help         show this text`;
 
 interface CliArgs {

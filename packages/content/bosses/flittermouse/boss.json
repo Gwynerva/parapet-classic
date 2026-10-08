@@ -1,0 +1,7 @@
+{
+  "id": "flittermouse",
+  "color": "#ffd23a",
+  "gender": "male",
+  "looks": ["armored", "future"],
+  "effect": ["swarm", "shade"]
+}

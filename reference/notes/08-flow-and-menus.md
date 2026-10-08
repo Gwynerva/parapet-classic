@@ -3,7 +3,7 @@
 What the original does around the simulation: the screen states of a mission, the warm-ups
 with the coach, the challenge rules, the results and name entry, unlock progression, the
 Prize ending, the menus and the music. Line numbers refer to `reference/decompiled/d.java`;
-string numbers to `packages/content-classic/generated/strings/ru.json`. Names follow
+string numbers to `packages/content/playman/extracted/strings/ru.json`. Names follow
 `glossary.md`.
 
 Two corrections to earlier assumptions: strings 56–75 are the Moves-menu descriptions, not
@@ -366,6 +366,16 @@ stashed volume, or 64 if it was 0.
 | app hidden                    | `hideNotify` 1316       | stop and pause                                                                                                                                                                   |
 | results                       | —                       | the in-game track keeps playing until the level is unloaded (`bh()` → `R()`)                                                                                                     |
 | Prize                         | `x(11)` 5502            | stop, then 0 once; stopped again on exit                                                                                                                                         |
+
+**How the tracks are written.** The menu track (1) is a pad of only 81 notes whose life is in
+about 1,400 channel volume changes (CC7): every chord swells from almost nothing and fades
+again, and the first chord starts at volume 0. A player that takes a note's volume at its start
+plays it nearly silent; ours follows the controller while the notes sound. Every track also
+ends with a marker chord, key 36 at velocity 1 on all sixteen channels (a kick on the drum
+channel) about 85 ms before the end: inaudible on the phone, a thud at every loop on a
+synthesiser that honours velocity 1, so we drop it. The menu track's last chords end exactly at
+the loop point and the next pass starts from the quiet swell, which made the loop sound cut
+off; our player lets those chords ring on and fade over the start of the next pass.
 
 **Options menu ("Функции", menu 1).** "Звук" is a slider (`void_f(0, …)` 2378): SELECT
 toggles 0 ↔ 64; Right/6 and Left/4 step ±8, wrapping; an 8-segment bar 60 px wide; 0 sets

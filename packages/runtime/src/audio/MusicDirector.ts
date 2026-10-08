@@ -1,18 +1,27 @@
 /**
  * Which track plays when, after the original (reference/notes/08-flow-and-menus.md §10):
  * track 1 in the menus and the warm-ups, one of three tracks per background theme during a
- * run (the rotation advances on every start), track 0 once for the prize. Tracks are loaded
- * on demand through `loadTrack` and cached.
+ * run (the rotation advances on every start), track 0 once for the prize; the bosses' theme
+ * (`CONTEST_TRACK`) in their contests. Tracks are loaded on demand through `loadTrack` and
+ * cached.
  */
 import type { MidiSong } from './MidiFile.ts';
 import type { MusicPlayer } from './MusicPlayer.ts';
 
 export const MENU_TRACK = 1;
 export const PRIZE_TRACK = 0;
+/** The bosses' theme, played in their contests (ours, not the original's). */
+export const CONTEST_TRACK = 100;
 export const THEME_COUNT = 4;
 export const TRACKS_PER_THEME = 3;
-/** Volume steps of the options slider (the original's 0..64 in steps of 8). */
-export const VOLUME_STEPS = 8;
+/** Volume of the options slider, in percent. */
+export const MAX_VOLUME = 100;
+
+/** Gain for a slider level: squared, so the slider feels even to the ear. */
+export function volumeGain(level: number): number {
+  const t = Math.max(0, Math.min(MAX_VOLUME, level)) / MAX_VOLUME;
+  return t * t;
+}
 
 export interface MusicDirectorOptions {
   player: MusicPlayer;
@@ -26,22 +35,22 @@ export class MusicDirector {
   /** Rotation per theme (`ropt[5 + theme]`). */
   readonly rotation = new Array<number>(THEME_COUNT).fill(0);
   private wanted: { id: number; loop: boolean } | null = null;
-  private volumeStep = VOLUME_STEPS / 2;
+  private level = 70;
 
   constructor(opts: MusicDirectorOptions) {
     this.player = opts.player;
     this.loadTrack = opts.loadTrack;
   }
 
-  /** Current volume step 0..8. */
+  /** Current volume in percent. */
   get volume(): number {
-    return this.volumeStep;
+    return this.level;
   }
 
-  setVolume(step: number): void {
-    this.volumeStep = Math.max(0, Math.min(VOLUME_STEPS, Math.round(step)));
-    this.player.setVolume(this.volumeStep / VOLUME_STEPS);
-    if (this.volumeStep === 0) this.player.stop();
+  setVolume(level: number): void {
+    this.level = Math.max(0, Math.min(MAX_VOLUME, Math.round(level)));
+    this.player.setVolume(volumeGain(this.level));
+    if (this.level === 0) this.player.stop();
     else if (this.wanted && !this.player.playing) this.start(this.wanted.id, this.wanted.loop);
   }
 
@@ -64,6 +73,11 @@ export class MusicDirector {
     const rot = ((this.rotation[t] ?? 0) + 1) % TRACKS_PER_THEME;
     this.rotation[t] = rot;
     this.start(2 + TRACKS_PER_THEME * t + ((rot + 2) % TRACKS_PER_THEME), true);
+  }
+
+  /** A contest with a boss: their theme instead of the level's music. */
+  contest(): void {
+    this.start(CONTEST_TRACK, true);
   }
 
   /** The same track again (resume after a pause). */
@@ -89,10 +103,9 @@ export class MusicDirector {
   }
 
   private start(id: number, loop: boolean, restart = false): void {
-    if (!restart && this.wanted?.id === id && (this.player.playing || this.volumeStep === 0))
-      return;
+    if (!restart && this.wanted?.id === id && (this.player.playing || this.level === 0)) return;
     this.wanted = { id, loop };
-    if (this.volumeStep === 0) return;
+    if (this.level === 0) return;
     let song = this.cache.get(id);
     if (!song) {
       song = this.loadTrack(id);

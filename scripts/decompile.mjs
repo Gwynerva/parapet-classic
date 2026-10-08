@@ -9,7 +9,8 @@ const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const jar = join(
   root,
   'packages',
-  'content-classic',
+  'content',
+  'playman',
   'original',
   'Playman_Extreme_Running_240x320.jar',
 );
@@ -45,7 +46,7 @@ if (haveJava) {
     'java',
     '-jar',
     '/w/reference/cfr.jar',
-    '/w/packages/content-classic/original/Playman_Extreme_Running_240x320.jar',
+    '/w/packages/content/playman/original/Playman_Extreme_Running_240x320.jar',
     '--outputdir',
     '/w/reference/decompiled',
     ...cfrOpts,

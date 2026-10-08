@@ -23,7 +23,7 @@ import {
   type StepContext,
 } from './runner/step.ts';
 import { initImpulse } from './runner/rootMotion.ts';
-import { MissionRules, type RulesEvent, type RulesOptions } from './rules.ts';
+import { MissionRules, type RulesEvent, type RulesOptions, type RunResult } from './rules.ts';
 import { ScoreState } from './scoring.ts';
 import type { PhysicsTables } from './tables.ts';
 
@@ -44,6 +44,24 @@ export interface WorldOptions {
 }
 
 export type WorldEvent = SimEvent | RulesEvent;
+
+/**
+ * Everything a world without rivals changes while it runs (see `World.saveState`). The
+ * level, move table and physics tables never change during a run and are not part of it.
+ */
+export interface WorldState {
+  clock: number;
+  stepCount: number;
+  player: RunnerState;
+  remainingMask: number;
+  flagsLeft: number;
+  nextCheckpoint: number;
+  splits: number[];
+  lastCollected: number;
+  result: RunResult | null;
+  /** The recorded input log, or null when the state was saved without it. */
+  input: InputRun[] | null;
+}
 
 interface RivalRuntime {
   runner: RunnerState;
@@ -159,6 +177,52 @@ export class World {
     const move = this.moves.get(this.player.moveId);
     score.step(this.player.moveId, move.scoreType === 5, this.player.vy, this.clock);
     return true;
+  }
+
+  /**
+   * A copy of the world's changing state, to come back to with `restoreState` (search tools
+   * try many continuations from one moment). `withInput: false` skips the recorded input log,
+   * which is the costly part; restoring such a state starts the recorder afresh. Worlds with
+   * rivals cannot be saved: their input players are not part of the state.
+   */
+  saveState(withInput = true): WorldState {
+    if (this.rivals.length > 0)
+      throw new Error('World.saveState: worlds with rivals are not supported');
+    const rules = this.rules;
+    return {
+      clock: this.clock,
+      stepCount: this.stepCount,
+      player: this.player.clone(),
+      remainingMask: rules.remainingMask,
+      flagsLeft: rules.flagsLeft,
+      nextCheckpoint: rules.nextCheckpoint,
+      splits: rules.splits.slice(),
+      lastCollected: rules.lastCollected,
+      result: rules.result ? { ...rules.result, splits: rules.result.splits.slice() } : null,
+      input: withInput ? this.recorder.finish() : null,
+    };
+  }
+
+  /** Puts the world back into a state from `saveState`; it then runs exactly as it did. */
+  restoreState(state: WorldState): void {
+    if (this.rivals.length > 0) {
+      throw new Error('World.restoreState: worlds with rivals are not supported');
+    }
+    const rules = this.rules;
+    this.clock = state.clock;
+    this.stepCount = state.stepCount;
+    this.ctx.clock = state.clock;
+    this.player.copyFrom(state.player);
+    rules.remainingMask = state.remainingMask;
+    rules.flagsLeft = state.flagsLeft;
+    rules.nextCheckpoint = state.nextCheckpoint;
+    rules.splits.length = 0;
+    rules.splits.push(...state.splits);
+    rules.lastCollected = state.lastCollected;
+    rules.result = state.result ? { ...state.result, splits: state.result.splits.slice() } : null;
+    this.events.length = 0;
+    if (state.input) this.recorder.restore(state.input);
+    else this.recorder.clear();
   }
 
   /** Run a recorded input log to its end (or until the run finishes). */

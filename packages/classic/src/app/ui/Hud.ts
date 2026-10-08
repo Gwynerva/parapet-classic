@@ -30,6 +30,8 @@ export interface HudOptions {
   label: string;
   /** Gap to the ghost at the last checkpoint (`-0.42` ahead, `+1.10` behind), shown briefly. */
   split?: { text: string; ahead: boolean } | null;
+  /** The boss's progress in a contest ("Grove 3/5"), in its colour. */
+  contest?: { text: string; color: string } | null;
 }
 
 export class Hud {
@@ -136,9 +138,16 @@ export class Hud {
       outlined(ctx, small, opts.label, left, dotsY, { color: Theme.muted });
     }
 
+    let below = dotsY + DOT_SIZE + 4 + (opts.label ? small.lineHeight + 2 : 0);
+    if (opts.contest) {
+      outlined(ctx, small, opts.contest.text, left, below, {
+        color: opts.contest.color,
+        tabular: true,
+      });
+      below += small.lineHeight + 3;
+    }
     if (opts.split) {
-      const splitY = dotsY + DOT_SIZE + 4 + (opts.label ? small.lineHeight + 2 : 0);
-      outlined(ctx, display, opts.split.text, left, splitY, {
+      outlined(ctx, display, opts.split.text, left, below, {
         color: opts.split.ahead ? Theme.success : Theme.danger,
         tabular: true,
       });

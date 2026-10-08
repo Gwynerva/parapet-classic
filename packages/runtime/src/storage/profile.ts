@@ -20,29 +20,45 @@ export const STORAGE_PREFIX = 'parapet.';
 export const SCHEMA_VERSION = 1;
 
 export type TouchControlsSetting = 'auto' | 'on' | 'off';
+/** Full screen: `auto` is on for touch screens (the first tap enters it), off elsewhere. */
+export type FullscreenSetting = 'auto' | 'on' | 'off';
 
 export interface Options {
-  /** BCP 47 tag of a bundled locale, or 'auto' to follow the browser. */
+  /**
+   * BCP 47 code of the chosen language; empty until the first launch picks one from the
+   * browser's preferences ('auto', the old default, counts as empty).
+   */
   locale: string;
   scaleMode: ScaleMode;
   vibration: boolean;
-  /** Music volume in steps 0..8 (the original's 0..64 by 8); 0 is off. */
-  musicVolume: number;
+  /** Music volume in percent, 0..100 (a slider; 0 is off). */
+  musicLevel: number;
   touchControls: TouchControlsSetting;
   touchLayout: TouchLayout;
   /** Race the ghost of the local record when starting a mission that has one. */
   bestGhost: boolean;
+  fullscreen: FullscreenSetting;
 }
 
 export const DEFAULT_OPTIONS: Readonly<Options> = {
-  locale: 'auto',
+  locale: '',
   scaleMode: 'auto',
   vibration: true,
-  musicVolume: 4,
+  musicLevel: 70,
   touchControls: 'auto',
   touchLayout: 'move-left',
   bestGhost: true,
+  fullscreen: 'auto',
 };
+
+/**
+ * The volume of the first schemas, 0..8 steps on a linear scale, as a percentage on the
+ * slider's curve (gain = level²) that sounds the same: 4 of 8 becomes 70 %.
+ */
+export function levelFromVolumeSteps(steps: number): number {
+  const s = Math.max(0, Math.min(8, steps));
+  return Math.round((Math.sqrt(s / 8) * 100) / 5) * 5;
+}
 
 export interface RecordEntry {
   /** Finish time in ms of game clock (0 when the time ran out). */
@@ -156,14 +172,21 @@ function remove(key: string): void {
 function validateOptions(raw: unknown): Partial<Options> | null {
   if (!isRecordObject(raw)) return null;
   const out: Partial<Options> = {};
-  if (typeof raw['locale'] === 'string') out.locale = raw['locale'];
+  if (typeof raw['locale'] === 'string') out.locale = raw['locale'] === 'auto' ? '' : raw['locale'];
   if (isScaleMode(raw['scaleMode'])) out.scaleMode = raw['scaleMode'];
   if (typeof raw['vibration'] === 'boolean') out.vibration = raw['vibration'];
+  const musicLevel = raw['musicLevel'];
   const musicVolume = raw['musicVolume'];
-  if (typeof musicVolume === 'number' && Number.isInteger(musicVolume)) {
-    out.musicVolume = Math.max(0, Math.min(8, musicVolume));
+  if (typeof musicLevel === 'number' && Number.isFinite(musicLevel)) {
+    out.musicLevel = Math.max(0, Math.min(100, Math.round(musicLevel)));
+  } else if (typeof musicVolume === 'number' && Number.isInteger(musicVolume)) {
+    out.musicLevel = levelFromVolumeSteps(musicVolume); // the 0..8 steps of the second schema
   } else if (raw['music'] === false) {
-    out.musicVolume = 0; // the on/off switch of the first schema
+    out.musicLevel = 0; // the on/off switch of the first schema
+  }
+  const fullscreen = raw['fullscreen'];
+  if (fullscreen === 'auto' || fullscreen === 'on' || fullscreen === 'off') {
+    out.fullscreen = fullscreen;
   }
   const touchControls = raw['touchControls'];
   if (touchControls === 'auto' || touchControls === 'on' || touchControls === 'off') {
@@ -183,6 +206,14 @@ export function saveOptions(patch: Partial<Options>): Options {
   const merged = { ...loadOptions(), ...patch };
   write(OPTIONS_KEY, merged);
   return merged;
+}
+
+/** Whether full screen is wanted: `auto` means on touch screens. */
+export function wantsFullscreen(
+  options: Pick<Options, 'fullscreen'>,
+  coarsePointer: boolean,
+): boolean {
+  return options.fullscreen === 'on' || (options.fullscreen === 'auto' && coarsePointer);
 }
 
 function validatePlayer(raw: unknown): PlayerInfo | null {
@@ -404,4 +435,65 @@ const LEGACY_KEYS = ['identity'];
 /** Removes the entries of earlier builds (call once at start-up). */
 export function dropLegacyEntries(): void {
   for (const key of LEGACY_KEYS) remove(key);
+}
+
+// ---------------------------------------------------------------------------------------------
+// Contests with the bosses (not part of the original's progress)
+// ---------------------------------------------------------------------------------------------
+
+/** The modes the bosses are raced in. */
+export type ContestKind = 'flags' | 'sprint';
+
+export interface ContestProgress {
+  /** Per kind, bit `level` set once the level's boss was beaten in it. */
+  beaten: Record<ContestKind, number>;
+}
+
+const CONTEST_KEY = 'contest';
+
+function validateContest(raw: unknown): ContestProgress | null {
+  if (!isRecordObject(raw) || !isRecordObject(raw['beaten'])) return null;
+  const beaten = raw['beaten'];
+  const bits = (v: unknown): number => (typeof v === 'number' && Number.isInteger(v) ? v >>> 0 : 0);
+  return { beaten: { flags: bits(beaten['flags']), sprint: bits(beaten['sprint']) } };
+}
+
+export function loadContestProgress(): ContestProgress {
+  return read(CONTEST_KEY, validateContest) ?? { beaten: { flags: 0, sprint: 0 } };
+}
+
+export function isContestBeaten(
+  progress: ContestProgress,
+  levelId: number,
+  kind: ContestKind,
+): boolean {
+  return (progress.beaten[kind] & (1 << levelId)) !== 0;
+}
+
+/** Records a win over a boss; returns whether it is the first on that level and mode. */
+export function markContestBeaten(levelId: number, kind: ContestKind): boolean {
+  const progress = loadContestProgress();
+  if (isContestBeaten(progress, levelId, kind)) return false;
+  progress.beaten[kind] = (progress.beaten[kind] | (1 << levelId)) >>> 0;
+  write(CONTEST_KEY, progress);
+  return true;
+}
+
+/** The player's best contest run (cleared with the records, unlike the wins). */
+function contestRecordKey(levelId: number, kind: ContestKind): string {
+  return `${RECORD_PREFIX}contest.${levelId}.${kind}`;
+}
+
+export function loadContestRecord(levelId: number, kind: ContestKind): RecordEntry | null {
+  return read(contestRecordKey(levelId, kind), validateRecord);
+}
+
+/** Stores `entry` when it is the player's fastest contest run; returns whether it was. */
+export function updateContestRecord(
+  levelId: number,
+  kind: ContestKind,
+  entry: RecordEntry,
+): boolean {
+  if (!isBetterRecord(kind, entry, loadContestRecord(levelId, kind), levelId)) return false;
+  return write(contestRecordKey(levelId, kind), entry);
 }

@@ -1,8 +1,9 @@
 /**
  * Virtual buttons for touch screens, drawn on the game canvas: left/right on one side of the
- * screen, up/down on the other (swappable). A button is sized `max(16, ceil(48 / scale))`
- * logical pixels (about 48 device pixels) with a much larger hit area, and the layout respects
- * the safe-area insets. `pointerdown` on a button is a press, like a key-down.
+ * screen, up/down on the other (swappable), and a pause button at the top centre (the way back
+ * to the menu). A button is about 40 CSS pixels with a larger hit area, and the layout respects
+ * the safe-area insets. `pointerdown` on a button is a press, like a key-down. The buttons only
+ * exist while a run is played (`shown`); menus get every tap.
  */
 import type { SafeArea, Viewport } from '../render/Viewport.ts';
 import type { Direction } from './InputManager.ts';
@@ -52,9 +53,46 @@ export const BUTTON_CSS_PX = 40;
 /** Invisible padding around each button that still counts as a hit, in CSS pixels. */
 export const BUTTON_PADDING_CSS_PX = 14;
 
+/** Visible size of the pause button in CSS pixels (smaller: it is rarely needed). */
+export const PAUSE_CSS_PX = 30;
+
 /** Visible button size in logical pixels for an upscale factor and device pixel ratio. */
 export function touchButtonSize(scale: number, dpr = 1): number {
   return Math.max(16, Math.ceil((BUTTON_CSS_PX * dpr) / scale));
+}
+
+export interface PauseButton {
+  x: number;
+  y: number;
+  size: number;
+  hitX: number;
+  hitY: number;
+  hitW: number;
+  hitH: number;
+}
+
+/**
+ * The pause button: top centre of the safe area, where the HUD leaves room (timer on the
+ * left, score on the right).
+ */
+export function layoutPauseButton(metrics: TouchLayoutMetrics, margin = 4): PauseButton {
+  const { width, height, scale, dpr, safeArea } = metrics;
+  const size = Math.max(14, Math.ceil((PAUSE_CSS_PX * dpr) / scale));
+  const hit = Math.max(size + 8, Math.ceil((MIN_HIT_CSS_PX * dpr) / scale));
+  const centre = safeArea.left + ((width - safeArea.left - safeArea.right) >> 1);
+  const x = centre - (size >> 1);
+  const y = safeArea.top + margin;
+  const hitX = Math.max(0, x + (size >> 1) - (hit >> 1));
+  const hitY = Math.max(0, y + (size >> 1) - (hit >> 1));
+  return {
+    x,
+    y,
+    size,
+    hitX,
+    hitY,
+    hitW: Math.min(width, hitX + hit) - hitX,
+    hitH: Math.min(height, hitY + hit) - hitY,
+  };
 }
 
 /** Pure layout, for tests: button rectangles for a viewport and a layout choice. */
@@ -133,11 +171,35 @@ function drawArrow(
   }
 }
 
+export type TouchHit = Direction | 'pause';
+
+/** A translucent square with a light border (brighter while held). */
+function drawSquare(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  size: number,
+  pressed: boolean,
+): void {
+  ctx.fillStyle = pressed ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.18)';
+  ctx.fillRect(x, y, size, size);
+  ctx.fillStyle = pressed ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.55)';
+  ctx.fillRect(x, y, size, 1);
+  ctx.fillRect(x, y + size - 1, size, 1);
+  ctx.fillRect(x, y, 1, size);
+  ctx.fillRect(x + size - 1, y, 1, size);
+}
+
 export class TouchControls {
+  /** The direction buttons (the option "touch controls"). */
   enabled: boolean;
+  /** A run is being played: the buttons exist (set by the play screen). */
+  shown = false;
   private layoutMode: TouchLayout;
   private readonly margin: number;
   private buttons: TouchButton[] = [];
+  private pauseButton: PauseButton | null = null;
+  private pausePressed = -1;
   private readonly pressed = new Map<number, Direction>();
   private readonly viewport: Viewport;
   private readonly unsubscribe: () => void;
@@ -165,12 +227,35 @@ export class TouchControls {
     return this.buttons;
   }
 
-  relayout(): void {
-    this.buttons = layoutTouchButtons(this.viewport, this.layoutMode, this.margin);
+  /** Whether the pause button is there: with the direction buttons, or on any touch screen. */
+  get pauseShown(): boolean {
+    return this.enabled || this.viewport.isCoarsePointer;
   }
 
-  /** The button under a logical point (nearest centre when hit areas overlap), or null. */
-  hitTest(x: number, y: number): Direction | null {
+  get pauseRect(): PauseButton | null {
+    return this.pauseButton;
+  }
+
+  relayout(): void {
+    this.buttons = layoutTouchButtons(this.viewport, this.layoutMode, this.margin);
+    this.pauseButton = layoutPauseButton(this.viewport);
+  }
+
+  /** The button under a logical point while a run is shown (nearest centre wins), or null. */
+  hitTest(x: number, y: number): TouchHit | null {
+    if (!this.shown) return null;
+    const p = this.pauseButton;
+    if (
+      p &&
+      this.pauseShown &&
+      x >= p.hitX &&
+      x < p.hitX + p.hitW &&
+      y >= p.hitY &&
+      y < p.hitY + p.hitH
+    ) {
+      return 'pause';
+    }
+    if (!this.enabled) return null;
     let best: Direction | null = null;
     let bestDistance = Infinity;
     for (const b of this.buttons) {
@@ -186,16 +271,19 @@ export class TouchControls {
     return best;
   }
 
-  setPressed(pointerId: number, direction: Direction): void {
-    this.pressed.set(pointerId, direction);
+  setPressed(pointerId: number, hit: TouchHit): void {
+    if (hit === 'pause') this.pausePressed = pointerId;
+    else this.pressed.set(pointerId, hit);
   }
 
   release(pointerId: number): void {
     this.pressed.delete(pointerId);
+    if (this.pausePressed === pointerId) this.pausePressed = -1;
   }
 
   releaseAll(): void {
     this.pressed.clear();
+    this.pausePressed = -1;
   }
 
   isPressed(direction: Direction): boolean {
@@ -205,16 +293,24 @@ export class TouchControls {
 
   /** Draws the buttons; call after the scene so they sit on top. */
   draw(ctx: CanvasRenderingContext2D): void {
+    const p = this.pauseButton;
+    if (p && this.pauseShown) {
+      const pressed = this.pausePressed >= 0;
+      drawSquare(ctx, p.x, p.y, p.size, pressed);
+      // Two bars: the usual pause sign.
+      const barW = Math.max(2, Math.floor(p.size / 6));
+      const barH = p.size - 2 * Math.max(3, Math.floor(p.size / 4));
+      const top = p.y + ((p.size - barH) >> 1);
+      const gap = Math.max(2, barW);
+      const left = p.x + ((p.size - (barW * 2 + gap)) >> 1);
+      ctx.fillStyle = pressed ? '#ffffff' : 'rgba(255,255,255,0.85)';
+      ctx.fillRect(left, top, barW, barH);
+      ctx.fillRect(left + barW + gap, top, barW, barH);
+    }
     if (!this.enabled) return;
     for (const b of this.buttons) {
       const pressed = this.isPressed(b.direction);
-      ctx.fillStyle = pressed ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.18)';
-      ctx.fillRect(b.x, b.y, b.size, b.size);
-      ctx.fillStyle = pressed ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.55)';
-      ctx.fillRect(b.x, b.y, b.size, 1);
-      ctx.fillRect(b.x, b.y + b.size - 1, b.size, 1);
-      ctx.fillRect(b.x, b.y, 1, b.size);
-      ctx.fillRect(b.x + b.size - 1, b.y, 1, b.size);
+      drawSquare(ctx, b.x, b.y, b.size, pressed);
       ctx.fillStyle = pressed ? '#ffffff' : 'rgba(255,255,255,0.85)';
       drawArrow(ctx, b.direction, b.x, b.y, b.size);
     }

@@ -1,6 +1,10 @@
 /**
  * Render debug page: runs level 0 as a free run and draws it with the rendering core on a
  * 640×360 canvas (scaled ×2 by CSS). Arrow keys are turned into the original press bits.
+ * C cycles the characters (the original's ten, then the drawn bosses, each with the effect of
+ * its Flag hunt and of its Sprint), O the outfits of a boss, G the way the runner is drawn
+ * (itself, a player's echo, a rival's echo), V a sheet of poses of the current character,
+ * magnified (the first frame of every move demo and the run cycle), for drawing looks.
  */
 import { buildSineTable, createRun, Input, STEP, type World } from '@parapet/sim';
 import { loadContent, type GameContent } from './assets/content.ts';
@@ -17,8 +21,18 @@ import {
   themeOfLevel,
 } from '@parapet/runtime/render/LevelRenderer.ts';
 import { Particles } from '@parapet/runtime/render/Particles.ts';
-import { SceneRenderer } from '@parapet/runtime/render/SceneRenderer.ts';
+import { CHARACTER_OBJECT, SceneRenderer } from '@parapet/runtime/render/SceneRenderer.ts';
 import { SpriteSheet } from '@parapet/runtime/render/SpriteSheet.ts';
+import { SkinLibrary } from '@parapet/runtime/render/SkinLibrary.ts';
+import { CharacterFx } from '@parapet/runtime/render/fx/CharacterFx.ts';
+import {
+  allBosses,
+  characterFx,
+  CONTEST_KINDS,
+  contestCharacter,
+  isDrawn,
+  registerBosses,
+} from './app/bosses.ts';
 import type { ViewSize } from '@parapet/runtime/render/View.ts';
 
 const LEVEL_ID = 0;
@@ -31,6 +45,7 @@ interface Session {
   camera: Camera;
   characters: CharacterRenderer;
   echo: EchoRenderer;
+  fx: CharacterFx;
   particles: Particles;
   bounce: MarkerBounce;
   clock: FixedStepClock;
@@ -42,8 +57,10 @@ function startSession(
   sheet: SpriteSheet,
   levelRenderer: LevelRenderer,
   echoSheets: EchoSheets,
+  skins: SkinLibrary,
   character: number,
   look: number,
+  outfit: number,
 ): Session {
   const level = content.levels[LEVEL_ID];
   const mission = content.missions.levels[LEVEL_ID];
@@ -57,17 +74,31 @@ function startSession(
   });
   const camera = new Camera(VIEW.width, VIEW.height);
   camera.reset(world.player, world.level);
-  const characters = new CharacterRenderer(scene, world.moves, buildClipTable(content.anims.clips));
-  characters.attach(world.player, { character, echo: look > 0 });
+  const characters = new CharacterRenderer(
+    scene,
+    world.moves,
+    buildClipTable(content.anims.clips),
+    skins,
+  );
+  characters.attach(world.player, { character, outfit, echo: look > 0 });
   const echo = new EchoRenderer(characters, echoSheets);
+  const fx = new CharacterFx(echoSheets);
+  const player = world.player;
   if (look > 0) {
-    const player = world.player;
     echo.add(player, {
       color: look === 1 ? echoColor('Parapet') : ECHO_GREY,
       textured: look === 1,
+      source: look === 1 ? skins.sceneFor(character, outfit) : scene,
       swap: look === 1 ? (clock) => characters.swapFor(player, clock) : () => skinSwap(1),
     });
     echo.reveal(performance.now());
+  } else {
+    const style = characterFx(skins, character, outfit, (clock) =>
+      characters.swapFor(player, clock),
+    );
+    if (style) {
+      fx.add(player, { pose: () => characters.pose(player, 1), move: () => player.moveId }, style);
+    }
   }
   const particles = new Particles(sheet, world.sine);
   particles.setLevel(world.level);
@@ -77,6 +108,7 @@ function startSession(
     camera,
     characters,
     echo,
+    fx,
     particles,
     bounce: new MarkerBounce(),
     clock: new FixedStepClock(),
@@ -97,16 +129,57 @@ async function main(): Promise<void> {
   scene.setViewport(VIEW.width, VIEW.height);
   const levelRenderer = new LevelRenderer(content, sheet, scene, buildSine());
   const echoSheets = new EchoSheets(scene);
+  const skins = new SkinLibrary(scene);
+  registerBosses(skins);
+  // The original's ten, then every drawn boss (once per contest: its two effects).
+  const characterIds = Array.from({ length: 10 }, (_, i) => i);
+  for (const boss of allBosses()) {
+    if (!isDrawn(boss)) continue;
+    for (const kind of CONTEST_KINDS) characterIds.push(contestCharacter(boss.levelId, kind));
+  }
   const theme = themeOfLevel(LEVEL_ID);
   const artFrame = defaultLevelArtFrame(LEVEL_ID);
 
   let character = 0;
   let look = 0;
+  let outfit = 0;
   const restart = (): Session =>
-    startSession(content, scene, sheet, levelRenderer, echoSheets, character, look);
+    startSession(content, scene, sheet, levelRenderer, echoSheets, skins, character, look, outfit);
   let session = restart();
   let pending = 0;
   let showTiles = false;
+  let showPoses = false;
+  const poseCanvas = document.createElement('canvas');
+  poseCanvas.width = VIEW.width / 2;
+  poseCanvas.height = VIEW.height / 2;
+  /** Keyframes of the pose sheet: every demo's first frame, then the run cycle. */
+  const clipTable = buildClipTable(content.anims.clips);
+  const poseFrames = [
+    ...content.anims.demos.map((d) => clipTable[d.clipOffset + 1] ?? 0),
+    ...Array.from({ length: 10 }, (_, i) => {
+      const run = content.anims.demos[0];
+      return run ? (clipTable[run.clipOffset + 1 + (i % run.frameCount)] ?? 0) : 0;
+    }),
+  ];
+  const drawPoses = (): void => {
+    const pctx = poseCanvas.getContext('2d');
+    if (!pctx) return;
+    pctx.imageSmoothingEnabled = false;
+    pctx.fillStyle = '#9fb3c8';
+    pctx.fillRect(0, 0, poseCanvas.width, poseCanvas.height);
+    const poseScene = skins.sceneFor(character, outfit);
+    const swap = skins.swapFor(character, -1, outfit);
+    const cols = 10;
+    const cellW = poseCanvas.width / cols;
+    const cellH = poseCanvas.height / 3;
+    poseFrames.forEach((frame, i) => {
+      const x = (i % cols) * cellW + cellW / 2;
+      const y = Math.floor(i / cols) * cellH + cellH - 8;
+      poseScene.drawFrame(pctx, CHARACTER_OBJECT, frame, x, y, undefined, false, swap);
+    });
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(poseCanvas, 0, 0, VIEW.width, VIEW.height);
+  };
   let paused = false;
   let stepOnce = false;
   let fps = 0;
@@ -148,11 +221,23 @@ async function main(): Promise<void> {
         break;
       case 'c':
       case 'C': {
-        character = (character + 1) % 10;
-        const v = session.characters.get(session.world.player);
-        if (v) v.character = character;
+        const at = characterIds.indexOf(character);
+        character = characterIds[(at + 1) % characterIds.length] ?? 0;
+        outfit = 0;
+        session = restart();
+        pending = 0;
         break;
       }
+      case 'o':
+      case 'O':
+        outfit = (outfit + 1) % Math.max(1, skins.outfitCount(character));
+        session = restart();
+        pending = 0;
+        break;
+      case 'v':
+      case 'V':
+        showPoses = !showPoses;
+        break;
       case 'g':
       case 'G':
         look = (look + 1) % LOOKS.length;
@@ -178,6 +263,7 @@ async function main(): Promise<void> {
       }
       characters.step(world.clock, STEP);
       session.echo.step();
+      session.fx.step({ clock: world.clock });
       particles.update(STEP, world.player);
       bounce.advance(STEP);
       camera.update(world.player, world.level);
@@ -190,13 +276,19 @@ async function main(): Promise<void> {
     const now = performance.now();
     const cam = { x: camera.renderX(alpha), y: camera.renderY(alpha) };
     ctx.imageSmoothingEnabled = false;
+    if (showPoses) {
+      drawPoses();
+      return;
+    }
     levelRenderer.drawBackground(ctx, cam, VIEW, now, theme);
     levelRenderer.drawLevelArt(ctx, cam, VIEW, artFrame);
     levelRenderer.drawMarkers(ctx, cam, VIEW, world.level, world.rules, now, bounce);
     particles.draw(ctx, cam, VIEW, world.clock, false);
     if (showTiles) levelRenderer.drawDebugTiles(ctx, cam, VIEW, world.level);
     echo.draw(ctx, cam, alpha, world.clock, now, VIEW);
+    session.fx.drawBehind(ctx, cam, world.clock, now, VIEW);
     characters.drawAll(ctx, cam, alpha, world.clock, world.player);
+    session.fx.drawFront(ctx, cam);
     particles.draw(ctx, cam, VIEW, world.clock, true);
 
     const p = world.player;
@@ -209,7 +301,7 @@ async function main(): Promise<void> {
       anim
         ? `clip ${anim.clipStart - 1} mode ${anim.mode} frame ${anim.frame}/${anim.clipLength} prev ${anim.prevFrame} tween ${anim.tween} face ${anim.faceSprite(world.clock)}`
         : '',
-      `skin ${character}  look ${LOOKS[look]}  ${paused ? 'PAUSED' : ''}`,
+      `skin ${character}  outfit ${skins.lookOf(character, outfit)?.id ?? '-'}  look ${LOOKS[look]}  ${paused ? 'PAUSED' : ''}`,
     ];
     ctx.font = '11px monospace';
     ctx.textBaseline = 'top';

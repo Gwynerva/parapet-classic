@@ -10,18 +10,20 @@
 import type { MoveTable, RunnerState, WorldEvent } from '@parapet/sim';
 import { Animator, HEAD_SPRITE } from '../anim/Animator.ts';
 import { CHARACTER_OBJECT, type SceneRenderer, type SpriteSwap } from './SceneRenderer.ts';
-import { toScreen, type CameraPos } from './View.ts';
+import type { CharacterSkins } from './SkinLibrary.ts';
+import { objectGrid, screenPixels, toScreen, type CameraPos } from './View.ts';
 
 /** Male characters get the male torso/arm parts (`a(int,int[])`: n2 ∈ {0, 1, 3, 6, 8}). */
 const MALE_CHARACTERS = new Set([1, 2, 4, 7, 9]);
 
 /**
- * Body-part swap of character `character` (0 = Blaise with the default heads 25–29).
- * `face` is the face sprite replacing the head this frame, or -1; it only applies to Blaise
- * because the other characters replace the head before the face check can keep it.
+ * Body-part swap of original character `character` (0 = Blaise with the default heads 25–29;
+ * anything outside 1..9 counts as Blaise). `face` is the face sprite replacing the head this
+ * frame, or -1; it only applies to Blaise because the other characters replace the head before
+ * the face check can keep it.
  */
 export function skinSwap(character: number, face = -1): SpriteSwap {
-  if (character <= 0) {
+  if (character <= 0 || character > 9) {
     if (face < 0) return identitySwap;
     return (id, transform) =>
       id === HEAD_SPRITE && (transform === 0 || transform === 4) ? face : id;
@@ -54,7 +56,10 @@ export interface CharacterPose {
   anchored: boolean;
 }
 
-/** Draws the character object in `pose` with `scene`'s sprites. */
+/**
+ * Draws the character object in `pose` with `scene`'s sprites, its root exactly where `cam`
+ * sees it to a screen pixel (`objectGrid`): a slow runner glides on a big screen.
+ */
 export function drawPose(
   ctx: CanvasRenderingContext2D,
   scene: SceneRenderer,
@@ -62,22 +67,27 @@ export function drawPose(
   cam: CameraPos,
   swap: SpriteSwap,
 ): void {
+  const grid = objectGrid(pose, cam, screenPixels(ctx));
+  ctx.translate(grid.dx, grid.dy);
   scene.drawObject(
     ctx,
     CHARACTER_OBJECT,
     pose.a,
     pose.b,
     pose.t,
-    toScreen(pose.x, cam.x),
-    toScreen(pose.y, cam.y),
+    toScreen(pose.x, grid.cam.x),
+    toScreen(pose.y, grid.cam.y),
     pose.flipX,
     swap,
   );
+  ctx.translate(-grid.dx, -grid.dy);
 }
 
 export interface RunnerVisualOptions {
-  /** Character id: 0 Blaise, 1..9 the other skins. */
+  /** Character id: 0 Blaise, 1..9 the other skins, 10.. the characters wearing looks. */
   character?: number;
+  /** Which of the character's outfits it wears (`SkinLibrary`). */
+  outfit?: number;
   /** Drawn by `EchoRenderer` (rivals and ghosts), not by `drawAll`. */
   echo?: boolean;
   /** Seed of the blink PRNG. */
@@ -89,6 +99,7 @@ export interface RunnerVisual {
   readonly runner: RunnerState;
   readonly animator: Animator;
   character: number;
+  outfit: number;
   echo: boolean;
   /** Draw positions (units) captured at the previous and the current step. */
   prevX: number;
@@ -111,6 +122,7 @@ export interface NpcOptions {
   x: number;
   y: number;
   character: number;
+  outfit?: number;
   facingRight?: boolean;
   /** Keyframe shown while idle (the coach holds 434). */
   idleKeyframe: number;
@@ -127,6 +139,7 @@ export interface NpcVisual {
   x: number;
   y: number;
   character: number;
+  outfit: number;
   facingRight: boolean;
   idleKeyframe: number;
   talkClipOffset: number;
@@ -135,16 +148,22 @@ export interface NpcVisual {
 }
 
 export class CharacterRenderer {
-  private readonly scene: SceneRenderer;
+  private readonly skins: CharacterSkins;
   private readonly moves: MoveTable;
   private readonly clips: Int16Array;
   private readonly visuals = new Map<RunnerState, RunnerVisual>();
   private readonly npcs = new Map<string, NpcVisual>();
 
-  constructor(scene: SceneRenderer, moves: MoveTable, clips: Int16Array) {
-    this.scene = scene;
+  /** `skins` draws looks with their own atlas; without it every character uses `scene`. */
+  constructor(scene: SceneRenderer, moves: MoveTable, clips: Int16Array, skins?: CharacterSkins) {
+    this.skins = skins ?? { sceneFor: () => scene, swapFor: (c, face) => skinSwap(c, face) };
     this.moves = moves;
     this.clips = clips;
+  }
+
+  /** The atlas a character is drawn from. */
+  sceneFor(character: number, outfit = 0): SceneRenderer {
+    return this.skins.sceneFor(character, outfit);
   }
 
   /** Start tracking a runner; it shows the idle loop until its first move change. */
@@ -156,6 +175,7 @@ export class CharacterRenderer {
       runner,
       animator,
       character: options.character ?? 0,
+      outfit: options.outfit ?? 0,
       echo: options.echo ?? false,
       prevX: p.x,
       prevY: p.y,
@@ -238,7 +258,13 @@ export class CharacterRenderer {
   swapFor(runner: RunnerState, clock: number): SpriteSwap {
     const v = this.visuals.get(runner);
     if (!v) return identitySwap;
-    return skinSwap(v.character, v.animator.faceSprite(clock));
+    return this.skins.swapFor(v.character, v.animator.faceSprite(clock), v.outfit);
+  }
+
+  /** The atlas a runner is drawn from (its character's look, or the base atlas). */
+  sceneOf(runner: RunnerState): SceneRenderer {
+    const v = this.visuals.get(runner);
+    return this.skins.sceneFor(v?.character ?? 0, v?.outfit ?? 0);
   }
 
   /**
@@ -254,7 +280,7 @@ export class CharacterRenderer {
   ): void {
     const p = this.pose(runner, alpha);
     if (!p) return;
-    drawPose(ctx, this.scene, p, cam, this.swapFor(runner, clock));
+    drawPose(ctx, this.sceneOf(runner), p, cam, this.swapFor(runner, clock));
   }
 
   attachNpc(id: string, opts: NpcOptions): NpcVisual {
@@ -262,6 +288,7 @@ export class CharacterRenderer {
       x: opts.x,
       y: opts.y,
       character: opts.character,
+      outfit: opts.outfit ?? 0,
       facingRight: opts.facingRight ?? true,
       idleKeyframe: opts.idleKeyframe,
       talkClipOffset: opts.talkClipOffset ?? -1,
@@ -286,10 +313,14 @@ export class CharacterRenderer {
 
   /** Draw the NPCs; `nowMs` is real time (`u` in the original), which drives the talk loop. */
   drawNpcs(ctx: CanvasRenderingContext2D, cam: CameraPos, nowMs: number): void {
+    const per = screenPixels(ctx);
     for (const npc of this.npcs.values()) {
-      const sx = toScreen(npc.x, cam.x);
-      const sy = toScreen(npc.y, cam.y);
-      const swap = skinSwap(npc.character);
+      const grid = objectGrid(npc, cam, per);
+      const sx = toScreen(npc.x, grid.cam.x);
+      const sy = toScreen(npc.y, grid.cam.y);
+      ctx.translate(grid.dx, grid.dy);
+      const swap = this.skins.swapFor(npc.character, -1, npc.outfit);
+      const scene = this.skins.sceneFor(npc.character, npc.outfit);
       const count = npc.talkClipOffset >= 0 ? (this.clips[npc.talkClipOffset] ?? 0) : 0;
       if (npc.talking && count > 0) {
         const phase = ((nowMs % npc.talkLoopMs) / npc.talkLoopMs) * count;
@@ -298,9 +329,9 @@ export class CharacterRenderer {
         const a = this.clips[npc.talkClipOffset + 1 + frame] ?? npc.idleKeyframe;
         const b = this.clips[npc.talkClipOffset + 1 + next] ?? a;
         const t = Math.floor((phase - Math.floor(phase)) * 65536);
-        this.scene.drawObject(ctx, CHARACTER_OBJECT, a, b, t, sx, sy, !npc.facingRight, swap);
+        scene.drawObject(ctx, CHARACTER_OBJECT, a, b, t, sx, sy, !npc.facingRight, swap);
       } else {
-        this.scene.drawFrame(
+        scene.drawFrame(
           ctx,
           CHARACTER_OBJECT,
           npc.idleKeyframe,
@@ -311,6 +342,7 @@ export class CharacterRenderer {
           swap,
         );
       }
+      ctx.translate(-grid.dx, -grid.dy);
     }
   }
 

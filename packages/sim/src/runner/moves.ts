@@ -1,6 +1,6 @@
 /**
  * The move table: 135 states with transition lists, loaded from
- * `packages/content/generated/moves.json`. See reference/notes/02-moves.md.
+ * `packages/content/playman/extracted/moves.json`. See reference/notes/02-moves.md.
  */
 
 export interface MoveTransition {

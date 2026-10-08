@@ -48,6 +48,11 @@ export interface MessageBoxOptions {
   onFrame?: (dtMs: number) => void;
   /** Widest box, in logical px (default 400). */
   maxWidth?: number;
+  /**
+   * 'bottom' (default, like the original) or 'auto': just above the speaker's head when the
+   * speaker (`tailTarget`) stands in the lower half, so the box does not cover them.
+   */
+  placement?: 'bottom' | 'auto';
 }
 
 /** Colours of the original box (lines 5053-5110). */
@@ -70,6 +75,11 @@ export class MessageBox implements Screen {
   private readonly host: MessageBoxHost;
   private readonly opts: MessageBoxOptions;
   private lines: string[] = [];
+  /**
+   * The pages as shown: the given pages wrapped to the box, a page too long for the screen
+   * split over several (nothing is cut off on a small screen).
+   */
+  private shown: string[][] = [[]];
   private box: Rect = { x: 0, y: 0, w: 0, h: 0 };
   private retryRect: Rect | null = null;
   private closed = false;
@@ -85,7 +95,7 @@ export class MessageBox implements Screen {
   }
 
   get pageCount(): number {
-    return Math.max(1, this.opts.pages.length);
+    return Math.max(1, this.shown.length);
   }
 
   get lastPage(): boolean {
@@ -119,6 +129,8 @@ export class MessageBox implements Screen {
   update(dt: number): void {
     this.elapsed += dt;
     this.opts.onFrame?.(dt);
+    // The speaker may still move (the camera settles): keep the box above them.
+    if (this.opts.placement === 'auto') this.box.y = this.boxTop(this.box.h);
   }
 
   onKey(key: UiKey): void {
@@ -160,18 +172,42 @@ export class MessageBox implements Screen {
     const safe = safeRect(viewport);
     const maxWidth = this.opts.maxWidth ?? 400;
     const w = Math.max(120, Math.min(maxWidth, safe.w - 16));
-    const text = this.opts.pages[this.page] ?? '';
-    this.lines = fonts.text.wrap(text, w - 2 * PADDING);
-    const titleH = this.opts.title && this.page === 0 ? fonts.display.lineHeight + 6 : 0;
-    const bodyH = Math.max(1, this.lines.length) * fonts.text.lineHeight;
+    const lineH = fonts.text.lineHeight;
     const footerH = fonts.small.lineHeight + 6;
-    const maxBodyH = Math.max(fonts.text.lineHeight, safe.h - 40 - titleH - footerH - 2 * PADDING);
-    const h = titleH + Math.min(bodyH, maxBodyH) + footerH + 2 * PADDING;
+    const titleBar = this.opts.title ? fonts.display.lineHeight + 6 : 0;
+    const linesFitting = (titleH: number): number =>
+      Math.max(1, Math.floor((safe.h - 40 - titleH - footerH - 2 * PADDING) / lineH));
+    this.shown = [];
+    for (const text of this.opts.pages) {
+      let rest = fonts.text.wrap(text, w - 2 * PADDING);
+      if (rest.length === 0) rest = [''];
+      while (rest.length > 0) {
+        const n = linesFitting(this.shown.length === 0 ? titleBar : 0);
+        this.shown.push(rest.slice(0, n));
+        rest = rest.slice(n);
+      }
+    }
+    if (this.shown.length === 0) this.shown = [['']];
+    this.page = Math.min(this.page, this.shown.length - 1);
+    this.lines = this.shown[this.page]!;
+    const titleH = this.page === 0 ? titleBar : 0;
+    const h = titleH + Math.max(1, this.lines.length) * lineH + footerH + 2 * PADDING;
     const x = safe.x + ((safe.w - w) >> 1);
-    // Bottom-anchored, leaving room for the tail and a margin above the device edge.
-    const y = Math.max(safe.y + 8, safe.y + safe.h - h - TAIL_HEIGHT - 12);
-    this.box = { x, y, w, h };
+    this.box = { x, y: this.boxTop(h), w, h };
     this.retryRect = null;
+  }
+
+  /**
+   * Bottom-anchored, leaving room for the tail and a margin above the device edge; or, placed
+   * 'auto', just above the speaker when the speaker would be under the box.
+   */
+  private boxTop(h: number): number {
+    const safe = safeRect(this.host.viewport);
+    const bottom = Math.max(safe.y + 8, safe.y + safe.h - h - TAIL_HEIGHT - 12);
+    if (this.opts.placement !== 'auto') return bottom;
+    const speaker = this.opts.tailTarget?.();
+    if (!speaker || speaker.y <= safe.y + safe.h * 0.5) return bottom;
+    return Math.max(safe.y + 8, speaker.y - h - TAIL_HEIGHT - 6);
   }
 
   render(ctx: CanvasRenderingContext2D): void {

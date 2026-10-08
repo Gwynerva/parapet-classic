@@ -4,7 +4,7 @@
  * intermediate greys, which read as smudges on anything but the original's light cards.
  * The clean-up keeps the drawing and snaps every pixel to four tones (outline, shadow,
  * paper, ink colour), then removes single-pixel speckles inside the outline. Deterministic,
- * applied at extraction time, documented in packages/content-classic/README.md.
+ * applied at extraction time, documented in packages/content/README.md.
  */
 
 export const MENU_ICON_IDS: readonly number[] = [141, 142, 143, 144, 145, 146, 147, 148, 149, 150];

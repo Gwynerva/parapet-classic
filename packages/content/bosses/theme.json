@@ -1,0 +1,105 @@
+{
+  "title": "Gwynerva",
+  "bpm": 168,
+  "stepsPerBar": 16,
+  "tracks": {
+    "bass": { "channel": 0, "program": 38, "volume": 0.85, "pan": 0, "gate": 0.6 },
+    "lead": { "channel": 1, "program": 81, "volume": 0.6, "pan": 0.15, "gate": 0.95 },
+    "arp": { "channel": 2, "program": 80, "volume": 0.3, "pan": -0.35, "gate": 0.5 },
+    "pad": { "channel": 3, "program": 89, "volume": 0.32, "pan": 0, "gate": 1 },
+    "stab": { "channel": 4, "program": 30, "volume": 0.42, "pan": 0.35, "gate": 0.45 },
+    "drums": { "channel": 9, "volume": 0.85 }
+  },
+  "drumKit": { "K": 36, "S": 38, "c": 39, "h": 42, "o": 46, "C": 49, "T": 45, "t": 48 },
+  "patterns": {
+    "bassPedal": "D2 . D2 . D2 . D2 . D2 . D2 . D2 D2 Eb2 .",
+    "bassDm": "D2 . D2 D3 . D2 D2 . Eb2 . D2 D3 . D2 C2 .",
+    "bassBb": "Bb1 . Bb1 Bb2 . Bb1 Bb1 . C2 . Bb1 Bb2 . Bb1 A1 .",
+    "bassC": "C2 . C2 C3 . C2 C2 . D2 . C2 C3 . C2 Bb1 .",
+    "bassGm": "G1 . G1 G2 . G1 G1 . A1 . G1 G2 . G1 F1 .",
+    "bassA": "A1 . A1 A2 . A1 A1 . Bb1 . A1 A2 . C#2 E2 .",
+    "bassLongDm": "D2 - - - - - - - - - - - - - - -",
+    "bassLongBb": "Bb1 - - - - - - - - - - - - - - -",
+    "bassLongA": "A1 - - - - - - - E2 - - - A1 - C#2 -",
+
+    "leadA": "D5 - - A4 - - D5 - F5 - E5 - D5 - C#5 - D5 - - - - - - - . . A4 - Bb4 - A4 - F5 - - D5 - - F5 - G5 - F5 - Eb5 - D5 - E5 - - - G5 - - - E5 - C5 - D5 - E5 - D5 - - A4 - - D5 - F5 - E5 - D5 - C#5 - D5 - - - - - F5 - A5 - - - G5 - F5 - G5 - - Bb5 - - A5 - G5 - F5 - E5 - D5 - C#5 - - - E5 - - - A4 - - - - - - -",
+    "leadB": "D5 - - - F5 - - - Bb5 - - - A5 - G5 - E5 - - - G5 - - - C6 - - - Bb5 - A5 - A5 - - - - - - - F5 - G5 - A5 - - - D6 - - - C6 - Bb5 - A5 - G5 - F5 - E5 - F5 - - - D5 - - - Bb4 - D5 - F5 - - - G5 - - - E5 - - - C5 - E5 - G5 - - - E5 - - - C#5 - - - E5 - - - A5 - - - C#6! - - - - - - - - - - - . . . .",
+
+    "arpDm": "D4 F4 A4 D5 A4 F4 D4 F4 A4 D5 A4 F4 D4 F4 A4 F4",
+    "arpBb": "Bb3 D4 F4 Bb4 F4 D4 Bb3 D4 F4 Bb4 F4 D4 Bb3 D4 F4 D4",
+    "arpC": "C4 E4 G4 C5 G4 E4 C4 E4 G4 C5 G4 E4 C4 E4 G4 E4",
+    "arpGm": "G3 Bb3 D4 G4 D4 Bb3 G3 Bb3 D4 G4 D4 Bb3 G3 Bb3 D4 Bb3",
+    "arpA": "A3 C#4 E4 A4 E4 C#4 A3 C#4 E4 A4 E4 C#4 A3 C#4 E4 C#4",
+
+    "padDm": "D3+F3+A3 - - - - - - - - - - - - - - -",
+    "padBb": "Bb2+D3+F3 - - - - - - - - - - - - - - -",
+    "padC": "C3+E3+G3 - - - - - - - - - - - - - - -",
+    "padGm": "G2+Bb2+D3 - - - - - - - - - - - - - - -",
+    "padA": "A2+C#3+E3 - - - - - - - - - - - - - - -",
+
+    "stabDm": ". . D4+F4+A4 . . . D4+F4+A4 . . . D4+F4+A4 . . D4+F4+A4! . .",
+    "stabBb": ". . Bb3+D4+F4 . . . Bb3+D4+F4 . . . Bb3+D4+F4 . . Bb3+D4+F4! . .",
+    "stabC": ". . C4+E4+G4 . . . C4+E4+G4 . . . C4+E4+G4 . . C4+E4+G4! . .",
+    "stabA": ". . A3+C#4+E4 . . . A3+C#4+E4 . . . A3+C#4+E4 . . A3+C#4+E4! . .",
+
+    "heartbeat": ["K..K....K..K....", "..h...h...h...h."],
+    "heartbeatFill": ["K..K....K..K....", "..h...h...h...h.", "............TTtt"],
+    "beatA": ["K...K..K..K.K...", "....S.......S...", "h.h.h.h.h.h.h.hh"],
+    "beatACrash": ["K...K..K..K.K...", "....S.......S...", "..h.h.h.h.h.h.hh", "C..............."],
+    "beatB": ["K..K..K...K..K..", "....S..S....S...", "h.hoh.h.h.hoh.h."],
+    "beatBCrash": ["K..K..K...K..K..", "....S..S....S...", "..hoh.h.h.hoh.h.", "C..............."],
+    "fill": ["K.......K.......", "....S...S.S.SSSS", "...........TT.tt"],
+    "pulse": ["K.......K.......", "....T.......T.t."],
+    "roll": ["K...K...K...K...", "S.S.S.S.SSSSSSSS", "........c...c..."]
+  },
+  "sections": {
+    "intro": {
+      "bars": 4,
+      "play": {
+        "bass": ["bassPedal"],
+        "pad": ["padDm"],
+        "drums": ["heartbeat", "heartbeat", "heartbeat", "heartbeatFill"]
+      }
+    },
+    "theme": {
+      "bars": 8,
+      "play": {
+        "bass": ["bassDm", "bassDm", "bassBb", "bassC", "bassDm", "bassDm", "bassGm", "bassA"],
+        "lead": ["leadA"],
+        "arp": ["arpDm", "arpDm", "arpBb", "arpC", "arpDm", "arpDm", "arpGm", "arpA"],
+        "pad": ["padDm", "padDm", "padBb", "padC", "padDm", "padDm", "padGm", "padA"],
+        "drums": ["beatACrash", "beatA", "beatA", "beatA", "beatA", "beatA", "beatA", "fill"]
+      }
+    },
+    "climb": {
+      "bars": 8,
+      "play": {
+        "bass": ["bassBb", "bassC", "bassDm", "bassDm", "bassBb", "bassC", "bassA", "bassA"],
+        "lead": ["leadB"],
+        "stab": ["stabBb", "stabC", "stabDm", "stabDm", "stabBb", "stabC", "stabA", "stabA"],
+        "pad": ["padBb", "padC", "padDm", "padDm", "padBb", "padC", "padA", "padA"],
+        "drums": ["beatBCrash", "beatB", "beatB", "beatB", "beatB", "beatB", "beatB", "fill"]
+      }
+    },
+    "break": {
+      "bars": 4,
+      "play": {
+        "bass": ["bassLongDm", "bassLongDm", "bassLongBb", "bassLongA"],
+        "arp": ["arpDm", "arpDm", "arpBb", "arpA"],
+        "pad": ["padDm", "padDm", "padBb", "padA"],
+        "drums": ["pulse", "pulse", "pulse", "roll"]
+      }
+    },
+    "finale": {
+      "bars": 8,
+      "play": {
+        "bass": ["bassDm", "bassDm", "bassBb", "bassC", "bassDm", "bassDm", "bassGm", "bassA"],
+        "lead": ["leadA@+12"],
+        "arp": ["arpDm", "arpDm", "arpBb", "arpC", "arpDm", "arpDm", "arpGm", "arpA"],
+        "stab": ["stabDm", "stabDm", "stabBb", "stabC", "stabDm", "stabDm", "stabDm", "stabA"],
+        "drums": ["beatBCrash", "beatB", "beatB", "beatB", "beatB", "beatB", "beatB", "fill"]
+      }
+    }
+  },
+  "song": ["intro", "theme", "climb", "break", "finale"]
+}

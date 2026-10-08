@@ -1,8 +1,9 @@
 import { Theme, type GameContext } from '../Context.ts';
-import type { Screen, UiKey, UiPointer } from '@parapet/runtime/app/Screen.ts';
+import type { Screen, UiKey, UiPointer, UiWheel } from '@parapet/runtime/app/Screen.ts';
 import { Menu } from '@parapet/runtime/ui/Menu.ts';
 import { heading, panel } from '@parapet/runtime/ui/draw.ts';
-import { fitWidth, inset, rowHeight, safeRect } from '@parapet/runtime/ui/layout.ts';
+import { rowHeight, type Rect } from '@parapet/runtime/ui/layout.ts';
+import { dialogLayout } from '../layouts.ts';
 import type { PlayScreen } from './PlayScreen.ts';
 import { TitleScreen } from './TitleScreen.ts';
 
@@ -43,15 +44,27 @@ export class PauseScreen implements Screen {
   }
 
   onResize(): void {
-    const { viewport } = this.ctx;
-    const safe = safeRect(viewport);
-    const col = fitWidth(inset(safe, 8, 0), 220);
+    const { viewport, fonts } = this.ctx;
     const row = rowHeight(24, viewport.isCoarsePointer);
-    this.menu.layout.x = col.x;
-    this.menu.layout.width = col.w;
-    this.menu.layout.rowHeight = row;
-    this.menu.layout.y = safe.y + (safe.h >> 1) - row;
+    const d = dialogLayout(viewport, {
+      width: 220,
+      header: fonts.display.lineHeight + 10,
+      footer: 0,
+      rows: this.menu.items.length,
+      rowHeight: row,
+    });
+    this.panelRect = d.panel;
+    Object.assign(this.menu.layout, {
+      x: d.menu.x,
+      y: d.menu.y,
+      width: d.menu.w,
+      rowHeight: row,
+      align: 'center',
+    });
+    this.menu.fit(d.menu.h);
   }
+
+  private panelRect: Rect = { x: 0, y: 0, w: 0, h: 0 };
 
   update(): void {}
 
@@ -67,13 +80,17 @@ export class PauseScreen implements Screen {
     this.menu.onPointer(p);
   }
 
+  onWheel(w: UiWheel): void {
+    this.menu.onWheel(w);
+  }
+
   render(c: CanvasRenderingContext2D): void {
     const { viewport, fonts, i18n } = this.ctx;
     c.fillStyle = Theme.overlay;
     c.fillRect(0, 0, viewport.width, viewport.height);
-    const { x, y, width, rowHeight: row } = this.menu.layout;
-    panel(c, x - 8, y - 40, width + 16, this.menu.items.length * row + 56);
-    heading(c, fonts.display, i18n.t('menu.pause'), x + (width >> 1), y - 30);
+    const r = this.panelRect;
+    panel(c, r.x, r.y, r.w, r.h);
+    heading(c, fonts.display, i18n.t('menu.pause'), r.x + (r.w >> 1), r.y + 6);
     this.menu.draw(c);
   }
 }

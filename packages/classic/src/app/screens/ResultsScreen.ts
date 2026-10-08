@@ -3,6 +3,8 @@
  * `evaluateMission`, the goal line, time and score, the local record with name entry, the
  * unlock bookkeeping, and retry / next mission / main menu. After a ghost race it also tells
  * who won and by how much; every ranked run can go out as a challenge link or a replay file.
+ * After a contest with a boss it judges the run against her time only (contests are not
+ * missions) and hands out her look on the first win.
  */
 import {
   cleanReplayName,
@@ -18,7 +20,8 @@ import {
   type RunMode,
 } from '@parapet/sim';
 import { formatTime, Theme, type GameContext } from '../Context.ts';
-import type { Screen, UiGesture, UiKey, UiPointer } from '@parapet/runtime/app/Screen.ts';
+import { countEvent } from '../analytics.ts';
+import type { Screen, UiGesture, UiKey, UiPointer, UiWheel } from '@parapet/runtime/app/Screen.ts';
 import { Menu, type MenuItem } from '@parapet/runtime/ui/Menu.ts';
 import { panel } from '@parapet/runtime/ui/draw.ts';
 import { fitWidth, inset, rowHeight, safeRect, type Rect } from '@parapet/runtime/ui/layout.ts';
@@ -26,6 +29,10 @@ import { MessageBox } from '@parapet/runtime/ui/MessageBox.ts';
 import { TextInputOverlay } from '@parapet/runtime/ui/TextInputOverlay.ts';
 import {
   completeMission,
+  loadContestProgress,
+  markContestBeaten,
+  updateContestRecord,
+  type ContestKind,
   isBetterRecord,
   isLevelUnlocked,
   loadProgress,
@@ -34,8 +41,23 @@ import {
   saveRecord,
   type RecordEntry,
 } from '@parapet/runtime/storage/profile.ts';
-import { copyChallengeLink, missionSetup, saveReplayFile, watchSetup } from '../ghosts.ts';
+import {
+  copyChallengeLink,
+  missionSetup,
+  runnerName,
+  saveReplayFile,
+  watchSetup,
+} from '../ghosts.ts';
 import { formatGap } from '../ui/GhostOverlay.ts';
+import {
+  bossCharacterFor,
+  bossOfCharacter,
+  bossOfLevel,
+  effectNameKey,
+  isDrawn,
+  upgradeCharacter,
+} from '../bosses.ts';
+import { CharacterSelectScreen } from './CharacterSelectScreen.ts';
 import { PlayScreen } from './PlayScreen.ts';
 import { TitleScreen } from './TitleScreen.ts';
 import { PrizeScreen } from './PrizeScreen.ts';
@@ -65,6 +87,12 @@ export class ResultsScreen implements Screen {
   private prizeUnlocked = false;
   private shownAt = 0;
   private lines: string[] = [];
+  /** A boss character opened by this run (character id), or -1. */
+  private wonLook = -1;
+  /** The win gave a boss the player already had its effect. */
+  private upgraded = false;
+  /** This run beat a boss for the first time on a level whose boss is not drawn yet. */
+  private wonLater = false;
 
   constructor(ctx: GameContext, play: PlayScreen) {
     this.ctx = ctx;
@@ -84,8 +112,12 @@ export class ResultsScreen implements Screen {
       world.player.moveBits,
     );
     this.race = this.judgeRace();
-    this.updateProgress();
-    this.storeRecord();
+    if (play.setup.contest) {
+      this.settleContest();
+    } else {
+      this.updateProgress();
+      this.storeRecord();
+    }
     this.lines = this.describe();
     this.buildMenu();
   }
@@ -94,8 +126,13 @@ export class ResultsScreen implements Screen {
     return rankingSort(this.play.setup.mode, this.play.setup.levelId);
   }
 
-  /** Who won the ghost race, by the rules the mode is ranked on. */
+  /** Who won the ghost race, by the rules the mode is ranked on (or the contest, by time). */
   private judgeRace(): RaceVerdict | null {
+    const contest = this.play.setup.contest;
+    if (contest) {
+      if (!this.finished || this.time > contest.timeMs) return 'lost';
+      return this.time < contest.timeMs ? 'won' : 'draw';
+    }
     const ghost = this.play.setup.ghost;
     if (!ghost) return null;
     const mine = { finished: this.finished, time: this.time, score: this.score };
@@ -103,9 +140,82 @@ export class ResultsScreen implements Screen {
     return order < 0 ? 'won' : order > 0 ? 'lost' : 'draw';
   }
 
+  /**
+   * A contest: the player's best contest run, and on the first win what it gives: the boss as a
+   * character, or its effect when the player already had it plain (their choice follows).
+   */
+  private settleContest(): void {
+    const { setup, session } = this.play;
+    const kind = setup.mode as ContestKind;
+    if (setup.script) return;
+    if (this.finished) {
+      const replay = session.buildReplay();
+      updateContestRecord(setup.levelId, kind, {
+        time: this.time,
+        score: this.score,
+        finished: true,
+        timeUp: false,
+        input: session.world.recorder.finish(),
+        playerName: setup.playerName,
+        character: setup.character,
+        withRival: false,
+        simVersion: replay?.simVersion ?? '',
+        date: new Date().toISOString(),
+      });
+    }
+    if (this.race !== 'won') return;
+    const before = bossCharacterFor(setup.levelId, loadContestProgress());
+    const firstTime = markContestBeaten(setup.levelId, kind);
+    if (firstTime) countEvent(`boss/${bossOfLevel(setup.levelId)?.id ?? setup.levelId}/${kind}`);
+    if (!isDrawn(bossOfLevel(setup.levelId))) {
+      this.wonLater = firstTime;
+      return;
+    }
+    const progress = loadContestProgress();
+    const after = bossCharacterFor(setup.levelId, progress);
+    if (after === null || after === before) return;
+    this.wonLook = after;
+    this.upgraded = before !== null;
+    const player = this.ctx.player;
+    if (player.character !== after && upgradeCharacter(player.character, progress) === after) {
+      player.character = after;
+      savePlayer(player);
+    }
+  }
+
+  private describeContest(): string[] {
+    const { i18n } = this.ctx;
+    const contest = this.play.setup.contest!;
+    const found = bossOfCharacter(contest.character);
+    const id = found?.boss.id ?? '';
+    const boss = id ? i18n.t(`boss.${id}.name`) : '';
+    const race = this.race ?? 'lost';
+    const out = [
+      i18n.t('contest.result', { boss, value: formatTime(contest.timeMs) }),
+      `${i18n.t('results.yourTime')} ${this.finished ? formatTime(this.time) : '-'}`,
+    ];
+    const margin = this.finished ? formatGap(this.time - contest.timeMs, 2) : '';
+    out.push(i18n.t(`contest.verdict.${race}`, { margin }));
+    // The boss has a word on it: impressed or smug.
+    const quoteKey = `boss.${id}.${race === 'won' ? 'won' : 'lost'}`;
+    if (id && i18n.has(quoteKey))
+      out.push(i18n.t('contest.quote', { boss, text: i18n.t(quoteKey) }));
+    if (this.wonLook >= 0 && found) {
+      const fx = i18n.t(effectNameKey(found.boss));
+      let key = 'contest.unlocked';
+      if (this.upgraded) key = 'contest.upgraded';
+      else if (bossOfCharacter(this.wonLook)?.effects) key = 'contest.unlockedFx';
+      out.push(i18n.t(key, { boss, fx }));
+    } else if (this.wonLater) {
+      out.push(i18n.t('contest.unlockedLater'));
+    }
+    return out;
+  }
+
   private describe(): string[] {
     const { i18n } = this.ctx;
     const { setup } = this.play;
+    if (setup.contest) return this.describeContest();
     const out: string[] = [];
     const target = this.outcome.target;
     if (target) {
@@ -177,10 +287,14 @@ export class ResultsScreen implements Screen {
     if (slot < 0) return;
     const { firstTime, total, progress } = completeMission(setup.levelId, slot);
     if (!firstTime) return;
+    countEvent(`level/${setup.levelId + 1}`);
     const unlocked = missions.find((m) => m.id !== 0 && m.unlockThreshold === total);
     if (unlocked) this.unlockedLevel = unlocked.id;
     const all = missions.reduce((n, m) => n + m.missionCount, 0);
-    if (total >= all && !progress.prizeSeen) this.prizeUnlocked = true;
+    if (total >= all && !progress.prizeSeen) {
+      this.prizeUnlocked = true;
+      countEvent('prize');
+    }
   }
 
   private storeRecord(): void {
@@ -264,11 +378,22 @@ export class ResultsScreen implements Screen {
     const { setup } = this.play;
     const items: MenuItem[] = [
       {
-        label: setup.ghost ? i18n.t('ghost.again') : i18n.t('results.retry'),
+        label: setup.ghost || setup.contest ? i18n.t('ghost.again') : i18n.t('results.retry'),
         onSelect: () => this.leave(() => this.play.restart()),
       },
     ];
-    const next = this.nextMission();
+    if (this.wonLook >= 0) {
+      const character = this.wonLook;
+      items.push({
+        label: i18n.t('contest.chooseCharacter'),
+        onSelect: () =>
+          this.leave(() => {
+            screens.pop();
+            screens.push(new CharacterSelectScreen(this.ctx, { select: character, back: true }));
+          }),
+      });
+    }
+    const next = setup.contest ? null : this.nextMission();
     if (next && setup.ghost?.kind !== 'challenger') {
       items.push({
         label: i18n.t('results.nextMission'),
@@ -299,7 +424,7 @@ export class ResultsScreen implements Screen {
     const ghost = setup.ghost;
     if (ghost && ghost.kind === 'challenger') {
       items.push({
-        label: i18n.t('ghost.watch'),
+        label: i18n.t('ghost.watch', { name: runnerName(this.ctx, ghost.replay) }),
         onSelect: () =>
           this.leave(() => {
             screens.pop();
@@ -312,7 +437,6 @@ export class ResultsScreen implements Screen {
       onSelect: () => this.leave(() => screens.clear(new TitleScreen(this.ctx))),
     });
     this.menu.setItems(items);
-    this.menu.maxVisible = items.length;
     this.onResize();
   }
 
@@ -398,12 +522,14 @@ export class ResultsScreen implements Screen {
     const col = fitWidth(inset(safe, 8, 0), 300);
     const row = rowHeight(22, viewport.isCoarsePointer);
     const headerH = this.headerHeight();
-    const menuH = this.menu.items.length * row;
-    const total = headerH + menuH + 16;
-    const top = Math.max(safe.y + 8, safe.y + ((safe.h - total) >> 1));
     this.menu.layout.x = col.x;
     this.menu.layout.width = col.w;
     this.menu.layout.rowHeight = row;
+    this.menu.layout.align = 'center';
+    // On a short screen the actions scroll instead of running off the bottom.
+    this.menu.fit(Math.max(row, safe.h - 16 - headerH - 16));
+    const total = headerH + this.menu.height + 16;
+    const top = Math.max(safe.y + 8, safe.y + ((safe.h - total) >> 1));
     this.menu.layout.y = top + headerH;
     this.nameRect = {
       x: col.x + 8,
@@ -444,6 +570,10 @@ export class ResultsScreen implements Screen {
     this.menu.onPointer(p);
   }
 
+  onWheel(w: UiWheel): void {
+    this.menu.onWheel(w);
+  }
+
   onGesture(g: UiGesture): boolean {
     if (this.nameInput?.isOpen && g.kind === 'key') return false;
     return this.menu.onGesture(g);
@@ -451,6 +581,11 @@ export class ResultsScreen implements Screen {
 
   private title(): { text: string; color: string } {
     const { i18n } = this.ctx;
+    if (this.play.setup.contest) {
+      return this.race === 'won'
+        ? { text: i18n.t('contest.title.won'), color: Theme.accent }
+        : { text: i18n.t('results.failed'), color: Theme.danger };
+    }
     if (this.race === 'won' && this.play.setup.ghost?.kind === 'challenger') {
       return { text: i18n.t('ghost.title.won'), color: Theme.accent };
     }
@@ -470,10 +605,10 @@ export class ResultsScreen implements Screen {
     const { viewport, fonts, i18n } = this.ctx;
     c.fillStyle = Theme.overlay;
     c.fillRect(0, 0, viewport.width, viewport.height);
-    const { x, y, width, rowHeight: row } = this.menu.layout;
+    const { x, y, width } = this.menu.layout;
     const headerH = this.headerHeight();
     const top = y - headerH;
-    panel(c, x - 8, top, width + 16, headerH + this.menu.items.length * row + 16);
+    panel(c, x - 8, top, width + 16, headerH + this.menu.height + 16);
     const title = this.title();
     const cx = x + (width >> 1);
     fonts.display.draw(c, title.text, cx + 1, top + 9, { align: 'center', color: '#000000' });

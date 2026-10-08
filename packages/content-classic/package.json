@@ -1,7 +1,0 @@
-{
-  "name": "@parapet/content-classic",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "description": "Game data generated from the original jar by @parapet/tools, plus hand-made fonts and i18n"
-}

@@ -157,3 +157,21 @@ export function column(width: number, maxWidth: number): { x: number; w: number 
   const w = Math.min(maxWidth, width - 16);
   return { x: (width - w) >> 1, w };
 }
+
+/**
+ * A small triangle telling that a list goes on above (`up`) or below: 7 px wide, 4 px tall,
+ * its flat side at `y` (pointing away from the list).
+ */
+export function drawScrollArrow(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  y: number,
+  up: boolean,
+  color: string = Theme.muted,
+): void {
+  ctx.fillStyle = color;
+  for (let i = 0; i < 4; i++) {
+    const w = 7 - 2 * i;
+    ctx.fillRect(Math.round(cx - w / 2), up ? y - 1 - i : y + i, w, 1);
+  }
+}

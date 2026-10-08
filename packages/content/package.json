@@ -1,0 +1,7 @@
+{
+  "name": "@parapet/content",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Data of Parapet Classic: the original game and what is extracted from it (playman/), and our own fonts, translations, characters and Gwynerva's records, looks and theme"
+}

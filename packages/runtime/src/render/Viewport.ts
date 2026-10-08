@@ -1,12 +1,19 @@
 /**
  * Logical canvas size and integer scale.
  *
- * The game draws at a small logical resolution and the browser upscales the canvas by an integer
- * factor, so pixels stay square and crisp on any screen. The scale targets roughly 384 logical
- * pixels of height (a little more than the original 320) but never lets the logical size drop
- * below the original 240×320; the logical width is capped at 960 so ultra-wide screens get black
- * margins instead of a huge playfield.
+ * The game draws at a small logical resolution scaled up by an integer factor, so pixels stay
+ * square and crisp on any screen. The scale targets roughly 384 logical pixels of height (a
+ * little more than the original 320) but never lets the logical size drop below the original
+ * 240×320; the logical width is capped at 960 so ultra-wide screens get black margins instead of
+ * a huge playfield.
+ *
+ * The canvas itself has the screen's pixels and its context is scaled by the factor: everything
+ * drawn at whole logical pixels looks exactly as if a small canvas were stretched, but what moves
+ * slower than the camera (the parallax layers) can be placed between logical pixels, a screen
+ * pixel at a time, and glides instead of jumping a whole big pixel every few frames.
  */
+
+import { physicalSize, SettleSchedule, type Size } from './viewportSize.ts';
 
 export type ScaleMode = 'auto' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 export type Orientation = 'landscape' | 'portrait';
@@ -31,8 +38,10 @@ export interface ViewportOptions {
   /** Element that receives the canvas; defaults to `#game`. */
   container?: HTMLElement | null;
   scaleMode?: ScaleMode;
-  /** Debounce for window resize events, in ms (default 100). */
-  debounceMs?: number;
+  /** A fixed logical size (development: looking at a phone's layout on a desktop). */
+  forceLogical?: { width: number; height: number } | null;
+  /** Treat the pointer as a finger (development). */
+  forceCoarse?: boolean;
 }
 
 export const MIN_LOGICAL_WIDTH = 240;
@@ -76,6 +85,28 @@ export function computeLayout(
   return { width, height, scale };
 }
 
+/**
+ * A fixed logical size at the largest integer scale that fits the physical size (development:
+ * `?vp=292x633` shows a phone's layout on a desktop).
+ */
+export function computeForcedLayout(
+  physicalWidth: number,
+  physicalHeight: number,
+  width: number,
+  height: number,
+): Layout {
+  const w = Math.max(1, Math.floor(width));
+  const h = Math.max(1, Math.floor(height));
+  const scale = Math.max(
+    1,
+    Math.min(MAX_SCALE, Math.floor(physicalWidth / w), Math.floor(physicalHeight / h)),
+  );
+  return { width: w, height: h, scale };
+}
+
+/** Period (ms) of the safety-net look at the container size. */
+const POLL_MS = 1000;
+
 /** Creates the hidden element whose computed insets expose `env(safe-area-inset-*)`. */
 function createSafeAreaProbe(): HTMLElement {
   const probe = document.createElement('div');
@@ -105,15 +136,26 @@ export class Viewport {
   isCoarsePointer = false;
   orientation: Orientation = 'portrait';
   private mode: ScaleMode;
+  private readonly forced: { width: number; height: number } | null;
+  private readonly forceCoarse: boolean;
   private readonly container: HTMLElement;
   private readonly probe: HTMLElement;
   private readonly listeners = new Set<ViewportListener>();
-  private readonly debounceMs: number;
-  private timer: ReturnType<typeof setTimeout> | null = null;
+  private readonly settle = new SettleSchedule();
+  /** A change was hinted since the last measurement. */
+  private dirty = true;
+  private lastPoll = 0;
+  private lastCss: Size = { width: 0, height: 0 };
+  /** Exact device pixels of the container, as ResizeObserver last reported them. */
+  private devicePixels: Size | null = null;
+  private observer: ResizeObserver | null = null;
+  private dprQuery: MediaQueryList | null = null;
   private readonly coarseQuery: MediaQueryList | null;
-  private readonly onWindowResize = (): void => this.scheduleLayout();
-  private readonly onPointerQueryChange = (): void => {
-    this.isCoarsePointer = this.coarseQuery?.matches ?? false;
+  private readonly cleanups: (() => void)[] = [];
+  private readonly onHint = (): void => this.invalidate();
+  private readonly onDprChange = (): void => {
+    this.watchPixelRatio();
+    this.invalidate();
   };
 
   constructor(opts: ViewportOptions = {}) {
@@ -121,7 +163,8 @@ export class Viewport {
     if (!container) throw new Error('Viewport: no #game container in the document');
     this.container = container;
     this.mode = opts.scaleMode ?? 'auto';
-    this.debounceMs = opts.debounceMs ?? 100;
+    this.forced = opts.forceLogical ?? null;
+    this.forceCoarse = opts.forceCoarse ?? false;
     this.canvas = document.createElement('canvas');
     const ctx = this.canvas.getContext('2d', { alpha: false });
     if (!ctx) throw new Error('Viewport: 2D canvas context unavailable');
@@ -131,10 +174,18 @@ export class Viewport {
     container.appendChild(this.canvas);
     this.coarseQuery =
       typeof window.matchMedia === 'function' ? window.matchMedia('(pointer: coarse)') : null;
-    this.isCoarsePointer = this.coarseQuery?.matches ?? false;
-    this.coarseQuery?.addEventListener('change', this.onPointerQueryChange);
-    window.addEventListener('resize', this.onWindowResize);
-    window.addEventListener('orientationchange', this.onWindowResize);
+    this.isCoarsePointer = this.forceCoarse || (this.coarseQuery?.matches ?? false);
+    this.listen(this.coarseQuery, 'change', this.onHint);
+    this.observeContainer();
+    this.watchPixelRatio();
+    this.listen(window, 'resize', this.onHint);
+    this.listen(window, 'orientationchange', this.onHint);
+    this.listen(window.visualViewport ?? null, 'resize', this.onHint);
+    this.listen(screen.orientation ?? null, 'change', this.onHint);
+    this.listen(document, 'fullscreenchange', this.onHint);
+    this.listen(document, 'webkitfullscreenchange', this.onHint);
+    this.listen(window, 'pageshow', this.onHint);
+    this.listen(document, 'visibilitychange', this.onHint);
     this.layout();
   }
 
@@ -164,29 +215,70 @@ export class Viewport {
     return { x: (clientX - rect.left) * sx, y: (clientY - rect.top) * sy };
   }
 
-  /** Recomputes the layout now (resize events call this through a debounce). */
-  layout(): void {
+  /** Marks the size as possibly changed: it is measured on the next frames until it settles. */
+  invalidate(): void {
+    this.dirty = true;
+    this.settle.trigger(performance.now());
+  }
+
+  /**
+   * Called at the start of every frame, before drawing: measures again when a change was hinted
+   * (and a few times after it, while the browser settles), and once a second regardless.
+   * Resizing here means the cleared canvas is redrawn in the same frame. Returns whether the
+   * layout changed.
+   */
+  sync(now = performance.now()): boolean {
+    const due = this.settle.due(now);
+    if (!this.dirty && !due) {
+      if (now - this.lastPoll < POLL_MS) return false;
+      // The safety net: a cheap look at the container for changes nobody announced.
+      this.lastPoll = now;
+      const css = this.cssSize();
+      if (
+        css.width === this.lastCss.width &&
+        css.height === this.lastCss.height &&
+        (window.devicePixelRatio || 1) === this.dpr
+      ) {
+        return false;
+      }
+    }
+    this.dirty = false;
+    return this.layout();
+  }
+
+  /** Recomputes the layout now; returns whether anything changed (listeners were told). */
+  layout(): boolean {
     const dpr = window.devicePixelRatio || 1;
-    const physicalWidth = Math.round(window.innerWidth * dpr);
-    const physicalHeight = Math.round(window.innerHeight * dpr);
-    const { width, height, scale } = computeLayout(physicalWidth, physicalHeight, this.mode);
-    const orientation: Orientation = physicalWidth >= physicalHeight ? 'landscape' : 'portrait';
+    const css = this.cssSize();
+    this.lastCss = css;
+    const physical = physicalSize({ devicePixels: this.devicePixels, css, dpr });
+    const { width, height, scale } = this.forced
+      ? computeForcedLayout(physical.width, physical.height, this.forced.width, this.forced.height)
+      : computeLayout(physical.width, physical.height, this.mode);
+    const orientation: Orientation = physical.width >= physical.height ? 'landscape' : 'portrait';
+    const coarse = this.forceCoarse || (this.coarseQuery?.matches ?? false);
     let changed =
       width !== this.width ||
       height !== this.height ||
       scale !== this.scale ||
       dpr !== this.dpr ||
-      orientation !== this.orientation;
+      orientation !== this.orientation ||
+      coarse !== this.isCoarsePointer;
     this.width = width;
     this.height = height;
     this.scale = scale;
     this.dpr = dpr;
     this.orientation = orientation;
-    // Setting the size clears the canvas and resets the context state.
-    if (this.canvas.width !== width) this.canvas.width = width;
-    if (this.canvas.height !== height) this.canvas.height = height;
-    this.canvas.style.width = `${(width * scale) / dpr}px`;
-    this.canvas.style.height = `${(height * scale) / dpr}px`;
+    this.isCoarsePointer = coarse;
+    // Setting the size clears the canvas and resets the context state. The canvas has the
+    // screen's pixels; the context draws in logical ones.
+    if (this.canvas.width !== width * scale) this.canvas.width = width * scale;
+    if (this.canvas.height !== height * scale) this.canvas.height = height * scale;
+    const cssWidth = `${(width * scale) / dpr}px`;
+    const cssHeight = `${(height * scale) / dpr}px`;
+    if (this.canvas.style.width !== cssWidth) this.canvas.style.width = cssWidth;
+    if (this.canvas.style.height !== cssHeight) this.canvas.style.height = cssHeight;
+    this.ctx.setTransform(scale, 0, 0, scale, 0, 0);
     this.ctx.imageSmoothingEnabled = false;
     const safeArea = this.readSafeArea();
     if (
@@ -201,25 +293,55 @@ export class Viewport {
     if (changed) {
       for (const listener of this.listeners) listener(this);
     }
+    return changed;
   }
 
   dispose(): void {
-    if (this.timer !== null) clearTimeout(this.timer);
-    this.timer = null;
-    window.removeEventListener('resize', this.onWindowResize);
-    window.removeEventListener('orientationchange', this.onWindowResize);
-    this.coarseQuery?.removeEventListener('change', this.onPointerQueryChange);
+    for (const cleanup of this.cleanups) cleanup();
+    this.cleanups.length = 0;
+    this.dprQuery?.removeEventListener('change', this.onDprChange);
+    this.observer?.disconnect();
+    this.observer = null;
     this.listeners.clear();
     this.probe.remove();
     this.canvas.remove();
   }
 
-  private scheduleLayout(): void {
-    if (this.timer !== null) clearTimeout(this.timer);
-    this.timer = setTimeout(() => {
-      this.timer = null;
-      this.layout();
-    }, this.debounceMs);
+  /** The container's CSS size (it fills the window: `position: fixed; inset: 0`). */
+  private cssSize(): Size {
+    const width = this.container.clientWidth || window.innerWidth;
+    const height = this.container.clientHeight || window.innerHeight;
+    return { width, height };
+  }
+
+  private observeContainer(): void {
+    if (typeof ResizeObserver === 'undefined') return;
+    this.observer = new ResizeObserver((entries) => {
+      const entry = entries[entries.length - 1];
+      const box = entry?.devicePixelContentBoxSize?.[0];
+      this.devicePixels = box ? { width: box.inlineSize, height: box.blockSize } : null;
+      this.invalidate();
+    });
+    try {
+      this.observer.observe(this.container, { box: 'device-pixel-content-box' });
+    } catch {
+      // Safari has no device-pixel box: the CSS size times the pixel ratio has to do.
+      this.observer.observe(this.container);
+    }
+  }
+
+  /** A media query that fires once when the pixel ratio leaves its current value. */
+  private watchPixelRatio(): void {
+    this.dprQuery?.removeEventListener('change', this.onDprChange);
+    if (typeof window.matchMedia !== 'function') return;
+    this.dprQuery = window.matchMedia(`(resolution: ${window.devicePixelRatio || 1}dppx)`);
+    this.dprQuery.addEventListener('change', this.onDprChange);
+  }
+
+  private listen(target: EventTarget | null, type: string, handler: () => void): void {
+    if (!target) return;
+    target.addEventListener(type, handler);
+    this.cleanups.push(() => target.removeEventListener(type, handler));
   }
 
   private readSafeArea(): SafeArea {

@@ -16,9 +16,7 @@ import {
   loadTables,
 } from './helpers/content.ts';
 
-const DEV_REPLAY = fileURLToPath(
-  new URL('../../classic/public/dev/l0-flags.json', import.meta.url),
-);
+const DEV_REPLAY = fileURLToPath(new URL('../../classic/dev/l0-flags.json', import.meta.url));
 
 interface DevReplay {
   levelId: number;

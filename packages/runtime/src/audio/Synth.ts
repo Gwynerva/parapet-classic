@@ -2,13 +2,21 @@
  * A small polyphonic Web Audio synthesiser driven by resolved MIDI notes: every note becomes
  * one or two oscillators (or a noise burst for drums) with an envelope, scheduled at an
  * absolute audio-context time. There is no per-sample processing, so hundreds of short notes
- * cost nothing noticeable.
+ * cost nothing noticeable. Each MIDI channel ends in a gain of its own that follows the song's
+ * channel volume changes, so a held chord swells and fades as written.
  */
 import { drumFor, patchFor, type DrumPatch, type Patch } from './Instruments.ts';
-import type { MidiNote } from './MidiFile.ts';
+import { DEFAULT_CHANNEL_VOLUME, type MidiControl, type MidiNote } from './MidiFile.ts';
 
 export const MAX_VOICES = 32;
 const MIN_GAIN = 0.0005;
+/** Time constant (s) of a channel volume change: smooth, but as quick as the controller. */
+const CONTROL_SMOOTHING = 0.012;
+/**
+ * Bump when the synthesiser's sound changes (patches, envelopes, channel handling): the
+ * measured loudness of the tracks (`content/audio/loudness.json`) must then be measured again.
+ */
+export const SYNTH_VERSION = 2;
 
 interface Voice {
   /** Audio time the voice is silent again. */
@@ -21,10 +29,41 @@ export class Synth {
   private readonly output: AudioNode;
   private readonly voices: Voice[] = [];
   private noise: AudioBuffer | null = null;
+  /** One gain per MIDI channel, made on first use. */
+  private readonly channels: (GainNode | null)[] = new Array<GainNode | null>(16).fill(null);
+  /**
+   * The song drives the channel volumes (`controlAt`): a note's own `volume` is then not
+   * applied again. Songs without controller changes play each note at its `volume`.
+   */
+  channelVolumes = false;
 
   constructor(ctx: BaseAudioContext, output: AudioNode) {
     this.ctx = ctx;
     this.output = output;
+  }
+
+  private channel(index: number): GainNode {
+    let gain = this.channels[index & 15];
+    if (!gain) {
+      gain = this.ctx.createGain();
+      gain.gain.value = this.channelVolumes ? DEFAULT_CHANNEL_VOLUME : 1;
+      gain.connect(this.output);
+      this.channels[index & 15] = gain;
+    }
+    return gain;
+  }
+
+  /** A channel volume change at audio time `when`. */
+  controlAt(control: MidiControl, when: number): void {
+    if (!this.channelVolumes) return;
+    const gain = this.channel(control.channel).gain;
+    gain.setTargetAtTime(control.volume, when, CONTROL_SMOOTHING);
+  }
+
+  /** Every channel back to the default volume at audio time `when` (a song starts again). */
+  resetChannels(when: number): void {
+    if (!this.channelVolumes) return;
+    for (const gain of this.channels) gain?.gain.setValueAtTime(DEFAULT_CHANNEL_VOLUME, when);
   }
 
   /** Number of voices still sounding at audio time `at`. */
@@ -61,7 +100,11 @@ export class Synth {
     }
   }
 
-  private panned(pan: number, level: number): { input: AudioNode; gain: GainNode } {
+  private panned(
+    pan: number,
+    level: number,
+    channel: number,
+  ): { input: AudioNode; gain: GainNode } {
     const gain = this.ctx.createGain();
     gain.gain.value = level;
     let tail: AudioNode = gain;
@@ -71,14 +114,19 @@ export class Synth {
       gain.connect(panner);
       tail = panner;
     }
-    tail.connect(this.output);
+    tail.connect(this.channel(channel));
     return { input: gain, gain };
   }
 
+  /** The note's own volume, unless the channel gain already carries it. */
+  private noteVolume(note: MidiNote): number {
+    return this.channelVolumes ? 1 : note.volume;
+  }
+
   private toneAt(note: MidiNote, when: number, patch: Patch): void {
-    const level = (note.velocity / 127) * note.volume * patch.gain;
+    const level = (note.velocity / 127) * this.noteVolume(note) * patch.gain;
     if (level <= MIN_GAIN) return;
-    const { input, gain } = this.panned(note.pan, 1);
+    const { input, gain } = this.panned(note.pan, 1, note.channel);
     const seconds = note.duration / 1000;
     const freq = 440 * Math.pow(2, (note.note - 69) / 12 + (patch.octave ?? 0));
     const env = gain.gain;
@@ -144,9 +192,9 @@ export class Synth {
   }
 
   private drumAt(note: MidiNote, when: number, drum: DrumPatch): void {
-    const level = (note.velocity / 127) * note.volume * drum.gain;
+    const level = (note.velocity / 127) * this.noteVolume(note) * drum.gain;
     if (level <= MIN_GAIN) return;
-    const { input, gain } = this.panned(note.pan, 1);
+    const { input, gain } = this.panned(note.pan, 1, note.channel);
     const env = gain.gain;
     env.setValueAtTime(level, when);
     env.setTargetAtTime(MIN_GAIN, when, Math.max(0.01, drum.decay / 4));

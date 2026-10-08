@@ -58,10 +58,72 @@ instead:
 - Clipboard, downloads and file dialogs run inside the browser's input handler
   (`Screen.onGesture`), as Safari and iOS require.
 
+## 3. Bosses, languages (done)
+
+- **Contests.** Two extra races per level, Flag hunt and Sprint without the rival, against
+  records found by a tool-assisted search under human limits (`packages/tools/src/tas`,
+  `reference/notes/09-tas.md`). Only times and split times ship; the routes stay secret, and
+  the boss shows itself only before the start and once its time is up.
+- **Twelve bosses.** A character per level with its own name, texts, outfits (one at random
+  every run) and little world on the character screen; won for normal play in Sprint, with its
+  effect in Flag hunt.
+- **Looks of any shape.** Pixel-art outfits as text over the original skeleton
+  (`runtime/render/Look.ts`, `LookSheet.ts`): parts of any size with pivots, pictures per side
+  of the body, gear on layers (`hips` for skirts), cloth on a damped chain blown by the
+  runner's speed (`fx/Ribbon.ts`), kits to extend; `npm run look` exports an atlas to paint,
+  imports it back and draws sheets, poses and line-ups.
+- **Effects as data.** One particle system for every boss (`runtime/render/fx`): emitters on
+  moves and tricks, afterimages, cloth, the presence by the start.
+- **The theme**, written as a tracker score (`runtime/audio/Score.ts`) and played by the same
+  synthesiser as the original's music.
+- **Languages as folders.** One folder per language under `packages/content/i18n`, found by
+  the build; `npm run i18n` checks keys, arguments and font coverage. The first launch takes
+  the browser's language and keeps it.
+- **Content split.** `packages/content/playman` holds the original game and what is extracted
+  from it, and nothing of ours.
+
+## 4. At home on phones (done)
+
+- **The screen.** The viewport re-measures on every hint of a size change (ResizeObserver,
+  visual viewport, pixel ratio, full screen, rotation) and once a second, and resizes at the
+  start of a frame, so no black bars and no blank frame. Full screen from the first tap on touch
+  screens, a corner button, F and the options; on iPhones from the Home Screen (a web app
+  manifest and our own icons). The phone's Back button pauses or steps back, and leaves the
+  game only when pressed twice on the main menu; the installed app has an Exit.
+- **The menus.** Every screen laid out by pure, tested functions for sizes from 240×320 to
+  960×540; menus centred where they stand alone; press feedback on release for everything
+  tappable, drag and wheel scrolling, Tab between rows; long text that scrolls by itself
+  (`TextScroller`); a touch pause button. About the game in three tabs with the credits and a
+  link to the source. A level with real recorded runs behind the menus.
+- **Moves.** Every move shown on a little level of grey blocks, with a run-up and a run-out
+  (`packages/content/moves/demos.json`, authored with `npm run demo`, proven by tests).
+- **Characters.** The rivals open with their levels; the boss contests with a level's
+  missions.
+- **Music.** Channel volume changes are applied as they happen (the menu pad swells again),
+  the end-of-track marker chord is dropped, loops cross-fade, every change fades, the volume is
+  a slider, and every track plays at the same measured loudness
+  (`packages/content/audio/loudness.json`).
+
+## 5. Found and smooth (done)
+
+- **Smooth on big screens.** The canvas has the screen's pixels and draws in logical ones: the
+  world, the runners and the parallax layers move a screen pixel at a time instead of a whole
+  big pixel every few frames, while every picture stays on its own pixel grid
+  (`runtime/render/View.ts`: `worldGrid`, `objectGrid`, `splitPixel`).
+- **Found by search engines and chats.** A description, link previews with our own picture,
+  structured data, favicons for every browser, a sitemap; a README with a banner drawn by the
+  game itself (`/dev/art.html`).
+- **Counted, anonymously.** Visits and a few moments of play through GoatCounter, opt-in per
+  deployment: no cookies, nothing personal.
+- **A looks page for artists** on the dev server (`/dev/looks.html`), and the bosses' art
+  generators in the repository (`packages/tools/art`).
+
 ## Next
 
-- **Offline play.** A service worker caching the build makes the site installable and playable
-  without a connection; nothing in the game needs the network.
+- **Contests** re-searched with longer budgets to remove the last frame-perfect moments.
+
+- **Offline play.** A service worker caching the build makes the site playable without a
+  connection (it already installs as an app); nothing in the game needs the network.
 - **Shorter links.** The replay format has a version byte; a deflated variant
   (`CompressionStream`) would roughly halve the links of long runs.
 - **Hot-seat.** The original's multiplayer (players take turns, earlier players run as
@@ -82,7 +144,8 @@ packages/
   runtime/          browser platform, rendering, UI toolkit (subpath imports)
   classic/          the game
   tools/            extraction from the jar, font build
-  content-classic/  data extracted from the original jar, fonts, translations, skins
+  content/          playman/ (the original jar and what is extracted from it), fonts,
+                    translations, the bosses (records, looks, effects, worlds, theme)
 ```
 
 1. **`sim` is the only home of mechanics.** No DOM, no floats; the move table and levels are

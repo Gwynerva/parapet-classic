@@ -36,6 +36,48 @@ export const Transform = {
   ANTI_TRANSPOSE: 7,
 } as const;
 
+/**
+ * Per transform code, the matrix `[a, b, c, d, kx, ky]` mapping an untransformed source pixel
+ * (sx, sy) of a sprite to its place in the `w × h` destination box at (x, y):
+ * `(a·sx + c·sy + x + kx·w, b·sx + d·sy + y + ky·h)`. See the pixel loops `a(boolean,boolean)`
+ * and `b(boolean,boolean)` (lines 616 / 657) for the reference orientation of every code.
+ */
+export const TRANSFORM_MATRICES: readonly (readonly [
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+])[] = [
+  [1, 0, 0, 1, 0, 0],
+  [0, 1, -1, 0, 1, 0],
+  [-1, 0, 0, -1, 1, 1],
+  [0, -1, 1, 0, 0, 1],
+  [-1, 0, 0, 1, 1, 0],
+  [1, 0, 0, -1, 0, 1],
+  [0, 1, 1, 0, 0, 0],
+  [0, -1, -1, 0, 1, 1],
+];
+
+/**
+ * Where source pixel (sx, sy) of a sprite lands inside its `w × h` destination box (the drawn
+ * size, already swapped for rotations) under `transform`.
+ */
+export function transformPixel(
+  transform: number,
+  sx: number,
+  sy: number,
+  w: number,
+  h: number,
+): [number, number] {
+  const m = TRANSFORM_MATRICES[transform] ?? TRANSFORM_MATRICES[0]!;
+  // The pixel's centre, mapped, floored.
+  const cx = m[0] * (sx + 0.5) + m[2] * (sy + 0.5) + m[4] * w;
+  const cy = m[1] * (sx + 0.5) + m[3] * (sy + 0.5) + m[5] * h;
+  return [Math.floor(cx), Math.floor(cy)];
+}
+
 /** Codes that swap width and height (`(1 << t) & 0xCA`, line 3359). */
 export function isRotated(transform: number): boolean {
   return ((1 << transform) & 0xca) !== 0;
@@ -62,25 +104,33 @@ export function anchorOffsetY(anchor: number, height: number): number {
 
 export class SpriteSheet {
   readonly image: CanvasImageSource;
+  /** The sheet's own frames, by sprite id. */
   readonly frames: readonly (AtlasFrame | undefined)[];
+  /** Asked for the sprites this sheet does not have (a look's layer over the base atlas). */
+  readonly fallback: SpriteSheet | null;
 
-  constructor(image: CanvasImageSource, frames: readonly (AtlasFrame | undefined)[]) {
+  constructor(
+    image: CanvasImageSource,
+    frames: readonly (AtlasFrame | undefined)[],
+    fallback: SpriteSheet | null = null,
+  ) {
     this.image = image;
     this.frames = frames;
+    this.fallback = fallback;
   }
 
   frame(id: number): AtlasFrame | undefined {
-    return this.frames[id];
+    return this.frames[id] ?? this.fallback?.frame(id);
   }
 
   /** Untransformed width (`int_c(int)`, line 757); 0 for unknown ids. */
   width(id: number): number {
-    return this.frames[id]?.w ?? 0;
+    return this.frame(id)?.w ?? 0;
   }
 
   /** Untransformed height (`int_b(int)`, line 752); 0 for unknown ids. */
   height(id: number): number {
-    return this.frames[id]?.h ?? 0;
+    return this.frame(id)?.h ?? 0;
   }
 
   /** Width on screen after `transform`. */
@@ -106,7 +156,10 @@ export class SpriteSheet {
     anchor: number = ANCHOR_TOP_LEFT,
   ): void {
     const f = this.frames[id];
-    if (!f) return;
+    if (!f) {
+      this.fallback?.drawSprite(ctx, id, x, y, transform, anchor);
+      return;
+    }
     let w = f.w;
     let h = f.h;
     if (isRotated(transform)) {
@@ -121,34 +174,8 @@ export class SpriteSheet {
       return;
     }
     ctx.save();
-    // Each matrix maps an untransformed source pixel (sx, sy) to its place inside the
-    // w × h destination box at (x, y); see the pixel loops `a(boolean,boolean)` and
-    // `b(boolean,boolean)` (lines 616 / 657) for the reference orientation of every code.
-    switch (transform) {
-      case Transform.ROT90:
-        ctx.transform(0, 1, -1, 0, x + w, y);
-        break;
-      case Transform.ROT180:
-        ctx.transform(-1, 0, 0, -1, x + w, y + h);
-        break;
-      case Transform.ROT270:
-        ctx.transform(0, -1, 1, 0, x, y + h);
-        break;
-      case Transform.MIRROR:
-        ctx.transform(-1, 0, 0, 1, x + w, y);
-        break;
-      case Transform.FLIP:
-        ctx.transform(1, 0, 0, -1, x, y + h);
-        break;
-      case Transform.TRANSPOSE:
-        ctx.transform(0, 1, 1, 0, x, y);
-        break;
-      case Transform.ANTI_TRANSPOSE:
-        ctx.transform(0, -1, -1, 0, x + w, y + h);
-        break;
-      default:
-        break;
-    }
+    const m = TRANSFORM_MATRICES[transform]!;
+    ctx.transform(m[0], m[1], m[2], m[3], x + m[4] * w, y + m[5] * h);
     ctx.drawImage(this.image, f.x, f.y, f.w, f.h, 0, 0, f.w, f.h);
     ctx.restore();
   }
@@ -169,7 +196,10 @@ export class SpriteSheet {
     srcY: number,
   ): void {
     const f = this.frames[id];
-    if (!f) return;
+    if (!f) {
+      this.fallback?.drawStrip(ctx, id, x, y, anchor, w, h, srcX, srcY);
+      return;
+    }
     x = (x | 0) - anchorOffsetX(anchor, w);
     y = (y | 0) - anchorOffsetY(anchor, h);
     const sw = Math.min(w, f.w - srcX);

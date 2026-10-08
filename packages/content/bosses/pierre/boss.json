@@ -1,0 +1,16 @@
+{
+  "id": "pierre",
+  "color": "#a96bff",
+  "gender": "male",
+  "looks": [
+    "swordsman",
+    "fencer",
+    "rebel",
+    "undercover",
+    "mechanic",
+    "kate",
+    "evening",
+    "birthday"
+  ],
+  "effect": ["code"]
+}

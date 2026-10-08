@@ -12,7 +12,7 @@ import type { MissionInfo } from '../../src/run.ts';
 export type { MissionInfo };
 
 const here = dirname(fileURLToPath(import.meta.url));
-export const CONTENT_DIR = join(here, '..', '..', '..', 'content-classic', 'generated');
+export const CONTENT_DIR = join(here, '..', '..', '..', 'content', 'playman', 'extracted');
 
 export function hasContent(): boolean {
   return existsSync(join(CONTENT_DIR, 'moves.json'));

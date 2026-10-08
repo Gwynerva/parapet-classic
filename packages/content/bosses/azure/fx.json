@@ -1,0 +1,141 @@
+{
+  "palette": {
+    "w": "#ffffff",
+    "c": "#bfe0ff",
+    "b": "#7ab0ff",
+    "B": "#4a6aff",
+    "v": "#b080ff",
+    "V": "#7a4aff",
+    "h": "#e4f0ff"
+  },
+  "sprites": {
+    "wisp1": [".c.", "cwc", ".c."],
+    "wisp2": ["..b..", ".bcb.", "bcwcb", ".bcb.", "..b.."],
+    "wisp3": [".v.", "vcv", ".v."],
+    "ring1": [".bbb.", "b...b", "b...b", "b...b", ".bbb."],
+    "ring2": ["..vvv..", ".v...v.", "v.....v", "v.....v", "v.....v", ".v...v.", "..vvv.."]
+  },
+  "emitters": {
+    "aura": {
+      "while": ["run", "air", "wall"],
+      "every": 5,
+      "minSpeed": 40,
+      "anchor": "body",
+      "jitter": [3, 6],
+      "speed": [10, 30],
+      "angle": [-40, 40],
+      "drag": 1.5,
+      "life": [350, 650],
+      "fadeOut": 300,
+      "flutter": {
+        "amp": 1.5,
+        "freq": 3
+      },
+      "sprite": {
+        "frames": ["wisp1", "wisp3", "wisp2"],
+        "random": true
+      },
+      "blend": "add",
+      "max": 40,
+      "reduced": 0.3
+    },
+    "hands": {
+      "while": ["run", "air", "wall", "idle"],
+      "perSecond": 14,
+      "anchor": "hands",
+      "jitter": [1, 1],
+      "speed": [4, 12],
+      "angle": [0, 360],
+      "life": [150, 300],
+      "fadeOut": 150,
+      "rect": {
+        "size": 1,
+        "colors": ["w", "c", "b", "v"]
+      },
+      "blend": "add",
+      "max": 20
+    },
+    "ring": {
+      "enter": ["flip", "vault", "land", "wall"],
+      "chance": 0.5,
+      "burst": [14, 20],
+      "anchor": "body",
+      "speed": [70, 100],
+      "angle": [0, 360],
+      "drag": 5,
+      "life": [300, 450],
+      "fadeOut": 250,
+      "rect": {
+        "size": [1, 2],
+        "colors": ["c", "b", "v", "w"]
+      },
+      "blend": "add"
+    },
+    "burst": {
+      "burst": 30,
+      "anchor": "body",
+      "speed": [20, 90],
+      "angle": [0, 360],
+      "drag": 2,
+      "life": [500, 900],
+      "fadeOut": 400,
+      "flutter": {
+        "amp": 2,
+        "freq": 3
+      },
+      "sprite": {
+        "frames": ["wisp1", "wisp2", "wisp3"],
+        "random": true
+      },
+      "blend": "add"
+    },
+    "idle": {
+      "perSecond": 5,
+      "anchor": "body",
+      "jitter": [6, 10],
+      "speed": [4, 10],
+      "angle": [60, 120],
+      "life": [600, 1000],
+      "fadeIn": 150,
+      "fadeOut": 400,
+      "flutter": {
+        "amp": 2,
+        "freq": 2
+      },
+      "sprite": {
+        "frames": ["wisp1", "wisp3"],
+        "random": true
+      },
+      "blend": "add"
+    }
+  },
+  "variants": {
+    "biotics": {
+      "emitters": ["aura", "hands", "ring"],
+      "afterimage": {
+        "steps": [
+          {
+            "back": 5,
+            "alpha": 0.16
+          },
+          {
+            "back": 3,
+            "alpha": 0.26
+          },
+          {
+            "back": 1,
+            "alpha": 0.36
+          }
+        ],
+        "colors": ["#4a6aff", "#7a5aff", "#a07aff"],
+        "textured": false,
+        "while": "fast"
+      }
+    }
+  },
+  "presence": {
+    "idle": ["idle"],
+    "vanish": ["burst"],
+    "appear": ["burst"]
+  }
+}

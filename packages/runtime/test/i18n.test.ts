@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import en from '../../content-classic/i18n/en.json';
-import ru from '../../content-classic/i18n/ru.json';
+import { checkLocales, hasErrors } from '../src/i18n/check.ts';
+import { collectLocales } from '../src/i18n/locales.ts';
+import { loadFontCoverage, loadLocales } from './helpers/locales.ts';
 import {
   I18n,
   fallbackPluralCategory,
@@ -89,6 +90,10 @@ describe('message format', () => {
   });
 });
 
+const LOCALES = loadLocales();
+const en = LOCALES.find((l) => l.code === 'en')!.messages;
+const ru = LOCALES.find((l) => l.code === 'ru')!.messages;
+
 describe('I18n', () => {
   const i18n = new I18n({ en, ru }, { locale: 'en' });
 
@@ -172,9 +177,27 @@ describe('I18n', () => {
 });
 
 describe('bundled dictionaries', () => {
-  it('have the same keys in en and ru', () => {
-    expect(Object.keys(ru).sort()).toEqual(Object.keys(en).sort());
+  const locales = LOCALES;
+  const byCode = new Map(locales.map((l) => [l.code, l]));
+
+  it('are found by folder, English first', () => {
+    expect(locales[0]?.code).toBe('en');
+    expect([...byCode.keys()]).toContain('ru');
+    expect(byCode.get('ru')!.meta.name).toBe('Русский');
     expect(Object.keys(en).length).toBeGreaterThan(150);
+  });
+
+  it('pass the translation checks (keys, files, arguments, glyphs)', () => {
+    for (const report of checkLocales(locales, loadFontCoverage())) {
+      expect(hasErrors(report), JSON.stringify(report, null, 2)).toBe(false);
+    }
+  });
+
+  it('are complete in the maintained languages', () => {
+    const reports = checkLocales(locales, loadFontCoverage());
+    for (const code of ['en', 'ru']) {
+      expect(reports.find((r) => r.code === code)?.missing, code).toEqual([]);
+    }
   });
 
   it('contain the keys the UI relies on', () => {
@@ -195,21 +218,18 @@ describe('bundled dictionaries', () => {
       'moves.poleSpin.desc',
       'hints.wallTurn',
       'hints.landing',
+      'ghost.watch',
     ]) {
-      expect(en[key as keyof typeof en], key).toBeTypeOf('string');
+      expect(en[key], key).toBeTypeOf('string');
     }
   });
 
-  it('parse and format in both locales', () => {
+  it('format in every language without control characters', () => {
     const params = { n: 2, name: 'x', value: 'v', rank: 1 };
-    for (const [locale, messages] of [
-      ['en', en],
-      ['ru', ru],
-    ] as const) {
+    for (const { code, messages } of locales) {
       for (const [key, pattern] of Object.entries(messages)) {
-        expect(() => formatMessage(pattern, params, locale), `${locale}:${key}`).not.toThrow();
         // Newlines are fine (multi-line texts); other control characters are not.
-        expect(formatMessage(pattern, params, locale), `${locale}:${key}`).not.toMatch(
+        expect(formatMessage(pattern, params, code), `${code}:${key}`).not.toMatch(
           /[\x00-\x09\x0b-\x1f]/,
         );
       }
@@ -218,5 +238,42 @@ describe('bundled dictionaries', () => {
 
   it('kept no control codes from the original strings', () => {
     for (const value of Object.values(ru)) expect(value).not.toMatch(/[\x13-\x1c]/);
+  });
+});
+
+describe('collectLocales', () => {
+  it('merges area files and rejects broken ones', () => {
+    const bundles = collectLocales({
+      'x/de/meta.json': { name: 'Deutsch', englishName: 'German' },
+      'x/de/ui.json': { 'menu.start': 'Start' },
+      'x/en/meta.json': { name: 'English', englishName: 'English' },
+      'x/en/ui.json': { 'menu.start': 'Start' },
+      'x/en/game.json': { 'mode.free': 'Free run' },
+    });
+    expect(bundles.map((b) => b.code)).toEqual(['en', 'de']);
+    expect(bundles[0]!.messages).toEqual({ 'menu.start': 'Start', 'mode.free': 'Free run' });
+    expect(() => collectLocales({ 'x/fr/ui.json': { a: 'b' } })).toThrow(/meta/);
+    expect(() =>
+      collectLocales({
+        'x/fr/meta.json': { name: 'Français', englishName: 'French' },
+        'x/fr/ui.json': { a: 1 },
+      }),
+    ).toThrow(/strings/);
+  });
+
+  it('reports unknown, misplaced and argument-changing keys', () => {
+    const [en, xx] = collectLocales({
+      'en/meta.json': { name: 'English', englishName: 'English' },
+      'en/ui.json': { 'a.one': 'Hi {name}', 'a.two': 'Two' },
+      'xx/meta.json': { name: 'Xx', englishName: 'Xx' },
+      'xx/game.json': { 'a.two': 'Zwei' },
+      'xx/ui.json': { 'a.one': 'Hallo', 'a.three': 'Drei' },
+    });
+    const all = new Set(Array.from({ length: 0x500 }, (_, i) => i));
+    const report = checkLocales([en!, xx!], { text: [all], display: [all] })[1]!;
+    expect(report.unknown).toEqual(['a.three']);
+    expect(report.misplaced).toEqual(['a.two (game.json, expected ui.json)']);
+    expect(report.argumentMismatch).toEqual(['a.one: ']);
+    expect(hasErrors(report)).toBe(true);
   });
 });

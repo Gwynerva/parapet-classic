@@ -5,9 +5,9 @@
  * together. Keyboard, gamepad (polled, edge-detected) and the on-screen touch buttons all feed
  * the same accumulator. Menus read a separate UI stream (`consumeUi`).
  */
-import type { UiGesture, UiKey, UiPointer } from '../app/Screen.ts';
+import type { UiGesture, UiKey, UiPointer, UiSource, UiWheel } from '../app/Screen.ts';
 import type { Viewport } from '../render/Viewport.ts';
-import type { TouchControls } from './TouchControls.ts';
+import type { TouchControls, TouchHit } from './TouchControls.ts';
 
 /** Press bits as the simulation reads them (`Input` in @parapet/sim). */
 export const Press = {
@@ -21,11 +21,12 @@ export const Press = {
 
 export type Direction = 'up' | 'down' | 'left' | 'right';
 export type UiAction = UiKey['action'];
-export type InputSource = 'keyboard' | 'gamepad' | 'touch' | 'mouse';
+export type InputSource = UiSource;
 
 export type UiEvent =
   | { type: 'key'; key: UiKey; source: InputSource }
-  | { type: 'pointer'; pointer: UiPointer; pointerType: string; pointerId: number };
+  | { type: 'pointer'; pointer: UiPointer; pointerType: string; pointerId: number }
+  | { type: 'wheel'; wheel: UiWheel };
 
 export interface InputManagerOptions {
   viewport: Viewport;
@@ -55,6 +56,14 @@ const KEY_ACTIONS: Readonly<Record<string, UiAction>> = {
   Backspace: 'back',
   KeyP: 'pause',
 };
+
+/** Keys that only act through the gesture path (they need user activation). */
+const KEY_GESTURES: Readonly<Record<string, UiAction>> = {
+  KeyF: 'fullscreen',
+};
+
+/** CSS pixels per line of a wheel that scrolls by lines. */
+const WHEEL_LINE_PX = 16;
 
 /** Standard gamepad mapping: d-pad 12–15, A/B 0/1, Select/Start 8/9. */
 const GAMEPAD_DIRECTIONS: Readonly<Record<number, Direction>> = {
@@ -113,7 +122,7 @@ export class InputManager {
   private ui: UiEvent[] = [];
   private readonly gamepads = new Map<number, GamepadState>();
   /** Pointers currently holding a touch button, so their move/up events are not UI events. */
-  private readonly capturedPointers = new Map<number, Direction>();
+  private readonly capturedPointers = new Map<number, TouchHit>();
   private readonly viewport: Viewport;
   private readonly facingRight: () => boolean;
   private touch: TouchControls | null;
@@ -136,6 +145,7 @@ export class InputManager {
     canvas.addEventListener('pointerup', this.onPointerUp);
     canvas.addEventListener('pointercancel', this.onPointerUp);
     canvas.addEventListener('contextmenu', this.onContextMenu);
+    canvas.addEventListener('wheel', this.onWheel, { passive: false });
   }
 
   get touchControls(): TouchControls | null {
@@ -151,12 +161,12 @@ export class InputManager {
   /** Registers a direction press from any source (also a UI navigation key). */
   press(direction: Direction, source: InputSource = 'keyboard'): void {
     this.bits |= pressBits(direction, this.facingRight());
-    this.ui.push({ type: 'key', key: { action: direction }, source });
+    this.ui.push({ type: 'key', key: { action: direction, source }, source });
   }
 
-  /** Registers a UI action (confirm/back/pause). */
+  /** Registers a UI action (confirm/back/pause/next/prev). */
   action(action: UiAction, source: InputSource = 'keyboard'): void {
-    this.ui.push({ type: 'key', key: { action }, source });
+    this.ui.push({ type: 'key', key: { action, source }, source });
   }
 
   /** Press bits accumulated since the last call; clears them. */
@@ -241,6 +251,7 @@ export class InputManager {
     canvas.removeEventListener('pointerup', this.onPointerUp);
     canvas.removeEventListener('pointercancel', this.onPointerUp);
     canvas.removeEventListener('contextmenu', this.onContextMenu);
+    canvas.removeEventListener('wheel', this.onWheel);
     this.clear();
   }
 
@@ -250,8 +261,20 @@ export class InputManager {
     if (isEditable(event.target)) return;
     const direction = KEY_DIRECTIONS[event.code];
     if (direction) {
-      this.press(direction, 'keyboard');
       event.preventDefault();
+      // A menu row that needs user activation (full screen) reacts to left/right right here.
+      if (this.gesture({ kind: 'key', action: direction })) return;
+      this.press(direction, 'keyboard');
+      return;
+    }
+    if (event.code === 'Tab') {
+      event.preventDefault();
+      this.action(event.shiftKey ? 'prev' : 'next', 'keyboard');
+      return;
+    }
+    const gestureOnly = KEY_GESTURES[event.code];
+    if (gestureOnly) {
+      if (this.gesture({ kind: 'key', action: gestureOnly })) event.preventDefault();
       return;
     }
     const action = KEY_ACTIONS[event.code];
@@ -267,16 +290,15 @@ export class InputManager {
 
   private readonly onPointerDown = (event: PointerEvent): void => {
     const { x, y } = this.viewport.toLogical(event.clientX, event.clientY);
-    const touch = this.touch;
-    if (touch?.enabled) {
-      const direction = touch.hitTest(x, y);
-      if (direction) {
-        this.capturedPointers.set(event.pointerId, direction);
-        touch.setPressed(event.pointerId, direction);
-        this.press(direction, event.pointerType === 'touch' ? 'touch' : 'mouse');
-        event.preventDefault();
-        return;
-      }
+    const hit = this.touch?.hitTest(x, y) ?? null;
+    if (hit) {
+      const source = event.pointerType === 'touch' ? 'touch' : 'mouse';
+      this.capturedPointers.set(event.pointerId, hit);
+      this.touch?.setPressed(event.pointerId, hit);
+      if (hit === 'pause') this.action('pause', source);
+      else this.press(hit, source);
+      event.preventDefault();
+      return;
     }
     if (this.gesture({ kind: 'pointer', x, y, type: 'down', pointerType: event.pointerType }))
       return;
@@ -304,13 +326,32 @@ export class InputManager {
       return;
     }
     const { x, y } = this.viewport.toLogical(event.clientX, event.clientY);
-    if (
-      event.type === 'pointerup' &&
-      this.gesture({ kind: 'pointer', x, y, type: 'up', pointerType: event.pointerType })
-    ) {
+    if (event.type === 'pointercancel') {
+      this.pushPointer(event, x, y, 'cancel');
+      return;
+    }
+    if (this.gesture({ kind: 'pointer', x, y, type: 'up', pointerType: event.pointerType })) {
       return;
     }
     this.pushPointer(event, x, y, 'up');
+  };
+
+  private readonly onWheel = (event: WheelEvent): void => {
+    event.preventDefault();
+    const rect = this.viewport.canvas.getBoundingClientRect();
+    const toLogical = rect.height > 0 ? this.viewport.height / rect.height : 1;
+    const cssPerUnit =
+      event.deltaMode === 1 ? WHEEL_LINE_PX : event.deltaMode === 2 ? rect.height : 1;
+    const dy = event.deltaY * cssPerUnit * toLogical;
+    if (dy === 0) return;
+    const { x, y } = this.viewport.toLogical(event.clientX, event.clientY);
+    // Touchpads send a burst of small deltas: sum them within a frame.
+    const last = this.ui[this.ui.length - 1];
+    if (last?.type === 'wheel') {
+      last.wheel.dy += dy;
+      return;
+    }
+    this.ui.push({ type: 'wheel', wheel: { x, y, dy } });
   };
 
   private gesture(g: UiGesture): boolean {
@@ -329,7 +370,7 @@ export class InputManager {
   private pushPointer(event: PointerEvent, x: number, y: number, type: UiPointer['type']): void {
     this.ui.push({
       type: 'pointer',
-      pointer: { x, y, type },
+      pointer: { x, y, type, pointerType: event.pointerType, id: event.pointerId },
       pointerType: event.pointerType,
       pointerId: event.pointerId,
     });

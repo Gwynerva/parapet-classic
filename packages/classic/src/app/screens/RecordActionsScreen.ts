@@ -4,10 +4,11 @@
  */
 import { rankingSort, type RunMode } from '@parapet/sim';
 import { formatTime, Theme, type GameContext } from '../Context.ts';
-import type { Screen, UiGesture, UiKey, UiPointer } from '@parapet/runtime/app/Screen.ts';
+import type { Screen, UiGesture, UiKey, UiPointer, UiWheel } from '@parapet/runtime/app/Screen.ts';
 import { Menu, type MenuItem } from '@parapet/runtime/ui/Menu.ts';
 import { heading, panel } from '@parapet/runtime/ui/draw.ts';
-import { fitWidth, inset, rowHeight, safeRect } from '@parapet/runtime/ui/layout.ts';
+import { rowHeight, type Rect } from '@parapet/runtime/ui/layout.ts';
+import { dialogLayout } from '../layouts.ts';
 import type { RecordEntry } from '@parapet/runtime/storage/profile.ts';
 import {
   bestGhost,
@@ -82,7 +83,6 @@ export class RecordActionsScreen implements Screen {
       { label: i18n.t('menu.back'), onSelect: () => screens.pop() },
     ];
     this.menu.setItems(items);
-    this.menu.maxVisible = items.length;
     this.onResize();
   }
 
@@ -92,15 +92,27 @@ export class RecordActionsScreen implements Screen {
   }
 
   onResize(): void {
-    const { viewport } = this.ctx;
-    const safe = safeRect(viewport);
-    const col = fitWidth(inset(safe, 8, 0), 260);
+    const { viewport, fonts } = this.ctx;
     const row = rowHeight(24, viewport.isCoarsePointer);
-    this.menu.layout.x = col.x;
-    this.menu.layout.width = col.w;
-    this.menu.layout.rowHeight = row;
-    this.menu.layout.y = safe.y + ((safe.h - this.menu.items.length * row) >> 1) + 16;
+    const d = dialogLayout(viewport, {
+      width: 260,
+      header: fonts.display.lineHeight + fonts.small.lineHeight + 14,
+      footer: fonts.small.lineHeight + 6,
+      rows: this.menu.items.length,
+      rowHeight: row,
+    });
+    this.panelRect = d.panel;
+    Object.assign(this.menu.layout, {
+      x: d.menu.x,
+      y: d.menu.y,
+      width: d.menu.w,
+      rowHeight: row,
+      align: 'center',
+    });
+    this.menu.fit(d.menu.h);
   }
+
+  private panelRect: Rect = { x: 0, y: 0, w: 0, h: 0 };
 
   update(): void {}
 
@@ -116,6 +128,10 @@ export class RecordActionsScreen implements Screen {
     this.menu.onPointer(p);
   }
 
+  onWheel(w: UiWheel): void {
+    this.menu.onWheel(w);
+  }
+
   onGesture(g: UiGesture): boolean {
     return this.menu.onGesture(g);
   }
@@ -124,25 +140,18 @@ export class RecordActionsScreen implements Screen {
     const { viewport, fonts } = this.ctx;
     c.fillStyle = Theme.overlay;
     c.fillRect(0, 0, viewport.width, viewport.height);
-    const { x, y, width, rowHeight: row } = this.menu.layout;
-    const headerH = fonts.display.lineHeight + fonts.small.lineHeight + 14;
-    const statusH = fonts.small.lineHeight + 6;
-    panel(
-      c,
-      x - 8,
-      y - headerH - 8,
-      width + 16,
-      headerH + this.menu.items.length * row + statusH + 16,
-    );
+    const { x, y, width } = this.menu.layout;
+    const r = this.panelRect;
+    panel(c, r.x, r.y, r.w, r.h);
     const cx = x + (width >> 1);
-    heading(c, fonts.display, this.title, cx, y - headerH);
+    heading(c, fonts.display, fonts.display.fit(this.title, width), cx, r.y + 6);
     fonts.small.draw(c, this.subtitle, cx, y - fonts.small.lineHeight - 6, {
       align: 'center',
       color: Theme.muted,
     });
     this.menu.draw(c);
     if (this.status && performance.now() < this.statusUntil) {
-      fonts.small.draw(c, this.status, cx, y + this.menu.items.length * row + 4, {
+      fonts.small.draw(c, this.status, cx, y + this.menu.height + 4, {
         align: 'center',
         color: Theme.success,
       });

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Looks</title>
+    <style>
+      body {
+        background: #101418;
+        color: #ddd;
+        font: 13px monospace;
+        margin: 16px;
+      }
+      header {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 16px;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      button,
+      select,
+      input {
+        font: inherit;
+      }
+      canvas {
+        display: block;
+        image-rendering: pixelated;
+        margin: 8px 0;
+      }
+      h2 {
+        font-size: 13px;
+        color: #8fa3b8;
+        margin: 16px 0 0;
+      }
+      #status {
+        white-space: pre-wrap;
+        min-height: 2.6em;
+      }
+      #status.bad {
+        color: #ff8a80;
+      }
+      #drop {
+        border: 1px dashed #4a5563;
+        padding: 8px;
+        color: #8fa3b8;
+      }
+      body.dragging #drop {
+        border-color: #ffd23a;
+        color: #ffd23a;
+      }
+      #cell {
+        color: #ffd23a;
+        min-height: 1.3em;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <label>Look <select id="look"></select></label>
+      <label>Zoom <select id="zoom"></select></label>
+      <label>World <select id="bg"></select></label>
+      <label><input id="fx" type="checkbox" checked /> effect (Flag hunt)</label>
+      <label>Margin <input id="margin" type="number" value="4" min="0" max="32" /></label>
+      <button id="download">Atlas PNG</button>
+      <button id="layout">Layout JSON</button>
+      <button id="reset" disabled>Undo changes</button>
+      <button id="save" disabled>Save to the look</button>
+    </header>
+    <p id="drop">
+      Development helper: an outfit as it runs in the game. <b>Atlas PNG</b> gives its parts to
+      paint in any editor; drop the painted picture anywhere on this page (with its
+      <code>.layout.json</code> if it came from <code>npm run look -- atlas</code>) and the
+      outfit runs with it at once. <b>Save</b> writes it into the look's file
+      (<code>packages/content/bosses/&lt;boss&gt;/looks/&lt;look&gt;.json</code>).
+    </p>
+    <p id="status"></p>
+    <h2>Running, both ways</h2>
+    <canvas id="run"></canvas>
+    <h2>Poses</h2>
+    <canvas id="poses"></canvas>
+    <h2>Atlas</h2>
+    <div id="cell"></div>
+    <canvas id="atlas"></canvas>
+    <script type="module" src="./looks.ts"></script>
+  </body>
+</html>

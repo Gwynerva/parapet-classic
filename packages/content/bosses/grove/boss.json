@@ -1,0 +1,7 @@
+{
+  "id": "grove",
+  "color": "#3fae4c",
+  "gender": "male",
+  "looks": ["grove-tank"],
+  "effect": ["respect"]
+}

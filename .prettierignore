@@ -1,6 +1,7 @@
 node_modules
 dist
 reference/decompiled
-packages/content-classic/generated
-packages/classic/public/dev
-packages/content-classic/fonts/*.json
+packages/content/playman/extracted
+packages/classic/dev
+packages/content/fonts/*.json
+packages/content/bosses/contests.json

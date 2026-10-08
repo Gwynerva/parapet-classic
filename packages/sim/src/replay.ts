@@ -40,6 +40,24 @@ export class InputRecorder {
     }
     return runs;
   }
+
+  /** Forget everything recorded so far. */
+  clear(): void {
+    this.runs.length = 0;
+    this.current = 0;
+    this.count = 0;
+  }
+
+  /** Replace the log with `runs` (as returned by `finish()`), continuing after its last run. */
+  restore(runs: readonly InputRun[]): void {
+    this.clear();
+    for (const run of runs) this.runs.push({ ticks: run.ticks, bits: run.bits });
+    const last = this.runs.pop();
+    if (last) {
+      this.current = last.bits;
+      this.count = last.ticks;
+    }
+  }
 }
 
 /**
@@ -120,7 +138,7 @@ export function expandRuns(runs: readonly InputRun[]): number[] {
 }
 
 /**
- * A rival recording as decoded from the original jar (`packages/content-classic/generated/rivals/<n>.json`).
+ * A rival recording as decoded from the original jar (`packages/content/playman/extracted/rivals/<n>.json`).
  * `snapshot` holds the 28 ints written by `W()` (line 4824), `flags` the facing and
  * hands-anchored bytes.
  */

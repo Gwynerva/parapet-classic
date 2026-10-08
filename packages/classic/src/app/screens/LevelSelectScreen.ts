@@ -6,17 +6,12 @@
  */
 import { LEVEL_COUNT } from '@parapet/sim';
 import { Theme, type GameContext } from '../Context.ts';
-import type { Screen, UiKey, UiPointer } from '@parapet/runtime/app/Screen.ts';
-import {
-  clear,
-  heading,
-  outlined,
-  panel,
-  drawBackButton,
-  hitBackButton,
-  headingCenterY,
-} from '@parapet/runtime/ui/draw.ts';
-import { inset, safeRect, stack, type Rect } from '@parapet/runtime/ui/layout.ts';
+import type { Screen, UiKey, UiPointer, UiWheel } from '@parapet/runtime/app/Screen.ts';
+import { outlined, panel } from '@parapet/runtime/ui/draw.ts';
+import { contains, type Rect } from '@parapet/runtime/ui/layout.ts';
+import { PressTracker } from '@parapet/runtime/ui/press.ts';
+import { TextScroller } from '@parapet/runtime/ui/TextScroller.ts';
+import { ScreenFrame } from '../ui/ScreenFrame.ts';
 import { ANCHOR_TOP_LEFT } from '@parapet/runtime/render/SpriteSheet.ts';
 import {
   completedCount,
@@ -42,7 +37,11 @@ const VARIANTS = [
 const thumbnailCache = new Map<number, HTMLCanvasElement>();
 
 export class LevelSelectScreen implements Screen {
+  readonly chrome = { fullscreenButton: true };
   private readonly ctx: GameContext;
+  private readonly frame: ScreenFrame;
+  private readonly press = new PressTracker<number>();
+  private readonly text = new TextScroller();
   private selected = 0;
   private progress: Progress = { completed: [], prizeSeen: false };
   private cols = 4;
@@ -50,16 +49,18 @@ export class LevelSelectScreen implements Screen {
   private gap = 4;
   private cards: Rect[] = [];
   private infoRect: Rect = { x: 0, y: 0, w: 0, h: 0 };
-  private lastTap = -1;
 
   constructor(ctx: GameContext) {
     this.ctx = ctx;
+    this.frame = new ScreenFrame(ctx);
+    this.text.fade = Theme.panel;
     this.onResize();
   }
 
   enter(): void {
     this.progress = loadProgress();
     this.onResize();
+    this.layoutText();
   }
 
   private thumbnail(levelId: number): HTMLCanvasElement {
@@ -78,23 +79,33 @@ export class LevelSelectScreen implements Screen {
   }
 
   onResize(): void {
-    const { viewport, fonts } = this.ctx;
-    const safe = inset(safeRect(viewport), 8, 0);
-    const header = fonts.display.lineHeight + 12;
+    this.frame.layout();
+    const body = this.frame.body;
     for (const [index, v] of VARIANTS.entries()) {
-      const [, grid, info] = stack(safe, [header, -1, v.infoH], 4);
-      const gridRect = grid ?? safe;
       const cell = v.thumb + 2 * v.margin + 2 * v.gap;
-      const cols = Math.max(2, Math.min(6, Math.floor(gridRect.w / cell)));
+      const gridSpace = body.h - v.infoH - 8;
+      const cols = Math.max(2, Math.min(6, Math.floor(body.w / cell)));
       const rows = Math.ceil(LEVEL_COUNT / cols);
       const last = index === VARIANTS.length - 1;
-      if (!last && (rows * cell > gridRect.h || cols * cell > gridRect.w)) continue;
-      this.infoRect = info ?? safe;
+      if (!last && (rows * cell > gridSpace || cols * cell > body.w)) continue;
       this.cols = cols;
       this.margin = v.margin;
       this.gap = v.gap;
-      const originX = gridRect.x + ((gridRect.w - cell * cols) >> 1);
-      const originY = gridRect.y + Math.max(0, (gridRect.h - cell * rows) >> 1);
+      // The cards and the panel under them as one block, a little above the middle; the
+      // panel as wide as the cards (or a readable minimum).
+      const gridW = cell * cols;
+      const gridH = cell * rows;
+      const block = gridH + 8 + v.infoH;
+      const top = body.y + Math.floor(Math.max(0, body.h - block) * 0.4);
+      const infoW = Math.min(body.w, Math.max(gridW, 320));
+      this.infoRect = {
+        x: body.x + ((body.w - infoW) >> 1),
+        y: top + gridH + 8,
+        w: infoW,
+        h: Math.min(v.infoH, Math.max(40, body.y + body.h - (top + gridH + 8))),
+      };
+      const originX = body.x + ((body.w - gridW) >> 1);
+      const originY = top;
       this.cards = [];
       for (let id = 0; id < LEVEL_COUNT; id++) {
         const col = id % cols;
@@ -107,6 +118,7 @@ export class LevelSelectScreen implements Screen {
           h: size,
         });
       }
+      this.layoutText();
       return;
     }
   }
@@ -121,7 +133,9 @@ export class LevelSelectScreen implements Screen {
     this.ctx.screens.push(new MissionSelectScreen(this.ctx, this.selected));
   }
 
-  update(): void {}
+  update(dt: number): void {
+    this.text.update(dt);
+  }
 
   onKey(key: UiKey): void {
     switch (key.action) {
@@ -129,16 +143,18 @@ export class LevelSelectScreen implements Screen {
         this.ctx.screens.pop();
         return;
       case 'left':
-        this.selected = (this.selected + LEVEL_COUNT - 1) % LEVEL_COUNT;
+      case 'prev':
+        this.select((this.selected + LEVEL_COUNT - 1) % LEVEL_COUNT);
         return;
       case 'right':
-        this.selected = (this.selected + 1) % LEVEL_COUNT;
+      case 'next':
+        this.select((this.selected + 1) % LEVEL_COUNT);
         return;
       case 'up':
-        this.selected = (this.selected - this.cols + LEVEL_COUNT) % LEVEL_COUNT;
+        this.select((this.selected - this.cols + LEVEL_COUNT) % LEVEL_COUNT);
         return;
       case 'down':
-        this.selected = (this.selected + this.cols) % LEVEL_COUNT;
+        this.select((this.selected + this.cols) % LEVEL_COUNT);
         return;
       case 'confirm':
         this.open();
@@ -148,35 +164,60 @@ export class LevelSelectScreen implements Screen {
     }
   }
 
-  onPointer(p: UiPointer): void {
-    if (p.type !== 'down') return;
+  private select(id: number): void {
+    this.selected = id;
+    this.layoutText();
+  }
+
+  /** The card under a point (the gaps count to the nearest card), or -1. */
+  private cardAt(x: number, y: number): number {
     const g = this.gap;
-    const hit = this.cards.findIndex(
-      (r) => p.x >= r.x - g && p.x < r.x + r.w + g && p.y >= r.y - g && p.y < r.y + r.h + g,
+    return this.cards.findIndex(
+      (r) => x >= r.x - g && x < r.x + r.w + g && y >= r.y - g && y < r.y + r.h + g,
     );
-    if (hit < 0) {
-      if (hitBackButton(this.ctx.viewport, p.x, p.y)) this.ctx.screens.pop();
-      return;
+  }
+
+  onPointer(p: UiPointer): void {
+    if (this.frame.onPointer(p)) return;
+    if (this.text.onPointer(p)) return;
+    const hit = this.cardAt(p.x, p.y);
+    switch (p.type) {
+      case 'down':
+        this.press.press(hit >= 0 ? hit : null, p);
+        return;
+      case 'move':
+        this.press.move(p, hit >= 0 ? hit : null);
+        return;
+      case 'up': {
+        // A tap selects a card; a tap on the selected card opens it.
+        const fired = this.press.release(hit >= 0 ? hit : null);
+        if (fired === null) return;
+        if (fired === this.selected) this.open();
+        else this.select(fired);
+        return;
+      }
+      case 'cancel':
+        this.press.reset();
+        return;
     }
-    if (hit === this.selected && this.lastTap === hit) this.open();
-    this.selected = hit;
-    this.lastTap = hit;
+  }
+
+  onWheel(w: UiWheel): void {
+    this.text.onWheel(w);
   }
 
   render(c: CanvasRenderingContext2D): void {
-    const { viewport, fonts, i18n } = this.ctx;
-    clear(c, viewport.width, viewport.height);
-    drawBackButton(c, fonts.text, viewport, headingCenterY(fonts.display, viewport.safeArea.top));
-    const safe = safeRect(viewport);
-    heading(c, fonts.display, i18n.t('level.select'), safe.x + (safe.w >> 1), safe.y + 8);
+    const { fonts, i18n } = this.ctx;
+    this.frame.draw(c, i18n.t('level.select'));
 
     for (let id = 0; id < LEVEL_COUNT; id++) {
       const r = this.cards[id]!;
       const unlocked = this.isUnlocked(id);
       const selected = id === this.selected;
-      // A white card with a dark border, the selected one framed in the accent colour.
-      if (selected) {
-        c.fillStyle = Theme.accent;
+      // A white card with a dark border, the selected one framed in the accent colour; a
+      // pressed one sinks by a pixel.
+      if (selected || this.press.pressed === id) {
+        c.fillStyle = this.press.pressed === id ? Theme.text : Theme.accent;
         c.fillRect(r.x - 2, r.y - 2, r.w + 4, r.h + 4);
       }
       c.fillStyle = CARD_BORDER;
@@ -227,15 +268,31 @@ export class LevelSelectScreen implements Screen {
         drawMissionIcon(c, render.sheet, type, done, iconsX + m * ICON_PITCH, r.y + 4);
       });
     }
+    this.text.draw(c);
+  }
+
+  /** The panel's text: the description, scrolling when it is long, or how to unlock. */
+  private layoutText(): void {
+    const { fonts, i18n, content } = this.ctx;
+    const r = this.infoRect;
+    const id = this.selected;
+    const level = content.missions.levels[id]!;
+    const unlocked = this.isUnlocked(id);
+    const iconsW = level.missionTypes.length * ICON_PITCH;
+    const name = `${id + 1}. ${i18n.t(`level.names.${id}`)}`;
+    const iconsX = r.x + r.w - 8 - iconsW;
+    const iconsFit = unlocked && iconsX > r.x + 8 + fonts.text.measure(name) + 8 && r.h >= 72;
     const textY = r.y + 6 + fonts.text.lineHeight + 8;
+    const textW = iconsFit ? iconsX - r.x - 16 : r.w - 16;
+    this.text.setRect({
+      x: r.x + 8,
+      y: textY,
+      w: Math.max(80, textW),
+      h: Math.max(fonts.small.lineHeight, r.y + r.h - textY - 4),
+    });
     const text = unlocked
       ? i18n.t(`level.desc.${id}`)
       : i18n.t('level.locked', { n: level.unlockThreshold - completedCount(this.progress) });
-    const textW = iconsFit ? iconsX - r.x - 16 : r.w - 16;
-    const maxLines = Math.max(1, Math.floor((r.y + r.h - textY - 4) / fonts.small.lineHeight));
-    const lines = fonts.small.wrap(text, Math.max(80, textW)).slice(0, maxLines);
-    fonts.small.draw(c, lines.join('\n'), r.x + 8, textY, {
-      color: unlocked ? Theme.text : Theme.muted,
-    });
+    this.text.setText([{ text, font: fonts.small, color: unlocked ? Theme.text : Theme.muted }]);
   }
 }

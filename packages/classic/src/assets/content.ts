@@ -1,15 +1,15 @@
 /**
  * Typed loaders for the generated game content (`packages/content/generated`, produced by
- * `@parapet/tools` from the original jar). JSON is bundled by Vite through the `@content`
+ * `@parapet/tools` from the original jar). JSON is bundled by Vite through the `@playman`
  * alias; the sprite atlas is loaded as an image.
  */
-import animsJson from '@content/anims.json';
-import atlasJson from '@content/atlas.json';
-import atlasUrl from '@content/atlas.png';
-import missionsJson from '@content/missions.json';
-import movesJson from '@content/moves.json';
-import stringsJson from '@content/strings/ru.json';
-import tablesJson from '@content/tables.json';
+import animsJson from '@playman/anims.json';
+import atlasJson from '@playman/atlas.json';
+import atlasUrl from '@playman/atlas.png';
+import missionsJson from '@playman/missions.json';
+import movesJson from '@playman/moves.json';
+import stringsJson from '@playman/strings/ru.json';
+import tablesJson from '@playman/tables.json';
 
 import type { LevelData, MoveTableData, PhysicsTables, RivalRecording } from '@parapet/sim';
 import type {
@@ -45,10 +45,10 @@ export type {
 // Loading
 // ---------------------------------------------------------------------------------------------
 
-const sceneModules = import.meta.glob('@content/scenes/*.json', { eager: true, import: 'default' });
-const levelModules = import.meta.glob('@content/levels/*.json', { eager: true, import: 'default' });
-const rivalModules = import.meta.glob('@content/rivals/*.json', { eager: true, import: 'default' });
-const musicModules = import.meta.glob('@content/music/*.mid', {
+const sceneModules = import.meta.glob('@playman/scenes/*.json', { eager: true, import: 'default' });
+const levelModules = import.meta.glob('@playman/levels/*.json', { eager: true, import: 'default' });
+const rivalModules = import.meta.glob('@playman/rivals/*.json', { eager: true, import: 'default' });
+const musicModules = import.meta.glob('@playman/music/*.mid', {
   eager: true,
   query: '?url',
   import: 'default',

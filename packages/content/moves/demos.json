@@ -1,0 +1,523 @@
+{
+  "demos": [
+    {
+      "move": "run",
+      "rows": [
+        "..........................",
+        "..........................",
+        "..........................",
+        "..........................",
+        "..........................",
+        ".S......../==\\............",
+        "==========xxxx============",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx"
+      ],
+      "presses": [],
+      "from": 50,
+      "steps": 175,
+      "expect": [4, 3]
+    },
+    {
+      "move": "jump",
+      "rows": [
+        "..........................",
+        "..........................",
+        "..........................",
+        "..........................",
+        "..........................",
+        ".S........................",
+        "============]..[==========",
+        "xxxxxxxxxxxx!..|xxxxxxxxxx",
+        "xxxxxxxxxxxx#==#xxxxxxxxxx"
+      ],
+      "presses": [
+        {
+          "step": 121,
+          "key": "up"
+        }
+      ],
+      "from": 70,
+      "steps": 190,
+      "expect": [18, [2, 25]]
+    },
+    {
+      "move": "landing",
+      "rows": [
+        "..........................",
+        "..........................",
+        ".S........................",
+        "===========]..............",
+        "xxxxxxxxxxx!..............",
+        "xxxxxxxxxxx!..............",
+        "xxxxxxxxxxx!..............",
+        "xxxxxxxxxxx#==============",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx"
+      ],
+      "presses": [
+        {
+          "step": 117,
+          "key": "down"
+        }
+      ],
+      "from": 70,
+      "steps": 190,
+      "expect": [22, [23, 24, 25]]
+    },
+    {
+      "move": "ladder",
+      "rows": [
+        "..........................",
+        "..........................",
+        "..............[===========",
+        "..............Hxxxxxxxxxxx",
+        "..............Hxxxxxxxxxxx",
+        ".S............Hxxxxxxxxxxx",
+        "==============#xxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx"
+      ],
+      "presses": [
+        {
+          "step": 195,
+          "key": "up"
+        }
+      ],
+      "from": 70,
+      "steps": 230,
+      "expect": [119, 112, 115]
+    },
+    {
+      "move": "slide",
+      "rows": [
+        "..........................",
+        "..........................",
+        "..............[===========",
+        "..............Hxxxxxxxxxxx",
+        "..............Hxxxxxxxxxxx",
+        ".S............Hxxxxxxxxxxx",
+        "==============#xxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx"
+      ],
+      "presses": [
+        {
+          "step": 164,
+          "key": "down"
+        }
+      ],
+      "from": 70,
+      "steps": 230,
+      "expect": [119, 120]
+    },
+    {
+      "move": "wallJump",
+      "rows": [
+        "..............[===========",
+        "..............|xxxxxxxxxxx",
+        "..............|xxxxxxxxxxx",
+        "..............|xxxxxxxxxxx",
+        "..............|xxxxxxxxxxx",
+        ".S............|xxxxxxxxxxx",
+        "==============#xxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx"
+      ],
+      "presses": [
+        {
+          "step": 120,
+          "key": "up"
+        },
+        {
+          "step": 132,
+          "key": "back"
+        }
+      ],
+      "from": 70,
+      "steps": 190,
+      "expect": [28, 20]
+    },
+    {
+      "move": "wallRun",
+      "rows": [
+        "..........................",
+        "..........................",
+        "..............[===========",
+        "..............|xxxxxxxxxxx",
+        "..............|xxxxxxxxxxx",
+        ".S............|xxxxxxxxxxx",
+        "==============#xxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx"
+      ],
+      "presses": [
+        {
+          "step": 121,
+          "key": "up"
+        },
+        {
+          "step": 132,
+          "key": "up"
+        },
+        {
+          "step": 144,
+          "key": "up"
+        },
+        {
+          "step": 164,
+          "key": "up"
+        }
+      ],
+      "from": 70,
+      "steps": 230,
+      "expect": [30, 33, 36, 112, 115]
+    },
+    {
+      "move": "ledge",
+      "rows": [
+        "..........................",
+        "..........................",
+        "..........................",
+        "..........................",
+        "..............[===========",
+        ".S............|xxxxxxxxxxx",
+        "==============#xxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx"
+      ],
+      "presses": [
+        {
+          "step": 113,
+          "key": "up"
+        },
+        {
+          "step": 146,
+          "key": "up"
+        }
+      ],
+      "from": 70,
+      "steps": 190,
+      "expect": [112, 115]
+    },
+    {
+      "move": "roll",
+      "rows": [
+        "..........................",
+        "..........................",
+        "..........................",
+        "..........................",
+        "..........................",
+        ".S........................",
+        "==========================",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx"
+      ],
+      "presses": [
+        {
+          "step": 97,
+          "key": "down"
+        }
+      ],
+      "from": 70,
+      "steps": 190,
+      "expect": [21, 2]
+    },
+    {
+      "move": "frontFlip",
+      "rows": [
+        "..........................",
+        "..........................",
+        "..........................",
+        ".S........................",
+        "===========]..............",
+        "xxxxxxxxxxx!..............",
+        "xxxxxxxxxxx!..............",
+        "xxxxxxxxxxx#==============",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx"
+      ],
+      "presses": [
+        {
+          "step": 103,
+          "key": "up"
+        },
+        {
+          "step": 108,
+          "key": "fwd"
+        },
+        {
+          "step": 134,
+          "key": "down"
+        }
+      ],
+      "from": 70,
+      "steps": 190,
+      "expect": [18, 63, 22, [24, 25]]
+    },
+    {
+      "move": "backFlip",
+      "rows": [
+        "..........................",
+        "..........................",
+        "..........................",
+        ".S........................",
+        "===========]..............",
+        "xxxxxxxxxxx!..............",
+        "xxxxxxxxxxx!..............",
+        "xxxxxxxxxxx#==============",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx"
+      ],
+      "presses": [
+        {
+          "step": 103,
+          "key": "up"
+        },
+        {
+          "step": 108,
+          "key": "back"
+        },
+        {
+          "step": 137,
+          "key": "down"
+        }
+      ],
+      "from": 70,
+      "steps": 190,
+      "expect": [18, 64, 22, [24, 25]]
+    },
+    {
+      "move": "tigerJump",
+      "rows": [
+        "..........................",
+        "..........................",
+        "..........................",
+        "..........................",
+        "..........................",
+        ".S..........n.............",
+        "==========================",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx"
+      ],
+      "presses": [
+        {
+          "step": 97,
+          "key": "fwd"
+        }
+      ],
+      "from": 70,
+      "steps": 190,
+      "expect": [56, [58, 59, 60]]
+    },
+    {
+      "move": "wallFlip",
+      "rows": [
+        "..............[===========",
+        "..............|xxxxxxxxxxx",
+        "..............|xxxxxxxxxxx",
+        "..............|xxxxxxxxxxx",
+        "..............|xxxxxxxxxxx",
+        ".S............|xxxxxxxxxxx",
+        "==============#xxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx"
+      ],
+      "presses": [
+        {
+          "step": 122,
+          "key": "up"
+        },
+        {
+          "step": 133,
+          "key": "fwd"
+        },
+        {
+          "step": 147,
+          "key": "down"
+        }
+      ],
+      "from": 70,
+      "steps": 220,
+      "expect": [47, 48, 53]
+    },
+    {
+      "move": "monkeyVault",
+      "rows": [
+        "..........................",
+        "..........................",
+        "..........................",
+        "..........................",
+        "..........................",
+        ".S..........##............",
+        "==========================",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx"
+      ],
+      "presses": [
+        {
+          "step": 111,
+          "key": "up"
+        },
+        {
+          "step": 121,
+          "key": "up"
+        }
+      ],
+      "from": 70,
+      "steps": 190,
+      "expect": [62]
+    },
+    {
+      "move": "dash",
+      "rows": [
+        "..........................",
+        "..........................",
+        ".S........................",
+        "===========]..............",
+        "xxxxxxxxxxx!..............",
+        "xxxxxxxxxxx!..............",
+        "xxxxxxxxxxx#==============",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx"
+      ],
+      "presses": [
+        {
+          "step": 116,
+          "key": "down"
+        }
+      ],
+      "from": 70,
+      "steps": 190,
+      "expect": [94, 22, 25]
+    },
+    {
+      "move": "monkeyFlip",
+      "rows": [
+        "..........................",
+        "..........................",
+        "..........................",
+        "..........................",
+        "..........................",
+        ".S..........#.............",
+        "==========================",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx"
+      ],
+      "presses": [
+        {
+          "step": 104,
+          "key": "fwd"
+        },
+        {
+          "step": 108,
+          "key": "down"
+        }
+      ],
+      "from": 70,
+      "steps": 190,
+      "expect": [56, [68, 69]]
+    },
+    {
+      "move": "spiderJump",
+      "rows": [
+        "..........................",
+        "..........................",
+        "..........................",
+        "..........................",
+        "..........................",
+        ".S..........#.............",
+        "==========================",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx"
+      ],
+      "presses": [
+        {
+          "step": 104,
+          "key": "fwd"
+        },
+        {
+          "step": 108,
+          "key": "up"
+        }
+      ],
+      "from": 70,
+      "steps": 190,
+      "expect": [56, [66, 67]]
+    },
+    {
+      "move": "poleSlide",
+      "rows": [
+        "..........................",
+        "..............P...........",
+        ".S............P...........",
+        "===========]..P...........",
+        "xxxxxxxxxxx!..P...........",
+        "xxxxxxxxxxx!..P...........",
+        "xxxxxxxxxxx!..P...........",
+        "xxxxxxxxxxx#==============",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx"
+      ],
+      "presses": [
+        {
+          "step": 142,
+          "key": "down"
+        }
+      ],
+      "from": 70,
+      "steps": 190,
+      "expect": [127, 2]
+    },
+    {
+      "move": "poleJump",
+      "rows": [
+        "..........................",
+        "..........................",
+        "..............P...........",
+        "..............P...........",
+        "..............P...........",
+        ".S............P...........",
+        "==========================",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx"
+      ],
+      "presses": [
+        {
+          "step": 126,
+          "key": "up"
+        },
+        {
+          "step": 137,
+          "key": "fwd"
+        }
+      ],
+      "from": 70,
+      "steps": 190,
+      "expect": [123]
+    },
+    {
+      "move": "poleSpin",
+      "rows": [
+        "..........................",
+        "..........................",
+        "..............P...........",
+        "..............P...........",
+        "..............P...........",
+        ".S............P...........",
+        "==========================",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxx"
+      ],
+      "presses": [
+        {
+          "step": 126,
+          "key": "up"
+        },
+        {
+          "step": 137,
+          "key": "back"
+        }
+      ],
+      "from": 70,
+      "steps": 190,
+      "expect": [125]
+    }
+  ]
+}

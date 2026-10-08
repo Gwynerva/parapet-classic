@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Sprite gallery</title>
+    <style>
+      body {
+        background: #101418;
+        color: #ddd;
+        font-family: monospace;
+        margin: 12px;
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: flex-end;
+        margin-bottom: 14px;
+      }
+      figure {
+        margin: 0;
+        text-align: center;
+        padding: 4px;
+      }
+      img {
+        image-rendering: pixelated;
+        display: block;
+      }
+      figcaption {
+        font-size: 11px;
+        margin-top: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <p>
+      Development helper: <code>?ids=141-150,163&amp;scale=4&amp;bg=dcd4d0</code> shows the extracted
+      sprites magnified on the given background.
+    </p>
+    <div id="out" class="row"></div>
+    <script>
+      const params = new URLSearchParams(location.search);
+      const scale = Number(params.get('scale') || 4);
+      const bg = '#' + (params.get('bg') || '1b2129');
+      const ids = [];
+      for (const part of (params.get('ids') || '0-40').split(',')) {
+        const [a, b] = part.split('-').map(Number);
+        for (let i = a; i <= (b ?? a); i++) ids.push(i);
+      }
+      const out = document.getElementById('out');
+      for (const id of ids) {
+        const fig = document.createElement('figure');
+        fig.style.background = bg;
+        const img = document.createElement('img');
+        img.src = `sprites/${id}.png`;
+        img.onload = () => {
+          img.width = img.naturalWidth * scale;
+          img.height = img.naturalHeight * scale;
+        };
+        const cap = document.createElement('figcaption');
+        cap.textContent = String(id);
+        fig.appendChild(img);
+        fig.appendChild(cap);
+        out.appendChild(fig);
+      }
+    </script>
+  </body>
+</html>

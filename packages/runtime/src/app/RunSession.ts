@@ -43,6 +43,18 @@ export interface GhostSetup {
   outcome: ReplayOutcome;
 }
 
+/**
+ * A race against a published record (a boss's): only its time and split times are known, so
+ * nothing is simulated for it; the screens show how the player stands against them.
+ */
+export interface ContestSetup {
+  timeMs: number;
+  /** Clock at the record's k-th flag or checkpoint. */
+  splitsMs: number[];
+  /** The character the record holder races in (the look the winner gets). */
+  character: number;
+}
+
 export interface RunSetup {
   levelId: number;
   mode: RunMode;
@@ -51,8 +63,15 @@ export interface RunSetup {
   character: number;
   /** Dev/replay mode: feed this input log instead of the player's presses. */
   script?: InputRun[];
+  /**
+   * Development only: feed this input log instead of the player's presses, but count the run
+   * as the player's (to try the results of a contest without playing it).
+   */
+  autopilot?: InputRun[];
   /** A recorded run to race. */
   ghost?: GhostSetup;
+  /** A record to beat (the bosses' contests). */
+  contest?: ContestSetup;
 }
 
 export interface RunData {
@@ -88,7 +107,8 @@ export class RunSession {
   constructor(setup: RunSetup, data: RunData) {
     this.setup = setup;
     this.data = data;
-    this.script = setup.script ? new InputPlayer(setup.script) : null;
+    const scripted = setup.script ?? setup.autopilot;
+    this.script = scripted ? new InputPlayer(scripted) : null;
     this.world = createRun({
       mode: setup.mode,
       level: data.level,

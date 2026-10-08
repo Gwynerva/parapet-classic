@@ -1,7 +1,7 @@
 # reference/oracle — the original game as a physics oracle
 
 A headless harness that runs the **original, unmodified** class files of Playman Extreme Running
-(`packages/content-classic/original/Playman_Extreme_Running_240x320.jar`, classes `S a b c d e f g`, class-file version 45) on a
+(`packages/content/playman/original/Playman_Extreme_Running_240x320.jar`, classes `S a b c d e f g`, class-file version 45) on a
 plain JVM. The J2ME / Nokia APIs the game needs are replaced by the stubs in `stubs/`; the driver
 `src/Oracle.java` initialises the game through reflection, loads a level, and then drives the
 physics step directly with scripted presses, writing one JSON object per step. The resulting

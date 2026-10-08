@@ -14,7 +14,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 $root = Resolve-Path (Join-Path $here '..\..')
-$jar = Join-Path $root 'packages\content-classic\original\Playman_Extreme_Running_240x320.jar'
+$jar = Join-Path $root 'packages\content\playman\original\Playman_Extreme_Running_240x320.jar'
 $build = Join-Path $here 'build'
 $classes = Join-Path $build 'classes'
 $stubs = Join-Path $build 'stubs'

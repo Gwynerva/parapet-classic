@@ -193,6 +193,38 @@ function parsePattern(pattern: string): Node[] {
   return nodes;
 }
 
+/** Names of the arguments a pattern uses (`{name}`, plural and select arguments). */
+export function messageArguments(pattern: string): Set<string> {
+  const names = new Set<string>();
+  const walk = (nodes: readonly Node[]): void => {
+    for (const node of nodes) {
+      if (node.type === 'arg') names.add(node.name);
+      else if (node.type === 'plural' || node.type === 'select') {
+        names.add(node.name);
+        for (const branch of node.options.values()) walk(branch);
+      }
+    }
+  };
+  walk(parsePattern(pattern));
+  return names;
+}
+
+/** The literal text of a pattern, all branches included (what the fonts must be able to draw). */
+export function messageText(pattern: string): string {
+  let text = '';
+  const walk = (nodes: readonly Node[]): void => {
+    for (const node of nodes) {
+      if (node.type === 'text') text += node.value;
+      else if (node.type === 'pound') text += '0123456789';
+      else if (node.type === 'plural' || node.type === 'select') {
+        for (const branch of node.options.values()) walk(branch);
+      }
+    }
+  };
+  walk(parsePattern(pattern));
+  return text;
+}
+
 /** Plain digits for integers; the game draws numbers with bitmap fonts and has no separators. */
 export function formatNumber(value: number): string {
   if (Number.isInteger(value)) return String(value);

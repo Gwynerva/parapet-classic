@@ -26,6 +26,20 @@ function host() {
 }
 
 describe('MessageBox', () => {
+  it('splits a page too long for the screen instead of cutting it', () => {
+    const long = Array.from({ length: 40 }, (_, i) => `line ${i}`).join('\n');
+    let closed = 0;
+    const box = new MessageBox(host(), {
+      pages: [long],
+      labels: { next: 'Next', ok: 'OK' },
+      onClose: () => closed++,
+    });
+    // 240 px high: about 16 lines of 10 px fit per page.
+    expect(box.pageCount).toBeGreaterThan(2);
+    for (let i = 0; i < box.pageCount; i++) box.onKey({ action: 'confirm' });
+    expect(closed).toBe(1);
+  });
+
   it('turns pages on confirm and closes after the last one', () => {
     let closed = 0;
     const box = new MessageBox(host(), {

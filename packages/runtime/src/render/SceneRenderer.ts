@@ -2,53 +2,43 @@
  * Composite scene interpreter: draws the objects of the k-files (character, props, level art).
  * Port of `b(int,int,int,int,int,int,int,int)` (d.java line 3218) and `a(6 ints)` (line 3211).
  *
- * `drawObject` tweens between two keyframes: x, y, w, h and the colour are interpolated, the
- * sprite id is always the one of frame A (when t > 0.5 the original swaps the frames and uses
- * 1 - t, so the id comes from the nearer frame). Mirroring is `x' = -x - width + objectWidth`
- * with each sprite transform composed with a horizontal mirror (line 3364).
+ * The pose itself (tween, skin swap, mirroring) is composed by `composePose` (`Pose.ts`); this
+ * class draws the commands on a canvas.
  */
 import { idiv } from '@parapet/sim';
 import type { SceneFile, SceneObject } from '../content/types.ts';
+import {
+  CMD_NESTED,
+  CMD_RECT,
+  CMD_SPRITE,
+  CMD_TILED,
+  composePose,
+  mixRgb565,
+  type DrawCommand,
+  type SpriteSizes,
+  type SpriteSwap,
+} from './Pose.ts';
 import {
   ANCHOR_CENTER,
   ANCHOR_TOP_LEFT,
   anchorOffsetX,
   anchorOffsetY,
-  isRotated,
-  mirrorTransform,
   type SpriteSheet,
 } from './SpriteSheet.ts';
+
+export {
+  mixRgb565,
+  TWEEN_ONE,
+  type AttachLookup,
+  type PartContext,
+  type SpriteSwap,
+} from './Pose.ts';
 
 /** Anchor value meaning "place the object's pivot on (x, y)" (the original passes 1024). */
 export const PIVOT_ANCHOR = 1024;
 
 /** Id of the character object (the single object of `k0`). */
 export const CHARACTER_OBJECT = 0;
-
-/** Keyframe tween fraction scale: `t` runs 0..TWEEN_ONE. */
-export const TWEEN_ONE = 65536;
-
-/**
- * Body-part replacement for primitives flagged `swapParts`: receives the sprite id and the
- * transform of the keyframe and returns the sprite id to draw, or -1 to hide the part.
- * The transform is kept (`a(int,int[])`, line 5931).
- */
-export type SpriteSwap = (spriteId: number, transform: number) => number;
-
-/** Composite primitive types (bits 8..13 of the header). */
-const RECT = 0;
-const SPRITE = 1;
-const NESTED = 2;
-const TILED = 3;
-
-/** Blend two RGB565 colours by t/65536 and expand to 24-bit RGB exactly like line 3313. */
-export function mixRgb565(a: number, b: number, t: number): number {
-  const u = TWEEN_ONE - t;
-  const r = ((((a & 0xf800) * u + (b & 0xf800) * t) >>> 13) * 33) & 0xff0000;
-  const g = ((((a & 0x7e0) * u + (b & 0x7e0) * t) >>> 17) * 65) & 0xff00;
-  const bl = ((((a & 0x1f) * u + (b & 0x1f) * t) * 33) >>> 18) & 0xff;
-  return r | g | bl;
-}
 
 /** RGB565 → 24-bit RGB (frame A only). */
 export function rgb565ToRgb(c: number): number {
@@ -60,16 +50,34 @@ export function cssColour(rgb: number): string {
   return '#' + (rgb & 0xffffff).toString(16).padStart(6, '0');
 }
 
+/** A composed pose: its object, its commands and how many of them there are. */
+export interface ComposedPose {
+  obj: SceneObject;
+  cmds: readonly DrawCommand[];
+  count: number;
+}
+
 export class SceneRenderer {
   readonly sheet: SpriteSheet;
   private readonly objects = new Map<number, SceneObject>();
   private readonly colours = new Map<number, string>();
+  /** Command buffers, one per depth of nested objects. */
+  private readonly buffers: DrawCommand[][] = [];
+  private depth = 0;
+  private readonly composed: DrawCommand[] = [];
+  /** Sprite and object sizes for `composePose`. */
+  readonly sizes: SpriteSizes;
   /** Culling rectangle (logical pixels of the current target), see `setViewport`. */
   viewWidth = Infinity;
   viewHeight = Infinity;
 
   constructor(sheet: SpriteSheet, scenes: Iterable<SceneFile>) {
     this.sheet = sheet;
+    this.sizes = {
+      width: (id) => sheet.width(id),
+      height: (id) => sheet.height(id),
+      objectWidth: (id) => this.objects.get(id)?.width ?? 0,
+    };
     for (const scene of scenes) {
       for (const object of scene.objects) {
         this.objects.set(object.id, object);
@@ -133,14 +141,6 @@ export class SceneRenderer {
   ): void {
     const obj = this.objects.get(objectId);
     if (!obj) return;
-    if (t > 32767) {
-      const s = frameA;
-      frameA = frameB;
-      frameB = s;
-      t = TWEEN_ONE - t;
-    }
-    frameA = clampFrame(frameA, obj.frames);
-    frameB = clampFrame(frameB, obj.frames);
 
     let ox = x | 0;
     let oy = y | 0;
@@ -160,84 +160,58 @@ export class SceneRenderer {
       return;
     }
 
+    const depth = this.depth;
+    let cmds = this.buffers[depth];
+    if (!cmds) {
+      cmds = [];
+      this.buffers[depth] = cmds;
+    }
+    const count = composePose(obj, this.sizes, frameA, frameB, t, flipX, swap, cmds);
     const sheet = this.sheet;
-    for (const p of obj.primitives) {
-      if (p.hidden) continue;
-      const ax = p.x[frameA] ?? 0;
-      const ay = p.y[frameA] ?? 0;
-      const av = p.value[frameA] ?? 0;
-      const aw = p.w[frameA] ?? 0;
-      const ah = p.h[frameA] ?? 0;
-      const bx = p.x[frameB] ?? 0;
-      const by = p.y[frameB] ?? 0;
-      const bv = p.value[frameB] ?? 0;
-      const bw = p.w[frameB] ?? 0;
-      const bh = p.h[frameB] ?? 0;
-
-      // `i[n] += (delta * t + 32768) >> 16` for every parameter (line 3330).
-      let px = ax + (((bx - ax) * t + 32768) >> 16);
-      const py = ay + (((by - ay) * t + 32768) >> 16);
-      const pv = av + (((bv - av) * t + 32768) >> 16);
-      const pw = aw + (((bw - aw) * t + 32768) >> 16);
-      const ph = ah + (((bh - ah) * t + 32768) >> 16);
-
-      // Sprite ids come from frame A; the skin swap sees the keyframe's id and transform.
-      let spriteValue = av;
-      if (p.type === SPRITE && p.swapParts && swap && spriteValue !== -1) {
-        const id = swap(spriteValue >> 3, spriteValue & 7);
-        spriteValue = id < 0 ? -1 : (id << 3) | (spriteValue & 7);
-      }
-
-      if (flipX) {
-        switch (p.type) {
-          case SPRITE: {
-            if (spriteValue === -1) continue;
-            const id = spriteValue >> 3;
-            const tr = spriteValue & 7;
-            const drawn = isRotated(tr) ? sheet.height(id) : sheet.width(id);
-            px = -px - (drawn & 1);
-            spriteValue = (id << 3) | mirrorTransform(tr);
-            break;
-          }
-          case RECT:
-            px = -px - pw;
-            break;
-          case NESTED:
-            px = -px - (this.objects.get(pv)?.width ?? 0);
-            break;
-          case TILED:
-            // The original has no case for tiled primitives (never mirrored in the data);
-            // treated like a rectangle.
-            px = -px - pw;
-            break;
-          default:
-            break;
-        }
-        px += obj.width;
-      }
-      px += ox;
-      const sy = py + oy;
-
-      switch (p.type) {
-        case SPRITE:
-          if (spriteValue === -1) continue;
-          sheet.drawSprite(ctx, spriteValue >> 3, px, sy, spriteValue & 7, ANCHOR_CENTER);
+    for (let i = 0; i < count; i++) {
+      const c = cmds[i]!;
+      const px = c.x + ox;
+      const sy = c.y + oy;
+      switch (c.kind) {
+        case CMD_SPRITE:
+          sheet.drawSprite(ctx, c.id, px, sy, c.transform, ANCHOR_CENTER);
           break;
-        case RECT:
-          ctx.fillStyle = this.colour(av, bv, t);
-          ctx.fillRect(px, sy, pw, ph);
+        case CMD_RECT:
+          ctx.fillStyle = this.colour(c.rgb);
+          ctx.fillRect(px, sy, c.w, c.h);
           break;
-        case NESTED:
+        case CMD_NESTED:
           // `a(id, 0, x, y, 20, 0)`: frame 0, top-left anchor, never mirrored.
-          this.drawObject(ctx, pv, 0, 0, 0, px, sy, false, undefined, ANCHOR_TOP_LEFT);
+          this.depth = depth + 1;
+          this.drawObject(ctx, c.id, 0, 0, 0, px, sy, false, undefined, ANCHOR_TOP_LEFT);
+          this.depth = depth;
           break;
-        case TILED:
-          this.drawTiled(ctx, pv >> 3, pv & 7, px, sy, pw, ph);
+        case CMD_TILED:
+          this.drawTiled(ctx, c.id, c.transform, px, sy, c.w, c.h);
           break;
         default:
           break;
       }
     }
+  }
+
+  /**
+   * The commands of a pose in the object's box (the pivot at `(pivotX, pivotY)`, or mirrored at
+   * `(width - pivotX, pivotY)`), without drawing: for effects anchored to the body and tools.
+   * The result is reused by the next call.
+   */
+  compose(
+    objectId: number,
+    frameA: number,
+    frameB: number,
+    t: number,
+    flipX = false,
+    swap?: SpriteSwap,
+  ): ComposedPose | null {
+    const obj = this.objects.get(objectId);
+    if (!obj) return null;
+    const count = composePose(obj, this.sizes, frameA, frameB, t, flipX, swap, this.composed);
+    return { obj, cmds: this.composed, count };
   }
 
   /**
@@ -299,8 +273,7 @@ export class SceneRenderer {
     ctx.restore();
   }
 
-  private colour(a: number, b: number, t: number): string {
-    const rgb = mixRgb565(a, b, t);
+  private colour(rgb: number): string {
     let css = this.colours.get(rgb);
     if (css === undefined) {
       if (this.colours.size > 4096) this.colours.clear();
@@ -309,10 +282,4 @@ export class SceneRenderer {
     }
     return css;
   }
-}
-
-function clampFrame(frame: number, count: number): number {
-  if (frame < 0) return 0;
-  if (frame >= count) return count - 1;
-  return frame;
 }

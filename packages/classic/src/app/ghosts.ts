@@ -11,6 +11,7 @@ import {
   encodeReplay,
   isRankedMode,
   replayCompatibility,
+  LEVEL_COUNT,
   RULESET_ID,
   runContentHash,
   SIM_VERSION,
@@ -36,11 +37,18 @@ import {
   pickFile,
   readText,
 } from '@parapet/runtime/platform/files.ts';
-import { loadRecord, type RecordEntry } from '@parapet/runtime/storage/profile.ts';
+import {
+  loadContestRecord,
+  loadRecord,
+  type ContestKind,
+  type RecordEntry,
+} from '@parapet/runtime/storage/profile.ts';
 import { MessageBox } from '@parapet/runtime/ui/MessageBox.ts';
 import type { GameContext } from './Context.ts';
+import { contestCharacter, contestRecord, FIRST_BOSS_CHARACTER } from './bosses.ts';
 import { CopyLinkScreen } from './screens/CopyLinkScreen.ts';
 import { PlayScreen } from './screens/PlayScreen.ts';
+import { countEvent } from './analytics.ts';
 
 export type GhostProblem = 'invalid' | 'version' | 'content';
 
@@ -100,7 +108,7 @@ export function recordReplay(
     levelId,
     mode,
     withRival: mode === 'sprint' && entry.withRival,
-    character: Math.max(0, Math.min(9, entry.character)),
+    character: Math.max(0, Math.min(FIRST_BOSS_CHARACTER + 2 * LEVEL_COUNT - 1, entry.character)),
     playerName: cleanReplayName(entry.playerName || ctx.player.name),
     input: entry.input,
   };
@@ -108,7 +116,15 @@ export function recordReplay(
 
 /** The ghost of the local record of a mission, or null when there is none (or it is stale). */
 export function bestGhost(ctx: GameContext, levelId: number, mode: RunMode): GhostSetup | null {
-  const record = loadRecord(levelId, mode);
+  return entryGhost(ctx, levelId, mode, loadRecord(levelId, mode));
+}
+
+function entryGhost(
+  ctx: GameContext,
+  levelId: number,
+  mode: RunMode,
+  record: RecordEntry | null,
+): GhostSetup | null {
   if (!record) return null;
   const replay = recordReplay(ctx, levelId, mode, record);
   if (!replay) return null;
@@ -133,6 +149,41 @@ export function missionSetup(
     withRival: mode === 'sprint' && withRival,
     playerName: ctx.player.name,
     character: ctx.player.character,
+    ...(ghost ? { ghost } : {}),
+  };
+}
+
+/**
+ * A contest with the boss of a level, or null when this build has no record there.
+ * With the record ghost option on, the player's own best contest run races along (their own
+ * route; hers is never shown).
+ */
+export function contestSetup(
+  ctx: GameContext,
+  levelId: number,
+  kind: ContestKind,
+): RunSetup | null {
+  const record = contestRecord(levelId, kind);
+  if (!record) return null;
+  // Development only: `?contestTime=<ms>` makes her time beatable, to try the winning screens.
+  const devTime = import.meta.env.DEV
+    ? Number(new URLSearchParams(location.search).get('contestTime') ?? NaN)
+    : NaN;
+  const timeMs = Number.isFinite(devTime) ? devTime : record.timeMs;
+  const ghost = ctx.options.bestGhost
+    ? entryGhost(ctx, levelId, kind, loadContestRecord(levelId, kind))
+    : null;
+  return {
+    levelId,
+    mode: kind,
+    withRival: false,
+    playerName: ctx.player.name,
+    character: ctx.player.character,
+    contest: {
+      timeMs,
+      splitsMs: record.splitsMs,
+      character: contestCharacter(levelId, kind),
+    },
     ...(ghost ? { ghost } : {}),
   };
 }
@@ -180,6 +231,7 @@ export function openReplayCode(ctx: GameContext, code: string): void {
     return;
   }
   ctx.input.clear();
+  countEvent('race/link');
   ctx.screens.push(new PlayScreen(ctx, raceSetup(ctx, prepared.ghost)));
 }
 

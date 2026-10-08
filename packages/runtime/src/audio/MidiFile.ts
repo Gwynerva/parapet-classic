@@ -1,8 +1,9 @@
 /**
  * Standard MIDI file parser (formats 0 and 1) that resolves everything the synthesiser needs
  * up front: a flat list of notes with absolute start times and durations in ms, each carrying
- * the program, channel volume and pan in force when it started. Tempo changes are applied
- * through the tempo map, so the player only has to walk the note list.
+ * the program, channel volume and pan in force when it started, and the changes of channel
+ * volume over time (a held chord swells and fades with them). Tempo changes are applied
+ * through the tempo map, so the player only has to walk the lists.
  */
 
 export interface MidiNote {
@@ -24,10 +25,29 @@ export interface MidiNote {
   pan: number;
 }
 
+/** A change of a channel's volume (CC7 × CC11) at a moment of the song. */
+export interface MidiControl {
+  time: number;
+  channel: number;
+  /** Channel volume × expression, 0..1. */
+  volume: number;
+}
+
+/** The channel volume before any controller says otherwise (CC7 100, CC11 127). */
+export const DEFAULT_CHANNEL_VOLUME = 100 / 127;
+
 export interface MidiSong {
   durationMs: number;
   ticksPerBeat: number;
   notes: MidiNote[];
+  /** Level the loader chose for the song (from measured loudness); estimated when absent. */
+  gain?: number;
+  /**
+   * Channel volume changes in time order. When present the synthesiser applies them to the
+   * channels as they happen (and ignores `MidiNote.volume`); songs without them (our own
+   * scores) play every note at its own volume.
+   */
+  controls?: MidiControl[];
   /** Events the parser skipped (unknown status bytes); for diagnostics. */
   unknownEvents: number;
 }
@@ -183,6 +203,14 @@ export function parseMidi(data: ArrayBuffer | Uint8Array): MidiSong {
   const pan = new Array<number>(16).fill(64);
   const active = new Map<number, MidiNote>();
   const notes: MidiNote[] = [];
+  const controls: MidiControl[] = [];
+  const lastControl = new Array<number>(16).fill(DEFAULT_CHANNEL_VOLUME);
+  const control = (channel: number, ms: number): void => {
+    const value = ((volume[channel] ?? 100) / 127) * ((expression[channel] ?? 127) / 127);
+    if (value === lastControl[channel]) return;
+    lastControl[channel] = value;
+    controls.push({ time: ms, channel, volume: value });
+  };
   let lastMs = 0;
   const closeNote = (key: number, ms: number): void => {
     const n = active.get(key);
@@ -223,9 +251,13 @@ export function parseMidi(data: ArrayBuffer | Uint8Array): MidiSong {
         closeNote(key, ms);
         break;
       case 0xb0:
-        if (e.data1 === 7) volume[channel] = e.data2;
-        else if (e.data1 === 11) expression[channel] = e.data2;
-        else if (e.data1 === 10) pan[channel] = e.data2;
+        if (e.data1 === 7) {
+          volume[channel] = e.data2;
+          control(channel, ms);
+        } else if (e.data1 === 11) {
+          expression[channel] = e.data2;
+          control(channel, ms);
+        } else if (e.data1 === 10) pan[channel] = e.data2;
         else if (e.data1 === 123 || e.data1 === 120) {
           for (const k of [...active.keys()]) if (k >> 8 === channel) closeNote(k, ms);
         }
@@ -240,5 +272,37 @@ export function parseMidi(data: ArrayBuffer | Uint8Array): MidiSong {
   for (const key of [...active.keys()]) closeNote(key, lastMs + 500);
   let durationMs = lastMs;
   for (const n of notes) durationMs = Math.max(durationMs, n.time + n.duration);
-  return { durationMs: Math.round(durationMs), ticksPerBeat, notes, unknownEvents };
+  return { durationMs: Math.round(durationMs), ticksPerBeat, notes, controls, unknownEvents };
+}
+
+/**
+ * Drops the marker chord the original's tracks end with (key 36 at velocity 1 on every
+ * channel, a kick on the drum channel, just before the end): inaudible on the phone, a thud at
+ * every loop on ours. The song keeps its length.
+ */
+export function stripEndMarker(song: MidiSong): MidiSong {
+  const tail = song.durationMs - 250;
+  const notes = song.notes.filter((n) => !(n.velocity <= 1 && n.time >= tail));
+  return { ...song, notes };
+}
+
+/** A note or a channel volume change, in time order (what the player schedules). */
+export interface SongEvent {
+  time: number;
+  note?: MidiNote;
+  control?: MidiControl;
+}
+
+const eventCache = new WeakMap<MidiSong, SongEvent[]>();
+
+/** Notes and controls of a song merged in time order (controls first at equal times). */
+export function songEvents(song: MidiSong): SongEvent[] {
+  const cached = eventCache.get(song);
+  if (cached) return cached;
+  const events: SongEvent[] = [];
+  for (const control of song.controls ?? []) events.push({ time: control.time, control });
+  for (const note of song.notes) events.push({ time: note.time, note });
+  events.sort((a, b) => a.time - b.time || (a.control ? 0 : 1) - (b.control ? 0 : 1));
+  eventCache.set(song, events);
+  return events;
 }

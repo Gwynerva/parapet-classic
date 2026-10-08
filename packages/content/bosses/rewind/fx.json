@@ -1,0 +1,163 @@
+{
+  "palette": {
+    "L": "#7ec4ff",
+    "b": "#2f78d8",
+    "B": "#1a4a9a",
+    "k": "#1a2030",
+    "w": "#ffffff",
+    "W": "#f4f0e8",
+    "g": "#cfc8bc",
+    "p": "#e07a94",
+    "y": "#ffd060",
+    "u": "#7ab0e0",
+    "G": "#5aa070"
+  },
+  "sprites": {
+    "fly1": ["LL.LL", "bLkLb", ".bkb.", "..k.."],
+    "fly2": [".L.L.", ".LkL.", "..k..", "..k.."],
+    "fly3": [".....", "bLkLb", "BbkbB", "..k.."],
+    "photo1": ["WWWWWW", "WuuuuW", "WuGGuW", "WGGGGW", "WWWWWW", "WWWWWW"],
+    "photo2": ["WWWWWW", "WyyuuW", "WuupuW", "WpppuW", "WWWWWW", "WWWWWW"],
+    "flash": ["..w..", ".www.", "wwwww", ".www.", "..w.."]
+  },
+  "emitters": {
+    "butterflies": {
+      "while": ["run", "air"],
+      "every": 16,
+      "minSpeed": 40,
+      "anchor": "body",
+      "jitter": [2, 4],
+      "speed": [10, 26],
+      "angle": [20, 80],
+      "inherit": 0.1,
+      "gravity": -12,
+      "drag": 0.8,
+      "life": [1300, 2000],
+      "fadeIn": 120,
+      "fadeOut": 500,
+      "flutter": {
+        "amp": 3,
+        "freq": 2.5
+      },
+      "face": true,
+      "sprite": {
+        "frames": ["fly1", "fly2", "fly3", "fly2"],
+        "fps": 10
+      },
+      "max": 14,
+      "reduced": 0.3
+    },
+    "flutter": {
+      "enter": ["flip", "wall", "land"],
+      "burst": [3, 5],
+      "anchor": "body",
+      "speed": [20, 45],
+      "angle": [0, 180],
+      "gravity": -15,
+      "drag": 1,
+      "life": [1000, 1500],
+      "fadeOut": 400,
+      "flutter": {
+        "amp": 3,
+        "freq": 3
+      },
+      "face": true,
+      "sprite": {
+        "frames": ["fly1", "fly2", "fly3", "fly2"],
+        "fps": 10
+      }
+    },
+    "photos": {
+      "anchor": "body",
+      "speed": [30, 70],
+      "angle": [0, 360],
+      "inherit": 0.1,
+      "gravity": 70,
+      "drag": 1.4,
+      "life": [900, 1300],
+      "fadeOut": 350,
+      "tumble": [1, 2],
+      "sprite": {
+        "frames": ["photo1", "photo2"],
+        "random": true
+      },
+      "max": 10,
+      "enter": ["flip", "vault", "wall", "roll"],
+      "chance": 0.45,
+      "burst": [2, 4]
+    },
+    "snap": {
+      "enter": ["jump", "flip", "vault"],
+      "burst": 1,
+      "anchor": "head",
+      "speed": 0,
+      "life": 160,
+      "fadeOut": 120,
+      "sprite": {
+        "frames": ["flash"],
+        "fps": 1
+      },
+      "blend": "add",
+      "scale": 2,
+      "scaleEnd": 1
+    },
+    "burst": {
+      "burst": 14,
+      "anchor": "body",
+      "speed": [20, 60],
+      "angle": [0, 360],
+      "gravity": -10,
+      "drag": 1,
+      "life": [1200, 1800],
+      "fadeOut": 500,
+      "flutter": {
+        "amp": 3,
+        "freq": 3
+      },
+      "sprite": {
+        "frames": ["fly1", "fly2", "fly3", "fly2"],
+        "fps": 10
+      }
+    },
+    "idle": {
+      "perSecond": 1.5,
+      "anchor": "body",
+      "jitter": [8, 6],
+      "speed": [6, 12],
+      "angle": [60, 120],
+      "gravity": -6,
+      "life": [1500, 2200],
+      "fadeIn": 300,
+      "fadeOut": 600,
+      "flutter": {
+        "amp": 3,
+        "freq": 2
+      },
+      "sprite": {
+        "frames": ["fly1", "fly2", "fly3", "fly2"],
+        "fps": 8
+      }
+    }
+  },
+  "variants": {
+    "butterflies": {
+      "emitters": ["butterflies", "flutter"]
+    },
+    "snapshots": {
+      "emitters": ["photos", "snap"],
+      "afterimage": {
+        "mode": "snapshot",
+        "enter": ["jump", "flip"],
+        "colors": ["#f4f0e8"],
+        "life": 350,
+        "drift": [0, 0],
+        "alpha": 0.45
+      }
+    }
+  },
+  "presence": {
+    "idle": ["idle"],
+    "vanish": ["burst"],
+    "appear": ["burst"]
+  }
+}

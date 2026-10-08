@@ -1,0 +1,161 @@
+{
+  "palette": {
+    "k": "#0c0c10",
+    "K": "#2a2a34",
+    "g": "#4a4a58",
+    "y": "#ffd23a",
+    "d": "#1a1a24",
+    "D": "#30303c"
+  },
+  "sprites": {
+    "bat1": ["K.....K", "kK.k.Kk", ".kkkkk.", "...k..."],
+    "bat2": ["...k...", ".kkkkk.", "kK...Kk", "K.....K"],
+    "bat3": [".......", "KkkkkkK", "..kkk..", "...k..."],
+    "wisp1": [".DD.", "DddD", ".DD."],
+    "wisp2": ["..DD..", ".DddD.", "DddddD", ".DddD.", "..DD.."]
+  },
+  "emitters": {
+    "bats": {
+      "while": ["run", "air", "wall"],
+      "every": 18,
+      "minSpeed": 50,
+      "anchor": "neck",
+      "jitter": [2, 3],
+      "speed": [25, 50],
+      "angle": [20, 70],
+      "inherit": 0.1,
+      "gravity": -20,
+      "drag": 0.6,
+      "life": [900, 1400],
+      "fadeOut": 400,
+      "flutter": {
+        "amp": 2,
+        "freq": 4
+      },
+      "face": true,
+      "sprite": {
+        "frames": ["bat1", "bat3", "bat2", "bat3"],
+        "fps": 14
+      },
+      "max": 18,
+      "reduced": 0.3
+    },
+    "swarm": {
+      "enter": ["flip", "vault", "wall", "roll", "land"],
+      "burst": [5, 8],
+      "anchor": "body",
+      "speed": [40, 90],
+      "angle": [0, 360],
+      "gravity": -30,
+      "drag": 0.8,
+      "life": [800, 1200],
+      "fadeOut": 400,
+      "flutter": {
+        "amp": 2,
+        "freq": 4
+      },
+      "sprite": {
+        "frames": ["bat1", "bat3", "bat2", "bat3"],
+        "fps": 14
+      },
+      "chance": 0.45
+    },
+    "shade": {
+      "while": ["run", "air", "wall"],
+      "every": 6,
+      "minSpeed": 40,
+      "anchor": "chest",
+      "offset": [5, 2],
+      "jitter": [2, 4],
+      "speed": [6, 16],
+      "angle": [-10, 40],
+      "gravity": -12,
+      "drag": 1.5,
+      "life": [600, 1000],
+      "fadeOut": 500,
+      "sprite": {
+        "frames": ["wisp1", "wisp2"],
+        "fps": 3,
+        "loop": false
+      },
+      "max": 30
+    },
+    "burst": {
+      "burst": 18,
+      "anchor": "body",
+      "speed": [30, 90],
+      "angle": [0, 360],
+      "gravity": -30,
+      "drag": 0.8,
+      "life": [900, 1300],
+      "fadeOut": 400,
+      "flutter": {
+        "amp": 2,
+        "freq": 4
+      },
+      "sprite": {
+        "frames": ["bat1", "bat3", "bat2", "bat3"],
+        "fps": 14
+      }
+    },
+    "smoke": {
+      "burst": 10,
+      "anchor": "body",
+      "speed": [10, 30],
+      "angle": [0, 360],
+      "gravity": -10,
+      "drag": 1.5,
+      "life": [700, 1100],
+      "fadeOut": 500,
+      "sprite": {
+        "frames": ["wisp1", "wisp2"],
+        "fps": 3,
+        "loop": false
+      }
+    },
+    "idle": {
+      "perSecond": 0.8,
+      "anchor": "head",
+      "jitter": [8, 4],
+      "speed": [10, 20],
+      "angle": [60, 120],
+      "gravity": -10,
+      "life": [1000, 1400],
+      "fadeOut": 400,
+      "flutter": {
+        "amp": 2,
+        "freq": 4
+      },
+      "sprite": {
+        "frames": ["bat1", "bat3", "bat2", "bat3"],
+        "fps": 14
+      }
+    }
+  },
+  "ribbons": {
+    "shadow": {
+      "anchor": "neck",
+      "offset": [3, 1],
+      "segments": 7,
+      "length": 3,
+      "width": [5, 2],
+      "colors": ["#1a1a24", "#24242e", "#30303c"],
+      "gravity": 120,
+      "drag": 2.2
+    }
+  },
+  "variants": {
+    "swarm": {
+      "emitters": ["bats", "swarm"]
+    },
+    "shade": {
+      "emitters": ["shade"],
+      "ribbons": ["shadow"]
+    }
+  },
+  "presence": {
+    "idle": ["idle"],
+    "vanish": ["burst", "smoke"],
+    "appear": ["burst", "smoke"]
+  }
+}

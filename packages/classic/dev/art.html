@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Promo art</title>
+    <style>
+      body {
+        background: #101418;
+        color: #ddd;
+        font: 13px monospace;
+        margin: 16px;
+      }
+      canvas {
+        display: block;
+        image-rendering: pixelated;
+        margin: 8px 0 20px;
+        max-width: 100%;
+      }
+      h2 {
+        font-size: 13px;
+        color: #8fa3b8;
+        margin: 16px 0 0;
+      }
+      button {
+        font: inherit;
+        padding: 4px 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <p>
+      Development helper: the promotional pictures drawn with the game's own renderers, levels
+      and bosses: the README's banner and Play button (<code>docs/</code>) and the link preview
+      (<code>packages/classic/public/og-image.png</code>). <b>Save</b> writes them;
+      <code>?scout=1</code> shows the places the shots can stand on.
+    </p>
+    <button id="save">Save</button>
+    <span id="status"></span>
+    <div id="out"></div>
+    <script type="module" src="./art.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Track loudness</title>
+    <style>
+      body {
+        background: #101418;
+        color: #ddd;
+        font-family: monospace;
+        margin: 16px;
+      }
+      table {
+        border-collapse: collapse;
+        margin: 12px 0;
+      }
+      td,
+      th {
+        padding: 2px 12px;
+        text-align: right;
+      }
+      button {
+        font: inherit;
+        padding: 4px 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <p>
+      Development helper: renders every music track offline with the game's synthesiser and
+      measures its integrated loudness (BS.1770). <b>Save</b> writes
+      <code>packages/content/audio/loudness.json</code>, which levels the tracks in the game.
+    </p>
+    <p id="status">Measuring…</p>
+    <table id="out"></table>
+    <button id="save" disabled>Save</button>
+    <script type="module" src="./loudness.ts"></script>
+  </body>
+</html>

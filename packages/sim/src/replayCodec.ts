@@ -39,7 +39,10 @@ export interface Replay {
   mode: RunMode;
   /** Sprint only: whether the original rival raced (the rival is part of the world). */
   withRival: boolean;
-  /** Character the runner played (0 Blaise, 1..9 the others). */
+  /**
+   * Character the runner played: 0 Blaise, 1..9 the original's others, 10 and up the looks won
+   * from Gwynerva. Purely cosmetic; a character a client does not know is drawn as Blaise.
+   */
   character: number;
   /** Display name of the runner; not verified by anything. */
   playerName: string;
@@ -296,8 +299,8 @@ function checkReplay(replay: Replay): string | null {
     return `mode ${replay.mode} has no records`;
   }
   if (replay.withRival && replay.mode !== 'sprint') return 'only a sprint has a rival';
-  if (!Number.isInteger(replay.character) || replay.character < 0 || replay.character > 9) {
-    return `character ${replay.character} does not exist`;
+  if (!Number.isInteger(replay.character) || replay.character < 0 || replay.character > 255) {
+    return `character ${replay.character} cannot be stored`;
   }
   if (hasControlChars(replay.playerName)) return 'name contains control characters';
   if (Array.from(replay.playerName).length > MAX_REPLAY_NAME_LENGTH) return 'name is too long';

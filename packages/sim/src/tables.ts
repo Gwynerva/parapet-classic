@@ -1,6 +1,6 @@
 /**
  * Physics tables from blobs 18–26 of `b1` (see reference/notes/03-physics.md). Loaded from
- * `packages/content-classic/generated/tables.json`.
+ * `packages/content/playman/extracted/tables.json`.
  */
 export interface PhysicsTables {
   /** Acceleration falloff by speed bucket (12 entries). */

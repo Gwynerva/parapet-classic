@@ -94,6 +94,21 @@ export class BitmapFont {
     return this.glyphs.get(codePoint) ?? this.fallback;
   }
 
+  /**
+   * `text` shortened with an ellipsis so it fits in `maxWidth` pixels (one line); unchanged
+   * when it already fits. Long translations and long player names stay inside their rows.
+   */
+  fit(text: string, maxWidth: number): string {
+    if (this.lineWidth(text) <= maxWidth) return text;
+    const chars = Array.from(text);
+    while (chars.length > 0) {
+      chars.pop();
+      const candidate = chars.join('').trimEnd() + '…';
+      if (this.lineWidth(candidate) <= maxWidth) return candidate;
+    }
+    return '…';
+  }
+
   /** Width in logical pixels of the widest line of `text`. */
   measure(text: string, scale: TextScale = 1, tabular = false): number {
     let widest = 0;

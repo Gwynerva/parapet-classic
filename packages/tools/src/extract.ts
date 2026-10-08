@@ -1,5 +1,5 @@
 /**
- * Decodes the original jar into `packages/content-classic/generated`. Pure orchestration: every format
+ * Decodes the original jar into `packages/content/playman/extracted`. Pure orchestration: every format
  * lives in its own decode module.
  */
 import { mkdirSync, writeFileSync } from 'node:fs';

@@ -8,12 +8,46 @@ export interface UiPointer {
   /** Logical canvas coordinates. */
   x: number;
   y: number;
-  type: 'down' | 'up' | 'move';
+  /** `cancel`: the browser took the pointer over (a scroll, a system gesture); nothing fires. */
+  type: 'down' | 'up' | 'move' | 'cancel';
+  /** `mouse`, `touch` or `pen` (absent for synthetic events). */
+  pointerType?: string;
+  id?: number;
 }
 
+/** Where a UI action came from; `system` is the phone's or browser's Back. */
+export type UiSource = 'keyboard' | 'gamepad' | 'touch' | 'mouse' | 'system';
+
 export interface UiKey {
-  /** Abstract UI action derived from keyboard/gamepad/touch. */
-  action: 'up' | 'down' | 'left' | 'right' | 'confirm' | 'back' | 'pause';
+  /**
+   * Abstract UI action derived from keyboard/gamepad/touch. `next`/`prev` are Tab and
+   * Shift+Tab; `fullscreen` (F) only ever arrives as a gesture.
+   */
+  action:
+    | 'up'
+    | 'down'
+    | 'left'
+    | 'right'
+    | 'confirm'
+    | 'back'
+    | 'pause'
+    | 'next'
+    | 'prev'
+    | 'fullscreen';
+  source?: UiSource;
+}
+
+/** A mouse wheel or touchpad scroll; `dy` in logical pixels, positive scrolls down. */
+export interface UiWheel {
+  x: number;
+  y: number;
+  dy: number;
+}
+
+/** What the frame around a screen shows (drawn by the client, not by the screen). */
+export interface ScreenChrome {
+  /** The full-screen corner button. */
+  fullscreenButton?: boolean;
 }
 
 /**
@@ -37,8 +71,10 @@ export interface Screen {
   render(ctx: CanvasRenderingContext2D, alpha: number): void;
   /** Whether screens below this one should still be rendered. */
   readonly translucent?: boolean;
+  readonly chrome?: ScreenChrome;
   onKey?(key: UiKey): void;
   onPointer?(p: UiPointer): void;
+  onWheel?(w: UiWheel): void;
   /**
    * Handle a gesture synchronously; return true to consume it (it is then not queued as a
    * regular UI event). Only screens with actions that need user activation implement it.
@@ -106,6 +142,10 @@ export class ScreenStack {
 
   onPointer(p: UiPointer): void {
     this.top?.onPointer?.(p);
+  }
+
+  onWheel(w: UiWheel): void {
+    this.top?.onWheel?.(w);
   }
 
   onGesture(g: UiGesture): boolean {

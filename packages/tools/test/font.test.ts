@@ -10,7 +10,7 @@ const FONTS = resolve(
   dirname(fileURLToPath(import.meta.url)),
   '..',
   '..',
-  'content-classic',
+  'content',
   'fonts',
   'src',
 );

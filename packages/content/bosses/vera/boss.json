@@ -1,0 +1,7 @@
+{
+  "id": "vera",
+  "color": "#e5332a",
+  "gender": "female",
+  "looks": ["vera-tank", "vera-vest", "vera-hood"],
+  "effect": ["wind"]
+}

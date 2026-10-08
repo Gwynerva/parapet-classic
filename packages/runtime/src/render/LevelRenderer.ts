@@ -5,7 +5,9 @@
  * The original screen was 240×320; vertical positions that are fractions of the screen
  * (horizon, near-layer base, sky band) are scaled by `viewHeight / 320`, parallax factors stay
  * the original ones (far 0.117×, near 0.234×, clouds 0.059× of the camera x), and the sprites
- * keep their pixel size.
+ * keep their pixel size. The original moved the background a whole pixel at a time; on a big
+ * screen that is a jump of several screen pixels every few frames, so here the layers glide a
+ * screen pixel at a time (`splitPixel`), the same path at a finer step.
  */
 import { idiv, type Level, type MissionRules } from '@parapet/sim';
 import type { LevelArtContent } from '../content/types.ts';
@@ -17,7 +19,7 @@ import {
   ANCHOR_TOP_LEFT,
   type SpriteSheet,
 } from './SpriteSheet.ts';
-import { toScreen, type CameraPos, type ViewSize } from './View.ts';
+import { screenPixels, splitPixel, toScreen, type CameraPos, type ViewSize } from './View.ts';
 
 /** Original screen height the vertical layout constants refer to. */
 const BASE_HEIGHT = 320;
@@ -104,10 +106,18 @@ export class LevelRenderer {
    * its height for the parallax.
    */
   setLevel(levelId: number, level: Level): void {
+    this.currentLevel = levelId;
     const mission = this.content.missions.levels[levelId];
     this.setLevelArt(mission ? mission.backgroundSceneId : -1);
     this.levelHeightTiles = level.height;
   }
+
+  /** The level last selected with `setLevel` (-1: none yet). */
+  get levelId(): number {
+    return this.currentLevel;
+  }
+
+  private currentLevel = -1;
 
   /** Select the level art object directly. */
   setLevelArt(objectId: number): void {
@@ -136,55 +146,70 @@ export class LevelRenderer {
     const cloudSprite = M[base + 4] ?? -1;
     const colours = this.themeColours(theme, ground, skyBottom, skyTop);
     const scaleY = view.height / BASE_HEIGHT;
-    const sy = (v: number): number => Math.round(v * scaleY);
+    const per = screenPixels(ctx);
 
     // Horizon: 260 - (camY / levelHeightTiles >> 4), 32 px higher in theme 3.
     const levelH = this.levelHeightTiles;
-    const camRatio = levelH > 0 ? idiv(cam.y, levelH) : 0;
-    let horizon = 260 - (camRatio >> 4);
+    const camRatio = levelH > 0 ? cam.y / levelH : 0;
+    let horizon = 260 - camRatio / 16;
     if (theme === 3) horizon -= 32;
-    const horizonPx = sy(horizon);
-    const bandPx = sy(SKY_BAND);
+    const sky = splitPixel(horizon * scaleY, per);
+    const horizonPx = sky.whole;
+    const bandPx = Math.round(SKY_BAND * scaleY);
 
+    ctx.save();
+    ctx.translate(0, sky.rest);
     this.drawGradient(ctx, 0, horizonPx - bandPx, view.width, bandPx, skyTop, skyBottom, view);
     ctx.fillStyle = colours.ground;
     ctx.fillRect(0, horizonPx, view.width, view.height - horizonPx);
-    if (horizonPx - bandPx > 0) {
+    if (horizonPx - bandPx >= 0) {
+      // From a pixel above the top: the sky moved down by the rest of a pixel.
       ctx.fillStyle = colours.skyTop;
-      ctx.fillRect(0, 0, view.width, horizonPx - bandPx);
+      ctx.fillRect(0, -1, view.width, horizonPx - bandPx + 1);
     }
 
     if (cloudSprite !== -1) {
       const period = view.width * CLOUD_PERIOD_FACTOR;
-      const scroll = -((cam.x * 240) >> 17);
+      const scroll = -((cam.x * 240) / (1 << 17));
       for (let i = 0; i < 3; i++) {
-        const x = ((scroll + i * 5423 + (clockMs >> 9)) % period) - view.width;
+        const x = splitPixel(((scroll + i * 5423 + clockMs / 512) % period) - view.width, per);
+        ctx.translate(x.rest, 0);
         this.sheet.drawSprite(
           ctx,
           cloudSprite,
-          x,
+          x.whole,
           horizonPx - SKY_BAND - i * 28,
           0,
           ANCHOR_BOTTOM_LEFT,
         );
+        ctx.translate(-x.rest, 0);
       }
     }
 
-    if (farSprite !== -1) {
-      for (let x = -((cam.x * 240) >> 16) % LAYER_WIDTH; x < view.width; x += LAYER_WIDTH) {
-        this.sheet.drawSprite(ctx, farSprite, x, horizonPx, 0, ANCHOR_BOTTOM_LEFT);
-      }
-      let nearBase = 310 - (camRatio >> 4) - (camRatio >> 5);
-      if (theme === 3) nearBase -= 32;
-      const nearPx = sy(nearBase);
-      const nearStart = -((cam.x * 240) >> 15) % LAYER_WIDTH;
-      for (let x = nearStart; x < view.width; x += LAYER_WIDTH) {
-        this.sheet.drawSprite(ctx, farSprite + 1, x, nearPx, 0, ANCHOR_BOTTOM_LEFT);
-      }
-      if (theme === 3 && nearPx < view.height) {
-        this.drawWater(ctx, nearStart, nearPx, view, clockMs);
-      }
+    if (farSprite === -1) {
+      ctx.restore();
+      return;
     }
+    const far = splitPixel(-(((cam.x * 240) / (1 << 16)) % LAYER_WIDTH), per);
+    ctx.translate(far.rest, 0);
+    for (let x = far.whole; x < view.width; x += LAYER_WIDTH) {
+      this.sheet.drawSprite(ctx, farSprite, x, horizonPx, 0, ANCHOR_BOTTOM_LEFT);
+    }
+    ctx.restore();
+
+    let nearBase = 310 - camRatio / 16 - camRatio / 32;
+    if (theme === 3) nearBase -= 32;
+    const nearY = splitPixel(nearBase * scaleY, per);
+    const near = splitPixel(-(((cam.x * 240) / (1 << 15)) % LAYER_WIDTH), per);
+    ctx.save();
+    ctx.translate(near.rest, nearY.rest);
+    for (let x = near.whole; x < view.width; x += LAYER_WIDTH) {
+      this.sheet.drawSprite(ctx, farSprite + 1, x, nearY.whole, 0, ANCHOR_BOTTOM_LEFT);
+    }
+    if (theme === 3 && nearY.whole < view.height) {
+      this.drawWater(ctx, near.whole, nearY.whole, view, clockMs);
+    }
+    ctx.restore();
   }
 
   /** Wavy water rows below the near layer in theme 3 (line 10005). */

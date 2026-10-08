@@ -14,8 +14,11 @@ import type { SpriteSheet } from '@parapet/runtime/render/SpriteSheet.ts';
 import type { SceneRenderer } from '@parapet/runtime/render/SceneRenderer.ts';
 import type { LevelRenderer } from '@parapet/runtime/render/LevelRenderer.ts';
 import type { EchoSheets } from '@parapet/runtime/render/EchoSkin.ts';
+import type { SkinLibrary } from '@parapet/runtime/render/SkinLibrary.ts';
 import type { ScreenStack } from '@parapet/runtime/app/Screen.ts';
 import type { MusicDirector } from '@parapet/runtime/audio/MusicDirector.ts';
+import type { Platform } from './platform.ts';
+import type { MenuBackdrop } from './ui/MenuBackdrop.ts';
 
 export interface Fonts {
   /** Terminus 12 px: HUD labels and small text. */
@@ -42,6 +45,8 @@ export interface Renderers {
   level: LevelRenderer;
   /** Recoloured atlases of the ghosts and rivals, made on first use and kept. */
   echo: EchoSheets;
+  /** The characters' atlases: the base one, and a layer per boss outfit (on first use). */
+  skins: SkinLibrary;
   moves: MoveTable;
   clips: Int16Array;
   sine: Int16Array;
@@ -60,6 +65,10 @@ export interface GameContext {
   music: MusicDirector;
   options: Options;
   player: PlayerInfo;
+  /** Full screen, the Back button, the installed app, toasts. */
+  platform: Platform;
+  /** The level with runners behind the menus. */
+  backdrop: MenuBackdrop;
   /** Facing of the player at press time; the play screen points it at the live runner. */
   facingRight: () => boolean;
 }

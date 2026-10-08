@@ -1,0 +1,115 @@
+"""Grove: the look (gr_looks.py) and the effects (respect: bills blown off him; spray: paint)."""
+from lookgen import *
+from tricks import tricks
+
+import gr_looks  # noqa: F401  (the look)
+
+# ------------------------------------------------------------------ effects
+fx_palette = {
+    'g': '#3fae4c', 'G': '#7fe08a', 'd': '#1f6b2a', 'w': '#f4f4e8', 'y': '#e8d36a',
+    's': '#5fd16b', 'S': '#a9f0b0', 'o': '#2a8f37',
+    'a': 'accent', 'l': 'accent.light',
+}
+bill1 = grid('''
+ddddddd
+dgGgGgd
+dGgyGgd
+dgGgGgd
+ddddddd
+''', {})
+bill2 = grid('''
+...ddd.
+.ddgGd.
+dgGyGd.
+dGgGgd.
+dgGdd..
+ddd....
+''', {})
+bill3 = grid('''
+.ddd...
+dGgdd..
+dgGyGd.
+.dGgGgd
+..ddGgd
+....ddd
+''', {})
+puff1 = grid('''
+.sS.
+sSSs
+.ss.
+''', {})
+puff2 = grid('''
+..ss..
+.sSSs.
+sSSSSs
+sSSSss
+.ssss.
+''', {})
+puff3 = grid('''
+...ss...
+.ssSSss.
+sSS..SSs
+sS....Ss
+sS....ss
+.ss..ss.
+..ssss..
+''', {})
+star = grid('''
+.l.
+lal
+.l.
+''', {})
+
+fx = {
+    'palette': fx_palette,
+    'sprites': {'bill1': bill1, 'bill2': bill2, 'bill3': bill3, 'puff1': puff1, 'puff2': puff2, 'puff3': puff3, 'star': star},
+    'emitters': {
+        'bills': {
+            'while': ['run', 'air'], 'every': 14, 'minSpeed': 60, 'anchor': 'hips', 'jitter': [3, 4],
+            'speed': [18, 40], 'angle': [20, 70], 'inherit': 0.15, 'gravity': 40, 'drag': 1.6,
+            'life': [700, 1100], 'fadeOut': 300, 'flutter': {'amp': 3, 'freq': 2.2},
+            'sprite': {'frames': ['bill1', 'bill2', 'bill3', 'bill2'], 'fps': 8}, 'max': 18, 'reduced': 0.3,
+        },
+        'cash': {
+            'enter': ['land', 'flip', 'vault'], 'burst': [4, 7], 'anchor': 'chest', 'speed': [40, 80],
+            'angle': [30, 150], 'gravity': 90, 'drag': 1.2, 'life': [600, 900], 'fadeOut': 250,
+            'flutter': {'amp': 2, 'freq': 3}, 'sprite': {'frames': ['bill1', 'bill2', 'bill3', 'bill2'], 'fps': 10},
+        },
+        'spray': {
+            'while': ['run', 'air', 'wall'], 'every': 9, 'minSpeed': 50, 'anchor': 'hand.near', 'jitter': [1, 1],
+            'speed': [10, 25], 'angle': [-20, 30], 'inherit': 0.1, 'gravity': -8, 'drag': 2,
+            'life': [500, 800], 'fadeOut': 350, 'sprite': {'frames': ['puff1', 'puff2', 'puff3'], 'fps': 5, 'loop': False},
+            'max': 22, 'reduced': 0.3,
+        },
+        'drips': {
+            'while': ['run', 'air'], 'perSecond': 10, 'minSpeed': 50, 'anchor': 'hand.near',
+            'speed': [5, 15], 'angle': [-100, -80], 'gravity': 260, 'life': [300, 500],
+            'rect': {'size': 1, 'colors': ['g', 'o', 's']},
+        },
+        'tag': {
+            'enter': ['land', 'flip', 'wall'], 'burst': [3, 4], 'anchor': 'body', 'speed': [8, 20],
+            'angle': [0, 360], 'gravity': -10, 'drag': 2, 'life': [500, 800], 'fadeOut': 300,
+            'sprite': {'frames': ['puff1', 'puff2', 'puff3'], 'fps': 5, 'loop': False},
+        },
+        'burst': {
+            'burst': 16, 'anchor': 'body', 'speed': [40, 110], 'angle': [0, 360], 'gravity': 60, 'drag': 1.4,
+            'life': [700, 1100], 'fadeOut': 350, 'flutter': {'amp': 2, 'freq': 3},
+            'sprite': {'frames': ['bill1', 'bill2', 'bill3', 'bill2'], 'fps': 10},
+        },
+        'smoke': {
+            'burst': 10, 'anchor': 'body', 'speed': [10, 35], 'angle': [0, 360], 'gravity': -15, 'drag': 1.5,
+            'life': [600, 900], 'fadeOut': 400, 'sprite': {'frames': ['puff1', 'puff2', 'puff3'], 'fps': 4, 'loop': False},
+        },
+        'idle': {
+            'perSecond': 2, 'anchor': 'body', 'speed': [4, 10], 'angle': [70, 110], 'gravity': -5,
+            'life': [700, 1000], 'fadeIn': 150, 'fadeOut': 300, 'sprite': {'frames': ['star'], 'fps': 1},
+        },
+    },
+    'variants': {
+        'respect': {'emitters': ['bills', 'cash']},
+        'spray': {'emitters': ['spray', 'drips', 'tag']},
+    },
+    'presence': {'idle': ['idle'], 'vanish': ['burst', 'smoke'], 'appear': ['burst', 'smoke']},
+}
+write_json(BOSSES + '/grove/fx.json', tricks(fx, 'grove'))
+print('grove written')
