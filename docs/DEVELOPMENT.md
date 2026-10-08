@@ -93,4 +93,7 @@ repository's variables, Settings → Secrets and variables → Actions → Varia
   lets pictures come from that host. Without it nothing is counted.
 
 The build also writes `sitemap.xml` and `robots.txt` for `VITE_SITE_URL` (a robots file counts
-only at a domain's root, on a domain of the site's own).
+only at a domain's root, on a domain of the site's own), and `race.html`: the game again, with
+the link preview of a challenge (`public/og-race.png`, out of search engines). Challenge links
+open it (`race.html#r=<code>`). Link previews are read from a page's HTML as served, and the
+replay rides in the fragment, which never reaches a server: one preview serves every challenge.

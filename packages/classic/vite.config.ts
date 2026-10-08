@@ -26,6 +26,7 @@ const ART_FILES: Record<string, string> = {
   banner: fileURLToPath(new URL('../../docs/banner.png', import.meta.url)),
   'play-now': fileURLToPath(new URL('../../docs/play-now.png', import.meta.url)),
   'og-image': fileURLToPath(new URL('./public/og-image.png', import.meta.url)),
+  'og-race': fileURLToPath(new URL('./public/og-race.png', import.meta.url)),
 };
 
 /** The file of a look by its id, or null. */
@@ -195,8 +196,23 @@ function counterOrigin(setting: string): string {
  * counts visits, and the sitemap and robots file of the published site.
  */
 function pagePlugin(site: string, counter: string): Plugin {
+  let outDir = '';
   return {
     name: 'parapet-page',
+    configResolved(config) {
+      outDir = config.build.outDir;
+    },
+    configureServer(server) {
+      // The challenge page is the game itself (the build writes it from index.html).
+      server.middlewares.use((req, _res, next) => {
+        if (req.url?.startsWith('/race.html')) req.url = '/' + req.url.slice('/race.html'.length);
+        next();
+      });
+    },
+    async writeBundle() {
+      const page = join(outDir, 'index.html');
+      await writeFile(join(outDir, 'race.html'), racePage(await readFile(page, 'utf8'), site));
+    },
     transformIndexHtml: {
       order: 'pre',
       handler(html) {
@@ -232,6 +248,43 @@ function pagePlugin(site: string, counter: string): Plugin {
       });
     },
   };
+}
+
+/**
+ * The page challenge links open (`race.html#r=<code>`): the game itself, with its own link
+ * preview (a race, a call to beat the run). Link previews come from a page's HTML as served:
+ * the replay sits in the fragment, which never reaches a server, so the preview is one for
+ * every challenge. Out of search engines: the game's page is the one to find.
+ */
+function racePage(html: string, site: string): string {
+  const title = 'Race my ghost · Parapet Classic';
+  const ogTitle = 'Race my ghost in Parapet Classic';
+  const description =
+    'Can you beat my time? Open the link and race my ghost over the rooftops. Free, in the browser.';
+  const meta = (attr: 'name' | 'property', key: string, value: string) => (text: string) => {
+    const pattern = new RegExp(`(<meta\\s+${attr}="${key}"\\s+content=")[^"]*(")`);
+    if (!pattern.test(text)) throw new Error(`race.html: no ${key} in index.html`);
+    return text.replace(pattern, `$1${value}$2`);
+  };
+  const steps: ((text: string) => string)[] = [
+    (text) => text.replace(/<title>[^<]*<\/title>/, `<title>${title}</title>`),
+    (text) => text.replace(/(<link rel="canonical" href=")[^"]*(")/, `$1${site}race.html$2`),
+    (text) =>
+      text.replace(
+        '<meta charset="utf-8" />',
+        '<meta charset="utf-8" />\n    <meta name="robots" content="noindex" />',
+      ),
+    meta('name', 'description', description),
+    meta('property', 'og:title', ogTitle),
+    meta('property', 'og:description', description),
+    meta('property', 'og:url', `${site}race.html`),
+    meta('property', 'og:image', `${site}og-race.png`),
+    meta('property', 'og:image:alt', 'Two runners racing over the rooftops of Parapet Classic'),
+    meta('name', 'twitter:title', ogTitle),
+    meta('name', 'twitter:description', description),
+    meta('name', 'twitter:image', `${site}og-race.png`),
+  ];
+  return steps.reduce((text, step) => step(text), html);
 }
 
 export default defineConfig(({ command, mode }) => {

@@ -54,6 +54,7 @@ no server: the build is a static site. The one exception is opt-in for a deploym
 visit and a few moments of play with a 1×1 picture from goatcounter.com, which the build adds
 to the CSP; no cookies, nothing personal, nothing under Do Not Track. `index.html` carries the
 page's description, link previews (`public/og-image.png`), structured data and favicons; the
-site's address in them comes from `VITE_SITE_URL`. Ghost races (`src/app/ghosts.ts`) take
+site's address in them comes from `VITE_SITE_URL`. Challenge links open `race.html`, the same
+page with a race's preview (`public/og-race.png`), which the build writes from `index.html`. Ghost races (`src/app/ghosts.ts`) take
 their replays from challenge links (`#r=<code>`), replay files, drops and pastes, or the local
 records.

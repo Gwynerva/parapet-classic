@@ -1,8 +1,10 @@
 /**
- * How replays travel: as a link (`<page>#r=<code>`), as a file (`*.parapet-replay`, a small
- * JSON document around the same code) or as pasted text containing either. The code is the
- * `encodeReplay` output; everything else in a file is there for people reading it and is
- * ignored on import, because the game re-runs the replay and computes the result itself.
+ * How replays travel: as a link (`<site>/race.html#r=<code>`: the game, with a link preview of
+ * its own), as a file (`*.parapet-replay`, a small JSON document around the same code) or as
+ * pasted text containing either. The code is the `encodeReplay` output; everything else in a
+ * file is there for people reading it and is ignored on import, because the game re-runs the
+ * replay and computes the result itself. The code rides in the fragment: it never reaches a
+ * server and has no length limit. `?r=<code>` and links to the game's own page work too.
  */
 
 export const REPLAY_FILE_FORMAT = 'parapet-classic-replay';
@@ -24,10 +26,13 @@ export interface ReplayFileInfo {
   score?: number;
 }
 
-/** The link that opens a replay on the page at `pageUrl` (its query and fragment dropped). */
+/** The page challenge links open, next to the game's own (see `vite.config.ts`). */
+export const RACE_PAGE = 'race.html';
+
+/** The link that opens a replay, made on the game's page at `pageUrl`. */
 export function replayLink(pageUrl: string, code: string): string {
-  const base = pageUrl.replace(/[?#].*$/, '');
-  return `${base}#r=${code}`;
+  const folder = pageUrl.replace(/[?#].*$/, '').replace(/[^/]*$/, '');
+  return `${folder}${RACE_PAGE}#r=${code}`;
 }
 
 /** The contents of a replay file. */

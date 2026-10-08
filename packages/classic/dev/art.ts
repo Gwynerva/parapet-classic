@@ -79,6 +79,13 @@ const BANNER_SHOTS: Shot[] = [
   { level: 4, mission: 0, at: -1, boss: 'b2', outfit: 0, frame: FLIP, feet: [0.55, 0.84], shift: [0, 20] },
   { level: 7, mission: 0, at: -1, boss: 'azure', outfit: 0, frame: JUMP, feet: [0.5, 0.84], shift: [0, 12] },
 ];
+/** The challenge links' preview: runners mid-race. */
+const RACE_SHOTS: Shot[] = [
+  { level: 10, mission: 1, at: 3, boss: '', outfit: 0, frame: -1, feet: [0.5, 0.84] },
+  { level: 3, mission: 0, at: -1, boss: 'vera', outfit: 1, frame: JUMP, feet: [0.5, 0.84], shift: [0, 12] },
+  { level: 8, mission: 0, at: -1, boss: 'five', outfit: 0, frame: -1, feet: [0.5, 0.84] },
+  { level: 6, mission: 0, at: -1, boss: 'granger', outfit: 1, frame: FLIP, feet: [0.5, 0.84], shift: [0, 18] },
+];
 /** The link preview: the place under the pennant, then the cards. */
 const OG_SHOTS: Shot[] = [
   { level: 10, mission: 1, at: 3, boss: '', outfit: 0, frame: -1, feet: [0.5, 0.84] },
@@ -96,12 +103,18 @@ async function main(): Promise<void> {
     BitmapFont.fromData(display16 as BitmapFontData, display16Png),
     BitmapFont.fromData(display24 as BitmapFontData, display24Png),
   ]);
-  const icon = await new Promise<HTMLImageElement>((done, fail) => {
-    const img = new Image();
-    img.onload = () => done(img);
-    img.onerror = fail;
-    img.src = '/icons/favicon-32.png';
-  });
+  const image = (src: string): Promise<HTMLImageElement> =>
+    new Promise((done, fail) => {
+      const img = new Image();
+      img.onload = () => done(img);
+      img.onerror = fail;
+      img.src = src;
+    });
+  // The app icon, and the race's (its runner with its echo) for the challenge links' preview.
+  const [icon, raceIcon] = await Promise.all([
+    image('/icons/favicon-32.png'),
+    image('/icons/race-32.png'),
+  ]);
   const sheet = new SpriteSheet(content.atlas.image, content.atlas.frames);
   const scene = new SceneRenderer(sheet, content.scenes.values());
   const levels = new LevelRenderer(content, sheet, scene, buildSineTable(10, true));
@@ -239,6 +252,8 @@ async function main(): Promise<void> {
     w: number,
     h: number,
     tagline: string | null,
+    logo: HTMLImageElement = icon,
+    taglineColor: string = Theme.muted,
   ): void => {
     const notch = 10;
     // Shadow, then the cloth row by row (the notch at the foot).
@@ -261,7 +276,7 @@ async function main(): Promise<void> {
     const cx = x + (w >> 1);
     const iconSize = 64;
     const iconY = tagline ? 14 : 12;
-    c.drawImage(icon, cx - iconSize / 2, iconY, iconSize, iconSize);
+    c.drawImage(logo, cx - iconSize / 2, iconY, iconSize, iconSize);
     const titleY = iconY + iconSize + 4;
     title.draw(c, 'PARAPET', cx + 1, titleY, { align: 'center', color: Theme.accent });
     display.draw(c, 'CLASSIC', cx, titleY + title.lineHeight - 3, {
@@ -274,7 +289,7 @@ async function main(): Promise<void> {
     c.fillRect(cx - 16, y, 32, 1);
     small.draw(c, small.wrap(tagline, w - 14).join('\n'), cx, y + 6, {
       align: 'center',
-      color: Theme.muted,
+      color: taglineColor,
     });
   };
 
@@ -289,6 +304,8 @@ async function main(): Promise<void> {
     shots: Shot[],
     pennantW: number,
     tagline: string | null,
+    logo: HTMLImageElement = icon,
+    taglineColor: string = Theme.muted,
   ): void => {
     c.fillStyle = '#07090c';
     c.fillRect(0, 0, width, height);
@@ -303,7 +320,7 @@ async function main(): Promise<void> {
       const x1 = i === cards.length - 1 ? width + 2 : Math.round(from + (i + 1) * span + 8);
       card(c, s, x0, x1, 0, height, lean);
     });
-    pennant(c, pennantX, pennantW, height - 4, tagline);
+    pennant(c, pennantX, pennantW, height - 4, tagline, logo, taglineColor);
   };
 
   /**
@@ -398,6 +415,18 @@ async function main(): Promise<void> {
   );
   picture('og-image', 'Link preview (public/og-image.png)', 400, 210, 3, (c) =>
     collage(c, 400, 210, OG_SHOTS, 146, 'The 2007 mobile parkour classic, remade for the browser'),
+  );
+  picture('og-race', 'Challenge link preview (public/og-race.png)', 400, 210, 3, (c) =>
+    collage(
+      c,
+      400,
+      210,
+      RACE_SHOTS,
+      146,
+      'Race my ghost! Can you beat my time?',
+      raceIcon,
+      Theme.text,
+    ),
   );
   picture('play-now', 'Play button (docs/play-now.png)', 148, 30, 2, (c) => button(c, 148, 30));
 

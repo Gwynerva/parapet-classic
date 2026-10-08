@@ -9,9 +9,15 @@ import {
 const CODE = 'AQ5wYXJhcGV0LXNpbUAwLjIuMAdjbGFzc2lj';
 
 describe('replay links and files', () => {
-  it('builds a link on the page without its query or fragment', () => {
-    expect(replayLink('https://example.org/parapet-classic/?touch=1#old', CODE)).toBe(
-      `https://example.org/parapet-classic/#r=${CODE}`,
+  it('builds a link to the race page next to the game, without query or fragment', () => {
+    expect(replayLink('https://example.org/parapet-classic/?app=1#old', CODE)).toBe(
+      `https://example.org/parapet-classic/race.html#r=${CODE}`,
+    );
+    expect(replayLink(`https://example.org/parapet-classic/race.html#r=${CODE}`, CODE)).toBe(
+      `https://example.org/parapet-classic/race.html#r=${CODE}`,
+    );
+    expect(replayLink('http://localhost:5173/index.html', CODE)).toBe(
+      `http://localhost:5173/race.html#r=${CODE}`,
     );
   });
 
@@ -22,6 +28,7 @@ describe('replay links and files', () => {
       CODE,
     );
     expect(extractReplayCode(CODE)).toBe(CODE);
+    expect(extractReplayCode(`https://example.org/race.html?r=${CODE}&app=1`)).toBe(CODE);
   });
 
   it('finds nothing in other text', () => {

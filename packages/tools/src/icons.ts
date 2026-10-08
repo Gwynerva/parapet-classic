@@ -12,6 +12,9 @@ const PALETTE: Readonly<Record<string, readonly [number, number, number]>> = {
   G: [139, 152, 168],
   A: [184, 116, 0],
   a: [255, 176, 0],
+  // The racing echo: the game's neon cyan ghost.
+  C: [20, 92, 112],
+  c: [38, 178, 204],
 };
 
 export const ICON_ART: readonly string[] = [
@@ -49,6 +52,37 @@ export const ICON_ART: readonly string[] = [
   'ggggggggggggggggggd.............',
 ];
 
+/** How far behind the runner its echo runs in the race icon, in art pixels. */
+const ECHO_BEHIND = 10;
+/** The parapet starts on this row; the runner and its speed lines are above it. */
+const PARAPET_ROW = 21;
+
+/**
+ * The icon of a race (the challenge links' preview): the runner leaping off the parapet with
+ * its echo, the game's neon ghost, a stride behind on the roof; no speed lines.
+ */
+export const RACE_ICON_ART: readonly string[] = ((): string[] => {
+  // Two runners show the speed: no lines.
+  const rows = ICON_ART.map((row, y) =>
+    y < PARAPET_ROW ? row.replace(/d/g, '.').split('') : row.split(''),
+  );
+  const runner = (ch: string): boolean => ch === 'a' || ch === 'A';
+  for (let y = 0; y < PARAPET_ROW; y++) {
+    for (let x = 0; x < rows[y]!.length; x++) {
+      const ch = ICON_ART[y]![x]!;
+      const ex = x - ECHO_BEHIND;
+      if (runner(ch) && ex >= 0) rows[y]![ex] = ch === 'a' ? 'c' : 'C';
+    }
+  }
+  // The runner over its echo.
+  for (let y = 0; y < PARAPET_ROW; y++) {
+    for (let x = 0; x < rows[y]!.length; x++) {
+      if (runner(ICON_ART[y]![x]!)) rows[y]![x] = ICON_ART[y]![x]!;
+    }
+  }
+  return rows.map((r) => r.join(''));
+})();
+
 /** Files under `packages/classic/public/icons/`: name → art scale and padding. */
 export const ICON_FILES: readonly { name: string; scale: number; size: number }[] = [
   { name: 'favicon-32.png', scale: 1, size: 32 },
@@ -62,8 +96,11 @@ export const ICON_FILES: readonly { name: string; scale: number; size: number }[
 ];
 
 /** The art scaled by `scale`, centred on a `size`² square of the background colour. */
-export function renderIcon(scale: number, size: number): Uint8Array {
-  const art = ICON_ART;
+export function renderIcon(
+  scale: number,
+  size: number,
+  art: readonly string[] = ICON_ART,
+): Uint8Array {
   const artSize = art.length * scale;
   const offset = (size - artSize) >> 1;
   const background = PALETTE['.']!;
@@ -88,8 +125,7 @@ export function renderIcon(scale: number, size: number): Uint8Array {
  * The art as an SVG of whole-pixel rectangles (a row's run of one colour each): crisp at any
  * size, for the browsers that take an SVG favicon.
  */
-export function renderIconSvg(): string {
-  const art = ICON_ART;
+export function renderIconSvg(art: readonly string[] = ICON_ART): string {
   const hex = (c: readonly number[]): string =>
     '#' + c.map((v) => v.toString(16).padStart(2, '0')).join('');
   const rects: string[] = [];

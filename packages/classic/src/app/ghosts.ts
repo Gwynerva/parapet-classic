@@ -338,9 +338,17 @@ export function installReplayInputs(ctx: GameContext): void {
   });
 }
 
-/** Reads `#r=<code>` from the page address, removing it so a reload does not start it again. */
+/**
+ * Reads the replay of a challenge link from the page address (`#r=<code>`, or `?r=<code>`),
+ * removing it so a reload does not start the race again.
+ */
 export function takeReplayFromLocation(): string | null {
-  const code = extractReplayCode(location.hash);
-  if (code) history.replaceState(null, '', location.pathname + location.search);
+  const fromHash = extractReplayCode(location.hash);
+  const query = new URLSearchParams(location.search);
+  const code = fromHash ?? extractReplayCode(`?r=${query.get('r') ?? ''}`);
+  if (!code) return null;
+  query.delete('r');
+  const search = query.toString();
+  history.replaceState(null, '', location.pathname + (search ? `?${search}` : ''));
   return code;
 }
