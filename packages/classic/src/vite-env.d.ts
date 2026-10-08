@@ -4,6 +4,6 @@
 declare const TAS_OUT: string;
 
 interface ImportMetaEnv {
-  /** The site's code at goatcounter.com for anonymous visit counts (`app/analytics.ts`). */
+  /** Anonymous visit counts (`app/analytics.ts`): a goatcounter.com code or an own address. */
   readonly VITE_GOATCOUNTER?: string;
 }

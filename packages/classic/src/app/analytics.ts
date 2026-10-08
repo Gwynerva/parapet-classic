@@ -1,8 +1,9 @@
 /**
  * Anonymous counts for the author, when the build is set up for them (`VITE_GOATCOUNTER`: the
- * site's code at goatcounter.com, see `packages/classic/README.md`): a visit, and a few moments
- * of play, each at most once per visit: the first run, a level's mission won for the first time,
- * a boss beaten, the Prize, a race from a challenge link.
+ * site's code at goatcounter.com, or the address of a GoatCounter of our own, see
+ * `docs/DEVELOPMENT.md`): a visit, and a few moments of play, each at most once per visit: the
+ * first run, a level's mission won for the first time, a boss beaten, the Prize, a race from a
+ * challenge link.
  *
  * GoatCounter keeps no cookies and nothing that tells one person from another; the count is a
  * 1×1 picture asked for by this code, no script from elsewhere. Nothing is counted on the dev
@@ -10,12 +11,24 @@
  * Privacy Control). A replay link's code (`#r=…`) never leaves: only the page's path does.
  */
 
-const SITE = (import.meta.env.VITE_GOATCOUNTER ?? '').trim();
+/** Where counts go: `https://<code>.goatcounter.com` for a code, else an `https://` address. */
+export function counterOrigin(setting: string): string {
+  const v = setting.trim();
+  if (/^[a-z0-9-]+$/.test(v)) return `https://${v}.goatcounter.com`;
+  try {
+    const url = new URL(v);
+    return url.protocol === 'https:' ? url.origin : '';
+  } catch {
+    return '';
+  }
+}
+
+const COUNTER = counterOrigin(import.meta.env.VITE_GOATCOUNTER ?? '');
 const sent = new Set<string>();
 
 /** Whether counts go out from this page. */
 function counting(): boolean {
-  if (!/^[a-z0-9-]+$/.test(SITE) || import.meta.env.DEV) return false;
+  if (!COUNTER || import.meta.env.DEV) return false;
   if (location.protocol !== 'https:') return false;
   const host = location.hostname;
   if (host === 'localhost' || host === '127.0.0.1' || host.endsWith('.localhost')) return false;
@@ -26,7 +39,7 @@ function counting(): boolean {
 function send(params: Record<string, string>): void {
   const query = new URLSearchParams({ ...params, rnd: Math.random().toString(36).slice(2) });
   const img = new Image();
-  img.src = `https://${SITE}.goatcounter.com/count?${query.toString()}`;
+  img.src = `${COUNTER}/count?${query.toString()}`;
 }
 
 /** Counts the visit (once). */

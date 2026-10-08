@@ -83,9 +83,14 @@ Pages of the dev server, never published:
 The build takes two settings from the environment (the CI workflow passes them from the
 repository's variables, Settings → Secrets and variables → Actions → Variables):
 
-- `VITE_SITE_URL` — where the site lives, for the canonical link, the link previews and the
-  structured data in the page (default `https://gwynerva.github.io/parapet-classic/`).
+- `VITE_SITE_URL` (repository variable `SITE_URL`) — where the site lives, for the canonical
+  link, the link previews and the structured data in the page (default
+  `https://gwynerva.github.io/parapet-classic/`).
 - `VITE_GOATCOUNTER` (repository variable `GOATCOUNTER`) — the site's code at
-  [goatcounter.com](https://www.goatcounter.com/): the published site then counts visits and a
-  few moments of play anonymously (`packages/classic/src/app/analytics.ts`). Without it nothing
-  is counted.
+  [goatcounter.com](https://www.goatcounter.com/) (`parapet-classic`), or the address of a
+  GoatCounter of our own (`https://stats.example.org`): the published site then counts visits
+  and a few moments of play anonymously (`packages/classic/src/app/analytics.ts`) and its page
+  lets pictures come from that host. Without it nothing is counted.
+
+The build also writes `sitemap.xml` and `robots.txt` for `VITE_SITE_URL` (a robots file counts
+only at a domain's root, on a domain of the site's own).

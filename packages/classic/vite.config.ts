@@ -175,25 +175,61 @@ function devHelpersPlugin(): Plugin {
 const DEFAULT_SITE_URL = 'https://gwynerva.github.io/parapet-classic/';
 
 /**
- * The page's own address in its links (`%SITE_URL%`: the canonical link, the link previews, the
- * structured data) and, when the build counts visits (`VITE_GOATCOUNTER`, see
- * `src/app/analytics.ts`), the counter's host among the pictures the page may load.
+ * Where the visit counter takes its counts (`VITE_GOATCOUNTER`, see `src/app/analytics.ts`):
+ * a goatcounter.com code, or the address of a GoatCounter of our own; '' for none.
  */
-function pagePlugin(site: string, goatcounter: string): Plugin {
+function counterOrigin(setting: string): string {
+  const v = setting.trim();
+  if (/^[a-z0-9-]+$/.test(v)) return `https://${v}.goatcounter.com`;
+  try {
+    const url = new URL(v);
+    return url.protocol === 'https:' ? url.origin : '';
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * The page's own address in its links (`%SITE_URL%`: the canonical link, the link previews, the
+ * structured data), the counter's host among the pictures the page may load when the build
+ * counts visits, and the sitemap and robots file of the published site.
+ */
+function pagePlugin(site: string, counter: string): Plugin {
   return {
     name: 'parapet-page',
     transformIndexHtml: {
       order: 'pre',
       handler(html) {
         let out = html.replaceAll('%SITE_URL%', site);
-        if (goatcounter) {
-          out = out.replace(
-            "img-src 'self' data: blob:",
-            `img-src 'self' data: blob: https://${goatcounter}.goatcounter.com`,
-          );
-        }
+        if (counter)
+          out = out.replace("img-src 'self' data: blob:", `img-src 'self' data: blob: ${counter}`);
         return out;
       },
+    },
+    generateBundle() {
+      this.emitFile({
+        type: 'asset',
+        fileName: 'sitemap.xml',
+        source: [
+          '<?xml version="1.0" encoding="UTF-8"?>',
+          '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+          `  <url><loc>${site}</loc><changefreq>monthly</changefreq></url>`,
+          '</urlset>',
+          '',
+        ].join('\n'),
+      });
+      // Read by search engines only at a domain's root (a site of its own, not a project page).
+      this.emitFile({
+        type: 'asset',
+        fileName: 'robots.txt',
+        source: [
+          'User-agent: *',
+          'Allow: /',
+          'Disallow: /debug.html',
+          `Sitemap: ${site}sitemap.xml`,
+          '',
+        ].join('\n'),
+      });
     },
   };
 }
@@ -201,19 +237,18 @@ function pagePlugin(site: string, goatcounter: string): Plugin {
 export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_');
   const site = (env.VITE_SITE_URL || DEFAULT_SITE_URL).replace(/\/?$/, '/');
-  const goatcounter = /^[a-z0-9-]+$/.test(env.VITE_GOATCOUNTER ?? '') ? env.VITE_GOATCOUNTER! : '';
-  return config(command, site, goatcounter);
+  return config(command, site, counterOrigin(env.VITE_GOATCOUNTER ?? ''));
 });
 
 /** The configuration for a command (`serve`, `build`), the page's address and counter. */
-function config(command: string, site: string, goatcounter: string): UserConfig {
+function config(command: string, site: string, counter: string): UserConfig {
   return {
     base: './',
     // The dev server only: a build must not carry a path of the developer's machine.
     define: { TAS_OUT: JSON.stringify(command === 'serve' ? tasOut : '') },
     // The original's music ships as MIDI files played by our own synthesiser.
     assetsInclude: ['**/*.mid'],
-    plugins: [devHelpersPlugin(), pagePlugin(site, goatcounter)],
+    plugins: [devHelpersPlugin(), pagePlugin(site, counter)],
     resolve: {
       alias: {
         '@playman': playman,
