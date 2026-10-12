@@ -37,8 +37,10 @@ npm run build          # packages/classic/dist, a static site
 npm run preview:pages  # serve the build under /parapet-classic/ like GitHub Pages
 ```
 
-Requires Node 24+. Pushes to `main` that pass the checks are published to GitHub Pages by the
-CI workflow (`.github/workflows/ci.yml`).
+Requires Node 24+. The types are checked by TypeScript 7, the native compiler (`npm run
+typecheck`: every package in about half a second). The CI workflow (`.github/workflows/ci.yml`)
+runs the checks on Node 24, the oldest supported, and on Node 26, which builds the site; pushes
+to `main` that pass them are published to GitHub Pages.
 
 ## Tools
 

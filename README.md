@@ -49,7 +49,7 @@ npm run dev       # http://localhost:5173
 npm run check     # format, types, tests
 ```
 
-Node 24+. TypeScript and Canvas 2D, no engine: a deterministic integer simulation
+Node 24+. TypeScript 7 and Canvas 2D, no engine: a deterministic integer simulation
 (`packages/sim`), a browser runtime (`packages/runtime`), the game (`packages/classic`), the
 tools and our content. Everything learned about the original is in `reference/`. The layout,
 the tools and the dev pages: [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md).
