@@ -1,5 +1,5 @@
 /**
- * Draws the echoes: ghosts of recorded runs and the rivals of the original, as holograms.
+ * Draws the echoes: ghosts of recorded runs, as holograms.
  *
  * Every echo is drawn into an offscreen layer with its recoloured skin (`EchoSheets`), then
  * the layer gets scanlines (every third pixel row dimmed, the phase crawling downwards) and
@@ -60,7 +60,7 @@ export interface EchoStyle {
   color: EchoColor;
   /** Atlas the echo is recoloured from: a look's (`SkinLibrary.sceneFor`), or the base one. */
   source?: SceneRenderer;
-  /** Keep the sprite detail (players) or draw a flat silhouette (the original's rivals). */
+  /** Keep the sprite detail (players) or draw a flat silhouette. */
   textured: boolean;
   /** Body-part swap for the frame (`clock` in ms of game clock). */
   swap: (clock: number) => SpriteSwap;

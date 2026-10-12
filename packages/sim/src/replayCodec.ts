@@ -1,7 +1,7 @@
 /**
  * Shareable replays: everything needed to re-run a recorded run (level, mode, rival flag and
  * the input log) plus the versions it was recorded on and the runner's name and character,
- * packed into base64url so a whole run fits into a link fragment.
+ * packed into base64url so a whole run fits into a link.
  *
  * Format 2 (written now), a stream of bits, most significant first:
  *

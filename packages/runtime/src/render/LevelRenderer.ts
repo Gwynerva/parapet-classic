@@ -2,12 +2,21 @@
  * Level drawing: parallax sky and layers (`bb()`, d.java line 9958), level art (`aV()`, line
  * 9847), checkpoint flags and finish marker (`aS()`, line 9747), birds and debug tile shapes.
  *
- * The original screen was 240×320; vertical positions that are fractions of the screen
- * (horizon, near-layer base, sky band) are scaled by `viewHeight / 320`, parallax factors stay
- * the original ones (far 0.117×, near 0.234×, clouds 0.059× of the camera x), and the sprites
- * keep their pixel size. The original moved the background a whole pixel at a time; on a big
+ * The original screen was 240×320. Its vertical layout (horizon, near-layer base, water) is kept
+ * to the pixel, standing on the bottom of the camera's frame (`Camera.frameH`, the view above
+ * the touch buttons): the level art keeps its pixel size, so the skyline sits behind it exactly
+ * as on the original screen whatever the height; a taller frame only gets a taller sky
+ * gradient. Parallax factors stay the original ones (far 0.117×, near 0.234×, clouds 0.059× of
+ * the camera x), and the sprites keep their pixel size. The original moved the background a whole pixel at a time; on a big
  * screen that is a jump of several screen pixels every few frames, so here the layers glide a
  * screen pixel at a time (`splitPixel`), the same path at a finer step.
+ *
+ * The original's camera never showed what lies below a level. Ours may (`Camera.setFrame`: the
+ * runner kept above the touch buttons, the strip under them below the level): the sky and the
+ * skyline then rise with the level's bottom edge, staying behind the level as on the original
+ * screen; every column of the art that reaches down to the level's bottom (walls, ground) goes
+ * on down in its own colour, and below the level's bottom edge all of it sinks into shadow
+ * (`drawUnder`): the city continues below, plainly not a part of the level.
  */
 import { idiv, type Level, type MissionRules } from '@parapet/sim';
 import type { LevelArtContent } from '../content/types.ts';
@@ -31,6 +40,26 @@ const SKY_BANDS = 12;
 const CLOUD_PERIOD_FACTOR = 2;
 const WATER_SPRITE = 222;
 const WATER_ROWS = 51;
+/** The water's fade from the far shore down: its steps and its opacity at the bottom. */
+const WATER_FADE_BANDS = 8;
+const WATER_DARKEST = 0.85;
+/**
+ * Under a level: the shade's colour, its bands (height in px) and its opacity at the end; a
+ * column of the art goes on down when it reaches this close to the level's bottom (px).
+ */
+const UNDER_SHADE = '12, 14, 18';
+const UNDER_BAND = 16;
+const UNDER_BANDS = 6;
+const UNDER_DARKEST = 0.8;
+const UNDER_REACH = 32;
+
+/** What goes on below a frame of the level art: its columns carried down, and their last row. */
+interface Under {
+  /** The art's size, transparent but below the columns that reach the level's bottom. */
+  fill: HTMLCanvasElement;
+  /** One row, the art's width: the colour each such column goes on with. */
+  row: HTMLCanvasElement;
+}
 
 const FLAG_SPRITE = 137;
 const FLAG_FRAMES = 3;
@@ -83,6 +112,7 @@ export class LevelRenderer {
   private readonly scene: SceneRenderer;
   private readonly sine: Int16Array;
   private readonly artCache = new Map<number, HTMLCanvasElement>();
+  private readonly underCache = new Map<number, Under | null>();
   private artObjectId = -1;
   /** Level height in tiles (`bQ`), used by the vertical parallax. */
   private levelHeightTiles = 0;
@@ -109,6 +139,7 @@ export class LevelRenderer {
     this.currentLevel = levelId;
     const mission = this.content.missions.levels[levelId];
     this.setLevelArt(mission ? mission.backgroundSceneId : -1);
+    if (level.height !== this.levelHeightTiles) this.underCache.clear();
     this.levelHeightTiles = level.height;
   }
 
@@ -124,18 +155,25 @@ export class LevelRenderer {
     if (objectId === this.artObjectId) return;
     this.artObjectId = objectId;
     this.artCache.clear();
+    this.underCache.clear();
   }
 
   // -------------------------------------------------------------------------------------------
   // Background (`bb`)
   // -------------------------------------------------------------------------------------------
 
+  /**
+   * `frameHeight`: the part of the view, from the top, whose bottom the original screen stands
+   * on (the camera's frame above the touch buttons, `Camera.frameH`); the ground and the water
+   * go on below it to the bottom of the view.
+   */
   drawBackground(
     ctx: CanvasRenderingContext2D,
     cam: CameraPos,
     view: ViewSize,
     clockMs: number,
     theme: number,
+    frameHeight = view.height,
   ): void {
     const M = this.content.tables.M;
     const base = theme * 5;
@@ -145,17 +183,22 @@ export class LevelRenderer {
     const farSprite = M[base + 3] ?? -1;
     const cloudSprite = M[base + 4] ?? -1;
     const colours = this.themeColours(theme, ground, skyBottom, skyTop);
-    const scaleY = view.height / BASE_HEIGHT;
+    const frame = Math.max(1, Math.min(view.height, frameHeight));
     const per = screenPixels(ctx);
+    // The original screen's top within the view (above it on a short frame).
+    const shift = frame - BASE_HEIGHT;
 
-    // Horizon: 260 - (camY / levelHeightTiles >> 4), 32 px higher in theme 3.
+    // Horizon: 260 - (camY / levelHeightTiles >> 4), 32 px higher in theme 3; camY is the top
+    // of that original screen.
     const levelH = this.levelHeightTiles;
-    const camRatio = levelH > 0 ? cam.y / levelH : 0;
+    const camRatio = levelH > 0 ? (cam.y + (shift << 5)) / levelH : 0;
     let horizon = 260 - camRatio / 16;
     if (theme === 3) horizon -= 32;
-    const sky = splitPixel(horizon * scaleY, per);
+    // The level's bottom edge above the bottom of the frame: everything rises with it.
+    const lift = levelH > 0 ? Math.max(0, frame - ((levelH << 10) - cam.y) / 32) : 0;
+    const sky = splitPixel(horizon + shift - lift, per);
     const horizonPx = sky.whole;
-    const bandPx = Math.round(SKY_BAND * scaleY);
+    const bandPx = Math.round(SKY_BAND * Math.max(1, frame / BASE_HEIGHT));
 
     ctx.save();
     ctx.translate(0, sky.rest);
@@ -199,7 +242,7 @@ export class LevelRenderer {
 
     let nearBase = 310 - camRatio / 16 - camRatio / 32;
     if (theme === 3) nearBase -= 32;
-    const nearY = splitPixel(nearBase * scaleY, per);
+    const nearY = splitPixel(nearBase + shift - lift, per);
     const near = splitPixel(-(((cam.x * 240) / (1 << 15)) % LAYER_WIDTH), per);
     ctx.save();
     ctx.translate(near.rest, nearY.rest);
@@ -207,28 +250,38 @@ export class LevelRenderer {
       this.sheet.drawSprite(ctx, farSprite + 1, x, nearY.whole, 0, ANCHOR_BOTTOM_LEFT);
     }
     if (theme === 3 && nearY.whole < view.height) {
-      this.drawWater(ctx, near.whole, nearY.whole, view, clockMs);
+      this.drawWater(ctx, near.whole, nearY.whole, view, clockMs, frame - nearY.rest, ground);
     }
     ctx.restore();
   }
 
-  /** Wavy water rows below the near layer in theme 3 (line 10005). */
+  /**
+   * Wavy water rows below the near layer in theme 3 (line 10005). The original drew its 51 rows
+   * and left the theme's dark ground under them, which on a taller screen is a black band
+   * between the far shore and the quay. Here the nearest row's waves go on down (still moving),
+   * and the water darkens in steps the further it lies from the far shore, into the night's
+   * ground colour by the bottom of the frame (`frameBottom`): the lights' reflections fade out
+   * instead of stopping at a line.
+   */
   private drawWater(
     ctx: CanvasRenderingContext2D,
     startX: number,
     baseY: number,
     view: ViewSize,
     clockMs: number,
+    frameBottom: number,
+    ground: number,
   ): void {
     const sine = this.sine;
     const phase = clockMs >> 2;
     for (let x = startX; x < view.width; x += LAYER_WIDTH) {
-      for (let row = 0; row < WATER_ROWS && baseY + row < view.height; row++) {
-        const n = idiv((WATER_ROWS - row) << 16, row + 1);
-        let srcRow = WATER_ROWS - row + (sine[(row + n + phase) & 0x1ff]! >> 8);
+      for (let row = 0; baseY + row < view.height; row++) {
+        const r = Math.min(row, WATER_ROWS - 1);
+        const n = idiv((WATER_ROWS - r) << 16, r + 1);
+        let srcRow = WATER_ROWS - r + (sine[(row + n + phase) & 0x1ff]! >> 8);
         if (srcRow < 0) srcRow = 0;
         else if (srcRow > WATER_ROWS - 1) srcRow = WATER_ROWS - 1;
-        const wobble = idiv(sine[(row + (n >> 4) + phase) & 0x1ff]!, WATER_ROWS - row + 1) >> 8;
+        const wobble = idiv(sine[(row + (n >> 4) + phase) & 0x1ff]!, WATER_ROWS - r + 1) >> 8;
         this.sheet.drawStrip(
           ctx,
           WATER_SPRITE,
@@ -241,6 +294,22 @@ export class LevelRenderer {
           srcRow,
         );
       }
+    }
+    // The fade: clear by the far shore, the ground colour at `WATER_DARKEST` from the last
+    // band (by the frame's bottom) down, in bands like the sky's.
+    const span = Math.max(WATER_FADE_BANDS, Math.round(frameBottom - baseY));
+    const rgb = `${(ground >> 16) & 0xff}, ${(ground >> 8) & 0xff}, ${ground & 0xff}`;
+    const left = Math.min(0, startX);
+    for (let i = 0; i < WATER_FADE_BANDS; i++) {
+      const y0 = baseY + Math.round((span * i) / WATER_FADE_BANDS);
+      const last = i === WATER_FADE_BANDS - 1;
+      const y1 = last ? view.height : baseY + Math.round((span * (i + 1)) / WATER_FADE_BANDS);
+      if (y0 >= view.height) break;
+      if (y1 <= y0) continue;
+      const alpha = (WATER_DARKEST * i) / (WATER_FADE_BANDS - 1);
+      if (alpha <= 0) continue;
+      ctx.fillStyle = `rgba(${rgb}, ${alpha.toFixed(3)})`;
+      ctx.fillRect(left, y0, view.width - left + 1, y1 - y0);
     }
   }
 
@@ -285,17 +354,118 @@ export class LevelRenderer {
   /** Draw one (cached) frame of the level art. */
   drawLevelArt(ctx: CanvasRenderingContext2D, cam: CameraPos, view: ViewSize, frame: number): void {
     const obj = this.scene.getObject(this.artObjectId);
-    if (!obj) return;
+    const canvas = this.artFrame(frame);
+    if (!obj || !canvas) return;
+    const x = -((cam.x * 32) >> 10) - obj.pivotX;
+    const y = -((cam.y * 32) >> 10) - obj.pivotY;
+    if (ctx.imageSmoothingEnabled) ctx.imageSmoothingEnabled = false;
+    if (x < view.width && y < view.height && x + obj.width > 0 && y + obj.height > 0) {
+      ctx.drawImage(canvas, x, y);
+    }
+    this.drawUnder(ctx, cam, view, frame);
+  }
+
+  /** The cached picture of an art frame (made on first use). */
+  private artFrame(frame: number): HTMLCanvasElement | null {
+    if (!this.scene.getObject(this.artObjectId)) return null;
     let canvas = this.artCache.get(frame);
     if (!canvas) {
       canvas = this.scene.renderObjectToCanvas(this.artObjectId, frame);
       this.artCache.set(frame, canvas);
     }
-    const x = -((cam.x * 32) >> 10) - obj.pivotX;
-    const y = -((cam.y * 32) >> 10) - obj.pivotY;
-    if (x >= view.width || y >= view.height || x + obj.width <= 0 || y + obj.height <= 0) return;
-    if (ctx.imageSmoothingEnabled) ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(canvas, x, y);
+    return canvas;
+  }
+
+  /**
+   * What lies below the level, when the view reaches there: the art's columns that come down
+   * to the level's bottom go on down in their own colour (to the art's edge, then stretched to
+   * the bottom of the view), and from the level's bottom edge a shade deepens in bands over
+   * everything, the background in the gaps too.
+   */
+  private drawUnder(
+    ctx: CanvasRenderingContext2D,
+    cam: CameraPos,
+    view: ViewSize,
+    frame: number,
+  ): void {
+    const obj = this.scene.getObject(this.artObjectId);
+    if (!obj || this.levelHeightTiles <= 0) return;
+    const floor = this.levelHeightTiles * 32 - ((cam.y * 32) >> 10);
+    if (floor >= view.height + 1) return;
+    const left = -((cam.x * 32) >> 10) - obj.pivotX;
+    const top = -((cam.y * 32) >> 10) - obj.pivotY;
+    const under = this.underFor(frame);
+    if (under && left < view.width && left + obj.width > 0) {
+      if (top < view.height && top + obj.height > 0) ctx.drawImage(under.fill, left, top);
+      const from = Math.max(top + obj.height, -1);
+      if (from < view.height + 1) {
+        const width = under.row.width;
+        ctx.drawImage(under.row, 0, 0, width, 1, left, from, width, view.height + 1 - from);
+      }
+    }
+    for (let i = 0; i < UNDER_BANDS; i++) {
+      const y = floor + i * UNDER_BAND;
+      if (y >= view.height + 1) return;
+      const h = i === UNDER_BANDS - 1 ? view.height + 1 - y : UNDER_BAND;
+      if (y + h <= -1) continue;
+      ctx.fillStyle = `rgba(${UNDER_SHADE}, ${((UNDER_DARKEST * (i + 1)) / UNDER_BANDS).toFixed(3)})`;
+      ctx.fillRect(-1, y, view.width + 2, h);
+    }
+  }
+
+  /**
+   * The columns of an art frame carried down (made once per frame): a column whose lowest
+   * pixel lies within `UNDER_REACH` of the level's bottom edge or below it goes on with the
+   * colour a little above that pixel (the very last one is often an outline).
+   */
+  private underFor(frame: number): Under | null {
+    const cached = this.underCache.get(frame);
+    if (cached !== undefined) return cached;
+    const obj = this.scene.getObject(this.artObjectId);
+    const art = this.artFrame(frame);
+    const actx = art?.getContext('2d', { willReadFrequently: true });
+    let under: Under | null = null;
+    if (obj && art && actx && typeof document !== 'undefined') {
+      const w = art.width;
+      const h = art.height;
+      const reach = Math.max(0, this.levelHeightTiles * 32 + obj.pivotY - UNDER_REACH);
+      const src = new Uint32Array(actx.getImageData(0, 0, w, h).data.buffer);
+      const fill = document.createElement('canvas');
+      fill.width = w;
+      fill.height = h;
+      const row = document.createElement('canvas');
+      row.width = w;
+      row.height = 1;
+      const fctx = fill.getContext('2d');
+      const rctx = row.getContext('2d');
+      if (fctx && rctx) {
+        const fillData = fctx.createImageData(w, h);
+        const rowData = rctx.createImageData(w, 1);
+        const fillPx = new Uint32Array(fillData.data.buffer);
+        const rowPx = new Uint32Array(rowData.data.buffer);
+        // Alpha is the top byte of a little-endian pixel word (every browser here).
+        const opaque = (i: number): boolean => src[i]! >>> 24 !== 0;
+        for (let x = 0; x < w; x++) {
+          let low = -1;
+          for (let y = h - 1; y >= reach; y--) {
+            if (opaque(y * w + x)) {
+              low = y;
+              break;
+            }
+          }
+          if (low < 0) continue;
+          const above = Math.max(0, low - 2) * w + x;
+          const colour = src[opaque(above) ? above : low * w + x]!;
+          for (let y = low + 1; y < h; y++) fillPx[y * w + x] = colour;
+          rowPx[x] = colour;
+        }
+        fctx.putImageData(fillData, 0, 0);
+        rctx.putImageData(rowData, 0, 0);
+        under = { fill, row };
+      }
+    }
+    this.underCache.set(frame, under);
+    return under;
   }
 
   /**
@@ -324,6 +494,8 @@ export class LevelRenderer {
       undefined,
       PIVOT_ANCHOR,
     );
+    // Under it, the frame it is closer to (their bottoms hardly differ).
+    this.drawUnder(ctx, cam, view, t < TWEEN_ONE / 2 ? frameA : frameB);
   }
 
   /**

@@ -1,8 +1,9 @@
 # @parapet/classic
 
 The faithful port of Playman Extreme Running as a Vite app: the original's twelve levels,
-missions (warm-ups with the coach, Sprint with the rival ghost, Flag hunt, Score run,
-Challenges), unlock progression, the Prize ending, the Moves menu and the music, plus our
+missions (warm-ups with the coach, Sprint against the rival, Flag hunt, Score run,
+Challenges), unlock progression (a level opens once the one before is complete), the Prize
+ending, the Moves menu and the music, plus our
 own Free run and races against ghosts: your record, or anyone's run shared as a link or file.
 
 - `src/main.ts` boots the runtime (viewport, fonts, dictionaries, content, music) and the
@@ -19,8 +20,10 @@ own Free run and races against ghosts: your record, or anyone's run shared as a 
   character, the verified time) before the race.
 - `src/app/bosses.ts` is the bosses' data (`packages/content/bosses`): their records per level
   and mode, outfits, effects and worlds, which character number each version is (with its
-  effect, or plain) and what a player has won. On the level a boss is `ui/BossPresence.ts`; on
-  the character screen it runs through its world in `ui/CharacterStage.ts`.
+  effect, or plain) and what a player has won. On the level a boss is `ui/BossPresence.ts`
+  (where it waits: `ui/bossSpots.ts`) and its glimpses `ui/BossGlimpse.ts`; on
+  the character screen it runs through its world in `ui/CharacterStage.ts` (a silhouette over
+  a stand-in for the world until it is won).
 - `src/i18n/locales.ts` finds the languages (`packages/content/i18n/<code>/`) at build time.
 - `src/assets/content.ts` loads the generated content through the `@playman` alias.
 
@@ -54,7 +57,8 @@ no server: the build is a static site. The one exception is opt-in for a deploym
 visit and a few moments of play with a 1×1 picture from goatcounter.com, which the build adds
 to the CSP; no cookies, nothing personal, nothing under Do Not Track. `index.html` carries the
 page's description, link previews (`public/og-image.png`), structured data and favicons; the
-site's address in them comes from `VITE_SITE_URL`. Challenge links open `r/#<code>`, the same
+site's address in them comes from `VITE_SITE_URL`. Challenge links open `r/?<code>`, the same
 page one folder down with a race's preview (`public/og-race.png`), which the build writes from
-`index.html`. Ghost races (`src/app/ghosts.ts`) take their replays from challenge links
-(`r/#<code>`, and the older `#r=<code>`), replay files, drops and pastes, or the local records.
+`index.html`; `src/app/racePage.ts` gives each race page its own title, description and
+canonical address for search engines. Ghost races (`src/app/ghosts.ts`) take their replays from
+challenge links (`r/?<code>`), replay files, drops and pastes, or the local records.

@@ -8,7 +8,8 @@
  * GoatCounter keeps no cookies and nothing that tells one person from another; the count is a
  * 1×1 picture asked for by this code, no script from elsewhere. Nothing is counted on the dev
  * server, in a local copy, or when the browser asks not to be tracked (Do Not Track, Global
- * Privacy Control). A replay link's code (`#r=…`) never leaves: only the page's path does.
+ * Privacy Control). A replay link's code (`r/?…`) never goes to the counter: only the page's
+ * path and its own title do (the visit is counted before a race page takes the race's title).
  */
 
 /** Where counts go: `https://<code>.goatcounter.com` for a code, else an `https://` address. */

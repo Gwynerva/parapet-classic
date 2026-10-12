@@ -1,11 +1,11 @@
 /**
- * The "echo" skin of ghosts and rivals: the character atlas recoloured into a glowing
- * hologram. Two variants:
+ * The "echo" skin of ghosts: the character atlas recoloured into a glowing hologram. Two
+ * variants:
  *
  * - textured: every pixel's brightness picks one of three tones of a neon ramp (shadow, body,
  *   highlight), so faces, hair and clothes stay readable in one colour;
- * - flat: every pixel takes the body tone, which leaves a featureless silhouette (the rivals
- *   of the original's story, who are not anyone the player knows).
+ * - flat: every pixel takes the body tone, which leaves a featureless silhouette (a boss
+ *   still in the workshop; the original drew its story rivals so).
  *
  * In both, the outer edge of every sprite becomes a bright one-pixel rim. The colour of a
  * player's echo comes from their name, so the same name glows the same everywhere.
@@ -82,7 +82,7 @@ export const ECHO_PALETTE: readonly EchoColor[] = [
   makeEchoColor('pink', '#ff4f8f'),
 ];
 
-/** Grey of the original's rivals; never handed out to a name. */
+/** The grey the original drew its rivals in (the debug view still has it); never handed out. */
 export const ECHO_GREY: EchoColor = {
   id: 'grey',
   css: '#a7b0ba',

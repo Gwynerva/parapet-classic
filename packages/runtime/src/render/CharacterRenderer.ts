@@ -88,8 +88,10 @@ export interface RunnerVisualOptions {
   character?: number;
   /** Which of the character's outfits it wears (`SkinLibrary`). */
   outfit?: number;
-  /** Drawn by `EchoRenderer` (rivals and ghosts), not by `drawAll`. */
+  /** Drawn by `EchoRenderer` (ghosts), not by `drawAll`. */
   echo?: boolean;
+  /** Opacity below 1 draws it see-through (a rival in the player's own skin). */
+  faded?: number;
   /** Seed of the blink PRNG. */
   seed?: number;
 }
@@ -101,6 +103,8 @@ export interface RunnerVisual {
   character: number;
   outfit: number;
   echo: boolean;
+  /** Opacity, 1 when solid. */
+  faded: number;
   /** Draw positions (units) captured at the previous and the current step. */
   prevX: number;
   prevY: number;
@@ -177,6 +181,7 @@ export class CharacterRenderer {
       character: options.character ?? 0,
       outfit: options.outfit ?? 0,
       echo: options.echo ?? false,
+      faded: Math.max(0, Math.min(1, options.faded ?? 1)),
       prevX: p.x,
       prevY: p.y,
       x: p.x,
@@ -356,8 +361,50 @@ export class CharacterRenderer {
   ): void {
     for (const v of this.visuals.values()) {
       if (v.runner === last || v.echo) continue;
-      this.draw(ctx, v.runner, cam, alpha, clock);
+      if (v.faded < 1) this.drawFaded(ctx, v, cam, alpha, clock);
+      else this.draw(ctx, v.runner, cam, alpha, clock);
     }
     if (last && !this.visuals.get(last)?.echo) this.draw(ctx, last, cam, alpha, clock);
+  }
+
+  /**
+   * A see-through runner: drawn whole into a layer the size of the view, then laid over at
+   * its opacity, so its limbs do not show through one another.
+   */
+  private drawFaded(
+    ctx: CanvasRenderingContext2D,
+    v: RunnerVisual,
+    cam: CameraPos,
+    alpha: number,
+    clock: number,
+  ): void {
+    const layer = this.fadeLayer(ctx);
+    const lctx = layer?.getContext('2d');
+    ctx.save();
+    ctx.globalAlpha *= v.faded;
+    if (layer && lctx) {
+      lctx.clearRect(0, 0, layer.width, layer.height);
+      this.draw(lctx, v.runner, cam, alpha, clock);
+      ctx.drawImage(layer, 0, 0);
+    } else {
+      this.draw(ctx, v.runner, cam, alpha, clock);
+    }
+    ctx.restore();
+  }
+
+  private layer: HTMLCanvasElement | null = null;
+
+  /** The layer for see-through runners, in the logical pixels `ctx` draws in. */
+  private fadeLayer(ctx: CanvasRenderingContext2D): HTMLCanvasElement | null {
+    if (typeof document === 'undefined' || !ctx.canvas || !ctx.getTransform) return null;
+    const scale = ctx.getTransform().a || 1;
+    const w = Math.ceil(ctx.canvas.width / scale) + 1;
+    const h = Math.ceil(ctx.canvas.height / scale) + 1;
+    if (!this.layer) this.layer = document.createElement('canvas');
+    if (this.layer.width !== w) this.layer.width = w;
+    if (this.layer.height !== h) this.layer.height = h;
+    const lctx = this.layer.getContext('2d');
+    if (lctx) lctx.imageSmoothingEnabled = false;
+    return this.layer;
   }
 }

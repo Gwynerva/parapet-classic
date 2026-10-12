@@ -3,15 +3,17 @@
 Every level has a boss, a character of its own with a name, a look (or several), an effect and
 a little world. On its level the boss holds a record in Flag hunt and in Sprint (without the
 original's rival): "Boss: Flag hunt" and "Boss: Sprint" in the mission list, open once every
-mission of the level is complete. A boss does not race in sight, so its routes stay secret: it
-waits by the start in a haze of its own particles, vanishes in a burst of them when the run
-starts and appears again when its time is up, back at the start in a flag hunt and at the goal
-in a sprint.
+mission of the level is complete. A boss does not race in sight, so its routes stay secret but
+for two seconds around each flag (`glimpses.json`), which loop as a hologram by the player's
+next flag: it waits by the start in a haze of its own particles, vanishes in a burst of them
+when the run starts and appears again when its time is up, where the player's run will end: at
+the goal in a sprint, by the flag the player is to take next in a flag hunt (moving on with
+every flag taken, floating where a flag hangs in the air, never where its hologram goes).
 
-Beating either record opens the boss as a character for normal play; beating the Flag hunt one
-also gives it its effect, which the player finds out when it happens (the briefings only hint
-at it). The two versions are two character numbers (10 + 2 × level with the effect, the next
-one plain), so runs and replays keep the version they were made with. The contests are not
+Beating either record opens the boss as a character for normal play; beating both, in any
+order, also gives it its effect, which the player finds out when it happens (the briefings only
+hint at it). The two versions are two character numbers (10 + 2 × level with the effect, the
+next one plain), so runs and replays keep the version they were made with. The contests are not
 missions of the original: they do not count towards unlocking levels or the Prize.
 
 | Level | Boss         | Folder          |
@@ -47,16 +49,49 @@ The runs come from a tool-assisted search (`packages/tools/src/tas`) under human
   it unchanged, or moved along) loses at most 300 ms. Where no run without one was found, a
   record may have one or two such moments; `npm run tas -- report` lists them.
 
-The inputs of the runs stay in `packages/tools/tas-out/`, which git ignores: they are published
-nowhere. `reference/notes/09-tas.md` tells how the records were found.
+Nobody keeps every press within a step of its place for a whole run, so a boss races slower than
+its found run: the game stretches the time and every split by an allowance (`CONTEST_ALLOWANCE`
+in `packages/classic/src/app/bosses.ts`), 6.5 % for every boss (the later records are hard
+enough as they are). Each
+stretch between flags gives in proportion to its length, and the screens show only the stretched
+times. `contests.json` keeps the found ones.
+
+The inputs of the runs stay in `packages/tools/tas-out/`, which git ignores: of the runs, only
+two seconds around each flag are published, as poses (below). `reference/notes/09-tas.md` tells
+how the records were found.
 
 ```bash
 npm run tas -- run              # search all 24 records (about 15 min on 12 cores)
 npm run tas -- run --resume     # continue from the stored runs, e.g. with another --seed
-npm run tas -- verify           # re-simulate the stored runs, compare with contests.json
-npm run tas -- publish          # write contests.json
+npm run tas -- verify           # re-simulate the stored runs, compare with both files
+npm run tas -- publish          # write contests.json and glimpses.json
 npm run tas -- report           # the times next to the original's records
 ```
+
+## `glimpses.json` — the route hints
+
+What a boss did around each flag: its runner as the game draws it, step by step, from a second
+before the flag is taken to a second after (33 steps on each side, 67 poses). Only these pieces
+of the routes are published, and as poses, never as input: they show how a flag is taken, not
+how to get there or which presses do it. `npm run tas -- publish` writes them with
+`contests.json`, from the stored runs played again in a world that never finishes: the run of a
+flag hunt ends on its last flag, and the second after it is the runner going on by itself.
+
+Per level and mode: one clip per flag or checkpoint, by its index (not in the order taken:
+Central Park's flag hunt takes the fifth flag before the fourth), and the SHA-256 of the run's
+replay, the same as in `contests.json`; with the file's format, the simulation version, the
+level data and the window (`beforeSteps`, `afterSteps`). `npm run tas -- verify` records the
+clips again and compares them; `packages/runtime/test/bosses.test.ts` fails when the versions, a
+level or a run's hash no longer match, so new records mean publishing both files again.
+
+A clip is base64url bytes (`packages/runtime/src/content/glimpses.ts`): per pose a header byte
+(facing, hands or feet as the origin, a cut the drawing must not interpolate across, how the
+keyframes changed, how the tween is found), then the position as the change of the step's move,
+the keyframes as changes and the tween, exact in 256ths, as a byte only when the clip's own pace
+does not predict it within one. About 3.9 bytes a pose: the 120 clips take 41.5 kB of the
+file's 48.6 kB.
+
+A glimpse moves at the found run's own pace; the game races the slower, stretched times.
 
 ## A boss's folder
 

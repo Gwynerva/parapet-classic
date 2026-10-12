@@ -7,7 +7,6 @@
  * race starts from the card; this screen then gives way to it (`closesOnReplay`). Replays
  * dropped or pasted onto the window while it is up land here too (`takeReplayText`).
  */
-import { rankingSort } from '@parapet/sim';
 import { IDLE_CLIP_OFFSET } from '@parapet/runtime/anim/Animator.ts';
 import type { Screen, UiGesture, UiKey, UiPointer, UiWheel } from '@parapet/runtime/app/Screen.ts';
 import { drawPose } from '@parapet/runtime/render/CharacterRenderer.ts';
@@ -15,11 +14,12 @@ import { Menu, type MenuItem } from '@parapet/runtime/ui/Menu.ts';
 import { heading, panel } from '@parapet/runtime/ui/draw.ts';
 import { rowHeight, type Rect } from '@parapet/runtime/ui/layout.ts';
 import { TextInputOverlay } from '@parapet/runtime/ui/TextInputOverlay.ts';
-import { formatTime, Theme, type GameContext } from '../Context.ts';
+import { Theme, type GameContext } from '../Context.ts';
 import { bossOfCharacter } from '../bosses.ts';
 import {
   checkReplayText,
   pickReplayFile,
+  replayResultText,
   runnerName,
   startRace,
   type ReplayCheck,
@@ -304,11 +304,7 @@ export class OpenReplayScreen implements Screen {
     const w = k.w - 2 - FIGURE_W - 6;
     const level = i18n.t(`level.names.${replay.levelId}`);
     const mode = i18n.t(`mode.${replay.mode}`);
-    const byScore = rankingSort(replay.mode, replay.levelId) === 'score';
-    let result = i18n.t('replayOpen.unfinished');
-    if (byScore) result = i18n.t('replayOpen.score', { value: String(outcome.score) });
-    else if (outcome.finished)
-      result = i18n.t('replayOpen.time', { value: formatTime(outcome.time) });
+    const result = replayResultText(this.ctx, replay, outcome);
     const lines: [string, string][] = [
       [i18n.t('replayOpen.who', { name: runnerName(this.ctx, replay) }), Theme.accent],
       [`${level} · ${mode}`, Theme.text],

@@ -44,7 +44,7 @@
   "results.attempts": "{n, plural, one {# attempt} other {# attempts}}",
   "results.points": "{n, plural, one {# point} other {# points}}",
   "results.notEnoughScore": "Not enough points. Try again.",
-  "results.enterName": "Enter your name.",
+  "results.enterName": "Name in the record (tap to change):",
   "results.record": "Record:",
   "results.retry": "Try again",
   "results.nextMission": "Next",
@@ -82,5 +82,9 @@
   "ghost.problem.title": "Cannot open the replay",
   "ghost.problem.invalid": "This link or file does not contain a replay, or it is damaged.",
   "ghost.problem.version": "This run was recorded in another version of the game and would not replay the same here.",
-  "ghost.problem.content": "This run was recorded on different level data and would not replay the same here."
+  "ghost.problem.content": "This run was recorded on different level data and would not replay the same here.",
+  "ghost.link.tooLong.title": "Too long for a link",
+  "ghost.link.tooLong": "This run is too long to fit in a link. Save it as a replay file and send the file instead.",
+  "race.page.title": "{name} · {level}, {mode} · {result} · Parapet Classic",
+  "race.page.description": "{name} challenges you on {level} ({mode}) in Parapet Classic, rooftop parkour in the browser. {result}. Race the ghost: free, no install."
 }

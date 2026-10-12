@@ -13,8 +13,20 @@
  * - hard leash of ±¼ width around (player − half width) and ±¼ height around
  *   (player − half height − height/20)
  * - clamp x to [0, levelW − viewW], y ≤ levelH − viewH; the camera may go above the map.
+ *
+ * The vertical rules work on a frame: the whole view (as on the original screen, which the
+ * traces check), or its upper part (`setFrame`). The game frames the runner above the place of
+ * the touch buttons: the level's bottom edge then stops at the top of the buttons instead of
+ * at the bottom of the screen, so the runner never runs among them, and what shows below the
+ * level (`LevelRenderer` draws it) is only the strip the buttons stand on. Everything else,
+ * and the horizontal rules, use the whole view.
  */
 import type { Level } from '@parapet/sim';
+
+/** The lowest the view's top may go (units): the level's bottom edge at the frame's bottom. */
+export function cameraMaxY(levelH: number, frameH: number): number {
+  return levelH - frameH;
+}
 
 export interface CameraTarget {
   /** Feet position in units (`k`, `l`). */
@@ -71,6 +83,12 @@ export class Camera {
   /** Viewport size in units. */
   viewW = 240 << 5;
   viewH = 320 << 5;
+  /** Height of the frame the runner is kept in, from the top of the view (units). */
+  frameH = 320 << 5;
+  /** The frame's height asked for in px (null: the whole view). */
+  private framePx: number | null = null;
+  /** The point `aimAtPoint` holds at screen fractions, re-aimed at after a resize (`refocus`). */
+  private focus: { x: number; y: number; fx: number; fy: number } | null = null;
 
   constructor(viewWidthPx = 240, viewHeightPx = 320) {
     this.setViewport(viewWidthPx, viewHeightPx);
@@ -79,12 +97,23 @@ export class Camera {
   setViewport(widthPx: number, heightPx: number): void {
     this.viewW = widthPx << 5;
     this.viewH = heightPx << 5;
+    this.frameH = this.framePx === null ? this.viewH : Math.min(this.framePx, heightPx) << 5;
+  }
+
+  /**
+   * Keep the runner in the top `heightPx` of the view (above the touch buttons), or in the
+   * whole view (null, the original).
+   */
+  setFrame(heightPx: number | null): void {
+    this.framePx = heightPx === null ? null : Math.max(1, Math.round(heightPx));
+    this.setViewport(this.viewW >> 5, this.viewH >> 5);
   }
 
   /** `k(int,int)`: snap to the player (`bk`, line 10654) and clear the spring. */
   reset(player: CameraTarget, level: Level): void {
+    this.focus = null;
     this.x = this.targetX = player.x - (this.viewW >> 1);
-    this.y = this.targetY = player.y - (this.viewH >> 1);
+    this.y = this.targetY = player.y - (this.frameH >> 1);
     this.velX = 0;
     this.velY = 0;
     this.clampToLevel(level);
@@ -96,6 +125,7 @@ export class Camera {
 
   /** Once per simulation step, after the player moved: `void_a(e)` then `b(30720, true)`. */
   update(player: CameraTarget, level: Level): void {
+    this.focus = null;
     this.prevX = this.x;
     this.prevY = this.y;
     this.aim(player, level);
@@ -110,12 +140,28 @@ export class Camera {
    * coach view `(coachX - 512, coachY - viewH + 1536)` or a flag centred on screen.
    */
   aimAt(x: number, y: number, level: Level): void {
+    this.focus = null;
     this.setTarget(x, y, level);
   }
 
   /** Aim so that the world point `(x, y)` sits at the screen fractions `(fx, fy)`. */
   aimAtPoint(x: number, y: number, fx: number, fy: number, level: Level): void {
+    this.focus = { x, y, fx, fy };
     this.setTarget(x - Math.round(this.viewW * fx), y - Math.round(this.viewH * fy), level);
+  }
+
+  /**
+   * After a resize: aim again at the point of the last `aimAtPoint` with the new view size,
+   * and go straight there (the screen changed under the view anyway). Nothing without one.
+   */
+  refocus(level: Level): void {
+    const f = this.focus;
+    if (!f) return;
+    this.aimAtPoint(f.x, f.y, f.fx, f.fy, level);
+    this.moveTo(this.targetX, this.targetY, level);
+    this.prevX = this.x;
+    this.prevY = this.y;
+    this.focus = f;
   }
 
   /**
@@ -132,6 +178,7 @@ export class Camera {
 
   /** Place the corner directly (camera tours); the frame interpolation still eases into it. */
   moveTo(x: number, y: number, level: Level): void {
+    this.focus = null;
     this.prevX = this.x;
     this.prevY = this.y;
     this.x = x;
@@ -156,11 +203,12 @@ export class Camera {
   /** `void_a(e)`: set the target from the player's position and velocity. */
   private aim(player: CameraTarget, level: Level): void {
     const halfW = this.viewW >> 1;
-    const halfH = this.viewH >> 1;
+    const frameH = this.frameH;
+    const halfH = frameH >> 1;
     // 5888 + ((p * 10240 / (H << 10) - 5120) * 256 >> 10) on the original screen.
-    const baseY = Math.trunc((this.viewH * 23) / 40);
+    const baseY = Math.trunc((frameH * 23) / 40);
     const levelH = level.height << 10;
-    const n = baseY + (((Math.trunc((player.renderY * this.viewH) / levelH) - halfH) * 256) >> 10);
+    const n = baseY + (((Math.trunc((player.renderY * frameH) / levelH) - halfH) * 256) >> 10);
     let lookX = Math.trunc((player.vx * 3840) / 4143);
     let lookY = Math.trunc((player.vy * 5120) / 4143);
     lookX = clamp(lookX, -halfW, halfW);
@@ -183,7 +231,7 @@ export class Camera {
   /** `l(int,int)`: clamp and store the target. */
   private setTarget(x: number, y: number, level: Level): void {
     const maxX = (level.width << 10) - this.viewW;
-    const maxY = (level.height << 10) - this.viewH;
+    const maxY = cameraMaxY(level.height << 10, this.frameH);
     this.targetX = clamp(x, 0, maxX);
     this.targetY = y > maxY ? maxY : y;
   }
@@ -205,17 +253,17 @@ export class Camera {
   /** `b(int,boolean)` with `bl = true`: the hard leash around the player. */
   private leash(player: CameraTarget): void {
     const halfW = this.viewW >> 1;
-    const halfH = this.viewH >> 1;
+    const halfH = this.frameH >> 1;
     const leashX = this.viewW >> 2;
-    const leashY = this.viewH >> 2;
-    const dropY = Math.trunc(this.viewH / 20);
+    const leashY = this.frameH >> 2;
+    const dropY = Math.trunc(this.frameH / 20);
     this.x = clamp(this.x, player.x - halfW - leashX, player.x - halfW + leashX);
     this.y = clamp(this.y, player.y - halfH - dropY - leashY, player.y - halfH - dropY + leashY);
   }
 
   private clampToLevel(level: Level): void {
     const maxX = (level.width << 10) - this.viewW;
-    const maxY = (level.height << 10) - this.viewH;
+    const maxY = cameraMaxY(level.height << 10, this.frameH);
     this.x = clamp(this.x, 0, maxX);
     if (this.y > maxY) this.y = maxY;
   }

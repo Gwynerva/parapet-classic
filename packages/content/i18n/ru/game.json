@@ -44,7 +44,7 @@
   "results.attempts": "{n, plural, one {# попытка} few {# попытки} many {# попыток} other {# попытки}}",
   "results.points": "{n, plural, one {# очко} few {# очка} many {# очков} other {# очка}}",
   "results.notEnoughScore": "У тебя недостаточно очков. Попробуй еще.",
-  "results.enterName": "Введи имя.",
+  "results.enterName": "Имя в рекорде (нажми, чтобы сменить):",
   "results.record": "Рекорд:",
   "results.retry": "Еще раз",
   "results.nextMission": "Далее",
@@ -82,5 +82,9 @@
   "ghost.problem.title": "Не удалось открыть реплей",
   "ghost.problem.invalid": "В этой ссылке или файле нет реплея, или он поврежден.",
   "ghost.problem.version": "Этот забег записан в другой версии игры и здесь повторился бы иначе.",
-  "ghost.problem.content": "Этот забег записан на других данных уровня и здесь повторился бы иначе."
+  "ghost.problem.content": "Этот забег записан на других данных уровня и здесь повторился бы иначе.",
+  "ghost.link.tooLong.title": "Слишком длинно для ссылки",
+  "ghost.link.tooLong": "Этот забег не помещается в ссылку. Сохрани его файлом реплея и отправь файл.",
+  "race.page.title": "{name} · {level}, {mode} · {result} · Parapet Classic",
+  "race.page.description": "{name} бросает тебе вызов на уровне {level} ({mode}) в Parapet Classic, паркуре по крышам в браузере. {result}. Обгони призрака: бесплатно, без установки."
 }

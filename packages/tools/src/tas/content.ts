@@ -12,6 +12,7 @@ import {
   type PhysicsTables,
   type RunContent,
 } from '@parapet/sim';
+import { buildClipTable } from '@parapet/runtime/anim/Animator.ts';
 
 export const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..');
 export const GENERATED_DIR = join(REPO_ROOT, 'packages', 'content', 'playman', 'extracted');
@@ -56,4 +57,12 @@ export function levelContent(levelId: number): RunContent {
 
 export function levelHash(levelId: number): ContentHash {
   return runContentHash(levelContent(levelId));
+}
+
+let clipTable: Int16Array | null = null;
+
+/** The animation clip table (`short_h`) the renderer plays the moves with, for the glimpses. */
+export function loadClipTable(): Int16Array {
+  clipTable ??= buildClipTable(readJson<{ clips: Record<string, number[]> }>('anims.json').clips);
+  return clipTable;
 }

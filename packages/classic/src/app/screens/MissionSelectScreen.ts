@@ -118,7 +118,7 @@ export class MissionSelectScreen implements Screen {
       const record = contestRecord(this.levelId, kind);
       if (!record || !boss) continue;
       const beaten = isContestBeaten(this.contests, this.levelId, kind);
-      // Flag hunt gives a boss the player already has something more (a surprise).
+      // The second record gives a boss the player already has something more (a surprise).
       const more = !beaten && bossCharacterFor(this.levelId, this.contests) !== null;
       const desc = i18n.t(`boss.${boss.id}.desc`);
       this.rows.push({

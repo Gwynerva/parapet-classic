@@ -4,7 +4,8 @@
  * (`bosses/<boss>/stage.json`) scrolling past at their own speeds, a strip of ground, a tint of
  * light and ambient particles; on the character its effects (particles, afterimages, cloth)
  * as in a run. A boss with several outfits changes into the next every few seconds. A character
- * not open yet runs as a silhouette, without effects, in its world all the same.
+ * not open yet runs as a silhouette, without effects, in one outfit, over a plain stand-in for
+ * its world (a dark checker and a bare strip of ground): the world is part of the prize.
  */
 import type { SceneRenderer, SpriteSwap } from '@parapet/runtime/render/SceneRenderer.ts';
 import { drawPose, type CharacterPose } from '@parapet/runtime/render/CharacterRenderer.ts';
@@ -30,6 +31,13 @@ const OUTFIT_MS = 4200;
 const UNITS = 32;
 const GROUND_COLOR = '#3a3f4b';
 const GROUND_EDGE = '#5b6270';
+/** The stand-in for a world not open yet: the checker of the looks page, a little darker. */
+const CHECKER_DARK = '#232830';
+const CHECKER_LIGHT = '#282e37';
+const CHECKER_PX = 4;
+/** Marks on the bare ground, so a silhouette is seen to run. */
+const MARK_EVERY = 24;
+const MARK_WIDTH = 6;
 
 export type StageMode = 'open' | 'locked' | 'workshop';
 
@@ -69,7 +77,7 @@ export class CharacterStage {
     if (boss) level = boss.stage?.level ?? boss.levelId;
     else if (character > 1) level = rivalLevels(this.ctx.content, character)[0] ?? 0;
     let stage: StageRenderer | null = null;
-    if (boss?.stage) {
+    if (boss?.stage && mode === 'open') {
       const accent = boss.data.color;
       stage = this.stages.get(boss.id) ?? new StageRenderer(boss.stage, accent);
       this.stages.set(boss.id, stage);
@@ -81,7 +89,8 @@ export class CharacterStage {
 
   private outfits(): number {
     const s = this.shown;
-    return s ? Math.max(1, this.ctx.render.skins.outfitCount(s.character)) : 1;
+    if (!s || s.mode !== 'open') return 1;
+    return Math.max(1, this.ctx.render.skins.outfitCount(s.character));
   }
 
   private attach(): void {
@@ -106,8 +115,7 @@ export class CharacterStage {
   }
 
   private pose(): CharacterPose {
-    const still = this.shown?.mode !== 'open' || this.reduced;
-    if (still) {
+    if (this.reduced) {
       const demo = this.ctx.content.anims.demos[RUN_DEMO];
       const idle = this.ctx.render.clips[(demo?.clipOffset ?? 0) + 1] ?? 0;
       return { x: this.x, y: 0, a: idle, b: idle, t: 0, flipX: false, anchored: false };
@@ -182,16 +190,21 @@ export class CharacterStage {
     c.translate(d.x, d.y);
     c.scale(zoom, zoom);
     c.imageSmoothingEnabled = false;
-    // The place's own sky, else its level's.
-    if (s.stage?.hasSky) s.stage.drawSky(c, 0, view.width, feetY, this.clock);
-    else render.level.drawBackground(c, { x: Math.round(this.x), y: 0 }, view, this.clock, s.theme);
-    if (s.stage) {
-      s.stage.draw(c, 0, view.width, feetY, scroll, false, 0, this.clock);
+    if (s.mode !== 'open') {
+      this.drawStandIn(c, view, feetY, scroll);
     } else {
-      c.fillStyle = GROUND_COLOR;
-      c.fillRect(0, feetY, view.width, view.height - feetY);
-      c.fillStyle = GROUND_EDGE;
-      c.fillRect(0, feetY, view.width, 1);
+      // The place's own sky, else its level's.
+      if (s.stage?.hasSky) s.stage.drawSky(c, 0, view.width, feetY, this.clock);
+      else
+        render.level.drawBackground(c, { x: Math.round(this.x), y: 0 }, view, this.clock, s.theme);
+      if (s.stage) {
+        s.stage.draw(c, 0, view.width, feetY, scroll, false, 0, this.clock);
+      } else {
+        c.fillStyle = GROUND_COLOR;
+        c.fillRect(0, feetY, view.width, view.height - feetY);
+        c.fillStyle = GROUND_EDGE;
+        c.fillRect(0, feetY, view.width, 1);
+      }
     }
     const cam = { x: Math.round(this.x - feetX * UNITS), y: -feetY * UNITS };
     const now = performance.now();
@@ -212,6 +225,32 @@ export class CharacterStage {
         align: 'center',
         color: s.silhouette.light,
       });
+    }
+  }
+
+  /** A world not open yet: a still checker, and bare ground with marks going by. */
+  private drawStandIn(
+    c: CanvasRenderingContext2D,
+    view: { width: number; height: number },
+    feetY: number,
+    scroll: number,
+  ): void {
+    c.fillStyle = CHECKER_DARK;
+    c.fillRect(0, 0, view.width, feetY);
+    c.fillStyle = CHECKER_LIGHT;
+    for (let y = 0; y < feetY; y += CHECKER_PX) {
+      const odd = (y / CHECKER_PX) & 1;
+      for (let x = odd * CHECKER_PX; x < view.width; x += CHECKER_PX * 2) {
+        c.fillRect(x, y, CHECKER_PX, Math.min(CHECKER_PX, feetY - y));
+      }
+    }
+    c.fillStyle = GROUND_COLOR;
+    c.fillRect(0, feetY, view.width, view.height - feetY);
+    c.fillStyle = GROUND_EDGE;
+    c.fillRect(0, feetY, view.width, 1);
+    const shift = Math.floor(scroll) % MARK_EVERY;
+    for (let x = -shift; x < view.width; x += MARK_EVERY) {
+      c.fillRect(x, feetY + 3, MARK_WIDTH, 1);
     }
   }
 

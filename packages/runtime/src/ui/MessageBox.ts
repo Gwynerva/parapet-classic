@@ -44,13 +44,18 @@ export interface MessageBoxOptions {
   onRetry?: () => void;
   /** Where the speech-bubble tail points (logical px), or null for no tail. Read every frame. */
   tailTarget?: () => { x: number; y: number } | null;
+  /** How far the speaker's feet are below the tail's point (logical px; default 0). */
+  speakerHeight?: number;
   /** Called every frame with the real elapsed ms, also during the delay. */
   onFrame?: (dtMs: number) => void;
   /** Widest box, in logical px (default 400). */
   maxWidth?: number;
   /**
-   * 'bottom' (default, like the original) or 'auto': just above the speaker's head when the
-   * speaker (`tailTarget`) stands in the lower half, so the box does not cover them.
+   * 'bottom' (default, like the original) or 'auto': at the bottom too, but just above the
+   * speaker's head (`tailTarget`) when the box there would cover the speaker (down to the feet,
+   * `speakerHeight`), and moved sideways just
+   * enough to stand under the speaker (wide screens). A host keeps its speaker clear of the box
+   * by aiming at `bottomTop`.
    */
   placement?: 'bottom' | 'auto';
 }
@@ -66,6 +71,8 @@ export const BOX_TITLE_NEUTRAL = '#4a3835';
 
 const PADDING = 8;
 const TAIL_HEIGHT = 10;
+/** How far in from the panel's ends the tail may stand. */
+const TAIL_REACH = 20;
 
 export class MessageBox implements Screen {
   readonly translucent = true;
@@ -107,6 +114,11 @@ export class MessageBox implements Screen {
     return this.box;
   }
 
+  /** The top of the panel when it sits at the bottom, with room for the tail under a speaker. */
+  get bottomTop(): number {
+    return this.bottomOf(this.box.h) - TAIL_HEIGHT;
+  }
+
   /** Confirm: turn the page, or close on the last one. */
   next(): void {
     if (this.closed) return;
@@ -129,8 +141,11 @@ export class MessageBox implements Screen {
   update(dt: number): void {
     this.elapsed += dt;
     this.opts.onFrame?.(dt);
-    // The speaker may still move (the camera settles): keep the box above them.
-    if (this.opts.placement === 'auto') this.box.y = this.boxTop(this.box.h);
+    // The speaker may still move (the camera settles): keep the box by them.
+    if (this.opts.placement === 'auto') {
+      this.box.x = this.boxLeft(this.box.w);
+      this.box.y = this.boxTop(this.box.h);
+    }
   }
 
   onKey(key: UiKey): void {
@@ -192,22 +207,45 @@ export class MessageBox implements Screen {
     this.lines = this.shown[this.page]!;
     const titleH = this.page === 0 ? titleBar : 0;
     const h = titleH + Math.max(1, this.lines.length) * lineH + footerH + 2 * PADDING;
-    const x = safe.x + ((safe.w - w) >> 1);
-    this.box = { x, y: this.boxTop(h), w, h };
+    this.box = { x: this.boxLeft(w), y: this.boxTop(h), w, h };
     this.retryRect = null;
+  }
+
+  /** The top of a panel `h` high anchored to the bottom, above the tail and a margin. */
+  private bottomOf(h: number): number {
+    const safe = safeRect(this.host.viewport);
+    return Math.max(safe.y + 8, safe.y + safe.h - h - TAIL_HEIGHT - 12);
   }
 
   /**
    * Bottom-anchored, leaving room for the tail and a margin above the device edge; or, placed
-   * 'auto', just above the speaker when the speaker would be under the box.
+   * 'auto', just above the speaker when the box at the bottom would cover them.
    */
   private boxTop(h: number): number {
-    const safe = safeRect(this.host.viewport);
-    const bottom = Math.max(safe.y + 8, safe.y + safe.h - h - TAIL_HEIGHT - 12);
+    const bottom = this.bottomOf(h);
     if (this.opts.placement !== 'auto') return bottom;
     const speaker = this.opts.tailTarget?.();
-    if (!speaker || speaker.y <= safe.y + safe.h * 0.5) return bottom;
+    const feet = (speaker?.y ?? 0) + (this.opts.speakerHeight ?? 0);
+    if (!speaker || Math.max(feet, speaker.y + TAIL_HEIGHT) <= bottom) return bottom;
+    const safe = safeRect(this.host.viewport);
     return Math.max(safe.y + 8, speaker.y - h - TAIL_HEIGHT - 6);
+  }
+
+  /** Centred across the screen; placed 'auto', moved just enough to have the speaker over it. */
+  private boxLeft(w: number): number {
+    const safe = safeRect(this.host.viewport);
+    const centred = safe.x + ((safe.w - w) >> 1);
+    const speaker = this.opts.placement === 'auto' ? this.opts.tailTarget?.() : null;
+    if (!speaker) return centred;
+    const x = Math.min(Math.max(centred, speaker.x - w + TAIL_REACH), speaker.x - TAIL_REACH);
+    return Math.max(safe.x + 8, Math.min(safe.x + safe.w - w - 8, x));
+  }
+
+  /** The tail points at a head on screen and not under the panel; else there is none. */
+  tailShown(target: { x: number; y: number }): boolean {
+    const { width, height } = this.host.viewport;
+    if (target.x < 0 || target.x >= width || target.y < 0 || target.y >= height) return false;
+    return !contains(this.box, target.x, target.y);
   }
 
   render(ctx: CanvasRenderingContext2D): void {
@@ -260,7 +298,7 @@ export class MessageBox implements Screen {
     }
 
     const target = this.opts.tailTarget?.();
-    if (target) this.drawTail(ctx, target.x, target.y);
+    if (target && this.tailShown(target)) this.drawTail(ctx, target.x, target.y);
   }
 
   /** Speech-bubble tail (sprite 183 in the original): a small triangle towards the speaker. */

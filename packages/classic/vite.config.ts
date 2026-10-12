@@ -255,10 +255,12 @@ function pagePlugin(site: string, counter: string): Plugin {
 }
 
 /**
- * The page challenge links open (`r/#<code>`): the game itself one folder down (its files'
- * relative paths one level up), with its own link preview (a race, a call to beat the run). Link previews come from a page's HTML as served:
- * the replay sits in the fragment, which never reaches a server, so the preview is one for
- * every challenge. Out of search engines: the game's page is the one to find.
+ * The page challenge links open (`r/?<code>`): the game itself one folder down (its files'
+ * relative paths one level up), with its own link preview (a race, a call to beat the run).
+ * Link previews come from a page's HTML as served, the same for every race, so the preview is
+ * one for every challenge. Search engines that run the script see each race as a page of its
+ * own: the game sets the title, the description and the canonical address from the replay
+ * (`src/app/racePage.ts`), so this page has no canonical link of its own.
  */
 function racePage(html: string, site: string): string {
   const title = 'Race my ghost · Parapet Classic';
@@ -272,14 +274,13 @@ function racePage(html: string, site: string): string {
   };
   const steps: ((text: string) => string)[] = [
     (text) => text.replace(/<title>[^<]*<\/title>/, `<title>${title}</title>`),
-    (text) => text.replace(/(<link rel="canonical" href=")[^"]*(")/, `$1${site}r/$2`),
+    (text) => {
+      const canonical = /\s*<link rel="canonical" href="[^"]*" \/>/;
+      if (!canonical.test(text)) throw new Error('r/index.html: no canonical link in index.html');
+      return text.replace(canonical, '');
+    },
     // The page's own files (scripts, styles, icons, the manifest) are one folder up.
     (text) => text.replace(/((?:src|href)=")\.\//g, '$1../'),
-    (text) =>
-      text.replace(
-        '<meta charset="utf-8" />',
-        '<meta charset="utf-8" />\n    <meta name="robots" content="noindex" />',
-      ),
     meta('name', 'description', description),
     meta('property', 'og:title', ogTitle),
     meta('property', 'og:description', description),

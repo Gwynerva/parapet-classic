@@ -16,7 +16,6 @@ export interface HistoryWindow {
     readonly state: unknown;
     pushState(data: unknown, unused: string, url?: string | URL | null): void;
   };
-  location: { readonly hash: string };
   addEventListener(type: 'popstate', listener: (event: PopStateEvent) => void): void;
   removeEventListener(type: 'popstate', listener: (event: PopStateEvent) => void): void;
 }
@@ -34,11 +33,6 @@ function isGuard(state: unknown): boolean {
   );
 }
 
-/** A challenge link (`#<code>`, `#r=<code>`) is a navigation the game handles itself. */
-function isChallengeHash(hash: string): boolean {
-  return hash.startsWith('#r=') || /^#[A-Za-z0-9_-]{12,}$/.test(hash);
-}
-
 export class HistoryGuard {
   private readonly win: HistoryWindow;
   private readonly onBack: () => BackDecision;
@@ -47,7 +41,7 @@ export class HistoryGuard {
   private standAsideUntil = -Infinity;
   private disposed = false;
   private readonly onPopState = (): void => {
-    if (this.disposed || isChallengeHash(this.win.location.hash)) return;
+    if (this.disposed) return;
     if (this.now() < this.standAsideUntil) return;
     if (this.onBack() === 'leave') {
       this.standAsideUntil = this.now() + LEAVE_WINDOW_MS;

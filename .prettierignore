@@ -5,3 +5,4 @@ packages/content/playman/extracted
 packages/classic/dev
 packages/content/fonts/*.json
 packages/content/bosses/contests.json
+packages/content/bosses/glimpses.json

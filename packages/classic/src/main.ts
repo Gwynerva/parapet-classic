@@ -39,6 +39,7 @@ import {
   takeReplayFromLocation,
   watchSetup,
 } from './app/ghosts.ts';
+import { keepOutOfSearch } from './app/racePage.ts';
 import type { ContestKind } from '@parapet/runtime/storage/profile.ts';
 import { installWebFont } from '@parapet/runtime/ui/TextInputOverlay.ts';
 import { parseMidi, stripEndMarker, type MidiSong } from '@parapet/runtime/audio/MidiFile.ts';
@@ -76,7 +77,7 @@ async function main(): Promise<void> {
   const start = startLocale(options.locale);
   if (start.detected) options = saveOptions({ locale: start.locale });
   const playerInfo = loadPlayer();
-  // A boss chosen plain wears its effect once its Flag hunt record is beaten.
+  // A boss is played in the version the player has: with its effect once both records fall.
   playerInfo.character = upgradeCharacter(playerInfo.character, loadContestProgress());
   const viewport = new Viewport({ scaleMode: options.scaleMode, ...devViewport() });
   const i18n = createI18n(start.locale);
@@ -188,12 +189,17 @@ async function main(): Promise<void> {
     (window as unknown as { parapet: unknown }).parapet = { ctx, music, player };
   }
   screens.clear(new TitleScreen(ctx));
+  // Counted with the page's own title, before a race page takes the race's (names stay out).
   countVisit();
   installReplayInputs(ctx);
-  // A challenge link (`#r=<code>`) goes straight into the race, over the title screen.
+  // A challenge link (`r/?<code>`) goes straight into the race, over the title screen.
   const shared = takeReplayFromLocation();
-  if (shared) openReplayCode(ctx, shared);
-  else await startFromQuery(ctx);
+  if (shared) {
+    openReplayCode(ctx, shared);
+  } else {
+    keepOutOfSearch();
+    await startFromQuery(ctx);
+  }
 
   const loop = new GameLoop((dt) => {
     // Resizing clears the canvas: it happens here, right before the frame is drawn again.

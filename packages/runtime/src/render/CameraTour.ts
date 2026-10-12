@@ -4,6 +4,7 @@
  * repeats until the player starts. Each leg eases with a smoothstep and lasts about 2 ms per
  * pixel of distance plus 625 ms, in game time.
  */
+import { cameraMaxY } from './Camera.ts';
 
 export interface TourPoint {
   /** World position in units to centre on screen. */
@@ -18,6 +19,8 @@ export interface TourView {
   /** Level size in units, for clamping like the camera does. */
   levelW: number;
   levelH: number;
+  /** Height of the camera's frame (`Camera.frameH`, units; default the whole view). */
+  frameH?: number;
 }
 
 export const LEG_MS_PER_PX = 2;
@@ -36,7 +39,7 @@ export function smoothstep(t: number): number {
 
 export class CameraTour {
   private readonly points: readonly TourPoint[];
-  private readonly view: TourView;
+  private view: TourView;
   private leg = 0;
   private legMs = 1;
   private elapsed = 0;
@@ -62,6 +65,23 @@ export class CameraTour {
     this.nextLeg();
   }
 
+  /**
+   * The screen changed size: the tour keeps showing the same places, centred in the new view
+   * (the leg in progress keeps its timing).
+   */
+  resize(viewW: number, viewH: number, frameH = viewH): void {
+    const dx = (this.view.viewW - viewW) >> 1;
+    const dy = (Math.min(this.view.viewH, this.view.frameH ?? this.view.viewH) - frameH) >> 1;
+    this.view = { ...this.view, viewW, viewH, frameH };
+    this.x += dx;
+    this.y += dy;
+    this.fromX += dx;
+    this.fromY += dy;
+    const target = this.corner(this.points[this.leg] ?? { x: this.x, y: this.y });
+    this.toX = target.x;
+    this.toY = target.y;
+  }
+
   /** Advance by game-time ms and return the corner to show. */
   advance(dtMs: number): { x: number; y: number } {
     if (this.points.length === 0) return { x: this.x, y: this.y };
@@ -80,9 +100,10 @@ export class CameraTour {
 
   private corner(p: TourPoint): { x: number; y: number } {
     const { viewW, viewH, levelW, levelH } = this.view;
+    const frameH = Math.min(viewH, this.view.frameH ?? viewH);
     return {
       x: clamp(p.x - (viewW >> 1), 0, Math.max(0, levelW - viewW)),
-      y: Math.min(p.y - (viewH >> 1), levelH - viewH),
+      y: Math.min(p.y - (frameH >> 1), cameraMaxY(levelH, frameH)),
     };
   }
 

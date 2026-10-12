@@ -110,4 +110,67 @@ describe('MessageBox', () => {
     expect(r.x).toBe(60);
     expect(r.y + r.h).toBeLessThanOrEqual(240 - 20 - 12);
   });
+
+  it('lays itself out again for a new screen size', () => {
+    const h = host();
+    const box = new MessageBox(h, {
+      pages: ['a page'],
+      labels: { next: 'Next', ok: 'OK' },
+      onClose: () => undefined,
+    });
+    h.viewport.width = 240;
+    h.viewport.height = 320;
+    box.onResize();
+    const r = box.rect;
+    expect(r.x + r.w).toBeLessThanOrEqual(240);
+    expect(r.y + r.h).toBeLessThanOrEqual(320 - 12);
+    expect(r.y).toBeGreaterThan(160);
+    expect(box.bottomTop).toBeLessThan(r.y);
+  });
+
+  it('moves above a speaker it would cover, and points its tail only at a head in sight', () => {
+    let head = { x: 160, y: 40 };
+    const box = new MessageBox(host(), {
+      pages: ['hello'],
+      labels: { next: 'Next', ok: 'OK' },
+      onClose: () => undefined,
+      tailTarget: () => head,
+      placement: 'auto',
+    });
+    const bottom = box.rect.y;
+    expect(box.tailShown(head)).toBe(true);
+    // A head low on the screen: the panel goes above it.
+    head = { x: 160, y: 220 };
+    box.update(16);
+    expect(box.rect.y + box.rect.h).toBeLessThan(220);
+    expect(box.tailShown(head)).toBe(true);
+    head = { x: 160, y: 40 };
+    box.update(16);
+    expect(box.rect.y).toBe(bottom);
+    // A head clear of the panel but the feet under it: above all the same.
+    const tall = new MessageBox(host(), {
+      pages: ['hello'],
+      labels: { next: 'Next', ok: 'OK' },
+      onClose: () => undefined,
+      tailTarget: () => ({ x: 160, y: bottom - 20 }),
+      speakerHeight: 50,
+      placement: 'auto',
+    });
+    expect(tall.rect.y + tall.rect.h).toBeLessThan(bottom - 20);
+    // A speaker far to one side: the panel moves just enough to stand under them.
+    const narrow = new MessageBox(host(), {
+      pages: ['hi'],
+      labels: { next: 'Next', ok: 'OK' },
+      onClose: () => undefined,
+      tailTarget: () => ({ x: 30, y: 40 }),
+      placement: 'auto',
+      maxWidth: 160,
+    });
+    expect(narrow.rect.x).toBeLessThanOrEqual(30 - 12);
+    expect(narrow.rect.x).toBeGreaterThanOrEqual(8);
+    // Off screen, or under the panel: no tail.
+    expect(box.tailShown({ x: -5, y: 40 })).toBe(false);
+    expect(box.tailShown({ x: 160, y: 400 })).toBe(false);
+    expect(box.tailShown({ x: box.rect.x + 4, y: box.rect.y + 4 })).toBe(false);
+  });
 });

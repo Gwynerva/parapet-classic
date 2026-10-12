@@ -14,7 +14,6 @@
   "contest.verdict.draw": "Exactly the same time. It takes a faster one.",
   "contest.title.won": "Record beaten!",
   "contest.unlocked": "New character: {boss}!",
-  "contest.unlockedFx": "New character: {boss}, with the {fx} effect!",
   "contest.upgraded": "{boss} levels up: now with the {fx} effect!",
   "contest.unlockedLater": "Victory counted! This character is still in the workshop and opens for you as soon as it is ready.",
   "contest.chooseCharacter": "Choose a character",

@@ -21,7 +21,8 @@ export type UiSource = 'keyboard' | 'gamepad' | 'touch' | 'mouse' | 'system';
 export interface UiKey {
   /**
    * Abstract UI action derived from keyboard/gamepad/touch. `next`/`prev` are Tab and
-   * Shift+Tab; `fullscreen` (F) only ever arrives as a gesture.
+   * Shift+Tab; `restart` (R, the gamepad's Y, the touch button) starts a run over at once;
+   * `fullscreen` (F) only ever arrives as a gesture.
    */
   action:
     | 'up'
@@ -31,6 +32,7 @@ export interface UiKey {
     | 'confirm'
     | 'back'
     | 'pause'
+    | 'restart'
     | 'next'
     | 'prev'
     | 'fullscreen';

@@ -94,7 +94,11 @@ repository's variables, Settings → Secrets and variables → Actions → Varia
 
 The build also writes `sitemap.xml` and `robots.txt` for `VITE_SITE_URL` (a robots file counts
 only at a domain's root, on a domain of the site's own), and `r/index.html`: the game again,
-one folder down, with the link preview of a challenge (`public/og-race.png`, out of search
-engines). Challenge links open it (`r/#<code>`). Link previews are read from a page's HTML as
-served, and the replay rides in the fragment, which never reaches a server: one preview serves
-every challenge.
+one folder down, with the link preview of a challenge (`public/og-race.png`). Challenge links
+open it with the replay code as the query (`r/?<code>`; chats keep a query where some drop a
+fragment). Link previews are read from a page's HTML as served, so one preview serves every
+challenge; search engines that run the script see each race as a page of its own (title,
+description and canonical address from the replay, `src/app/racePage.ts`), and a race page
+without a race asks to stay out of the index. Links are offered up to 4000 characters (a
+server takes about 8 KB of address, a Telegram message 4096 characters); a longer run is sent
+as a file.

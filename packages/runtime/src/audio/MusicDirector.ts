@@ -35,7 +35,7 @@ export class MusicDirector {
   /** Rotation per theme (`ropt[5 + theme]`). */
   readonly rotation = new Array<number>(THEME_COUNT).fill(0);
   private wanted: { id: number; loop: boolean } | null = null;
-  private level = 70;
+  private level = 40;
 
   constructor(opts: MusicDirectorOptions) {
     this.player = opts.player;

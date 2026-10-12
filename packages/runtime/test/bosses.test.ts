@@ -1,8 +1,8 @@
 /**
- * The bosses' published data (`packages/content/bosses`): their records must belong to this
- * simulation and these levels (a change of either needs `npm run tas` again), every level has a
- * boss of its own whose outfits, effects and world are sound, and every text about them exists
- * in every language.
+ * The bosses' published data (`packages/content/bosses`): their records and the glimpses of
+ * their runs must belong to this simulation and these levels (a change of either needs
+ * `npm run tas` again), every level has a boss of its own whose outfits, effects and world are
+ * sound, and every text about them exists in every language.
  */
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -11,6 +11,14 @@ import { describe, expect, it } from 'vitest';
 import { LEVEL_COUNT, RULESET_ID, SIM_VERSION, contentHashes } from '@parapet/sim';
 import type { AtlasData, AtlasFrame } from '../src/content/types.ts';
 import { bossProblems, type BossData, type BossRoster } from '../src/content/bosses.ts';
+import {
+  decodeGlimpse,
+  glimpseProblems,
+  GLIMPSE_AFTER_STEPS,
+  GLIMPSE_BEFORE_STEPS,
+  GLIMPSE_FORMAT,
+  type GlimpsesFile,
+} from '../src/content/glimpses.ts';
 import { decodePng } from '../../tools/src/png.ts';
 import { lookDataProblems, lookProblems, resolveLook, type LookData } from '../src/render/Look.ts';
 import { buildLookLayer } from '../src/render/LookSheet.ts';
@@ -96,6 +104,81 @@ describe.skipIf(!hasContent())("the bosses' records", () => {
       expect(entry.sprint.timeMs).toBeLessThan(sprintGoal.defaultTime);
       expect(entry.sprint.timeMs).toBeLessThan(m.rivalTotalTime + m.rivalStartDelay);
     }
+  });
+});
+
+describe.skipIf(!hasContent())("the bosses' glimpses", () => {
+  const glimpses = readJson<GlimpsesFile>(join(BOSSES_DIR, 'glimpses.json'));
+  const contests = readJson<ContestsFile>(join(BOSSES_DIR, 'contests.json'));
+  const modes = ['flags', 'sprint'] as const;
+  /** Mission type of each mode: the flags and checkpoints are in its section of the level. */
+  const missionType = { flags: 1, sprint: 0 } as const;
+
+  it('are sound and belong to this simulation and these levels', () => {
+    expect(glimpseProblems(glimpses)).toEqual([]);
+    expect(glimpses.format).toBe(GLIMPSE_FORMAT);
+    expect(glimpses.simVersion).toBe(SIM_VERSION);
+    expect(glimpses.rulesetId).toBe(RULESET_ID);
+    expect([glimpses.beforeSteps, glimpses.afterSteps]).toEqual([33, 33]);
+    expect([GLIMPSE_BEFORE_STEPS, GLIMPSE_AFTER_STEPS]).toEqual([33, 33]);
+    expect(glimpses.levels.map((l) => l.levelId)).toEqual(
+      Array.from({ length: LEVEL_COUNT }, (_, i) => i),
+    );
+    const moves = loadMoves();
+    const tables = loadTables();
+    for (const entry of glimpses.levels) {
+      expect(entry.contentHash, `level ${entry.levelId}`).toEqual(
+        contentHashes(loadLevel(entry.levelId), moves, tables),
+      );
+    }
+  });
+
+  it("are of the published records' runs", () => {
+    for (const entry of glimpses.levels) {
+      const records = contests.levels.find((l) => l.levelId === entry.levelId)!;
+      for (const mode of modes) {
+        expect(entry[mode].runSha256, `level ${entry.levelId} ${mode}`).toBe(
+          records[mode].runSha256,
+        );
+      }
+    }
+  });
+
+  it('show each flag from a second before it is taken, where it stands', () => {
+    for (const entry of glimpses.levels) {
+      const level = loadLevel(entry.levelId);
+      for (const mode of modes) {
+        const flags = level.missions[String(missionType[mode])]!.checkpoints;
+        const clips = entry[mode].clips;
+        expect(clips, `level ${entry.levelId} ${mode}`).toHaveLength(5);
+        clips.forEach((code, i) => {
+          const name = `level ${entry.levelId} ${mode} flag ${i}`;
+          const track = decodeGlimpse(code);
+          expect(track, name).not.toBeNull();
+          const { poses, at } = track!;
+          expect(at, name).toBe(33);
+          expect(poses.length, name).toBeGreaterThanOrEqual(34);
+          expect(poses.length, name).toBeLessThanOrEqual(67);
+          expect(poses[0]!.cut, name).toBe(true);
+          // The pose of the taking step is drawn from the feet, or from the hands up to a body's
+          // length above them, near the centre of the flag's lower tile.
+          const p = poses[at]!;
+          const dx = p.x - ((flags[i]!.x << 10) + 512);
+          const dy = p.y - ((flags[i]!.y << 10) + 512);
+          expect(Math.abs(dx), name).toBeLessThanOrEqual(2048);
+          expect(dy, name).toBeLessThanOrEqual(2048);
+          expect(dy, name).toBeGreaterThanOrEqual(p.anchored ? -3584 : -2048);
+        });
+      }
+    }
+  });
+
+  it('stay small', () => {
+    let size = 0;
+    for (const entry of glimpses.levels) {
+      for (const mode of modes) size += entry[mode].clips.join('').length;
+    }
+    expect(size).toBeLessThan(64 * 1024);
   });
 });
 

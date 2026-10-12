@@ -1,10 +1,11 @@
 /**
  * End-of-run screen (the original's state 7, d.java line 5349): the outcome judged by
  * `evaluateMission`, the goal line, time and score, the local record with name entry, the
- * unlock bookkeeping, and retry / next mission / main menu. After a ghost race it also tells
+ * unlock bookkeeping, and retry / next mission / main menu. A win that completes its level
+ * brings up the level-complete box over it (`LevelCompleteScreen`). After a ghost race it also tells
  * who won and by how much; every ranked run can go out as a challenge link or a replay file.
  * After a contest with a boss it judges the run against her time only (contests are not
- * missions) and hands out her look on the first win.
+ * missions) and hands out her look on a first win (plain, then with her effect).
  */
 import {
   cleanReplayName,
@@ -24,8 +25,14 @@ import { countEvent } from '../analytics.ts';
 import type { Screen, UiGesture, UiKey, UiPointer, UiWheel } from '@parapet/runtime/app/Screen.ts';
 import { Menu, type MenuItem } from '@parapet/runtime/ui/Menu.ts';
 import { panel } from '@parapet/runtime/ui/draw.ts';
-import { fitWidth, inset, rowHeight, safeRect, type Rect } from '@parapet/runtime/ui/layout.ts';
-import { MessageBox } from '@parapet/runtime/ui/MessageBox.ts';
+import {
+  contains,
+  fitWidth,
+  inset,
+  rowHeight,
+  safeRect,
+  type Rect,
+} from '@parapet/runtime/ui/layout.ts';
 import { TextInputOverlay } from '@parapet/runtime/ui/TextInputOverlay.ts';
 import {
   completeMission,
@@ -35,6 +42,7 @@ import {
   type ContestKind,
   isBetterRecord,
   isLevelUnlocked,
+  isMissionCompleted,
   loadProgress,
   loadRecord,
   savePlayer,
@@ -58,6 +66,11 @@ import {
   upgradeCharacter,
 } from '../bosses.ts';
 import { CharacterSelectScreen } from './CharacterSelectScreen.ts';
+import {
+  LevelCompleteScreen,
+  levelCompletion,
+  type LevelCompletion,
+} from './LevelCompleteScreen.ts';
 import { PlayScreen } from './PlayScreen.ts';
 import { TitleScreen } from './TitleScreen.ts';
 import { PrizeScreen } from './PrizeScreen.ts';
@@ -67,6 +80,8 @@ const NAME_LETTER = /^[\p{L}\p{N}]$/u;
 const NAME_JOINERS = ' -_.';
 /** How long a status line ("link copied") stays, in ms. */
 const STATUS_MS = 4000;
+/** The level-complete box comes up this long after the results, so they are seen first. */
+const LEVEL_BOX_DELAY_MS = 700;
 
 type RaceVerdict = 'won' | 'lost' | 'draw';
 
@@ -85,7 +100,10 @@ export class ResultsScreen implements Screen {
   private statusUntil = 0;
   private nameInput: TextInputOverlay | null = null;
   private nameRect: Rect = { x: 0, y: 0, w: 0, h: 0 };
-  private unlockedLevel = -1;
+  /** A finger is down on the name field: it opens on release (where phones allow a keyboard). */
+  private nameArmed = false;
+  /** This run completed its level: the box to show over the results (once). */
+  private completion: LevelCompletion | null = null;
   private prizeUnlocked = false;
   private shownAt = 0;
   private lines: string[] = [];
@@ -148,8 +166,8 @@ export class ResultsScreen implements Screen {
   }
 
   /**
-   * A contest: the player's best contest run, and on the first win what it gives: the boss as a
-   * character, or its effect when the player already had it plain (their choice follows).
+   * A contest: the player's best contest run, and on a first win what it gives: the boss as a
+   * plain character (one record beaten), or its effect (the other one too; their choice follows).
    */
   private settleContest(): void {
     const { setup, session } = this.play;
@@ -210,10 +228,7 @@ export class ResultsScreen implements Screen {
     }
     if (this.wonLook >= 0 && found) {
       const fx = i18n.t(effectNameKey(found.boss));
-      let key = 'contest.unlocked';
-      if (this.upgraded) key = 'contest.upgraded';
-      else if (bossOfCharacter(this.wonLook)?.effects) key = 'contest.unlockedFx';
-      out.push(i18n.t(key, { boss, fx }));
+      out.push(i18n.t(this.upgraded ? 'contest.upgraded' : 'contest.unlocked', { boss, fx }));
     } else if (this.wonLater) {
       out.push(i18n.t('contest.unlockedLater'));
     }
@@ -280,9 +295,9 @@ export class ResultsScreen implements Screen {
   }
 
   /**
-   * `n(ci, cj)` on success: mission bits, the "level unlocked" check and the prize. A race
-   * from a shared link may be on a level the player has not opened yet; it counts only once
-   * the level is open.
+   * `n(ci, cj)` on success: mission bits, the level completed by this win (which opens the
+   * next) and the prize. A race from a shared link may be on a level the player has not opened
+   * yet; it counts only once the level is open.
    */
   private updateProgress(): void {
     const { setup } = this.play;
@@ -290,14 +305,14 @@ export class ResultsScreen implements Screen {
     if (!this.outcome.won || setup.script) return;
     const missions = this.ctx.content.missions.levels;
     const level = missions[setup.levelId]!;
-    if (!isLevelUnlocked(loadProgress(), level.unlockThreshold)) return;
+    const before = loadProgress();
+    if (!isLevelUnlocked(before, missions, setup.levelId)) return;
     const slot = missionSlot(level, setup.mode);
     if (slot < 0) return;
     const { firstTime, total, progress } = completeMission(setup.levelId, slot);
     if (!firstTime) return;
     countEvent(`level/${setup.levelId + 1}`);
-    const unlocked = missions.find((m) => m.id !== 0 && m.unlockThreshold === total);
-    if (unlocked) this.unlockedLevel = unlocked.id;
+    this.completion = levelCompletion(this.ctx.content, setup.levelId, before, progress);
     const all = missions.reduce((n, m) => n + m.missionCount, 0);
     if (total >= all && !progress.prizeSeen) {
       this.prizeUnlocked = true;
@@ -357,24 +372,29 @@ export class ResultsScreen implements Screen {
     this.setStatus(this.ctx.i18n.t('replayFile.saved'));
   }
 
-  /** The mission to offer next: the next one of this level not yet done, else the next level. */
+  /**
+   * The mission to offer next: one of this level not done yet (after this one, then round from
+   * the first: they can be played in any order), else the next level's first not done.
+   */
   private nextMission(): { levelId: number; mode: RunMode } | null {
     const { setup } = this.play;
     const missions = this.ctx.content.missions.levels;
     const progress = loadProgress();
     const level = missions[setup.levelId]!;
     const slot = missionSlot(level, setup.mode);
-    for (let m = slot + 1; m < level.missionTypes.length; m++) {
-      if (((progress.completed[setup.levelId] ?? 0) & (1 << m)) !== 0) continue;
-      const type = level.missionTypes[m]!;
-      const mode = modeOf(type);
+    const count = level.missionTypes.length;
+    for (let i = 1; i < count; i++) {
+      const m = (slot + i) % count;
+      if (isMissionCompleted(progress, setup.levelId, m)) continue;
+      const mode = modeOf(level.missionTypes[m]!);
       if (mode) return { levelId: setup.levelId, mode };
     }
     const next = setup.levelId + 1;
-    if (next < LEVEL_COUNT) {
+    if (next < LEVEL_COUNT && isLevelUnlocked(progress, missions, next)) {
       const nextLevel = missions[next]!;
-      if (isLevelUnlocked(progress, nextLevel.unlockThreshold)) {
-        const mode = modeOf(nextLevel.missionTypes[0] ?? 0);
+      for (let m = 0; m < nextLevel.missionTypes.length; m++) {
+        if (isMissionCompleted(progress, next, m)) continue;
+        const mode = modeOf(nextLevel.missionTypes[m]!);
         if (mode) return { levelId: next, mode };
       }
     }
@@ -448,37 +468,39 @@ export class ResultsScreen implements Screen {
     this.onResize();
   }
 
-  /** Close this screen, showing the "level unlocked" box first when one is due. */
+  /** Close this screen, then go on. */
   private leave(then: () => void): void {
-    const { i18n, screens } = this.ctx;
     this.closeNameInput(true);
-    screens.pop();
-    if (this.unlockedLevel < 0) {
-      then();
-      return;
-    }
-    const levelId = this.unlockedLevel;
-    this.unlockedLevel = -1;
-    screens.push(
-      new MessageBox(
-        { viewport: this.ctx.viewport, fonts: this.ctx.fonts },
-        {
-          title: i18n.t('level.unlocked'),
-          tone: 'success',
-          pages: [i18n.t('level.unlockedName', { name: i18n.t(`level.names.${levelId}`) })],
-          labels: { next: i18n.t('menu.next'), ok: i18n.t('menu.ok') },
-          onClose: () => {
-            screens.pop();
-            then();
-          },
-        },
-      ),
+    this.ctx.screens.pop();
+    then();
+  }
+
+  /** The level-complete box over the results: this mission again, the boss, the next level. */
+  private showCompletion(): void {
+    const completion = this.completion;
+    if (!completion) return;
+    this.completion = null;
+    this.closeNameInput(true);
+    this.ctx.screens.push(
+      new LevelCompleteScreen(this.ctx, {
+        ...completion,
+        repeat: () => this.leave(() => this.play.restart()),
+        leaveRun: () => this.leave(() => this.ctx.screens.pop()),
+      }),
     );
   }
 
+  /**
+   * The name field of a new record waits to be tapped (or reached with Up from the first
+   * action): opening it by itself would pop the keyboard up after every record.
+   */
   enter(): void {
     this.shownAt = performance.now();
-    if (this.newRecord && !this.nameInput) this.openNameInput();
+  }
+
+  /** The keyboard's place is the name field (above the first action) rather than a row. */
+  private get nameFocused(): boolean {
+    return this.newRecord && this.menu.cursor < 0;
   }
 
   exit(): void {
@@ -609,12 +631,32 @@ export class ResultsScreen implements Screen {
     small.draw(c, `— ${quote.boss}`, x + w - QUOTE_PAD, ly, { align: 'right', color: quote.color });
   }
 
-  update(): void {}
+  update(): void {
+    if (
+      this.completion &&
+      !this.nameInput?.isOpen &&
+      performance.now() - this.shownAt >= LEVEL_BOX_DELAY_MS
+    ) {
+      this.showCompletion();
+    }
+  }
 
   onKey(key: UiKey): void {
     if (this.nameInput?.isOpen) return;
     if (key.action === 'back') {
       this.leave(() => this.ctx.screens.clear(new TitleScreen(this.ctx)));
+      return;
+    }
+    const up = key.action === 'up' || key.action === 'prev';
+    if (this.nameFocused) {
+      if (up) return;
+      // A gamepad's confirm comes without a gesture; the field opens all the same.
+      if (key.action === 'confirm') {
+        this.openNameInput();
+        return;
+      }
+    } else if (this.newRecord && up && this.menu.cursor === 0) {
+      this.menu.cursor = -1;
       return;
     }
     this.menu.onKey(key);
@@ -629,7 +671,27 @@ export class ResultsScreen implements Screen {
   }
 
   onGesture(g: UiGesture): boolean {
-    if (this.nameInput?.isOpen && g.kind === 'key') return false;
+    if (this.nameInput?.isOpen) return g.kind === 'pointer' ? this.menu.onGesture(g) : false;
+    if (this.newRecord) {
+      if (g.kind === 'key') {
+        if (g.action === 'confirm' && this.nameFocused) {
+          this.openNameInput();
+          return true;
+        }
+      } else if (g.type === 'down') {
+        this.nameArmed = false;
+        if (contains(this.nameRect, g.x, g.y)) {
+          // A mouse opens it at once, a finger on release (browsers give the keyboard then).
+          if (g.pointerType === 'mouse') this.openNameInput();
+          else this.nameArmed = true;
+          return true;
+        }
+      } else if (this.nameArmed) {
+        this.nameArmed = false;
+        if (contains(this.nameRect, g.x, g.y)) this.openNameInput();
+        return true;
+      }
+    }
     return this.menu.onGesture(g);
   }
 
@@ -693,17 +755,17 @@ export class ResultsScreen implements Screen {
         },
       );
       if (!this.nameInput?.isOpen) {
+        // Drawn like the real field (which only exists while editing), brighter when chosen.
+        const r = this.nameRect;
+        const lit = this.nameFocused || this.nameArmed;
+        c.fillStyle = lit ? Theme.accent : 'rgba(255, 255, 255, 0.7)';
+        c.fillRect(r.x - 1, r.y - 1, r.w + 2, r.h + 2);
         c.fillStyle = '#2a1815';
-        c.fillRect(this.nameRect.x, this.nameRect.y, this.nameRect.w, this.nameRect.h);
-        fonts.text.draw(
-          c,
-          this.ctx.player.name || i18n.t('player.name'),
-          this.nameRect.x + 4,
-          this.nameRect.y + 3,
-          {
-            color: Theme.text,
-          },
-        );
+        c.fillRect(r.x, r.y, r.w, r.h);
+        const name = this.ctx.player.name;
+        fonts.text.draw(c, name || i18n.t('player.name'), r.x + 4, r.y + 3, {
+          color: name ? Theme.text : Theme.muted,
+        });
       }
     }
     this.menu.draw(c);

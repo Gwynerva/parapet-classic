@@ -2,7 +2,9 @@
 
 The boss contests (Flag hunt and Sprint without the rival, on every level) are raced against
 times found by a search over the simulation (`packages/tools/src/tas`). Only the times reach
-the game; the inputs stay local. What the search taught about the game:
+the game, with two seconds of poses around each flag (the glimpses a boss shows of its route,
+`packages/content/bosses/glimpses.json`); the inputs stay local. What the search taught about
+the game:
 
 ## How the developers played
 

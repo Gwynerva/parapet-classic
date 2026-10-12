@@ -67,9 +67,12 @@ export class SceneRenderer {
   private readonly composed: DrawCommand[] = [];
   /** Sprite and object sizes for `composePose`. */
   readonly sizes: SpriteSizes;
-  /** Culling rectangle (logical pixels of the current target), see `setViewport`. */
-  viewWidth = Infinity;
-  viewHeight = Infinity;
+  /**
+   * Culling rectangle (logical pixels of the current target), see `setViewport`. Shared by
+   * every renderer made from this one with `withSheet`, so a resize reaches the recoloured
+   * copies (looks, echoes) too.
+   */
+  private view: { width: number; height: number } = { width: Infinity, height: Infinity };
 
   constructor(sheet: SpriteSheet, scenes: Iterable<SceneFile>) {
     this.sheet = sheet;
@@ -92,19 +95,37 @@ export class SceneRenderer {
   withSheet(sheet: SpriteSheet): SceneRenderer {
     const copy = new SceneRenderer(sheet, []);
     for (const [id, object] of this.objects) copy.objects.set(id, object);
-    copy.viewWidth = this.viewWidth;
-    copy.viewHeight = this.viewHeight;
+    copy.view = this.view;
     return copy;
+  }
+
+  get viewWidth(): number {
+    return this.view.width;
+  }
+
+  set viewWidth(width: number) {
+    this.view.width = width;
+  }
+
+  get viewHeight(): number {
+    return this.view.height;
+  }
+
+  set viewHeight(height: number) {
+    this.view.height = height;
   }
 
   getObject(id: number): SceneObject | undefined {
     return this.objects.get(id);
   }
 
-  /** Size of the drawing target in logical pixels; objects fully outside are skipped. */
+  /**
+   * Size of the drawing target in logical pixels; objects fully outside are skipped. It is
+   * the size of this renderer's whole family (see `withSheet`).
+   */
   setViewport(width: number, height: number): void {
-    this.viewWidth = width;
-    this.viewHeight = height;
+    this.view.width = width;
+    this.view.height = height;
   }
 
   /** `a(6 ints)`: draw a single frame with no tween. */

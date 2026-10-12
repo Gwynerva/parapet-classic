@@ -14,7 +14,6 @@
   "contest.verdict.draw": "Ровно то же время. Нужно быстрее.",
   "contest.title.won": "Рекорд побит!",
   "contest.unlocked": "Новый персонаж: {boss}!",
-  "contest.unlockedFx": "Новый персонаж: {boss} с эффектом «{fx}»!",
   "contest.upgraded": "{boss} — новый уровень: теперь с эффектом «{fx}»!",
   "contest.unlockedLater": "Победа засчитана! Персонаж ещё в мастерской и откроется, как только будет готов.",
   "contest.chooseCharacter": "Выбрать персонажа",

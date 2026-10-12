@@ -21,6 +21,19 @@ describe('MissionFlow', () => {
     expect(flow.phase).toBe('done');
   });
 
+  it('starts over quickly at ready, past the pages, the briefing and the flyover', () => {
+    for (const tutorialPages of [0, 3]) {
+      const flow = new MissionFlow({ tutorialPages, briefing: true, flyover: true, readyMs: 400 });
+      flow.advance();
+      flow.reset(true);
+      expect(flow.phase).toBe('ready');
+      expect(flow.readyLeft).toBe(400);
+      expect(flow.tutorialPage).toBe(0);
+      flow.reset();
+      expect(flow.phase).toBe(tutorialPages > 0 ? 'tutorial' : 'briefing');
+    }
+  });
+
   it('runs a sprint through briefing, flyover and ready', () => {
     const flow = new MissionFlow({ tutorialPages: 0, briefing: true, flyover: true, readyMs: 100 });
     expect(flow.phase).toBe('briefing');

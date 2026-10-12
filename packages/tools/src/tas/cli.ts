@@ -9,18 +9,29 @@ import {
   sameContentHash,
   simulateReplay,
 } from '@parapet/sim';
+import {
+  GLIMPSE_AFTER_STEPS,
+  GLIMPSE_BEFORE_STEPS,
+  GLIMPSE_FORMAT,
+  glimpseProblems,
+  type GlimpseSet,
+  type GlimpsesFile,
+} from '@parapet/runtime/content/glimpses.ts';
 import { checkRun, DEFAULT_CONSTRAINTS, type Constraints } from './constraints.ts';
 import { levelContent, levelHash, loadGameData } from './content.ts';
 import {
   readContests,
+  readGlimpses,
   readRun,
   runPath,
   sha256,
   writeContests,
+  writeGlimpses,
   writeRun,
   type ContestLevel,
   type TasRunFile,
 } from './files.ts';
+import { runGlimpses } from './glimpses.ts';
 import { runFile, type JobMessage, type TasJob } from './job.ts';
 import { tidy } from './polish.ts';
 import { CONTEST_MODES, isContestMode, parsePresses, type ContestMode } from './model.ts';
@@ -32,13 +43,13 @@ const USAGE = `usage: npm run tas -- <command> [options]
 Finds the bosses' records: fast runs of every level's Flag hunt and Sprint (no rival) under
 human limits (single key presses, at least --min-gap steps apart, no press that only works
 on its exact step). Runs are kept in packages/tools/tas-out (git-ignored, the routes stay
-secret); only times are published.
+secret); only the times are published, and two seconds around each flag as poses (glimpses).
 
 commands:
   run       search and polish runs, keep each one if it beats the stored run
   tidy      drop the presses the stored runs do without (same time, no new precise press)
-  verify    re-simulate the stored runs, check the limits and the published table
-  publish   write packages/content/bosses/contests.json from the stored runs
+  verify    re-simulate the stored runs, check the limits and the published files
+  publish   write packages/content/bosses/contests.json and glimpses.json from the stored runs
   report    table of the stored runs next to the original's records (--markdown for notes)
 
 options:
@@ -291,9 +302,35 @@ function checkStored(run: TasRunFile): { problems: string[]; fragile: number[] }
   return { problems, fragile: checked.robustness.fragile };
 }
 
+/** Problems of the published glimpses of a stored run, recorded again. */
+function checkGlimpses(run: TasRunFile, glimpses: GlimpsesFile): string[] {
+  const level = glimpses.levels.find((l) => l.levelId === run.levelId);
+  const set: GlimpseSet | undefined = level?.[run.mode];
+  if (!level || !set) return ['published without glimpses'];
+  const problems: string[] = [];
+  if (!sameContentHash(level.contentHash, run.contentHash)) {
+    problems.push('glimpses of other level data');
+  }
+  if (set.runSha256 !== sha256(run.replay)) problems.push('glimpses of another run');
+  const recorded = runGlimpses(run);
+  problems.push(...recorded.problems);
+  if (recorded.clips.join() !== set.clips.join()) problems.push('published glimpses differ');
+  return problems;
+}
+
 function commandVerify(args: Args): number {
   const contests = readContests();
+  const glimpses = readGlimpses();
   let bad = 0;
+  if (contests) {
+    const problems = glimpses ? glimpseProblems(glimpses) : ['missing'];
+    if (glimpses && glimpses.simVersion !== SIM_VERSION) problems.push('another simulation');
+    if (glimpses && glimpses.rulesetId !== RULESET_ID) problems.push('another ruleset');
+    if (problems.length > 0) {
+      bad++;
+      console.log(`glimpses.json ${problems.join('; ')}`);
+    }
+  }
   for (const levelId of args.levels) {
     for (const mode of args.modes) {
       const name = label(levelId, mode);
@@ -311,6 +348,7 @@ function commandVerify(args: Args): number {
         if (published.splitsMs.join() !== run.splitsMs.join())
           problems.push('published splits differ');
         if (published.runSha256 !== sha256(run.replay)) problems.push('published run hash differs');
+        if (glimpses) problems.push(...checkGlimpses(run, glimpses));
       }
       if (problems.length > 0) bad++;
       const precise = fragile.length > 0 ? ` (${fragile.length} frame-perfect)` : '';
@@ -348,6 +386,7 @@ function commandTidy(args: Args): number {
 
 function commandPublish(): number {
   const levels: ContestLevel[] = [];
+  const glimpseLevels: GlimpsesFile['levels'] = [];
   const missing: string[] = [];
   let constraints: Constraints | null = null;
   for (let levelId = 0; levelId < LEVEL_COUNT; levelId++) {
@@ -379,12 +418,31 @@ function commandPublish(): number {
       flags: record(flags),
       sprint: record(sprint),
     });
+    const glimpseSet = (r: TasRunFile): GlimpseSet => {
+      const { clips, problems } = runGlimpses(r);
+      if (problems.length > 0) missing.push(`${label(levelId, r.mode)}: ${problems.join('; ')}`);
+      return { runSha256: sha256(r.replay), clips };
+    };
+    glimpseLevels.push({
+      levelId,
+      contentHash: flags.contentHash,
+      flags: glimpseSet(flags),
+      sprint: glimpseSet(sprint),
+    });
   }
   if (missing.length > 0 || !constraints) {
     console.error(`not published:\n  ${missing.join('\n  ')}`);
     return 1;
   }
   writeContests({ simVersion: SIM_VERSION, rulesetId: RULESET_ID, constraints, levels });
+  writeGlimpses({
+    format: GLIMPSE_FORMAT,
+    simVersion: SIM_VERSION,
+    rulesetId: RULESET_ID,
+    beforeSteps: GLIMPSE_BEFORE_STEPS,
+    afterSteps: GLIMPSE_AFTER_STEPS,
+    levels: glimpseLevels,
+  });
   console.log(`published ${levels.length} levels`);
   return 0;
 }

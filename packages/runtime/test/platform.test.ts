@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { HistoryGuard, LEAVE_WINDOW_MS, type HistoryWindow } from '../src/platform/HistoryGuard.ts';
 import { isInstalledApp, isIOS } from '../src/platform/fullscreen.ts';
 
-/** A browser history in memory: entries with state and hash, Back fires `popstate`. */
+/** A browser history in memory: entries with their state, Back fires `popstate`. */
 class FakeWindow implements HistoryWindow {
-  entries: { state: unknown; hash: string }[] = [{ state: null, hash: '' }];
+  entries: { state: unknown }[] = [{ state: null }];
   index = 0;
   left = false;
   private listeners: ((e: PopStateEvent) => void)[] = [];
@@ -12,16 +12,13 @@ class FakeWindow implements HistoryWindow {
     state: null as unknown,
     pushState: (data: unknown): void => {
       this.entries.splice(this.index + 1);
-      this.entries.push({ state: data, hash: this.location.hash });
+      this.entries.push({ state: data });
       this.index++;
       this.sync();
     },
   };
-  readonly location = { hash: '' };
-
   private sync(): void {
     this.history.state = this.entries[this.index]!.state;
-    this.location.hash = this.entries[this.index]!.hash;
   }
 
   addEventListener(_: 'popstate', listener: (e: PopStateEvent) => void): void {
@@ -40,13 +37,6 @@ class FakeWindow implements HistoryWindow {
     this.index--;
     this.sync();
     for (const l of this.listeners) l({} as PopStateEvent);
-  }
-
-  navigateHash(hash: string): void {
-    this.entries.splice(this.index + 1);
-    this.entries.push({ state: null, hash });
-    this.index++;
-    this.sync();
   }
 }
 
@@ -88,20 +78,6 @@ describe('HistoryGuard', () => {
     now += LEAVE_WINDOW_MS;
     guard.arm();
     expect(guard.armed).toBe(true);
-  });
-
-  it('leaves challenge links to the game', () => {
-    const win = new FakeWindow();
-    let backs = 0;
-    const guard = new HistoryGuard(win, () => {
-      backs++;
-      return 'stay';
-    });
-    guard.arm();
-    win.navigateHash('#r=abc');
-    win.navigateHash('#r=def');
-    win.back();
-    expect(backs).toBe(0);
   });
 });
 

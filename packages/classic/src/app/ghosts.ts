@@ -10,6 +10,7 @@ import {
   decodeReplay,
   encodeReplay,
   isRankedMode,
+  rankingSort,
   replayCompatibility,
   LEVEL_COUNT,
   RULESET_ID,
@@ -18,11 +19,13 @@ import {
   simulateReplay,
   type ContentHash,
   type Replay,
+  type ReplayOutcome,
   type RunContent,
   type RunMode,
 } from '@parapet/sim';
 import type { GhostKind, GhostSetup, RunSetup } from '@parapet/runtime/app/RunSession.ts';
 import {
+  codeFromQuery,
   extractReplayCode,
   REPLAY_FILE_ACCEPT,
   replayFileName,
@@ -44,11 +47,12 @@ import {
   type RecordEntry,
 } from '@parapet/runtime/storage/profile.ts';
 import { MessageBox } from '@parapet/runtime/ui/MessageBox.ts';
-import type { GameContext } from './Context.ts';
+import { formatTime, type GameContext } from './Context.ts';
 import { contestCharacter, contestRecord, FIRST_BOSS_CHARACTER } from './bosses.ts';
 import { CopyLinkScreen } from './screens/CopyLinkScreen.ts';
 import { PlayScreen } from './screens/PlayScreen.ts';
 import { countEvent } from './analytics.ts';
+import { describeRace, keepOutOfSearch } from './racePage.ts';
 
 export type GhostProblem = 'invalid' | 'version' | 'content';
 
@@ -218,6 +222,16 @@ export function runnerName(ctx: GameContext, replay: Replay): string {
   return replay.playerName || ctx.i18n.t('player.name');
 }
 
+/** What a replay's run is to beat: its time, its score, or that it never finished. */
+export function replayResultText(ctx: GameContext, replay: Replay, outcome: ReplayOutcome): string {
+  const { i18n } = ctx;
+  if (rankingSort(replay.mode, replay.levelId) === 'score') {
+    return i18n.t('replayOpen.score', { value: String(outcome.score) });
+  }
+  if (outcome.finished) return i18n.t('replayOpen.time', { value: formatTime(outcome.time) });
+  return i18n.t('replayOpen.unfinished');
+}
+
 /** What a text holds: no replay at all, one that cannot run here, or one ready to race. */
 export type ReplayCheck =
   | { kind: 'none' }
@@ -253,9 +267,31 @@ export function openReplayText(ctx: GameContext, text: string): void {
   else showProblem(ctx, check.kind === 'problem' ? check.problem : 'invalid');
 }
 
-/** Starts a race against a replay code (from a challenge link), or says why it cannot run. */
+/**
+ * Starts a race against the replay of the page's challenge link, which then describes that
+ * race to search engines; or says why it cannot run, and keeps the page out of their index.
+ */
 export function openReplayCode(ctx: GameContext, code: string): void {
-  openReplayText(ctx, code);
+  const check = checkReplayText(ctx, code);
+  if (check.kind === 'ok') {
+    const { i18n } = ctx;
+    const { replay, outcome } = check.ghost;
+    const args = {
+      name: runnerName(ctx, replay),
+      level: i18n.t(`level.names.${replay.levelId}`),
+      mode: i18n.t(`mode.${replay.mode}`),
+      result: replayResultText(ctx, replay, outcome),
+    };
+    describeRace(
+      check.code,
+      i18n.t('race.page.title', args),
+      i18n.t('race.page.description', args),
+    );
+    startRace(ctx, check.ghost);
+    return;
+  }
+  keepOutOfSearch();
+  showProblem(ctx, check.kind === 'problem' ? check.problem : 'invalid');
 }
 
 function showProblem(ctx: GameContext, problem: GhostProblem): void {
@@ -276,10 +312,26 @@ function showProblem(ctx: GameContext, problem: GhostProblem): void {
 
 /**
  * Copies the challenge link of `replay` to the clipboard; call from a gesture. `onCopied`
- * runs when it is there; when the browser refuses, the link is shown for copying by hand.
+ * runs when it is there; when the browser refuses, the link is shown for copying by hand. A run
+ * too long for a link is offered as a file instead.
  */
 export function copyChallengeLink(ctx: GameContext, replay: Replay, onCopied: () => void): void {
   const link = replayLink(location.href, encodeReplay(replay));
+  if (!link) {
+    const { i18n, screens } = ctx;
+    screens.push(
+      new MessageBox(
+        { viewport: ctx.viewport, fonts: ctx.fonts },
+        {
+          title: i18n.t('ghost.link.tooLong.title'),
+          pages: [i18n.t('ghost.link.tooLong')],
+          labels: { next: i18n.t('menu.next'), ok: i18n.t('menu.ok') },
+          onClose: () => screens.pop(),
+        },
+      ),
+    );
+    return;
+  }
   void copyText(link).then((copied) => {
     if (copied) onCopied();
     else ctx.screens.push(new CopyLinkScreen(ctx, link));
@@ -311,8 +363,8 @@ interface ReplayTaker {
 }
 
 /**
- * Replays dropped onto the window, pasted (Ctrl+V) or opened as a link in this tab start a
- * race from any menu; during a run they are ignored.
+ * Replays dropped onto the window or pasted (Ctrl+V) start a race from any menu; during a run
+ * they are ignored. (A challenge link opens a page of its own: `takeReplayFromLocation`.)
  */
 export function installReplayInputs(ctx: GameContext): void {
   const accepting = (): boolean => !(ctx.screens.top instanceof PlayScreen);
@@ -331,24 +383,12 @@ export function installReplayInputs(ctx: GameContext): void {
   onPasteText((text) => {
     if (accepting() && extractReplayCode(text)) take(text);
   });
-  // A challenge link opened in a tab that already runs the game only changes the fragment.
-  window.addEventListener('hashchange', () => {
-    const code = takeReplayFromLocation();
-    if (code && accepting()) openReplayCode(ctx, code);
-  });
 }
 
 /**
- * Reads the replay of a challenge link from the page address (`#<code>`, `#r=<code>` or
- * `?r=<code>`), removing it so a reload does not start the race again.
+ * The replay of a challenge link (`r/?<code>`) from the page address. The address keeps it: it
+ * is the race's own, to share again (a reload shows the race again).
  */
 export function takeReplayFromLocation(): string | null {
-  const fromHash = extractReplayCode(location.hash.slice(1));
-  const query = new URLSearchParams(location.search);
-  const code = fromHash ?? extractReplayCode(`?r=${query.get('r') ?? ''}`);
-  if (!code) return null;
-  query.delete('r');
-  const search = query.toString();
-  history.replaceState(null, '', location.pathname + (search ? `?${search}` : ''));
-  return code;
+  return codeFromQuery(location.search);
 }

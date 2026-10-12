@@ -2,10 +2,13 @@
  * Where TAS runs live.
  *
  * - `packages/tools/tas-out/<level>-<mode>.json`: a run with its input. Git-ignored: the route
- *   of Gwynerva's records is her secret and is published nowhere.
+ *   of Gwynerva's records is her secret, but for two seconds around each flag.
  * - `packages/content/bosses/contests.json`: what the game ships, only her time and
  *   split times per level and mode, plus a SHA-256 of the replay so a local run can be shown
  *   to be the one published.
+ * - `packages/content/bosses/glimpses.json`: those two seconds around each flag or checkpoint,
+ *   published as the poses the game draws (`@parapet/runtime/content/glimpses.ts`), never as
+ *   input.
  */
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -18,12 +21,14 @@ import {
   type InputRun,
   type Replay,
 } from '@parapet/sim';
+import type { GlimpsesFile } from '@parapet/runtime/content/glimpses.ts';
 import type { Constraints } from './constraints.ts';
 import { REPO_ROOT } from './content.ts';
 import { contestCharacter, type ContestMode } from './model.ts';
 
 export const TAS_OUT_DIR = join(REPO_ROOT, 'packages', 'tools', 'tas-out');
 export const CONTESTS_FILE = join(REPO_ROOT, 'packages', 'content', 'bosses', 'contests.json');
+export const GLIMPSES_FILE = join(REPO_ROOT, 'packages', 'content', 'bosses', 'glimpses.json');
 
 /** Name the runs carry (Gwynerva searched them all; the bosses hold them in the game). */
 export const GWYNERVA = 'Gwynerva';
@@ -95,6 +100,16 @@ export function readContests(): ContestsFile | null {
 export function writeContests(file: ContestsFile): void {
   mkdirSync(join(CONTESTS_FILE, '..'), { recursive: true });
   writeFileSync(CONTESTS_FILE, JSON.stringify(file, null, 2) + '\n');
+}
+
+export function readGlimpses(): GlimpsesFile | null {
+  if (!existsSync(GLIMPSES_FILE)) return null;
+  return JSON.parse(readFileSync(GLIMPSES_FILE, 'utf8')) as GlimpsesFile;
+}
+
+export function writeGlimpses(file: GlimpsesFile): void {
+  mkdirSync(join(GLIMPSES_FILE, '..'), { recursive: true });
+  writeFileSync(GLIMPSES_FILE, JSON.stringify(file, null, 2) + '\n');
 }
 
 /** The replay of a TAS run, as Gwynerva's. */

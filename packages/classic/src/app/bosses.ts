@@ -1,19 +1,20 @@
 /**
  * The bosses of Parapet Classic: one per level, each holding a record in Flag hunt and in
- * Sprint (no rival), found by a tool-assisted search under human limits (`npm run tas`). Only
- * the times and split times ship (`bosses/contests.json`); the input of the runs is never
- * published, and a boss does not race in sight, so the routes stay secret.
+ * Sprint (no rival), found by a tool-assisted search under human limits (`npm run tas`). The
+ * times and split times ship (`bosses/contests.json`), and of the routes only two seconds around
+ * each flag, as poses to watch (`bosses/glimpses.json`, `contestGlimpses`): the input of the
+ * runs is never published, and a boss does not race in sight.
  *
  * A boss (`bosses/<id>/`) has outfits (`looks/`, one picked at random for every run; nobody
  * chooses), an effect (`fx.json`) and a little world for the character screen (`stage.json`).
- * Beating either of its records unlocks it for normal play; beating the Flag hunt one also
+ * Beating either of its records unlocks it for normal play; beating both (in any order) also
  * gives it its effect, which the player finds out when it happens. The two versions are two
  * character numbers (`contestCharacter`: the boss with its effect, then plain), so runs and
  * replays keep the one they were made with; the player always plays the best one they have
  * (`upgradeCharacter`). Wins are kept per level and mode, so a boss drawn later opens by itself
  * for whoever already beat its record.
  */
-import { LEVEL_COUNT, RULESET_ID, SIM_VERSION } from '@parapet/sim';
+import { LEVEL_COUNT, RULESET_ID, SIM_VERSION, STEP } from '@parapet/sim';
 import { bossProblems, type BossData, type BossRoster } from '@parapet/runtime/content/bosses.ts';
 import {
   lookDataProblems,
@@ -35,7 +36,14 @@ import {
   type ContestKind,
   type ContestProgress,
 } from '@parapet/runtime/storage/profile.ts';
+import {
+  decodeGlimpse,
+  GLIMPSE_FORMAT,
+  type GlimpsesFile,
+  type GlimpseTrack,
+} from '@parapet/runtime/content/glimpses.ts';
 import contestsJson from '@content/bosses/contests.json';
+import glimpsesJson from '@content/bosses/glimpses.json';
 import rosterJson from '@content/bosses/bosses.json';
 
 const bossFiles = import.meta.glob('@content/bosses/*/boss.json', {
@@ -52,7 +60,7 @@ const stageFiles = import.meta.glob('@content/bosses/*/stage.json', {
   import: 'default',
 });
 
-/** Name of the bosses' runs and replays (never shown: the routes are not published). */
+/** Name of the bosses' runs and replays (never shown: the runs are not published). */
 export const RECORD_HOLDER = 'Gwynerva';
 /** The silhouette of a boss still in the workshop. */
 export const WORKSHOP_COLOR: EchoColor = makeEchoColor('workshop', '#7d2a63');
@@ -72,8 +80,9 @@ export interface Boss {
 }
 
 /**
- * The character a contest's winner unlocks: two per level, in level order, the boss with its
- * effect (Flag hunt) and plain (Sprint).
+ * The two characters of a level's boss, in level order: with its effect (both records beaten)
+ * and plain (one of them). The numbers keep the contest they once belonged to (`flags`: the
+ * one with the effect) because recorded runs name them.
  */
 export function contestCharacter(levelId: number, kind: ContestKind): number {
   return FIRST_BOSS_CHARACTER + 2 * levelId + (kind === 'sprint' ? 1 : 0);
@@ -97,18 +106,70 @@ export interface ContestRecord {
 interface ContestsFile {
   simVersion: string;
   rulesetId: string;
-  levels: ({ levelId: number } & Record<ContestKind, ContestRecord>)[];
+  levels: ({ levelId: number } & Record<ContestKind, ContestRecord & { runSha256: string }>)[];
 }
 
 const contests = contestsJson as unknown as ContestsFile;
+const glimpses = glimpsesJson as unknown as GlimpsesFile;
 
 /**
- * The record of a level and mode, or null when there is none for this simulation (a change of
- * the simulation needs the records searched again; the tests make sure they were).
+ * The share of its run a boss gives the player, the same on every level: the found runs need
+ * every press within a step of its place, which nobody keeps up for a whole run, so a boss
+ * races that much slower (the later levels are hard enough as they are).
+ */
+export const CONTEST_ALLOWANCE = 0.065;
+
+/** A clock of the found run as the boss races it, on a step of the clock. */
+function allowed(ms: number, allowance: number): number {
+  return Math.round((ms * (1 + allowance)) / STEP) * STEP;
+}
+
+/**
+ * The record of a level and mode as the boss races it (the found run slowed by
+ * `CONTEST_ALLOWANCE`, every split with it, so each stretch gives in proportion to its length),
+ * or null when there is none for this simulation (a change of the simulation needs the records
+ * searched again; the tests make sure they were).
  */
 export function contestRecord(levelId: number, kind: ContestKind): ContestRecord | null {
   if (contests.simVersion !== SIM_VERSION || contests.rulesetId !== RULESET_ID) return null;
-  return contests.levels.find((l) => l.levelId === levelId)?.[kind] ?? null;
+  const found = contests.levels.find((l) => l.levelId === levelId)?.[kind];
+  if (!found) return null;
+  const allowance = CONTEST_ALLOWANCE;
+  return {
+    timeMs: allowed(found.timeMs, allowance),
+    splitsMs: found.splitsMs.map((ms) => allowed(ms, allowance)),
+  };
+}
+
+const glimpseCache = new Map<string, readonly (GlimpseTrack | null)[] | null>();
+
+/**
+ * What the boss of a level and mode did around each of its flags (by flag or checkpoint index;
+ * null for one without), or null when the glimpses are not for this simulation, not of the run
+ * behind the published record, or broken.
+ */
+export function contestGlimpses(
+  levelId: number,
+  kind: ContestKind,
+): readonly (GlimpseTrack | null)[] | null {
+  const key = `${levelId}-${kind}`;
+  if (glimpseCache.has(key)) return glimpseCache.get(key)!;
+  let tracks: (GlimpseTrack | null)[] | null = null;
+  const record = contests.levels.find((l) => l.levelId === levelId)?.[kind];
+  const set = glimpses.levels?.find((l) => l.levelId === levelId)?.[kind];
+  if (
+    glimpses.format === GLIMPSE_FORMAT &&
+    glimpses.simVersion === SIM_VERSION &&
+    glimpses.rulesetId === RULESET_ID &&
+    contestRecord(levelId, kind) &&
+    record &&
+    set &&
+    set.runSha256 === record.runSha256
+  ) {
+    tracks = set.clips.map((code) => (code ? decodeGlimpse(code) : null));
+  }
+  glimpseCache.set(key, tracks);
+  return tracks;
 }
 
 function folderOf(path: string): string {
@@ -211,13 +272,14 @@ export function registerBosses(skins: SkinLibrary): void {
 }
 
 /**
- * The character a player plays a level's boss as: with its effect once its Flag hunt record is
- * beaten, plain once only the Sprint one is, null while neither is (or it is not drawn yet).
+ * The character a player plays a level's boss as: plain once one of its two records is beaten
+ * (either), with its effect once both are, null while neither is (or it is not drawn yet).
  */
 export function bossCharacterFor(levelId: number, progress: ContestProgress): number | null {
   if (!isDrawn(bossOfLevel(levelId))) return null;
-  if (isContestBeaten(progress, levelId, 'flags')) return contestCharacter(levelId, 'flags');
-  if (isContestBeaten(progress, levelId, 'sprint')) return contestCharacter(levelId, 'sprint');
+  const wins = CONTEST_KINDS.filter((kind) => isContestBeaten(progress, levelId, kind)).length;
+  if (wins >= CONTEST_KINDS.length) return contestCharacter(levelId, 'flags');
+  if (wins > 0) return contestCharacter(levelId, 'sprint');
   return null;
 }
 
@@ -230,7 +292,10 @@ export function isBossUnlocked(character: number, progress: ContestProgress): bo
   return found.effects ? best === character : true;
 }
 
-/** The best version of a character the player has: a plain boss gets its effect once won. */
+/**
+ * The version of a boss character the player has: a plain boss gets its effect once both
+ * records are beaten (and one with an effect the player has not earned falls back to plain).
+ */
 export function upgradeCharacter(character: number, progress: ContestProgress): number {
   const found = bossOfCharacter(character);
   if (!found) return character;

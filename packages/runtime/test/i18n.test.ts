@@ -130,8 +130,9 @@ describe('I18n', () => {
     ] as const;
     for (const [n, text] of attempts) expect(i18n.t('results.attempts', { n })).toBe(text);
     expect(i18n.t('hud.flagsLeft', { n: 3 })).toBe('Осталось 3 флага');
-    expect(i18n.t('level.locked', { n: 1 })).toBe(
-      'Чтобы открыть этот уровень, выполни еще 1 миссию.',
+    expect(i18n.t('contest.outfits', { n: 1 })).toBe('1 образ, каждый забег — случайный');
+    expect(i18n.t('level.locked', { name: 'Мельничный ручей' })).toBe(
+      'Чтобы открыть этот уровень, пройди все миссии уровня «Мельничный ручей».',
     );
     i18n.setLocale('en');
   });

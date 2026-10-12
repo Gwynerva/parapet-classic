@@ -125,12 +125,21 @@ export class MenuBackdrop {
     }
     const view = { width: viewport.width, height: viewport.height };
     show.camera.setViewport(view.width, view.height);
+    // The runner above the touch buttons' place, as in a run.
+    show.camera.setFrame(this.ctx.touch.frameHeight());
     render.scene.setViewport(view.width, view.height);
     const alpha = this.still ? 1 : this.clock.alpha;
     const exact = { x: show.camera.renderX(alpha), y: show.camera.renderY(alpha) };
     c.imageSmoothingEnabled = false;
     render.level.setLevel(show.levelId, show.level);
-    render.level.drawBackground(c, exact, view, now, themeOfLevel(show.levelId));
+    render.level.drawBackground(
+      c,
+      exact,
+      view,
+      now,
+      themeOfLevel(show.levelId),
+      show.camera.frameH >> 5,
+    );
     // The world on whole pixels, moved by the rest to a screen pixel (as in a run).
     const grid = worldGrid(exact, screenPixels(c));
     const cam = grid.cam;
@@ -373,6 +382,7 @@ export class MenuBackdrop {
       0,
       show.actors.findIndex((a) => a.clock === 0),
     );
+    show.camera.setFrame(this.ctx.touch.frameHeight());
     show.camera.reset(show.actors[show.focus]!.runner, level);
     this.show = show;
     this.clock.reset();

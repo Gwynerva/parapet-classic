@@ -55,6 +55,7 @@ const KEY_ACTIONS: Readonly<Record<string, UiAction>> = {
   Escape: 'back',
   Backspace: 'back',
   KeyP: 'pause',
+  KeyR: 'restart',
 };
 
 /** Keys that only act through the gesture path (they need user activation). */
@@ -65,7 +66,7 @@ const KEY_GESTURES: Readonly<Record<string, UiAction>> = {
 /** CSS pixels per line of a wheel that scrolls by lines. */
 const WHEEL_LINE_PX = 16;
 
-/** Standard gamepad mapping: d-pad 12–15, A/B 0/1, Select/Start 8/9. */
+/** Standard gamepad mapping: d-pad 12–15, A/B 0/1, Y 3, Select/Start 8/9. */
 const GAMEPAD_DIRECTIONS: Readonly<Record<number, Direction>> = {
   12: 'up',
   13: 'down',
@@ -76,6 +77,7 @@ const GAMEPAD_DIRECTIONS: Readonly<Record<number, Direction>> = {
 const GAMEPAD_ACTIONS: Readonly<Record<number, UiAction>> = {
   0: 'confirm',
   1: 'back',
+  3: 'restart',
   8: 'back',
   9: 'pause',
 };
@@ -295,8 +297,9 @@ export class InputManager {
       const source = event.pointerType === 'touch' ? 'touch' : 'mouse';
       this.capturedPointers.set(event.pointerId, hit);
       this.touch?.setPressed(event.pointerId, hit);
+      // Restart waits for the finger to lift on it (`onPointerUp`).
       if (hit === 'pause') this.action('pause', source);
-      else this.press(hit, source);
+      else if (hit !== 'restart') this.press(hit, source);
       event.preventDefault();
       return;
     }
@@ -321,8 +324,16 @@ export class InputManager {
   };
 
   private readonly onPointerUp = (event: PointerEvent): void => {
-    if (this.capturedPointers.delete(event.pointerId)) {
+    const captured = this.capturedPointers.get(event.pointerId);
+    if (captured) {
+      this.capturedPointers.delete(event.pointerId);
       this.touch?.release(event.pointerId);
+      if (captured === 'restart' && event.type !== 'pointercancel') {
+        const { x, y } = this.viewport.toLogical(event.clientX, event.clientY);
+        if (this.touch?.hitTest(x, y) === 'restart') {
+          this.action('restart', event.pointerType === 'touch' ? 'touch' : 'mouse');
+        }
+      }
       return;
     }
     const { x, y } = this.viewport.toLogical(event.clientX, event.clientY);

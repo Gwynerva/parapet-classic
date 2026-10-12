@@ -5,9 +5,9 @@
  * small tiles below. The original's ten come first, then the twelve bosses in level order. Blaise
  * and Playman are open from the start, each rival once the levels they race on are complete
  * (`characters.ts`), each boss once either of its records is beaten; it wears its effect once
- * the Flag hunt one is (the tile then shows a spark). A character not open yet shows as a dark
- * silhouette, a boss still in the workshop as a silhouette in its colour; they can be looked at
- * but not chosen.
+ * both are (the tile then shows a spark). A character not open yet shows as a dark
+ * silhouette, a boss still in the workshop as a silhouette in its colour; they run over a
+ * stand-in for their world and can be looked at but not chosen.
  */
 import { LEVEL_COUNT } from '@parapet/sim';
 import { CharacterStage } from '../ui/CharacterStage.ts';
@@ -205,10 +205,13 @@ export class CharacterSelectScreen implements Screen {
       const id = boss?.id ?? '';
       const outfits = boss?.looks ?? [];
       const look = outfits[this.stage.outfit % Math.max(1, outfits.length)];
-      name = id ? i18n.t(`boss.${id}.name`) : '';
-      if (look && outfits.length > 1) name += ` · ${i18n.t(`boss.${id}.look.${look.id}`)}`;
-      const level = i18n.t(`level.names.${levelId}`);
       const status = this.status(entry);
+      name = id ? i18n.t(`boss.${id}.name`) : '';
+      // The outfits are part of the prize: named once the boss is open.
+      if (look && outfits.length > 1 && status === 'open') {
+        name += ` · ${i18n.t(`boss.${id}.look.${look.id}`)}`;
+      }
+      const level = i18n.t(`level.names.${levelId}`);
       const beaten =
         isContestBeaten(this.progress, levelId, 'flags') ||
         isContestBeaten(this.progress, levelId, 'sprint');

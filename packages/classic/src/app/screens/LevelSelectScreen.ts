@@ -1,8 +1,9 @@
 /**
  * Level select in the spirit of the original's map of cards (reference/notes/08 §9): the
  * twelve thumbnails of the original on light cards, the row of mission icons by progress and
- * the level description, or the "complete N more missions" note for a locked level (shown
- * dimmed under a lock instead of the original's placeholder picture).
+ * the level description, or for a locked level the note to complete the one before it (shown
+ * dimmed under a lock instead of the original's placeholder picture). A level opens once every
+ * mission of the previous one is done (`isLevelUnlocked`), not by the original's mission count.
  */
 import { LEVEL_COUNT } from '@parapet/sim';
 import { Theme, type GameContext } from '../Context.ts';
@@ -14,7 +15,7 @@ import { TextScroller } from '@parapet/runtime/ui/TextScroller.ts';
 import { ScreenFrame } from '../ui/ScreenFrame.ts';
 import { ANCHOR_TOP_LEFT } from '@parapet/runtime/render/SpriteSheet.ts';
 import {
-  completedCount,
+  isLevelUnlocked,
   isMissionCompleted,
   loadProgress,
   type Progress,
@@ -50,8 +51,10 @@ export class LevelSelectScreen implements Screen {
   private cards: Rect[] = [];
   private infoRect: Rect = { x: 0, y: 0, w: 0, h: 0 };
 
-  constructor(ctx: GameContext) {
+  /** `selected`: the card chosen at first (the level the player is heading to). */
+  constructor(ctx: GameContext, selected = 0) {
     this.ctx = ctx;
+    this.selected = Math.max(0, Math.min(LEVEL_COUNT - 1, selected));
     this.frame = new ScreenFrame(ctx);
     this.text.fade = Theme.panel;
     this.onResize();
@@ -124,8 +127,7 @@ export class LevelSelectScreen implements Screen {
   }
 
   private isUnlocked(levelId: number): boolean {
-    const threshold = this.ctx.content.missions.levels[levelId]?.unlockThreshold ?? 0;
-    return completedCount(this.progress) >= threshold;
+    return isLevelUnlocked(this.progress, this.ctx.content.missions.levels, levelId);
   }
 
   private open(): void {
@@ -292,7 +294,7 @@ export class LevelSelectScreen implements Screen {
     });
     const text = unlocked
       ? i18n.t(`level.desc.${id}`)
-      : i18n.t('level.locked', { n: level.unlockThreshold - completedCount(this.progress) });
+      : i18n.t('level.locked', { name: i18n.t(`level.names.${id - 1}`) });
     this.text.setText([{ text, font: fonts.small, color: unlocked ? Theme.text : Theme.muted }]);
   }
 }

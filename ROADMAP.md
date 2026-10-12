@@ -51,10 +51,10 @@ instead:
   simulation version or other level data are refused rather than replayed wrongly.
 - The replay races next to the player as a ghost in a world of its own (`RunSession`), so it
   cannot change the player's run. Checkpoint splits give the gap; the results compare both runs.
-- Ghosts and the original's rivals are drawn as "echoes": the atlas recoloured into a
-  hologram (`runtime/render/EchoSkin.ts`, `EchoRenderer.ts`). A player's echo is their own
-  character in a colour derived from their name; the story rivals are a featureless grey
-  silhouette.
+- Ghosts are drawn as "echoes": the atlas recoloured into a hologram
+  (`runtime/render/EchoSkin.ts`, `EchoRenderer.ts`), their own character in a colour derived
+  from their name. The story rivals run as themselves (the original drew a grey silhouette);
+  in the player's own skin, a rival is see-through.
 - Clipboard, downloads and file dialogs run inside the browser's input handler
   (`Screen.onGesture`), as Safari and iOS require.
 
@@ -121,6 +121,48 @@ instead:
   2: bits, versions and content as short keys, adaptive codes for the pauses, a prefix code for
   the presses; format 1 still opens), a preview of their own (a runner racing its echo), and
   "Open replay" with a field to paste into and the challenger's card before the race.
+
+## 6. Hints and thumbs (0.3.0)
+
+- **Glimpses of the bosses.** By the player's next flag a hologram of the boss loops what it
+  did from a second before taking that flag to a second after (`content/bosses/glimpses.json`,
+  poses written by `npm run tas -- publish`; the rest of each route stays secret). In a flag
+  hunt the boss, once its time is up, waits by the flag the player is to take next and moves on
+  with every flag, so it stands where the run ends; it floats by flags hanging in the air and
+  keeps clear of its own hologram.
+- **Bosses race a little slower** than their found runs (6.5 % on every level): nobody keeps
+  every press within a step of its place for a whole run.
+- **Boss rewards.** Both records of a boss open with the level's last mission; one win (either)
+  gives the boss plain, both give it its effect. (A single Flag hunt win used to give the effect.)
+- **Levels open by completion.** A level opens once every mission of the one before is done, in
+  any order (the original counted missions over all levels; a level already played stays
+  open). Completing a level brings up a box: who opened with it, the next level, the boss, and
+  the ways on (this mission again, the boss, the next level).
+- **Rivals run as themselves** in the sprints, with their name on the arrow towards them.
+- **A pointer to the finish** of a score run, see-through, while the finish is off screen.
+- **Touch buttons for two thumbs.** Round pixel buttons: left and right under one thumb, down
+  and up on a diagonal under the other (up higher and further out, along the thumb's arc),
+  restart and pause between them, all along the bottom; 52 to 72 CSS pixels by the screen, each
+  cluster owning a large part of its side of the screen (the nearest button takes a press). An
+  instant restart (the button, R, the gamepad's Y) goes straight to "get ready".
+- **The runner above the touch buttons.** The original's camera kept a level's bottom edge at
+  the bottom of the view, so on a tall screen the runner ran low, among the touch buttons,
+  under a wall of sky. The camera now frames the runner in the part of the screen above the
+  buttons' place (`Camera.setFrame`, the original rules within it; the whole view still for
+  the oracle tests), so the level's bottom edge stops just above the buttons. The strip under
+  it shows the city's walls and ground going on down into shadow. The sky and the skyline keep
+  the original screen's layout to the pixel, standing on the bottom of that frame (they used
+  to stretch with the screen's height and part from the level art), and the night harbour's
+  water reaches the quay, its reflections fading into the dark instead of a black band.
+- **Quieter music by default**: 40 % instead of 70 % (a level left at the old default follows).
+- **Race links in the query** (`<site>/r/?<code>`): chats such as Telegram drop a fragment.
+  Links stay within 4000 characters (minutes of busy play; longer runs go as files), and a race
+  page tells search engines whose race it is (title, description, canonical address).
+- **Fixes.** Characters not open yet run as silhouettes over a stand-in for their world (the
+  world is part of the prize); grid pictures no longer vanish after a rotation (the recoloured
+  scenes share the base scene's size); speech boxes keep their speaker in sight and their tail
+  on the head through resizes and rotations; the record's name field waits to be tapped instead
+  of popping the keyboard up.
 
 ## Next
 

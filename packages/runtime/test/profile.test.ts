@@ -1,13 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   clearRecords,
+  completeMission,
   dropLegacyEntries,
   isBetterRecord,
   isContestBeaten,
+  isLevelComplete,
+  isLevelUnlocked,
   listRecords,
   loadContestProgress,
   loadContestRecord,
   loadOptions,
+  loadProgress,
   markContestBeaten,
   saveOptions,
   updateContestRecord,
@@ -86,15 +90,23 @@ describe('profile', () => {
   });
 
   it('keeps the music volume of older schemas', () => {
-    expect(loadOptions().musicLevel).toBe(70);
+    expect(loadOptions().musicLevel).toBe(40);
+    // The old default (4 of 8 steps, or 70 %) was never a choice: it takes today's.
     store.setItem('parapet.options', JSON.stringify({ v: 1, data: { musicVolume: 4 } }));
-    expect(loadOptions().musicLevel).toBe(70);
+    expect(loadOptions().musicLevel).toBe(40);
+    store.setItem('parapet.options', JSON.stringify({ v: 1, data: { musicLevel: 70 } }));
+    expect(loadOptions().musicLevel).toBe(40);
+    store.setItem('parapet.options', JSON.stringify({ v: 1, data: { musicLevel: 55 } }));
+    expect(loadOptions().musicLevel).toBe(55);
     store.setItem('parapet.options', JSON.stringify({ v: 1, data: { musicVolume: 8 } }));
     expect(loadOptions().musicLevel).toBe(100);
     store.setItem('parapet.options', JSON.stringify({ v: 1, data: { music: false } }));
     expect(loadOptions().musicLevel).toBe(0);
     saveOptions({ musicLevel: 35 });
     expect(loadOptions().musicLevel).toBe(35);
+    // Chosen after this change, 70 stays 70.
+    saveOptions({ musicLevel: 70 });
+    expect(loadOptions().musicLevel).toBe(70);
   });
 
   it('wants full screen on touch screens unless told otherwise', () => {
@@ -134,5 +146,21 @@ describe('profile', () => {
     clearRecords();
     expect(loadContestRecord(2, 'sprint')).toBeNull();
     expect(isContestBeaten(loadContestProgress(), 2, 'sprint')).toBe(true);
+  });
+
+  it('opens a level once every mission of the one before is done, in any order', () => {
+    const levels = [{ missionCount: 3 }, { missionCount: 2 }, { missionCount: 2 }];
+    const open = (id: number): boolean => isLevelUnlocked(loadProgress(), levels, id);
+    expect([open(0), open(1), open(2)]).toEqual([true, false, false]);
+    completeMission(0, 2);
+    completeMission(0, 0);
+    expect(open(1)).toBe(false);
+    expect(completeMission(0, 1).firstTime).toBe(true);
+    expect(isLevelComplete(loadProgress(), levels, 0)).toBe(true);
+    expect([open(1), open(2)]).toEqual([true, false]);
+    // A level played under the original's mission count stays open.
+    completeMission(2, 1);
+    expect(open(2)).toBe(true);
+    expect(isLevelComplete(loadProgress(), levels, 1)).toBe(false);
   });
 });

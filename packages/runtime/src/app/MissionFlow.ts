@@ -32,11 +32,15 @@ export class MissionFlow {
     this.reset();
   }
 
-  /** Back to the first phase of a fresh attempt (also forgets the hints shown). */
-  reset(): void {
+  /**
+   * Back to the first phase of a fresh attempt (also forgets the hints shown); `quick` goes
+   * straight to "get ready", without the pages, the briefing and the flyover seen before.
+   */
+  reset(quick = false): void {
     this.tutorialPage = 0;
     this.hints.clear();
-    if (this.cfg.tutorialPages > 0) this.enter('tutorial');
+    if (quick) this.enter('ready');
+    else if (this.cfg.tutorialPages > 0) this.enter('tutorial');
     else if (this.cfg.briefing) this.enter('briefing');
     else this.enter(this.afterBriefing());
   }

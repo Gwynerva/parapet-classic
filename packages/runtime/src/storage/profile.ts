@@ -44,12 +44,18 @@ export const DEFAULT_OPTIONS: Readonly<Options> = {
   locale: '',
   scaleMode: 'auto',
   vibration: true,
-  musicLevel: 70,
+  musicLevel: 40,
   touchControls: 'auto',
   touchLayout: 'move-left',
   bestGhost: true,
   fullscreen: 'auto',
 };
+
+/**
+ * The default music level of the saves made before each save noted its default
+ * (`musicDefault`); a level left there follows the default of today.
+ */
+const OLD_DEFAULT_MUSIC_LEVEL = 70;
 
 /**
  * The volume of the first schemas, 0..8 steps on a linear scale, as a percentage on the
@@ -177,13 +183,19 @@ function validateOptions(raw: unknown): Partial<Options> | null {
   if (typeof raw['vibration'] === 'boolean') out.vibration = raw['vibration'];
   const musicLevel = raw['musicLevel'];
   const musicVolume = raw['musicVolume'];
+  let level: number | undefined;
   if (typeof musicLevel === 'number' && Number.isFinite(musicLevel)) {
-    out.musicLevel = Math.max(0, Math.min(100, Math.round(musicLevel)));
+    level = Math.max(0, Math.min(100, Math.round(musicLevel)));
   } else if (typeof musicVolume === 'number' && Number.isInteger(musicVolume)) {
-    out.musicLevel = levelFromVolumeSteps(musicVolume); // the 0..8 steps of the second schema
+    level = levelFromVolumeSteps(musicVolume); // the 0..8 steps of the second schema
   } else if (raw['music'] === false) {
-    out.musicLevel = 0; // the on/off switch of the first schema
+    level = 0; // the on/off switch of the first schema
   }
+  // A level still at the default it was saved under is no choice: it takes today's default
+  // (the music got quieter by default: 70 % was far too loud).
+  const savedDefault =
+    typeof raw['musicDefault'] === 'number' ? raw['musicDefault'] : OLD_DEFAULT_MUSIC_LEVEL;
+  if (level !== undefined && level !== savedDefault) out.musicLevel = level;
   const fullscreen = raw['fullscreen'];
   if (fullscreen === 'auto' || fullscreen === 'on' || fullscreen === 'off') {
     out.fullscreen = fullscreen;
@@ -201,10 +213,13 @@ export function loadOptions(): Options {
   return { ...DEFAULT_OPTIONS, ...(read(OPTIONS_KEY, validateOptions) ?? {}) };
 }
 
-/** Merges `patch` into the stored options and returns the result. */
+/**
+ * Merges `patch` into the stored options and returns the result. The default music level goes
+ * with them, so a level left at the default follows a later one.
+ */
 export function saveOptions(patch: Partial<Options>): Options {
   const merged = { ...loadOptions(), ...patch };
-  write(OPTIONS_KEY, merged);
+  write(OPTIONS_KEY, { ...merged, musicDefault: DEFAULT_OPTIONS.musicLevel });
   return merged;
 }
 
@@ -390,9 +405,33 @@ export function completeMission(levelId: number, slot: number): CompletionResult
   return { progress, firstTime, total: completedCount(progress) };
 }
 
-/** A level opens once the total completed missions reach its threshold (`z[8]`). */
-export function isLevelUnlocked(progress: Progress, threshold: number): boolean {
-  return completedCount(progress) >= threshold;
+/** What the unlock rules need to know of a level: how many missions it has. */
+export interface LevelMissions {
+  missionCount: number;
+}
+
+/** Every mission of a level is done (its contests with a boss are not missions). */
+export function isLevelComplete(
+  progress: Progress,
+  levels: readonly LevelMissions[],
+  levelId: number,
+): boolean {
+  const level = levels[levelId];
+  return level !== undefined && completedMissions(progress, levelId) >= level.missionCount;
+}
+
+/**
+ * A level opens once the one before it is complete. The original counted the missions done
+ * over all levels instead (`z[8]`, kept as `unlockThreshold`); a level already played under
+ * that rule stays open.
+ */
+export function isLevelUnlocked(
+  progress: Progress,
+  levels: readonly LevelMissions[],
+  levelId: number,
+): boolean {
+  if (levelId <= 0) return true;
+  return isLevelComplete(progress, levels, levelId - 1) || completedMissions(progress, levelId) > 0;
 }
 
 export function markPrizeSeen(): void {

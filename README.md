@@ -31,13 +31,14 @@ new, a readable reference for this kind of game.
   challenge link: whoever opens it (or pastes it into "Open replay") races your ghost, and
   their browser re-runs it, so a link cannot claim a time the run did not make.
 - **Twelve bosses.** A character on every level with a record far below the original's. Beat
-  its Sprint and it is yours to play; beat its Flag hunt and it brings its effect. See
+  one of its two records and it is yours to play; beat both and it brings its effect. See
   [`packages/content/bosses`](packages/content/bosses/README.md).
 - **At home anywhere.** Wide screens, tablets and phones in either orientation, full screen
   and installable as an app; keyboard, touch and gamepad; English and Russian.
 
 **Controls:** arrows or WASD run and do the tricks (the Moves menu shows each one); Enter or
-Space confirms, Esc steps back, P pauses. Phones get touch buttons.
+Space confirms, Esc steps back, P pauses, R starts the run over. Phones get touch buttons for
+two thumbs, with start-over and pause between them.
 
 ## Development
 
