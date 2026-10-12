@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Showcase</title>
+    <style>
+      body {
+        background: #101418;
+        color: #ddd;
+        font: 13px monospace;
+        margin: 16px;
+      }
+      header {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 16px;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      select,
+      input {
+        font: inherit;
+      }
+      canvas {
+        display: block;
+        image-rendering: pixelated;
+        margin: 8px 0;
+      }
+      #status {
+        white-space: pre-wrap;
+        min-height: 1.3em;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <label>Look <select id="look"></select></label>
+      <label>Scene <select id="scene"></select></label>
+      <label>Zoom <select id="zoom"></select></label>
+      <label><input type="checkbox" id="fx" checked /> effect</label>
+      <label><input type="checkbox" id="force" /> every flourish</label>
+    </header>
+    <p id="status"></p>
+    <canvas id="view"></canvas>
+    <script type="module" src="./showcase.ts"></script>
+  </body>
+</html>
