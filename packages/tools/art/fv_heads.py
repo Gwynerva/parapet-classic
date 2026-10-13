@@ -1,11 +1,16 @@
 """Five's heads, drawn from scratch: V of Cyberpunk 2077, the woman and the man (two faces: the
 game lets you play either).
 
-Her: a raspberry asymmetric undercut, the crest swept over the crown and highest at the front, a
-forelock over the forehead, the long hair hanging at the back to the collar, the side shaved to
-dark stubble; the chrome cyber line from the brow's tail back to the temple and down round the
-eye to the cheekbone; heavy-lidded green eyes in dark liner, dark plum lips, a narrow firm chin,
-silver rings in the ear. In the 3/4 face the crest falls in a sheet over the far eye.
+Her (redrawn to read feminine and neat): a raspberry asymmetric undercut, the crest swept over
+the crown and highest at the front, its tip over the forehead, the long hair hanging at the back
+in points to the collar, the side shaved to dark stubble; the chrome cyber line, one clean pixel
+wide, from the brow's tail back to the temple, down and round under the eye to the cheekbone;
+large green eyes with white under a dark lash line with a flick at the outer corner, thin brows,
+a small upturned nose, small dark berry lips, a short lower face curving in to a small chin set
+back, a slim jaw climbing to the ear, a slender neck in shade, a ring under the lobe. The light is
+soft and broad (lit front, a mid tone on the side planes, shade under the chin, a touch of
+blush), never dark pixels on the cheek or jaw. In the 3/4 face the crest falls in a sheet down
+the far side, framing the far cheek and jaw; both eyes are the same size.
 
 Him: a short spiky black crop over faded sides with a shaved line through the fade, heavy
 straight brows low over green eyes, chrome brackets at the temples, a short boxed beard with a
@@ -24,16 +29,21 @@ Each grid marks the base's head box (`*_BOX`, its top left corner in the grid; B
 from heads import Pic
 
 # --------------------------------------------------------------------------------------------
-# Her legend.
+# Her legend. The skin's five tones are the body's (fv_parts.py takes HER_SKIN for her hands and
+# midriff); the head adds its own warmer outline and a blush.
 # --------------------------------------------------------------------------------------------
 HER_SKIN = {
-    'H': '#ffeccc',  # highlight: brow ridge, nose, cheekbone (yellower)
+    'H': '#ffeccc',  # highlight: forehead, nose tip, cheek (yellower)
     '1': '#fbd0a0',  # light
     '2': '#eaab7b',  # base
     '3': '#c87f57',  # shadow (redder)
     '4': '#97503a',  # deep shadow
     'o': '#4a1c14',  # outline in shade
     's': '#d89468',  # the lit edge (sel-out)
+}
+HEAD_SKIN = {
+    'o': '#7a3a2c',  # the face's outline: a warm dark skin tone, not black
+    'u': '#f0a088',  # a touch of blush
 }
 HER_HAIR = {
     'P': '#ff86a6',  # highlight band
@@ -44,23 +54,25 @@ HER_HAIR = {
     'k': '#2a0613',  # hair outline
 }
 SHAVED = {
-    'g': '#5c4a50',  # stubble where the light reaches
-    'G': '#40333a',  # stubble
-    'j': '#2a2026',  # stubble in shade
+    'g': '#5e4650',  # stubble where the light reaches
+    'G': '#45323b',  # stubble
+    'j': '#2e2028',  # stubble in shade
 }
-CHROME = {'C': '#f0ecea', 'c': '#b4acac', 'x': '#5c5052'}
+CHROME = {'C': '#f0ecea', 'c': '#b4acac', 'x': '#5c5052'}  # (his brackets)
+HER_CHROME = {'C': '#c4cedb'}  # her line: one clean, cool silver
 HER_FACE = {
-    'w': '#f4e8e0',  # eye white (warm)
-    'i': '#5aa648',  # green iris
-    'I': '#1e3a1a',  # pupil
-    'l': '#1e0c10',  # liner and lashes
-    'b': '#3e1a1a',  # brows
-    'm': '#6a2234',  # lips, dark plum
-    'M': '#bd6a76',  # lower lip's light
-    'e': '#f2f4fa',  # silver rings
-    'E': '#9096a6',
+    'w': '#fbf3ec',  # eye white (warm)
+    'i': '#4fb052',  # green iris
+    'v': '#b4ec9a',  # the iris' highlight
+    'I': '#163a20',  # pupil
+    'l': '#2a0c16',  # liner and lashes
+    'b': '#8a4440',  # thin brows, a dark warm brown
+    'm': '#7c2244',  # the mouth line and upper lip, dark berry
+    'M': '#b0506c',  # lower lip
+    'n': '#e08ca0',  # the lower lip's highlight
+    'e': '#f2f4fa',  # a silver ring
 }
-HER = {**HER_SKIN, **HER_HAIR, **SHAVED, **CHROME, **HER_FACE}
+HER = {**HER_SKIN, **HEAD_SKIN, **HER_HAIR, **SHAVED, **HER_CHROME, **HER_FACE}
 
 # --------------------------------------------------------------------------------------------
 # Her profile (25), facing right: column i is x + 1 of the head box, row j is y + 2.
@@ -69,51 +81,51 @@ HER_PROF_BOX = (1, 2)
 # fmt: off
 HER_PROF = [
     #012345678901234567     x + 1
-    '..........krr.....',  # -2 the crest, highest at the front
-    '.......kRrpPPpr...',  # -1
-    '....kRrqqpPPPpqr..',  # 0
-    '..kRrqppqrqpPpqr..',  # 1
-    '.kRqpqrqpqrqpPqr..',  # 2
-    '.kqprRRrRrqrqpqk..',  # 3 the crest's underside; the forelock
-    '.kpqRjjjjj321Rqr..',  # 4 the shaved side under it
-    '.kprjGGGgg2111r...',  # 5 the forelock's tip on the forehead
-    '.kqrjGgggccbbbH...',  # 6 the chrome line from the brow's tail; the brow
-    '.krqje12gC2llls...',  # 7 a ring on the helix; heavy liner
-    '.kRrj1o12c12wwiH..',  # 8 the ear; the eye; the nose
-    '.krRj34222c13wI2H.',  # 9 the line's end
-    '.kRR4o13321H1132s.',  # 10 the lobe; the cheekbone; the nostril
-    '..kR443322211223..',  # 11 the long hair's tip
-    '...ko4E3322223mm..',  # 12 a ring under the lobe; the upper lip
-    '....o434322212MM..',  # 13 the lower lip
-    '.....o334322123...',  # 14 the jaw line; under the lip
-    '.....o333432111s..',  # 15 the narrow firm chin
-    '......o33344333o..',  # 16 the jaw's shadow on the neck
+    '..........kk......',  # -2 the crest, highest toward the front
+    '........kkRqk.....',  # -1
+    '.....kkRqpPPPk....',  # 0 the highlight band on the crown
+    '...kRrqqpPPPpqk...',  # 1
+    '..kRqqrqppPPppqk..',  # 2
+    '.kRqrqqrqqppPPpqk.',  # 3 the crest swept back over the shaved side
+    '.kqrRRRRRRr1HH1rk.',  # 4 its dark underside; the forelock's tip
+    'kRqrjjjjjjgCbbbH..',  # 5 the stubble; the chrome line from the brow's tail; a thin brow
+    'kRqRGGGGggCl11HH..',  # 6 the line down the temple; the liner's flick
+    'kRqRGGGgg2C2lll1..',  # 7 the lash line
+    'kRqRjjj322C1wIi1..',  # 8 the ear; the eye
+    'kRqRjjj342C1wiv1s.',  # 9 the nose's bridge
+    'kRqRRjj3322CH111H.',  # 10 the line's end on the cheekbone; the small upturned nose
+    '.kRqrRRke221u113..',  # 11 a ring under the lobe; a touch of blush; the nostril
+    '.kRqRrRR332111mm..',  # 12 the berry lips
+    '.kRrqRrk4321112M..',  # 13 the lower lip; the jaw climbing to the ear
+    '..kRqkRk343211s...',  # 14 the small chin, set back
+    '..kRk.kk334323....',  # 15 the long hair hanging in points; under the chin
+    '...k...k334.......',  # 16 the slender neck in shade
 ]
 
 # Her 3/4 face (29): column i is x + 1 of the box, row j is y + 2. The crest swept over to the
-# far side falls in a sheet over the far eye; the near temple shaved, the ear with its rings.
+# far side falls in a sheet down the far cheek; the near temple shaved, the ear with its ring.
 HER_FRONT_BOX = (1, 2)
 HER_FRONT = [
     #012345678901234567     x + 1
-    '.......krrk.......',  # -2
-    '....kRqpPPpqr.....',  # -1 swept over from the shaved side
-    '..kRqppPPppqqrk...',  # 0
-    '.kRrqpqpPpqpqqrk..',  # 1
-    '.kRRrqrqpqrqpqqrk.',  # 2
-    '.kjRrRrqrqpqpqpqk.',  # 3
-    '.kGj321123Rrqpqrk.',  # 4 the shaved temple; the hairline; the sheet of hair falling
-    '.kgG21H112Rrqpqrk.',  # 5
-    '.kgCbbb2bbRrqqprk.',  # 6 the brows; the chrome line from the brow's tail
-    'kGc2lllHllRrqqprk.',  # 7 liner; the line turns down at the temple
-    'o2c2wwi1wiRrqpqrk.',  # 8 the ear; the eyes, the far one under the strand
-    '242c3wI23IRrqqrk..',  # 9 the line round the eye's corner
-    'o321cH1H333Rqrqk..',  # 10 the line's end on the cheekbone; the nose's tip
-    '.o322123434Rrqk...',  # 11 the nostril, its shadow on the far cheek
-    '.Eo323mmm34Rqk....',  # 12 a ring under the lobe; the lips
-    '...o322MM3oRk.....',  # 13
-    '...4o2233o.k......',  # 14
-    '...44o12o.........',  # 15 the narrow chin
-    '...o44oo..........',  # 16
+    '.....kk...........',  # -2 the crest, highest over the parting
+    '...kkRqk..........',  # -1
+    '..kRqpPPpk........',  # 0 the highlight band
+    '.kRqpPPPpqqk......',  # 1
+    '.kRqpPpppqqqrk....',  # 2
+    '.kGRRqppqqpqqqrk..',  # 3 the shaved temple; the fringe swept across
+    '.kG3H12Rqpqpqqprk.',  # 4
+    '.GgCbbb12bRqpqprk.',  # 5 thin brows; the chrome line from the brow's tail
+    '.GCl1H1112Rqqprk..',  # 6 the line down the temple; the liner's flick
+    'o2C1lll11lllRqrk..',  # 7 the lash lines
+    'o4C1wIi12wIiRqrk..',  # 8 the eyes, the same size
+    'o3C1wiv12wivRqrk..',  # 9
+    '.o2CCH1H32u3Rqk...',  # 10 the line turning under the eye; the nose's tip, shaded on the far side
+    '.es1u1123233Rqrk..',  # 11 a ring under the lobe; blush
+    '..s112mm323Rk.Rk..',  # 12 small berry lips; the sheet of hair ends in points
+    '...s11nM33k...k...',  # 13 the lower lip
+    '....s1H123........',  # 14 the small chin
+    '.....s123.........',  # 15
+    '.....3433.........',  # 16 the slender neck
 ]
 # fmt: on
 
@@ -240,13 +252,18 @@ def centred(pic, box, wp=0, hp=1):
     return pic.pad(pad_l, pad_t, W - w0 - pad_l, H - h0 - pad_t)
 
 
-# The profile's faces, as changes of the grid (column, row): 76 the eyes closing, 77 closed (the
-# smoky lid down to the lashes), 78 the pain face (the eyes squeezed, the mouth open).
+# The profile's faces, as changes of the grid (column, row), made from the eye of 25: 76 the eye
+# half closed (the lid and the lash line with its flick one row down), 77 closed (a curved lash
+# line at the bottom of the eye), 78 the pain face (the eye squeezed, the brow pulled down at the
+# front, the mouth open).
 HER_FACES = {
-    76: {(12, 10): 'l', (13, 10): 'l', (14, 10): 'l', (12, 11): '3', (13, 11): 'w', (14, 11): 'I'},
-    77: {(12, 10): '2', (13, 10): '1', (14, 10): '1', (12, 11): 'l', (13, 11): 'l', (14, 11): 'l'},
-    78: {(12, 10): 'l', (13, 10): 'l', (14, 10): 'l', (12, 11): '3', (13, 11): '2', (14, 11): '2',
-         (11, 8): 'b', (13, 14): 'o', (14, 14): 'o', (15, 14): 'm', (14, 15): 'o', (15, 15): 'M'},
+    76: {(11, 8): '2', (11, 9): 'l', (12, 9): '1', (13, 9): '1', (14, 9): '1',
+         (12, 10): 'l', (13, 10): 'l', (14, 10): 'l'},
+    77: {(11, 8): '2', (12, 9): '1', (13, 9): '1', (14, 9): '1', (12, 10): '1', (13, 10): 'H', (14, 10): '1',
+         (11, 11): 'l', (12, 11): 'l', (13, 11): 'l', (14, 11): 'l'},
+    78: {(11, 8): '2', (12, 9): '1', (13, 9): '1', (14, 9): '1', (12, 10): 'l', (13, 10): 'l', (14, 10): 'l',
+         (12, 11): '2', (13, 11): '3', (14, 11): '2', (14, 7): '1', (14, 8): 'b',
+         (13, 14): 'l', (14, 14): 'l', (14, 15): 'l'},
 }
 
 
