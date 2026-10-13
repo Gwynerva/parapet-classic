@@ -2,9 +2,11 @@
 secrets. Her head and body are drawn anew (az_heads.py, az_parts.py); four looks (az_looks.py):
 the scholar of the first game in her sage-green coat, the Shadow Broker in white and indigo, the
 black leather with pink-red inserts, the information broker of Illium in dark green over ivory.
-Her effect is her biotics (az_fx.py): a Singularity left hanging after some tricks, pebbles lifted
-on some landings, a shimmer at her hands in the air, the Prothean stasis bubble while she waits,
-and with the broker look her drone Glyph. Writes the looks, fx.json and the whole boss.json."""
+Her effect is her biotics (az_fx.py): on some tricks her aura flares, cold flames lick off her and
+a Singularity is left hanging behind her; a faint cold flame now and then as she runs, pebbles
+lifted on some landings, a shimmer at her hands in the air, the Prothean stasis bubble while she
+waits, and with the broker look her drone Glyph. Writes the looks, fx.json and the whole
+boss.json."""
 import os
 from lookgen import BOSSES, write_json
 from tricks import tricks

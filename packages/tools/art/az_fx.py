@@ -1,8 +1,12 @@
 """Azure's effect: Liara's biotics, each piece one of her own powers or scenes, not "blue sparks".
 
-* Singularity (her signature power in all three games) on some flips and vaults: a black sphere
-  in a thin dark red edge and a white-lilac corona, four tongues of it swirling out, left hanging
-  in the air where she was for under a second, then collapsing to a point.
+* The flare, on about a third of the flips and vaults: her biotic aura blazes up as she casts
+  (a copy of her pose in biotic violet, left where she was, rising a little and fading in 0.4 s),
+  cold flames lick up off her outline, and her Singularity (her signature power in all three
+  games) is left hanging behind her: a black sphere 25 px across in a thin dark red edge and a
+  white-lilac corona, six arms swirling round it with pebbles and sparks drawn in along them; it
+  forms, spins and collapses to a point in about a second. The three always come together.
+* Her aura on the run, much fainter: now and then a small cold flame rising off her.
 * Lift on some landings: two to four pebbles rise from under her feet in a faint lilac field and
   drift up as she runs on.
 * While she is in the air, a faint shimmer at her hands (the open-palm cast of her renders).
@@ -11,17 +15,20 @@
 * `glyph` (worn by the broker look): now and then her VI drone Glyph, a white core in blue rings,
   keeps her company for a moment, hovering over the back of her crest.
 
-The sprites are drawn here, some by code (circles and the bubble), the stones by hand."""
+The sprites are drawn here, some by code (the Singularity and the bubble), the stones and the
+flames by hand."""
 import math
 
 # Biotic lilac and blue, the singularity's core, the stones, the barrier's blue (with alpha).
 PALETTE = {
     'w': '#ffffff', 'L': '#efeaff', 'l': '#c4bcff', 'v': '#8a82ec', 'V': '#5a52b8', 'u': '#3c3488',
-    'k': '#0c0818', 'K': '#221a44', 'r': '#7a2a5a',
+    'k': '#0c0818', 'K': '#221a44', 'r': '#7c1e3c', 'R': '#a8304e',
     'h': '#9a8cff70', 'H': '#c8c0ff90',
     's': '#c8bca8', 'S': '#968a76', 'd': '#5e5648',
     'b': '#5a7cff2e', 'B': '#7c9cffa0', 'c': '#b4ccffd0', 'C': '#eef4ffe8', 'e': '#6a8cff60',
     'g': '#5aa8ff', 'G': '#a8d4ff', 'W': '#f4faff', 'q': '#2e6ad8',
+    # Cold flame (drawn with blend add: the darker, the fainter).
+    'F': '#d4ccff', 'f': '#8a7aff', 'n': '#4a38cc', 'm': '#261c7c',
 }
 
 
@@ -33,54 +40,115 @@ def rows(g):
     return [''.join(r) for r in g]
 
 
-def singularity(frame, size=15):
-    """The sphere as Liara throws it: a black core in a thin dark red edge, a white-lilac corona
-    round it and four tongues of it swirling out and fading; a step of a sixteenth of a turn a
-    frame, so four frames loop (the tongues are four)."""
+# The Singularity, 25 px across: a sprite of its own for every step of its life.
+SING = 25
+ARMS = 6
+# A spin step: the arms are six, the pebbles and sparks drawn in along them come every other
+# arm, so the picture repeats after a third of a turn: eight frames of 15 degrees.
+SPIN = 8
+STEP = (2 * math.pi / 3) / SPIN
+
+
+def singularity(i, sc=1.0, pull=0.0, motes=True):
+    """The sphere as Liara throws it (ME3, against Kai Leng): a black core in a thin dark red
+    edge, a white-lilac corona brightest on the lit side (the upper front: the upper right here,
+    the particle is mirrored to her facing), six arms of it trailing as it spins, and pebbles and
+    sparks drawn in along the arms, falling into the corona and glowing as they go. `i` is the spin step (a step turns it 15 degrees, eight steps make a seamless loop),
+    `sc` its size (the forming and collapsing frames), `pull` how tightly the collapse winds the
+    arms in."""
+    g = blank(SING, SING)
+    c = (SING - 1) / 2
+    rot = i * STEP
+    core, rim, cor = 4.55 * sc, 5.45 * sc, 7.1 * sc
+    a0, a1 = 6.2 * sc, (12.3 - 2.6 * pull) * sc
+    twist = 0.30 + 0.35 * pull
+    for y in range(SING):
+        for x in range(SING):
+            dx, dy = x - c, y - c
+            d = math.hypot(dx, dy)
+            a = math.atan2(dy, dx)
+            lit = math.cos(a + math.pi / 4)
+            if d <= core:
+                g[y][x] = 'k'
+                continue
+            if d <= rim:
+                g[y][x] = 'R' if lit > 0.5 else 'r'
+                continue
+            if d <= cor:
+                g[y][x] = 'w' if lit > 0.2 else 'L' if lit > -0.55 else 'l'
+                continue
+    # The arms: six strokes along trailing spirals, 2-3 px wide where they leave the corona and
+    # thinning to a point, bright at the root and on the lit side, dimmer toward the tip.
+    curves = []
+    for k in range(ARMS):
+        pts = []
+        n = 40
+        for m in range(n + 1):
+            r = a0 + (a1 - a0) * m / n
+            ang = rot + k * math.pi / 3 - twist * (r - a0) / max(sc, 0.2)
+            pts.append((c + r * math.cos(ang), c + r * math.sin(ang), m / n))
+        curves.append(pts)
+    for y in range(SING):
+        for x in range(SING):
+            d = math.hypot(x - c, y - c)
+            if d <= cor or d > a1 + 1.0:
+                continue
+            best = None
+            for pts in curves:
+                for (cx, cy, t) in pts:
+                    w = (1.35 - 0.95 * t) * max(sc, 0.5)
+                    dd = math.hypot(x - cx, y - cy)
+                    if dd < w:
+                        lit = math.cos(math.atan2(cy - c, cx - c) + math.pi / 4)
+                        v = 1.0 - 1.0 * t + 0.30 * lit - 0.25 * (dd / w) ** 2
+                        best = v if best is None else max(best, v)
+            if best is not None:
+                g[y][x] = ('L' if best > 0.86 else 'l' if best > 0.6 else 'v' if best > 0.36
+                           else 'V' if best > 0.14 else 'u')
+    if motes:
+        out, inn = (a1 - 0.8), cor + 0.3
+        for j in range(-2, 5):
+            # Pebbles on arms 0, 2, 4 and sparks on arms 1, 3, 5, each sliding one place in along
+            # its arm per loop (so the loop is seamless: where one was, the next one is).
+            for phase, kind in ((0.0, 'stone'), (0.5, 'spark')):
+                s = j + (i % SPIN) / SPIN + phase + (i // SPIN)
+                if not 0.15 < s < 2.95:
+                    continue
+                arm = 2 * j + (1 if kind == 'spark' else 0)
+                r = out - (out - inn) * s / 3
+                ang = rot + arm * math.pi / 3 - twist * (r - a0) / max(sc, 0.2) + 0.05
+                px, py = round(c + r * math.cos(ang)), round(c + r * math.sin(ang))
+                if not (0 <= px < SING and 0 <= py < SING):
+                    continue
+                if kind == 'stone':
+                    if s < 0.5 or s > 2.5:
+                        g[py][px] = 'S' if s < 0.5 else 'w'
+                    else:
+                        g[py][px] = 's'
+                        if py + 1 < SING:
+                            g[py + 1][px] = 'd'
+                        if px - 1 >= 0 and s < 1.9:
+                            g[py][px - 1] = 'S'
+                else:
+                    g[py][px] = 'w' if 0.6 < s < 2.6 else 'L'
+    return rows(g)
+
+
+def flash(size=SING):
+    """The end of the collapse: a white point with four short rays and a faint ring."""
     g = blank(size, size)
-    c = (size - 1) / 2
-    turn = frame * math.pi / 8
+    c = (size - 1) // 2
     for y in range(size):
         for x in range(size):
             dx, dy = x - c, y - c
             d = math.hypot(dx, dy)
-            a = math.atan2(dy, dx)
-            if d <= 2.9:
-                g[y][x] = 'k'
-            elif d <= 3.6:
-                g[y][x] = 'r'
-            elif d <= 4.95:
-                # The corona: brightest on the side the light comes from (upper right).
-                lit = math.cos(a + math.pi / 4)
-                g[y][x] = 'w' if lit > 0.3 else 'L' if lit > -0.5 else 'l'
-            elif d <= 7.0:
-                for k in range(4):
-                    ang = turn + k * math.pi / 2 + 0.45 * (d - 4.95)
-                    off = (a - ang + math.pi) % (2 * math.pi) - math.pi
-                    if abs(off) < 0.42 - 0.1 * (d - 4.95):
-                        g[y][x] = 'l' if d <= 5.7 else 'v' if d <= 6.4 else 'h'
-    return rows(g)
-
-
-def collapse(radius, size=15):
-    """The sphere shrinking: a smaller core and rim, the haze pulled in, then a bright point."""
-    g = blank(size, size)
-    c = (size - 1) / 2
-    for y in range(size):
-        for x in range(size):
-            d = math.hypot(x - c, y - c)
-            if radius <= 0.6:
-                if d < 0.6:
-                    g[y][x] = 'w'
-                elif d < 1.6:
-                    g[y][x] = 'H'
-                elif d < 2.4 and (x + y) % 2 == 0:
-                    g[y][x] = 'h'
-            elif d <= radius - 1.0:
-                g[y][x] = 'k'
-            elif d <= radius:
-                g[y][x] = 'L' if x + y < size - 1 else 'l'
-            elif d <= radius + 1.2:
+            if d < 0.6:
+                g[y][x] = 'w'
+            elif (dx == 0 or dy == 0) and d <= 1.1:
+                g[y][x] = 'L'
+            elif (dx == 0 or dy == 0) and d <= 3.1:
+                g[y][x] = 'H' if d <= 2.1 else 'h'
+            elif abs(d - 4.6) < 0.5 and (x + y) % 2 == 0:
                 g[y][x] = 'h'
     return rows(g)
 
@@ -121,6 +189,97 @@ def bubble(w=33, h=61, broken=0):
     return rows(g)
 
 
+# Cold flame: biotic light licking off her outline (blend add, so on the night sky it glows and
+# on a light one it only brightens). Drawn for a runner facing right (`face` mirrors them): the
+# tongues lean back, the way the air takes them. Each animation: born at the outline, stretched
+# and curling, then a thin wisp torn off.
+WISPS = {
+    # The small ones of the run, 3-4 px wide, 5-6 tall: a lilac heart, a dim tip.
+    'wisp-a1': ['.m.',
+                '.n.',
+                'nfn',
+                'fFf',
+                '.n.'],
+    'wisp-a2': ['m..',
+                '.n.',
+                '.nn',
+                'nff',
+                '.fn',
+                '..n'],
+    'wisp-a3': ['m...',
+                '.n..',
+                '..n.',
+                '..f.',
+                '...n'],
+    'wisp-b1': ['..m',
+                '.n.',
+                'nf.',
+                'fFn',
+                '.n.'],
+    'wisp-b2': ['m...',
+                '.n..',
+                '.nn.',
+                '.nfn',
+                '..ff',
+                '..n.'],
+    'wisp-b3': ['.m..',
+                'm...',
+                '.n..',
+                '..f.',
+                '..n.'],
+    # The flare's, 5 px wide and 7-8 tall: a fuller tongue, round at the root, with a white
+    # heart, its tip curling back.
+    'flame-a1': ['.....',
+                 '..m..',
+                 '..n..',
+                 '.nn..',
+                 '.nfn.',
+                 'nffFn',
+                 'nfFfn',
+                 '.nfn.'],
+    'flame-a2': ['m....',
+                 '.n...',
+                 '.nn..',
+                 '..fn.',
+                 '.nffn',
+                 '.nFfn',
+                 '..fn.',
+                 '..n..'],
+    'flame-a3': ['m....',
+                 '.n...',
+                 '..n..',
+                 '..nm.',
+                 '.nf..',
+                 '..fn.',
+                 '..n..',
+                 '.....'],
+    'flame-b1': ['.....',
+                 '...m.',
+                 '..n..',
+                 '.nf..',
+                 '.ffn.',
+                 'nfFfn',
+                 'nfFfn',
+                 '.nn..'],
+    'flame-b2': ['.m...',
+                 'm....',
+                 '.n...',
+                 '.nfn.',
+                 '..ffn',
+                 '.nfFn',
+                 '.nffn',
+                 '..nn.'],
+    'flame-b3': ['.m...',
+                 'm.n..',
+                 '..n..',
+                 '..fm.',
+                 '.nf..',
+                 '..n..',
+                 '.....',
+                 '.....'],
+}
+
+
 GLYPH = {
     'glyph1': ['..ggg..', '.g...g.', 'g.GWG.g', 'q.WWW.q', 'g.GWG.g', '.q...q.', '..qqq..'],
     'glyph2': ['...g...', '.qgGgq.', '.gGWGg.', 'gGWWWGg', '.gGWGg.', '.qgGgq.', '...q...'],
@@ -128,23 +287,51 @@ GLYPH = {
 
 
 def sprites():
-    s = {f'sing{i}': singularity(i) for i in range(4)}
-    s.update({'coll1': collapse(3.6), 'coll2': collapse(2.2), 'coll3': collapse(0.5)})
+    s = {f'sing{i}': singularity(i) for i in range(SPIN)}
+    # Forming (two steps before the loop's start) and collapsing (going on from where the loop
+    # leaves it: the frames after sing2 of the second round).
+    s.update({'form1': singularity(-2, 0.42, motes=False), 'form2': singularity(-1, 0.74)})
+    s.update({'coll1': singularity(11, 0.74, 0.5), 'coll2': singularity(12, 0.5, 0.9, motes=False),
+              'coll3': singularity(13, 0.3, 1.0, motes=False), 'flash': flash()})
     s.update(STONES)
     s.update({'bubble': bubble(), 'pop1': bubble(broken=1), 'pop2': bubble(broken=2)})
     s.update(GLYPH)
+    s.update(WISPS)
     return s
 
 
 EMITTERS = {
-    # Singularity: on a flip or a vault, about one in three, ahead of her near hand; it stays in the
-    # world (inherit 0), swirls for half a second and collapses (12 frames at 13 fps, 0.92 s).
+    # The flare (the biotics variant's snapshot, on about a third of the flips and vaults) brings
+    # the Singularity and the cold flames with it; neither has a trigger of its own (and with
+    # reduced motion, which takes no snapshots, neither comes).
+    # Singularity: a little behind her hips and below them, on the layer behind her, so she flips
+    # away from it (forward or back) and it never covers her face; it stays in the world
+    # (inherit 0), forms, spins a loop and a half and collapses to a point: 17 frames at 16 fps,
+    # 1.06 s.
     'singularity': {
-        'enter': ['flip', 'vault'], 'chance': 0.3, 'burst': 1, 'anchor': 'hand.near', 'offset': [-3, -1],
-        'speed': 0, 'inherit': 0, 'life': 920, 'fadeIn': 60, 'fadeOut': 140,
-        'sprite': {'frames': ['sing0', 'sing1', 'sing2', 'sing3', 'sing0', 'sing1', 'sing2', 'sing3', 'coll1',
-                              'coll2', 'coll3', 'coll3'], 'fps': 13, 'loop': False},
-        'max': 2, 'reduced': 1,
+        'burst': 1, 'anchor': 'hips', 'offset': [14, 5], 'speed': 0, 'inherit': 0, 'life': 1060,
+        'fadeOut': 110,
+        'sprite': {'frames': ['form1', 'form2'] + [f'sing{i}' for i in range(SPIN)] + ['sing0', 'sing1', 'sing2']
+                   + ['coll1', 'coll2', 'coll3', 'flash'], 'fps': 16, 'loop': False},
+        'face': True, 'max': 2, 'reduced': 1,
+    },
+    # The flare's cold flames: seven to ten tongues licking up off her outline as the power goes,
+    # carried along with her and torn off behind.
+    'flare': {
+        'burst': [7, 10], 'anchor': 'body', 'speed': [6, 16], 'angle': [60, 120], 'inherit': 0.85,
+        'gravity': -40, 'drag': 1.5, 'life': [300, 480], 'fadeOut': 220,
+        'sprite': {'frames': [], 'sets': [['flame-a1', 'flame-a2', 'flame-a3'], ['flame-b1', 'flame-b2', 'flame-b3']],
+                   'fps': 8, 'loop': False},
+        'face': True, 'blend': 'add', 'max': 12, 'reduced': 0.5,
+    },
+    # Her aura on the run, much fainter: now and then (two or three a second) a small cold flame on
+    # her, rising off her outline and lagging behind (in front of her: it only brightens).
+    'aura': {
+        'while': ['run'], 'perSecond': 2.4, 'minSpeed': 60, 'anchor': 'body', 'speed': [4, 10], 'angle': [70, 110],
+        'inherit': 0.75, 'gravity': -36, 'life': [300, 440], 'fadeIn': 60, 'fadeOut': 200,
+        'sprite': {'frames': [], 'sets': [['wisp-a1', 'wisp-a2', 'wisp-a3'], ['wisp-b1', 'wisp-b2', 'wisp-b3']],
+                   'fps': 8, 'loop': False},
+        'face': True, 'blend': 'add', 'max': 3, 'reduced': 0.4, 'layer': 'front',
     },
     # Lift: on about a third of the landings, two to four pebbles float up from under her feet.
     'lift': {
@@ -197,8 +384,16 @@ EMITTERS = {
     },
 }
 
+# The flare: on about a third of the flips and vaults her aura blazes up as she casts, a copy of
+# her pose in biotic violet left where she was and fading fast, the cold flames and the
+# Singularity with it (no snapshots with reduced motion, so none of the three then).
+FLARE = {
+    'mode': 'snapshot', 'enter': ['flip', 'vault'], 'chance': 0.3, 'burst': ['singularity', 'flare'],
+    'colors': ['#8a9cff'], 'textured': True, 'life': 400, 'drift': [0, -10], 'alpha': 0.7,
+}
+
 VARIANTS = {
-    'biotics': {'emitters': ['singularity', 'lift', 'hands']},
+    'biotics': {'emitters': ['aura', 'lift', 'hands'], 'afterimage': FLARE},
     'glyph': {'emitters': ['glyph']},
 }
 
