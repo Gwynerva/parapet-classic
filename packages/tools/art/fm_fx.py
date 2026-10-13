@@ -1,5 +1,6 @@
 """Flittermouse's effect (fx.json): now and then a single bat slips out from under the cape and
-flaps away; on some flips and vaults he throws a batarang; waiting at the start a faint signal
+flaps away; on some flips and vaults he throws a batarang; on a few tricks a colony of bats bursts
+out from round him and scatters every way; waiting at the start a faint signal
 hangs in the sky; leaving and coming back, a smoke pellet: dark smoke creeping along the ground
 and bats flushed out of it."""
 from lookgen import BOSSES, write_json
@@ -136,6 +137,13 @@ EMITTERS = {
         'inherit': 0.3, 'gravity': 40, 'drag': 0.2, 'life': [560, 700], 'fadeOut': 200,
         'sprite': {'frames': ['rang1', 'rang2', 'rang3', 'rang4'], 'fps': 20}, 'layer': 'front', 'max': 2, 'reduced': 1,
     },
+    # On a few tricks a colony of bats bursts out from round him and scatters every way, flapping
+    # fast, gone in a second (its tricks and chance are set in tricks.py).
+    'swarm': {
+        'enter': ['flip'], 'burst': [6, 9], 'anchor': 'body', 'jitter': [3, 4], 'speed': [50, 100],
+        'angle': [0, 360], 'inherit': 0.2, 'gravity': -15, 'drag': 0.9, 'life': [700, 1100], 'fadeIn': 60,
+        'fadeOut': 350, 'flutter': {'amp': 2, 'freq': 5}, 'sprite': {**FLAP, 'fps': 16}, 'max': 10, 'reduced': 0.3,
+    },
     # Waiting: a faint signal high in the sky, now and then; a bat circling.
     'signal': {
         'perSecond': 0.12, 'anchor': 'head', 'offset': [0, -46], 'jitter': [10, 4], 'speed': [1, 3],
@@ -172,7 +180,7 @@ FX = {
     'palette': PALETTE,
     'sprites': SPRITES,
     'emitters': EMITTERS,
-    'variants': {'bats': {'emitters': ['bat']}, 'batarang': {'emitters': ['batarang']}},
+    'variants': {'bats': {'emitters': ['bat', 'swarm']}, 'batarang': {'emitters': ['batarang']}},
     'presence': {'idle': ['signal', 'idle-bat'], 'vanish': ['smoke', 'smoke-ahead', 'smoke-rise', 'flush'],
                  'appear': ['smoke', 'smoke-ahead', 'smoke-rise', 'flush']},
 }

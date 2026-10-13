@@ -56,8 +56,10 @@ def tricks(fx, boss):
         # to add.
         pass
     elif boss == 'flittermouse':
-        # A batarang on about a third of the flips and vaults, ahead from the near hand.
+        # A batarang on about a third of the flips and vaults, ahead from the near hand; a colony of
+        # bats scattering every way on about one trick in six.
         em['batarang'] = {**em['batarang'], 'enter': ['flip', 'vault'], 'chance': 0.35}
+        em['swarm'] = {**em['swarm'], 'enter': TRICKS, 'chance': 0.18}
     elif boss == 'granger':
         # The news from the future flies off her on a few flips, vaults and wall moves (her blink
         # comes with its snapshot's own chance).

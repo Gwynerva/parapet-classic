@@ -99,6 +99,31 @@
       "reduced": 1,
       "chance": 0.35
     },
+    "swarm": {
+      "enter": ["flip", "vault", "wall", "roll"],
+      "burst": [6, 9],
+      "anchor": "body",
+      "jitter": [3, 4],
+      "speed": [50, 100],
+      "angle": [0, 360],
+      "inherit": 0.2,
+      "gravity": -15,
+      "drag": 0.9,
+      "life": [700, 1100],
+      "fadeIn": 60,
+      "fadeOut": 350,
+      "flutter": {
+        "amp": 2,
+        "freq": 5
+      },
+      "sprite": {
+        "frames": ["bat-up", "bat-mid", "bat-down", "bat-mid"],
+        "fps": 16
+      },
+      "max": 10,
+      "reduced": 0.3,
+      "chance": 0.18
+    },
     "signal": {
       "perSecond": 0.12,
       "anchor": "head",
@@ -209,7 +234,7 @@
   },
   "variants": {
     "bats": {
-      "emitters": ["bat"]
+      "emitters": ["bat", "swarm"]
     },
     "batarang": {
       "emitters": ["batarang"]
