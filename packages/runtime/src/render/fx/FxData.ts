@@ -124,6 +124,8 @@ export interface FxAfterimage {
   enter?: FxTrigger[];
   /** …and the chance (0..1) that it does: a flourish on some tricks, not on every one. */
   chance?: number;
+  /** Snapshot: emitters bursting with it, and only when it comes (the sand it crumbles into). */
+  burst?: string[];
   /** Snapshot: how long it lasts and how it drifts (px/s). */
   life?: number;
   drift?: readonly [number, number];
@@ -225,6 +227,7 @@ export function fxProblems(fx: FxFile): string[] {
     names('emitters', v.emitters, `variant ${name}`);
     names('ribbons', v.ribbons, `variant ${name}`);
     const a = v.afterimage;
+    names('emitters', a?.burst, `variant ${name} afterimage`);
     if (a && Array.isArray(a.colors)) {
       for (const c of a.colors) if (!colour(c)) out.push(`variant ${name}: colour "${c}"`);
     }

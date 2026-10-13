@@ -54,7 +54,10 @@ describe('effects data', () => {
       palette: { a: 'nope' },
       sprites: { s: ['ab', 'a'] },
       emitters: { e: { while: ['jog' as FxTrigger], life: [3, 1], sprite: { frames: ['x'] } } },
-      variants: { flags: { emitters: ['missing'] } },
+      variants: {
+        flags: { emitters: ['missing'] },
+        sprint: { afterimage: { mode: 'snapshot', chance: 0.3, burst: ['gone'] } },
+      },
     };
     const text = fxProblems(bad).join('\n');
     expect(text).toMatch(/palette "a": nope/);
@@ -63,6 +66,7 @@ describe('effects data', () => {
     expect(text).toMatch(/sprite "x" does not exist/);
     expect(text).toMatch(/life is not a number/);
     expect(text).toMatch(/emitter "missing" does not exist/);
+    expect(text).toMatch(/variant sprint afterimage: emitter "gone" does not exist/);
   });
 
   it('compiles sprites and colours for an accent', () => {

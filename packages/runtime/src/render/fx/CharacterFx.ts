@@ -206,6 +206,7 @@ export class CharacterFx {
         if ((m.entered & bits) !== 0 && (a.chance === undefined || e.rand() < a.chance)) {
           e.snapshots.push({ pose: { ...pose }, clock: e.clock, age: 0 });
           if (e.snapshots.length > MAX_SNAPSHOTS) e.snapshots.shift();
+          if (a.burst) this.burstWith(e, pose, m, a.burst);
         }
       }
     }
@@ -327,6 +328,28 @@ export class CharacterFx {
       }
       for (let i = 0; i < count; i++) {
         const p = this.anchorPoint(e, pose, spec.anchor);
+        this.particles.spawn(
+          fx,
+          em,
+          { x: p.x, y: p.y, facingRight: e.facingRight, vx, vy },
+          e.rand,
+        );
+      }
+    }
+  }
+
+  /** A burst of the named emitters on a body this step (what a snapshot brings with it). */
+  private burstWith(e: Entry, pose: CharacterPose, m: MotionStep, names: readonly string[]): void {
+    const fx = e.style.fx;
+    if (!fx) return;
+    const vx = m.vx * (1000 / STEP_MS);
+    const vy = m.vy * (1000 / STEP_MS);
+    for (const n of names) {
+      const em = fx.emitters.get(n);
+      if (!em) continue;
+      const count = Math.round(pick(em.spec.burst, e.rand, 6));
+      for (let i = 0; i < count; i++) {
+        const p = this.anchorPoint(e, pose, em.spec.anchor);
         this.particles.spawn(
           fx,
           em,
