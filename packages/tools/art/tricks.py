@@ -32,9 +32,10 @@ def tricks(fx, boss):
         if 'idea-trick' not in v['code']['emitters']:
             v['code']['emitters'].append('idea-trick')
     elif boss == 'rewind':
-        em['photos'] = every_way(em['photos'], 0.45, [2, 4], [30, 70])
-        em['photos']['anchor'] = 'body'
-        em['photos']['max'] = 10
+        # A Polaroid (with its flash) on about a third of the tricks, now and then two: each
+        # picture rolls its own chance.
+        for k in [k for k in em if k.startswith('photo-')]:
+            em[k] = {**em[k], 'enter': TRICKS, 'chance': 0.1}
     elif boss == 'shahzada':
         em['swirl'] = every_way(em['swirl'], 0.5)
     elif boss == 'grove':
