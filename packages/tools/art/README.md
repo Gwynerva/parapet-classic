@@ -86,7 +86,7 @@ diff -r /tmp/bosses packages/content/bosses
 | `five.py`         | `fx.json`; looks `five-her`, `five-him` (`fv_looks.py`); `looks` in `boss.json`                                                                                           |
 | `flittermouse.py` | `fx.json` (`fm_fx.py`); looks `asylum`, `armored`, `future` (`fm_heads.py`, `fm_body.py`); `looks` in `boss.json`                                                         |
 | `shahzada.py`     | `fx.json`; looks `sands`, `warrior`, `wanderer`, `dark-prince` (`sh_looks.py`, `sh_heads.py`, `sh_parts.py`); `looks` in `boss.json`                                      |
-| `azure.py`        | `fx.json`; looks `scholar`, `broker`, `leather`, `twilight`; the whole `boss.json`                                                                                        |
+| `azure.py`        | `fx.json` (`az_fx.py`); looks `scholar`, `broker`, `leather`, `illium` (`az_looks.py`, `az_heads.py`, `az_parts.py`); the whole `boss.json`                               |
 | `stages.py`       | `stage.json` of every boss, or of the bosses named                                                                                                                        |
 
 Pierre's looks `mechanic`, `kate`, `evening` and `birthday`, his and Grove's `boss.json`,
