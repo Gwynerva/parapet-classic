@@ -3,7 +3,8 @@ boss.json.
 
 The effect is Counter-Strike's, kept as quiet as Max's butterflies:
 * casings: now and then (one every five seconds or so of running) a single brass casing jumps up
-  and back off him, glinting, tumbling, and falls away;
+  and back off him, glinting, tumbling, and falls away; on about a third of the flips and vaults a
+  whole spray of them, casings and live rounds, flies off him every way up and back;
 * smoke: on about one hard landing or roll in five a smoke grenade (grey, its green band) is
   tossed a step ahead, bounces once, rolls to a stop, hisses and pops a cloud of fat grey puffs
   that stays where it fell for a second and a half while he runs on through it, then thins away
@@ -58,6 +59,13 @@ SPRITES['casing'] = P.rows([
     'wYYk',
     'oOOk',
 ], BRASS)
+
+# A live round: the copper bullet in front of the brass case.
+COPPER = {'r': '#ffb488', 'R': '#c86a3c', 'q': '#6a2e14'}
+SPRITES['round'] = P.rows([
+    'rRwYYk',
+    'qRoOOk',
+], {**BRASS, **COPPER})
 
 # ------------------------------------------------------------------------------ the smoke grenade
 # One particle plays the whole of it, 29 x 21, the ground on its bottom row: the grenade (a grey
@@ -212,6 +220,13 @@ fx = {
             'speed': [55, 80], 'angle': [60, 85], 'inherit': 0.25, 'gravity': 420, 'life': [700, 850],
             'fadeOut': 200, 'tumble': [6, 9], 'sprite': {'frames': ['casing']}, 'max': 2, 'reduced': 0.5,
         },
+        # On some flips and vaults (tricks.py): a spray of casings and live rounds off his chest, up
+        # and back every way, tumbling and glinting as they fall.
+        'spray': {
+            'burst': [4, 6], 'anchor': 'chest', 'jitter': [2, 2], 'speed': [60, 115], 'angle': [30, 150],
+            'inherit': 0.2, 'gravity': 420, 'life': [650, 900], 'fadeOut': 200, 'tumble': [6, 10],
+            'sprite': {'frames': ['casing', 'casing', 'round'], 'random': True}, 'max': 8, 'reduced': 0.3,
+        },
         # On some hard landings and rolls (tricks.py): the grenade is tossed a little ahead, rolls
         # to a stop and pops; he runs on through its cloud, which stays where it fell. It keeps
         # none of his speed: falling onto a landing it would sink into the ground.
@@ -237,7 +252,7 @@ fx = {
             'sprite': {'frames': ['puff1', 'puff2'], 'fps': 4, 'loop': False}, 'reduced': 0.3,
         },
     },
-    'variants': {'casings': {'emitters': ['casing']}, 'smoke': {'emitters': ['smoke-nade']}},
+    'variants': {'casings': {'emitters': ['casing', 'spray']}, 'smoke': {'emitters': ['smoke-nade']}},
     'presence': {'idle': ['c4'], 'vanish': ['puff', 'puff-feet'], 'appear': ['puff', 'puff-feet']},
 }
 write_json(BOSSES + '/rush-b/fx.json', tricks(fx, 'rush-b'))

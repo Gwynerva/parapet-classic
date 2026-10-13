@@ -68,6 +68,8 @@ def tricks(fx, boss):
         # A smoke grenade on about one hard landing (moves 24 and 25, the landings that need DOWN)
         # or roll in five; its cloud stays where it fell.
         em['smoke-nade'] = {**em['smoke-nade'], 'enter': ['roll'], 'moves': [24, 25], 'chance': 0.22}
+        # A spray of casings and rounds on about a third of the flips and vaults.
+        em['spray'] = {**em['spray'], 'enter': ['flip', 'vault'], 'chance': 0.3}
     elif boss == 'sir-nobody':
         # His summon sign stays on the roof where he touches down, about one time in three; the
         # soul is shaken out of his slit on some flips and vaults. (His steel sparks on most of
