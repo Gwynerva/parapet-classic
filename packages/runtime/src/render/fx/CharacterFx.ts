@@ -327,10 +327,11 @@ export class CharacterFx {
       if (amount <= 0) continue;
       let count = 0;
       if ((m.active & em.whileBits) !== 0 && m.speed >= (spec.minSpeed ?? 0)) {
+        // Reduced motion thins what each step adds; scaling the whole debt every step would
+        // keep a rare emitter (a butterfly every few seconds) from ever reaching one particle.
         let owed = e.owed.get(em) ?? 0;
-        if (spec.every) owed += m.distance / spec.every;
-        if (spec.perSecond) owed += (spec.perSecond * STEP_MS) / 1000;
-        owed *= amount;
+        if (spec.every) owed += (m.distance / spec.every) * amount;
+        if (spec.perSecond) owed += ((spec.perSecond * STEP_MS) / 1000) * amount;
         count += Math.floor(owed);
         e.owed.set(em, owed - Math.floor(owed));
       }
