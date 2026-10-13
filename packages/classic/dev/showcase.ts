@@ -6,8 +6,9 @@
  * plays them.
  *
  * For pictures the page can be driven step by step: with `#manual=1` its clock stands still and
- * `window.showcase` sets it up, moves it on and draws it: a browser driven by a script (Playwright)
- * takes the same picture every time.
+ * `window.showcase` sets it up, moves it on and draws it, drawing every step on a clock of its own
+ * (particles and cloth move as they are drawn): a browser driven by a script (Playwright) takes
+ * the same picture every time.
  */
 import { MoveTable, STEP } from '@parapet/sim';
 import { buildClipTable } from '@parapet/runtime/anim/Animator.ts';
@@ -134,6 +135,8 @@ async function main(): Promise<void> {
   let x = 0;
   let cam = { x: 0, y: 0 };
   let ambientRand = 1;
+  /** The page's own clock in manual mode: particles and cloth move by it, in step with the game. */
+  let virtualNow = 0;
 
   const style = (swap: FxStyle['swap'], source: SceneRenderer): FxStyle | null => {
     if (!boss || !look) return null;
@@ -284,6 +287,11 @@ async function main(): Promise<void> {
           fx.idleAt(stage.fx, names, x + (rand() * 360 - 100) * UNITS, 0, true, rand);
         }
       }
+      // Particles and cloth move when drawn, by the time since the last picture.
+      if (manual) {
+        virtualNow += STEP;
+        draw();
+      }
     }
   };
 
@@ -293,7 +301,7 @@ async function main(): Promise<void> {
     if (canvas.height !== VIEW.height * zoom) canvas.height = VIEW.height * zoom;
     c.setTransform(zoom, 0, 0, zoom, 0, 0);
     c.imageSmoothingEnabled = false;
-    const now = performance.now();
+    const now = manual ? virtualNow : performance.now();
     if (demo && characters) {
       if (stage?.hasSky) stage.drawSky(c, 0, VIEW.width, VIEW.height, clock);
       else {
