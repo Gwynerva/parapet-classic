@@ -1,29 +1,50 @@
 /**
  * The promotional pictures (dev server only, `dev/art.html`), drawn with the game's renderers:
  * pieces of the levels laid over one another like cards, a boss running on each with its
- * effect, the logo on a narrow pennant at the left. The README's banner and its Play button go
- * to `docs/`, the link preview (Open Graph) to `packages/classic/public/og-image.png`; Save
- * sends them to the dev server (`vite.config.ts`, POST /dev/save-art). `?scout=1` draws every
- * place a shot can stand on (the start and the flags of every mission) and the keyframes.
+ * effect, the logo on a narrow pennant at the left. A boss runs into its shot, or does a trick
+ * of the Moves menu with every flourish of its effect (a shot, a singularity, a hologram chain);
+ * a card shows a piece of a level or the boss's own world. The README's banner, its Play button
+ * and a collage of tricks without the logo go to `docs/`, the link previews (Open Graph) to
+ * `packages/classic/public/og-*.png`; Save sends them to the dev server (`vite.config.ts`, POST
+ * /dev/save-art). `?scout=1` draws every place a shot can stand on (the start and the flags of
+ * every mission) and the keyframes.
  */
-import { buildSineTable, Level, type LevelData } from '@parapet/sim';
+import { buildSineTable, Level, MoveTable, STEP, type LevelData } from '@parapet/sim';
 import { buildClipTable } from '@parapet/runtime/anim/Animator.ts';
-import { drawPose, type CharacterPose } from '@parapet/runtime/render/CharacterRenderer.ts';
+import {
+  CharacterRenderer,
+  drawPose,
+  type CharacterPose,
+} from '@parapet/runtime/render/CharacterRenderer.ts';
 import { applyScanlines } from '@parapet/runtime/render/EchoRenderer.ts';
 import { EchoSheets, makeEchoColor } from '@parapet/runtime/render/EchoSkin.ts';
-import { CharacterFx } from '@parapet/runtime/render/fx/CharacterFx.ts';
+import { CharacterFx, type FxStyle } from '@parapet/runtime/render/fx/CharacterFx.ts';
+import type { FxFile } from '@parapet/runtime/render/fx/FxData.ts';
+import { compileFx } from '@parapet/runtime/render/fx/FxSheet.ts';
 import {
   defaultLevelArtFrame,
   LevelRenderer,
   themeOfLevel,
 } from '@parapet/runtime/render/LevelRenderer.ts';
+import type { ResolvedLook } from '@parapet/runtime/render/Look.ts';
 import { SceneRenderer } from '@parapet/runtime/render/SceneRenderer.ts';
 import { SkinLibrary } from '@parapet/runtime/render/SkinLibrary.ts';
 import { SpriteSheet } from '@parapet/runtime/render/SpriteSheet.ts';
+import { StageRenderer } from '@parapet/runtime/render/Stage.ts';
+import { DemoRun, type MoveDemoData } from '@parapet/runtime/moves/MoveDemo.ts';
 import { BitmapFont, type BitmapFontData } from '@parapet/runtime/text/BitmapFont.ts';
 import { Theme } from '@parapet/runtime/ui/theme.ts';
-import { allBosses, characterFx, contestCharacter, registerBosses } from '../src/app/bosses.ts';
+import demosJson from '@content/moves/demos.json';
+import {
+  allBosses,
+  characterFx,
+  contestCharacter,
+  effectOf,
+  registerBosses,
+  type Boss,
+} from '../src/app/bosses.ts';
 import { loadContent } from '../src/assets/content.ts';
+import { forced } from './flourishes.ts';
 import text12 from '../../content/fonts/text-12.json';
 import text12Png from '../../content/fonts/text-12.png';
 import display16 from '../../content/fonts/display-16.json';
@@ -31,6 +52,7 @@ import display16Png from '../../content/fonts/display-16.png';
 import display24 from '../../content/fonts/display-24.json';
 import display24Png from '../../content/fonts/display-24.png';
 
+const DEMOS = (demosJson as unknown as { demos: MoveDemoData[] }).demos;
 const UNITS = 32;
 const TILE = 1024;
 const STEP_MS = 30;
@@ -46,7 +68,7 @@ const PARAPET_ROW = 21;
 /** Tiles with a floor on top (`PIT_FLOOR_TILES` of the level). */
 const FLOOR_TILES = new Set([1, 3, 5, 6, 7, 8]);
 
-/** A boss on a level: where (a mission's start or flag), in which outfit and pose. */
+/** A boss on a level or in its world: where (a mission's start or flag), in which outfit and pose. */
 interface Shot {
   level: number;
   /** Mission section of the level (its start and flags). */
@@ -68,6 +90,25 @@ interface Shot {
   zoom?: number;
   /** A rival racing alongside as an echo, the game's hologram of a recorded run. */
   rival?: Rival;
+  /** A trick instead of the run (`frame` unused). */
+  trick?: Trick;
+  /** The boss's own world (its stage, as on the character screen) instead of the level. */
+  world?: boolean;
+  /** How far the world has scrolled by, in px (which part of it shows). */
+  scroll?: number;
+}
+
+/**
+ * A demo of the Moves menu (`content/moves/demos.json`) played by the boss with every flourish
+ * of its effect, shown `ms` after its move starts; the demo's ground at the place's floor and the
+ * boss at `feet` across (the demo's blocks and walls are not drawn).
+ */
+interface Trick {
+  move: string;
+  ms: number;
+  seed?: number;
+  /** The demo's ground: where it starts (default), or the floor under the boss when shown. */
+  ground?: 'start' | 'under';
 }
 
 /** The echo a runner races: a boss in an outfit and pose, `ahead` px in front of it. */
@@ -96,11 +137,11 @@ const VAULT = 91;
 /** The README's banner: the place under the pennant, then the cards left to right. */
 const BANNER_SHOTS: Shot[] = [
   { level: 10, mission: 1, at: 3, boss: '', outfit: 0, frame: -1, feet: [0.5, 0.84] },
-  { level: 3, mission: 0, at: -1, boss: 'vera', outfit: 0, frame: -1, feet: [0.6, 0.84] },
-  { level: 5, mission: 0, at: -1, boss: 'sir-nobody', outfit: 0, frame: -1, feet: [0.55, 0.84] },
-  { level: 9, mission: 0, at: -1, boss: 'flittermouse', outfit: 0, frame: JUMP, feet: [0.55, 0.84], shift: [0, 14] },
-  { level: 4, mission: 0, at: -1, boss: 'b2', outfit: 0, frame: FLIP, feet: [0.55, 0.84], shift: [0, 20] },
-  { level: 7, mission: 0, at: -1, boss: 'azure', outfit: 0, frame: JUMP, feet: [0.5, 0.84], shift: [0, 12] },
+  { level: 2, mission: 0, at: -1, boss: 'grove', outfit: 0, frame: -1, feet: [0.5, 0.84], trick: { move: 'monkeyVault', ms: 2010 } },
+  { level: 3, mission: 0, at: -1, boss: 'vera', outfit: 0, frame: -1, feet: [0.5, 0.84], trick: { move: 'backFlip', ms: 1740 } },
+  { level: 4, mission: 0, at: -1, boss: 'b2', outfit: 0, frame: -1, feet: [0.5, 0.84], trick: { move: 'backFlip', ms: 1410 } },
+  { level: 8, mission: 0, at: -1, boss: 'five', outfit: 0, frame: -1, feet: [0.5, 0.84], trick: { move: 'monkeyVault', ms: 2070 } },
+  { level: 10, mission: 1, at: -1, boss: 'shahzada', outfit: 0, frame: -1, feet: [0.5, 0.84], trick: { move: 'frontFlip', ms: 1380 } },
 ];
 /**
  * The challenge links' preview: a runner and the echo it races, side by side on a roof, drawn
@@ -123,9 +164,31 @@ const RACE_SHOTS: Shot[] = [
 /** The link preview: the place under the pennant, then the cards. */
 const OG_SHOTS: Shot[] = [
   { level: 10, mission: 1, at: 3, boss: '', outfit: 0, frame: -1, feet: [0.5, 0.84] },
-  { level: 1, mission: 0, at: -1, boss: 'rewind', outfit: 0, frame: -1, feet: [0.5, 0.84] },
-  { level: 6, mission: 1, at: 1, boss: 'widow', outfit: 0, frame: VAULT, feet: [0.5, 0.84], shift: [0, 6] },
-  { level: 2, mission: 0, at: -1, boss: 'petra', outfit: 0, frame: JUMP, feet: [0.5, 0.84], shift: [0, 12] },
+  { level: 0, mission: 1, at: 1, boss: 'petra', outfit: 5, frame: -1, feet: [0.36, 0.84], trick: { move: 'monkeyFlip', ms: 1350 } },
+  { level: 6, mission: 1, at: 1, boss: 'widow', outfit: 0, frame: -1, feet: [0.35, 0.84], trick: { move: 'monkeyVault', ms: 2310 } },
+  { level: 11, mission: 1, at: -1, boss: 'azure', outfit: 0, frame: -1, feet: [0.55, 0.84], trick: { move: 'frontFlip', ms: 1290 } },
+];
+
+/** The collage without the logo: every boss in its own world at the height of a trick. */
+const COLLAGE_ROWS: Shot[][] = [
+  [
+    { level: 0, mission: 0, at: -1, boss: 'petra', outfit: 5, frame: -1, feet: [0.45, 0.92], world: true, trick: { move: 'monkeyFlip', ms: 1350 } },
+    { level: 1, mission: 0, at: -1, boss: 'rewind', outfit: 0, frame: -1, feet: [0.45, 0.92], world: true, trick: { move: 'backFlip', ms: 1380 } },
+    { level: 2, mission: 0, at: -1, boss: 'grove', outfit: 0, frame: -1, feet: [0.45, 0.92], world: true, trick: { move: 'monkeyVault', ms: 2010 } },
+    { level: 3, mission: 0, at: -1, boss: 'vera', outfit: 0, frame: -1, feet: [0.45, 0.92], world: true, trick: { move: 'backFlip', ms: 1740 } },
+  ],
+  [
+    { level: 4, mission: 0, at: -1, boss: 'b2', outfit: 0, frame: -1, feet: [0.5, 0.92], world: true, trick: { move: 'backFlip', ms: 1410 } },
+    { level: 5, mission: 0, at: -1, boss: 'sir-nobody', outfit: 0, frame: -1, feet: [0.45, 0.92], world: true, trick: { move: 'monkeyVault', ms: 1980 } },
+    { level: 6, mission: 0, at: -1, boss: 'widow', outfit: 0, frame: -1, feet: [0.3, 0.92], world: true, trick: { move: 'monkeyVault', ms: 2310 } },
+    { level: 7, mission: 0, at: -1, boss: 'rush-b', outfit: 0, frame: -1, feet: [0.45, 0.92], world: true, trick: { move: 'tigerJump', ms: 1110 } },
+  ],
+  [
+    { level: 8, mission: 0, at: -1, boss: 'five', outfit: 0, frame: -1, feet: [0.5, 0.92], world: true, trick: { move: 'monkeyVault', ms: 2070 } },
+    { level: 9, mission: 0, at: -1, boss: 'flittermouse', outfit: 0, frame: -1, feet: [0.45, 0.92], world: true, trick: { move: 'monkeyFlip', ms: 1350 } },
+    { level: 10, mission: 0, at: -1, boss: 'shahzada', outfit: 0, frame: -1, feet: [0.45, 0.92], world: true, trick: { move: 'frontFlip', ms: 1380 } },
+    { level: 11, mission: 0, at: -1, boss: 'azure', outfit: 0, frame: -1, feet: [0.55, 0.92], world: true, trick: { move: 'frontFlip', ms: 1290 } },
+  ],
 ];
 
 const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
@@ -158,6 +221,43 @@ async function main(): Promise<void> {
   const clips = buildClipTable(content.anims.clips);
   const run = content.anims.demos[0]!;
   const bosses = new Map(allBosses().map((b) => [b.id, b]));
+  const moves = new MoveTable(content.moves);
+  const stages = new Map<Boss, StageRenderer>();
+  const stageOf = (boss: Boss): StageRenderer | null => {
+    if (!boss.stage) return null;
+    let stage = stages.get(boss);
+    if (!stage) {
+      stage = new StageRenderer(boss.stage, boss.data.color);
+      stages.set(boss, stage);
+    }
+    return stage;
+  };
+  const forcedFx = new Map<Boss, FxFile>();
+  /** A boss's effect with every flourish coming (`flourishes.ts`). */
+  const trickStyle = (
+    boss: Boss,
+    look: ResolvedLook,
+    swap: FxStyle['swap'],
+    source: SceneRenderer,
+    seed: number,
+  ): FxStyle | null => {
+    if (!boss.fx) return null;
+    let file = forcedFx.get(boss);
+    if (!file) {
+      file = forced(boss.fx);
+      forcedFx.set(boss, file);
+    }
+    return {
+      fx: compileFx(file, look.accent),
+      variants: effectOf(boss, look),
+      color: makeEchoColor(look.id, look.accent),
+      source,
+      swap,
+      ribbons: Object.values(look.ribbons),
+      ribbonColor: (token) => look.palette[token] ?? token,
+      seed,
+    };
+  };
 
   const levelOf = new Map<string, Level>();
   const level = (id: number, mission: number): Level => {
@@ -169,8 +269,13 @@ async function main(): Promise<void> {
     }
     return l;
   };
-  /** Where a shot stands, in world units (feet): on the first floor under its place. */
+  /** Where a shot stands, in world units (feet): on the first floor under its place (a world's
+   * ground is at 0). */
   const placeOf = (s: Shot): { x: number; y: number } => {
+    if (s.world) {
+      const [dx, dy] = s.shift ?? [0, 0];
+      return { x: dx * UNITS, y: -dy * UNITS };
+    }
     const l = level(s.level, s.mission);
     const p = s.at < 0 ? l.start : (l.checkpoints[s.at] ?? l.start);
     let floor = p.y + 1;
@@ -184,8 +289,12 @@ async function main(): Promise<void> {
     return clips[run.clipOffset + 1 + i] ?? 0;
   };
 
-  /** Draws a level around a shot into the box (w × h) at the context's origin. */
+  /** Draws a level around a shot, or the boss's world, into the box (w × h) at the origin. */
   const drawPlace = (c: CanvasRenderingContext2D, s: Shot, w: number, h: number): void => {
+    if (s.world) {
+      drawWorld(c, s, w, h, false);
+      return;
+    }
     const l = level(s.level, s.mission);
     levels.setLevel(s.level, l);
     const p = placeOf(s);
@@ -198,8 +307,108 @@ async function main(): Promise<void> {
     levels.drawLevelArt(c, cam, view, defaultLevelArtFrame(s.level));
   };
 
+  /**
+   * A boss's world as on the character screen: its sky (else its level's), its layers and
+   * ground (`front`: the layers in front of the boss), the ground at the place's floor.
+   */
+  const drawWorld = (
+    c: CanvasRenderingContext2D,
+    s: Shot,
+    w: number,
+    h: number,
+    front: boolean,
+  ): void => {
+    const boss = bosses.get(s.boss);
+    const stage = boss ? stageOf(boss) : null;
+    if (!boss || !stage) return;
+    const groundY = Math.round(s.feet[1] * h + (s.shift?.[1] ?? 0));
+    const scroll = s.scroll ?? 0;
+    if (front) {
+      stage.draw(c, 0, w, groundY, scroll, true);
+      return;
+    }
+    if (stage.hasSky) stage.drawSky(c, 0, w, groundY, 0);
+    else {
+      const theme = themeOfLevel(stage.file.level ?? boss.levelId);
+      levels.drawBackground(c, { x: Math.round(scroll * UNITS), y: 0 }, { width: w, height: h }, 0, theme);
+    }
+    stage.draw(c, 0, w, groundY, scroll, false);
+  };
+
+  /**
+   * A boss doing a trick: the Moves menu's demo played with every flourish of its effect,
+   * drawn step by step (particles and cloth move as they are drawn), the demo's ground on the
+   * place's floor.
+   */
+  const drawTrick = (c: CanvasRenderingContext2D, s: Shot, trick: Trick, w: number, h: number): void => {
+    const boss = bosses.get(s.boss);
+    const data = DEMOS.find((d) => d.move === trick.move);
+    const look = boss?.looks[s.outfit];
+    if (!boss || !data || !look) return;
+    const seed = trick.seed ?? 1;
+    const character = contestCharacter(boss.levelId, 'flags');
+    const run = new DemoRun({ ...data, from: 0 }, content);
+    const chars = new CharacterRenderer(scene, moves, clips, skins);
+    const runner = run.world.player;
+    chars.attach(runner, { character, outfit: s.outfit, seed });
+    const fx = new CharacterFx(echo);
+    const style = trickStyle(
+      boss,
+      look,
+      (clk) => chars.swapFor(runner, clk),
+      skins.sceneFor(character, s.outfit),
+      seed,
+    );
+    if (style) fx.add(runner, { pose: () => chars.pose(runner, 1), move: () => runner.moveId }, style);
+    let ground = runner.y;
+    const step = (silent: boolean): void => {
+      chars.onEvents(run.step());
+      chars.step(run.world.clock, STEP);
+      fx.step({ silent, clock: run.world.clock });
+    };
+    while (run.stepCount < data.from) step(true);
+    const view = { width: w, height: h };
+    const cam = (): { x: number; y: number } => ({
+      x: Math.round(runner.x - s.feet[0] * w * UNITS),
+      y: Math.round(ground - (s.feet[1] * h + (s.shift?.[1] ?? 0)) * UNITS),
+    });
+    const draw = (to: CanvasRenderingContext2D): void => {
+      const at = cam();
+      const clock = run.world.clock;
+      fx.drawBehind(to, at, clock, clock, view);
+      scene.setViewport(w, h);
+      chars.drawAll(to, at, 1, clock, runner);
+      fx.drawFront(to, at);
+    };
+    const scratch = document.createElement('canvas').getContext('2d')!;
+    // The floor under the boss as the demo goes on, if that is the ground asked for.
+    const floor = (): void => {
+      if (trick.ground !== 'under') return;
+      const { fill, width, height } = run.level;
+      const col = Math.floor(runner.x / TILE);
+      for (let row = Math.max(0, Math.floor((runner.y - 1) / TILE)); row < height; row++) {
+        if (fill[row * width + col]) {
+          ground = row * TILE;
+          return;
+        }
+      }
+    };
+    for (let t = STEP; t < trick.ms && !run.done; t += STEP) {
+      step(false);
+      floor();
+      draw(scratch);
+    }
+    step(false);
+    floor();
+    draw(c);
+  };
+
   /** A boss running into its shot (its effect and cloth trailing), then in its final pose. */
   const drawRunner = (c: CanvasRenderingContext2D, s: Shot, w: number, h: number): void => {
+    if (s.trick) {
+      drawTrick(c, s, s.trick, w, h);
+      return;
+    }
     const boss = bosses.get(s.boss);
     if (!boss) return;
     const character = contestCharacter(boss.levelId, 'flags');
@@ -322,6 +531,7 @@ async function main(): Promise<void> {
     drawPlace(c, s, vw, vh);
     if (s.rival) drawRival(c, s, s.rival, vw, vh);
     drawRunner(c, s, vw, vh);
+    if (s.world) drawWorld(c, s, vw, vh, true);
     c.restore();
     // A dark rim and a light one along its left edge and top.
     for (let y = 0; y < h; y++) {
@@ -412,6 +622,42 @@ async function main(): Promise<void> {
       card(c, s, x0, x1, 0, height, lean);
     });
     pennant(c, pennantX, pennantW, height - 4, tagline, logo, taglineColor);
+  };
+
+  /** Rows of cards across the whole picture, fanned like the banner's, without the pennant. */
+  const mosaic = (
+    c: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    rows: Shot[][],
+  ): void => {
+    c.fillStyle = '#07090c';
+    c.fillRect(0, 0, width, height);
+    rows.forEach((cards, r) => {
+      const top = Math.round((r * height) / rows.length);
+      const bottom = Math.round(((r + 1) * height) / rows.length);
+      const lean = Math.round((bottom - top) / 10);
+      const span = (width + lean) / cards.length;
+      cards.forEach((s, i) => {
+        const x0 = Math.round(-lean + i * span);
+        const x1 = i === cards.length - 1 ? width + 2 : Math.round(-lean + (i + 1) * span + 8);
+        card(c, s, x0, x1, top, bottom, lean);
+      });
+    });
+  };
+
+  // For scripts trying shots out: a card alone, `w × h` px drawn `scale` times bigger.
+  (window as unknown as { art: unknown }).art = {
+    card: (s: Shot, w: number, h: number, scale = 3): string => {
+      const canvas = document.createElement('canvas');
+      canvas.width = w * scale;
+      canvas.height = h * scale;
+      const c = canvas.getContext('2d')!;
+      c.setTransform(scale, 0, 0, scale, 0, 0);
+      c.imageSmoothingEnabled = false;
+      card(c, s, 0, w, 0, h, 0);
+      return canvas.toDataURL('image/png');
+    },
   };
 
   /**
@@ -520,6 +766,9 @@ async function main(): Promise<void> {
     ),
   );
   picture('play-now', 'Play button (docs/play-now.png)', 148, 30, 2, (c) => button(c, 148, 30));
+  picture('collage', 'Collage of tricks, no logo (docs/collage.png)', 480, 270, 4, (c) =>
+    mosaic(c, 480, 270, COLLAGE_ROWS),
+  );
 
   $('save').addEventListener('click', () => {
     const status = $('status');

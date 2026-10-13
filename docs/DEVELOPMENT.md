@@ -75,8 +75,13 @@ Pages of the dev server, never published:
   echo looks, `V` a magnified sheet of poses).
 - `/dev/looks.html` — a boss's outfit running both ways with its effect in its world, a sheet
   of poses and its atlas; drop a painted atlas on it to see it at once, Save writes the look.
-- `/dev/art.html` — the promotional pictures drawn with the game's renderers: the README's
-  banner and Play button (`docs/`) and the link preview (`packages/classic/public/og-image.png`).
+- `/dev/showcase.html` — a boss's outfit with its effect running through its world or doing any
+  move of the Moves menu, "every flourish" making the effects that come now and then come
+  every time; `#manual=1` steps it from a script for pictures.
+- `/dev/art.html` — the promotional pictures drawn with the game's renderers, the bosses in the
+  middle of their tricks with every flourish of their effects: the README's banner and Play
+  button, a collage of all twelve in their worlds without the logo (`docs/`) and the link
+  previews (`packages/classic/public/og-*.png`).
 - `/dev/sprites.html` — a gallery of the extracted sprites.
 - `/dev/loudness.html` — measures the music tracks and saves the levels they are played at.
 

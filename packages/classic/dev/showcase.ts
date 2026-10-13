@@ -20,7 +20,7 @@ import {
 } from '@parapet/runtime/render/CharacterRenderer.ts';
 import { EchoSheets, makeEchoColor } from '@parapet/runtime/render/EchoSkin.ts';
 import { CharacterFx, type FxStyle } from '@parapet/runtime/render/fx/CharacterFx.ts';
-import type { FxFile, FxTrigger } from '@parapet/runtime/render/fx/FxData.ts';
+import type { FxFile } from '@parapet/runtime/render/fx/FxData.ts';
 import { compileFx } from '@parapet/runtime/render/fx/FxSheet.ts';
 import type { ResolvedLook } from '@parapet/runtime/render/Look.ts';
 import { drawPlaceholderTiles } from '@parapet/runtime/render/PlaceholderTiles.ts';
@@ -39,6 +39,7 @@ import {
   type Boss,
 } from '../src/app/bosses.ts';
 import { loadContent } from '../src/assets/content.ts';
+import { forced } from './flourishes.ts';
 
 const DEMOS = (demosJson as unknown as { demos: MoveDemoData[] }).demos;
 /** World units per pixel. */
@@ -65,29 +66,6 @@ interface Options {
   fx: boolean;
   force: boolean;
   seed: number;
-}
-
-/** Tricks: what an emitter on a clock may be kept to (a gust now and then while she flips). */
-const TRICKS: readonly FxTrigger[] = ['flip', 'vault', 'wall', 'roll'];
-/** How often such a rare one comes when every flourish is asked for: on every trick. */
-const FORCED_PER_SECOND = 4;
-
-/** Every chance emitter (and snapshot) of an effect firing every time, and the rare ones on a
- * clock during tricks on every trick. */
-function forced(file: FxFile): FxFile {
-  const copy = JSON.parse(JSON.stringify(file)) as FxFile;
-  for (const em of Object.values(copy.emitters ?? {})) {
-    if (em.chance !== undefined) em.chance = 1;
-    const during = em.while ?? [];
-    const trickOnly = during.length > 0 && during.every((t) => TRICKS.includes(t));
-    if (trickOnly && em.perSecond !== undefined && em.perSecond < FORCED_PER_SECOND) {
-      em.perSecond = FORCED_PER_SECOND;
-    }
-  }
-  for (const v of Object.values(copy.variants ?? {})) {
-    if (v.afterimage?.chance !== undefined) v.afterimage.chance = 1;
-  }
-  return copy;
 }
 
 async function main(): Promise<void> {

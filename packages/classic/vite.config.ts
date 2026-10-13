@@ -27,6 +27,7 @@ const ART_FILES: Record<string, string> = {
   'play-now': fileURLToPath(new URL('../../docs/play-now.png', import.meta.url)),
   'og-image': fileURLToPath(new URL('./public/og-image.png', import.meta.url)),
   'og-race': fileURLToPath(new URL('./public/og-race.png', import.meta.url)),
+  collage: fileURLToPath(new URL('../../docs/collage.png', import.meta.url)),
 };
 
 /** The file of a look by its id, or null. */
