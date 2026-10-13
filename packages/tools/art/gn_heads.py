@@ -1,133 +1,140 @@
-"""Granger's head, drawn from scratch: Tracer's chestnut hair in big uneven spikes swept up and
-back, a fringe jutting over the goggles and a strand before the ear; a small upturned nose,
-freckles, a wide cheeky grin, a pointed chin; silver rings in her left ear. Over the eyes, the
-eyewear of the look: the orange single-lens goggles in a thick white frame (classic), aviator
-sunglasses (Slipstream), round black goggles (Punk).
+"""Granger's head, drawn from scratch: Tracer as a cheerful young woman. Her chestnut hair in a
+few clean tapering spikes swept up and back, a lighter fringe falling across the forehead (the
+3/4 face) or jutting over the goggles (the profile), a strand before the ear; a slim face that
+narrows from round cheeks to a small pointed chin, a touch of blush, a tiny nose, a small happy
+smile with rose lips; silver rings in her left ear. Over the eyes, the eyewear of the look: the
+orange single-lens goggles in a thick white frame with her eyes and lashes seen through the lens
+(classic), aviator sunglasses under thin arched brows (Slipstream), round black goggles
+(Punk).
 
-The pictures are text with a legend of semantic characters, lit from the upper front (the way
-she runs: the right of the profile 25, the near left of the 3/4 face 29, whose far side turns
-away into shade). Each grid marks Blaise's 16×17 head box (`*_BOX`, its top left corner in the
-grid): `centred` pads the picture so the box sits where the game puts a head."""
+The pictures are text with a legend of semantic characters, lit softly from the upper front (the
+way she runs: the right of the profile 25 and of the 3/4 face 29). The skin keeps low contrast:
+light over the face, one soft shade on the turned-away edge, under the fringe and under the chin
+on the neck; the outline is a warm skin tone, never black. Each grid marks Blaise's 16×17 head
+box (`*_BOX`, its top left corner in the grid): `centred` pads the picture so the box sits where
+the game puts a head."""
 from heads import Pic
 
 # --------------------------------------------------------------------------------------------
-# The legend. Hair: highlight → outline; skin: highlight (yellower) → deep shade (redder) →
-# the outline in shade, `s` the lit edge; eyewear and features.
+# The legend. Hair: highlight → outline; skin: highlight (yellower) → deep shade (redder) → the
+# warm outline, `s` the lit edge, `u` the blush; the eyes, brows and lips; the eyewear.
 # --------------------------------------------------------------------------------------------
 HAIR_CHESTNUT = {'H': '#d8b496', 'A': '#b48660', 'a': '#8c6042', 'b': '#684230', 'c': '#462a1e',
                  'k': '#24140e'}
 HAIR_MAGENTA = {'H': '#ffc2f2', 'A': '#ff7ae0', 'a': '#e04cc6', 'b': '#b0329e', 'c': '#7c2276',
                 'k': '#3a1038'}
-SKIN = {'1': '#ffeccc', '2': '#ffd0a2', '3': '#f2ac7e', '4': '#d8845a', '5': '#ac553c',
-        '6': '#62221a', 's': '#d07c58'}
-FEATURES = {'m': '#5a1a1a', 't': '#fff4ea', 'p': '#d4766a', 'f': '#c27050', 'B': '#4a3024',
-            'e': '#9aa4b4', 'E': '#f4f8ff'}
-GOGGLES = {'W': '#ffffff', 'w': '#e2e2dc', 'q': '#b4b2ac', 'Q': '#7a7874',
-           'Y': '#ffe28c', 'O': '#ffa030', 'R': '#e8681c', 'r': '#a83e18'}
+# '2' '3' '4' are the tones of her neck in the collar (gn_parts.NECK).
+SKIN = {'1': '#fff0d6', '2': '#ffd0a2', '3': '#f2ac7e', '4': '#d8845a', '5': '#b45e40',
+        's': '#e8a07a', 'u': '#f8a088'}
+FEATURES = {'m': '#8c2a36', 't': '#fff6ee', 'p': '#d4646e', 'P': '#ee8e8e', 'B': '#6e4030',
+            'l': '#6a2410', 'r': '#a83e18', 'e': '#9aa4b4', 'E': '#f4f8ff'}
+GOGGLES = {'W': '#ffffff', 'w': '#e2e2dc', 'q': '#b4b2ac',
+           'Y': '#ffe28c', 'O': '#ffa030', 'R': '#e8681c'}
+SHADES = {'L': '#26242c', 'g': '#e2b456', 'G': '#a87c34', 'K': '#18161c', 'n': '#76809a'}
 
 
 def legend(hair=HAIR_CHESTNUT, extra=None):
-    return {**hair, **SKIN, **FEATURES, **GOGGLES, **(extra or {})}
+    return {**hair, **SKIN, **FEATURES, **GOGGLES, **SHADES, **(extra or {})}
 
 
 # --------------------------------------------------------------------------------------------
 # The profile (25), facing right: column i is x + 5 of Blaise's head box, row j is y + 5.
+# Three spikes swept back, the fringe a visor over the goggles, a short nape; the ear behind a
+# strand of hair; a 1-px upturned nose, lips, a small chin set back, the jaw climbing to the ear.
+# Through the lens her eye: a lash and the iris.
 # --------------------------------------------------------------------------------------------
 PROF_BOX = (5, 5)
 PROF = [
-    '........................',  # -5
-    '..........cA............',  # -4
-    '....k.....bA.....c......',  # -3
-    '....kba..cbaA...bA......',  # -2
-    '.....kbacbaaAA.cbaA.....',  # -1
-    '......kcbbaAHAbaAHAa....',  #  0
-    '...kbcbaaaAAHAaaAAHAc...',  #  1
-    '...kccbbaAAaaabaAAHHAc..',  #  2
-    '....kcbaacbbaabbaAAAAac.',  #  3
-    '....kcbaacbbaacccbbcbac.',  #  4
-    '....kcbacbbaacqWWWWWWw..',  #  5
-    '....kcbacbbacbWwOOYYOW..',  #  6
-    '.....kcacbacccqqRRORrw..',  #  7
-    '.....kcbcbc644bQqqqqwq..',  #  8
-    '.....kcbcc6353b4443332s.',  #  9
-    '......kcbc6353b32f1f224.',  # 10
-    '.......kcc6643c32m122p..',  # 11
-    '........kc55643322mmt...',  # 12
-    '..........5456433223p...',  # 13
-    '...........445564323s...',  # 14
-    '............44455656....',  # 15
-    '............44445.......',  # 16
+    '........k................',  # -5
+    '..k.....kA...............',  # -4
+    '..kA....kaA....k.........',  # -3
+    '...kaA...kaA..kA.........',  # -2
+    '....kaA..kbaA.kaA........',  # -1
+    '.....kaAAbaAAbaAAc.......',  #  0
+    '.....kaaAAaaAHHHAAc......',  #  1
+    '...kaabaaAAAAAAHHAAAc....',  #  2
+    '.kbbbbcaaaaaaaAAAAAHHAc..',  #  3
+    '...kbbbbaaaaaabbbbbbbAAc.',  #  4
+    '.....kbbbaaabbcWWWWWWw...',  #  5
+    '.....kbbbbaabccWwYYrOW...',  #  6
+    '.....kbbbbbacb3qwORlRw...',  #  7
+    '......kbbbc43c3qqwwwwq...',  #  8
+    '......kbbbc453322221s....',  #  9
+    '.......kbbc34322uu221s...',  # 10
+    '........kbc5432222m2p....',  # 11
+    '.........kc44532222mP....',  # 12
+    '..........c54455221s.....',  # 13
+    '............5444555......',  # 14
+    '............5433.........',  # 15
+    '............5433.........',  # 16
 ]
 
 # --------------------------------------------------------------------------------------------
-# The 3/4 face (29): column i is x + 3 of the box, row j is y + 5.
+# The 3/4 face (29): column i is x + 3 of the box, row j is y + 5. Three spikes up, one out to
+# the near side, the light fringe sweeping down across the forehead over the goggles' near end;
+# the goggles across the face with her eyes through the lens; round cheeks with blush narrowing
+# to a pointed chin; a small open smile (rose corners, a line of teeth); a slender neck.
 # --------------------------------------------------------------------------------------------
 FRONT_BOX = (3, 5)
 FRONT = [
-    '......................',  # -5
-    '...........cA.........',  # -4
-    '......k...cbA....c....',  # -3
-    '.....kba..cbaA..bA....',  # -2
-    '......kbacbaaA.cbaA...',  # -1
-    '......kcbbaAHAbaAHAa..',  #  0
-    '...kbcbbbaaAHHAaaAAAAc',  #  1
-    '...kcbbbaaaaAAHAaAAAc.',  #  2
-    '...kcbbaaAAAAaabcbbc..',  #  3
-    '...kcaAAAaabc4334cbc..',  #  4
-    '...kAaWWWWWWWWWWWWw...',  #  5
-    '...kbWwYYOOOOYYOORq...',  #  6
-    '...kcqwORRRRrwqRRrQ...',  #  7
-    '...64Qqqqwwwq23QqqQ...',  #  8
-    '...63b5443343235456...',  #  9
-    '...64c42f1f22115f45...',  # 10
-    '....6543m2223453m45...',  # 11
-    '.....6543mttttmm456...',  # 12
-    '......65434ppp4456....',  # 13
-    '.......6543443456.....',  # 14
-    '.........6532246......',  # 15
-    '...........6556.......',  # 16
+    '...........k...........',  # -5
+    '....k.....kA...........',  # -4
+    '....kA....kaA....k.....',  # -3
+    '....kbA..kbaA...kA.....',  # -2
+    '....kbaA.kbaaA.kaA.....',  # -1
+    '....kbaAcbaaAAcbaAc....',  #  0
+    '..kaAbaabaAHHHAAAAaAc..',  #  1
+    'kaAAbaaAHHAAAAaabcAc...',  #  2
+    '..kbbbHAAAaaabc323bc...',  #  3
+    '...kbAHAaabc322123bc...',  #  4
+    '...kAAabcWWWWWWWWWwc...',  #  5
+    '...kaabcYrrYYOrrOOwc...',  #  6
+    '...kbbcWOOlRRRRlRRq....',  #  7
+    '....kb5wWWWWWwwwwwq....',  #  8
+    '.....k53222222212s.....',  #  9
+    '......53uu22312u2s.....',  # 10
+    '.......5322pttp2s......',  # 11
+    '........5322mm22s......',  # 12
+    '.........532212s.......',  # 13
+    '..........45235........',  # 14
+    '..........4455.........',  # 15
+    '..........4443.........',  # 16
 ]
 
 
 # --------------------------------------------------------------------------------------------
 # Eyewear of the other looks: rows of the profile and the 3/4 face replaced (by their y).
-# Slipstream: aviator sunglasses (dark teardrop lenses, a gold frame), the brows over them.
-# Punk: round black goggles on a black strap.
+# Slipstream: aviator sunglasses (dark teardrop lenses under a gold bar), thin arched brows over
+# them. Punk: round black goggles on a black strap.
 # --------------------------------------------------------------------------------------------
-SHADES = {'L': '#26242c', 'l': '#76809a', 'g': '#e2b456', 'K': '#18161c'}
-NO_GOGGLE_CHEEKS_PROF = '.....kcbbc6353b332f222s.'
-NO_GOGGLE_CHEEKS_FRONT = '...63b4332232234456...'
 EYEWEAR = {
     'slipstream': {
         'prof': {
-            5: '....kcbcbabbcc5432BB2s..',
-            6: '....kcbbcbbbcc4gggLlL2..',
-            7: '.....kcbbabccc4332LLL3..',
-            8: '.....kcbbbc644b3322232..',
-            9: NO_GOGGLE_CHEEKS_PROF,
+            5: '.....kbbbaaabbc322BBs....',
+            6: '.....kbbbbaabccGgggLL....',
+            7: '.....kbbbbbacb33222nL....',
+            8: '......kbbbc43c33222Ls....',
         },
         'front': {
-            5: '...kAa4BBB2232BB345...',
-            6: '...kbgLlLLLggLlLL45...',
-            7: '...kc4LLLLL23LLLL45...',
-            8: '...6443LLL3223LL445...',
-            9: NO_GOGGLE_CHEEKS_FRONT,
+            5: '...kAAabc3BB22BB2sbc...',
+            6: '...kaabcggggggggg3bc...',
+            7: '...kbbc3nLLL2nLL2s.....',
+            8: '....kb53LLL222LL2s.....',
         },
     },
     'punk': {
         'prof': {
-            5: '....kcbcbabbcc543222KK..',
-            6: '....kcbbcbbbKKKKKKKKlLK.',
-            7: '.....kcbbabccc43323KLLK.',
-            8: '.....kcbbbc644b33222KK..',
-            9: NO_GOGGLE_CHEEKS_PROF,
+            5: '.....kbbbaaabbc32BBKK....',
+            6: '.....kbbbbaabccKKKKKnK...',
+            7: '.....kbbbbbacb33222KLK...',
+            8: '......kbbbc43c33222KK....',
         },
         'front': {
-            5: '...kAa3KK22233KK345...',
-            6: '...kKKKlLKKKKKlLK45...',
-            7: '...kc4KLLK323KLLK45...',
-            8: '...6443KK32223KK445...',
-            9: NO_GOGGLE_CHEEKS_FRONT,
+            4: '...kbAHAaabc322BB3bc...',
+            5: '...kAAabcKK222KK2sbc...',
+            6: '...kaabcKnLKKKnLKKbc...',
+            7: '...kbbc3KLLK2KLLKs.....',
+            8: '....kb532KK222KK2s.....',
         },
     },
 }
@@ -152,17 +159,20 @@ def centred(pic, box):
     return pic.pad(pad_l, pad_t, W - w0 - pad_l, H - h0 - pad_t)
 
 
-# Her left ear's silver rings (the side seen while she runs left: `25:left`, `29:left`).
-RINGS_PROF = {(10, 14): 'E', (10, 16): 'e'}
-RINGS_FRONT = {(3, 15): 'E', (4, 16): 'e'}
-# The profile's faces: 76 and 77 blink (her eyes are behind the lens: the grin relaxes a little),
-# 78 winces (the mouth open, the cheek pulled).
+# Her left ear's silver rings (the side seen while she runs left: `25:left`, `29:left`), as
+# (column, row) of the grids.
+RINGS_PROF = {(11, 13): 'e', (12, 16): 'E'}
+RINGS_FRONT = {(4, 13): 'e', (5, 14): 'E'}
+# The profile's faces, as (column, row) of the grid: 76 and 77 blink (her eye behind the lens
+# closes to a lash line; the dark lenses of the other looks hide it), 78 winces (the eye
+# squeezed, the smile gone to a small open mouth). `eye` marks apply to the orange lens only.
 FACES = {
-    76: {},
-    77: {(17, 16): '2', (18, 17): 'm', (19, 17): 'm', (20, 17): '3'},
-    78: {(17, 16): '3', (18, 17): 'm', (19, 17): 'm', (20, 17): 'm', (19, 18): 'm', (20, 18): '6',
-         (18, 16): 'm', (20, 16): '4'},
+    76: {'eye': {(19, 11): 'Y', (18, 12): 'r', (19, 12): 'l'}, 'mouth': {}},
+    77: {'eye': {(19, 11): 'O', (18, 12): 'R', (19, 12): 'l', (20, 12): 'r'}, 'mouth': {}},
+    78: {'eye': {(18, 11): 'l', (19, 11): 'Y', (19, 12): 'l'},
+         'mouth': {(18, 16): '2', (18, 17): 'm', (19, 16): 'm', (19, 17): 'm', (20, 16): 'p', (20, 17): 'p'}},
 }
+LENS_EYES = ('classic',)
 
 
 def head(front=False, look='classic', side=None, face=None, extra=None, overlay=None):
@@ -172,7 +182,7 @@ def head(front=False, look='classic', side=None, face=None, extra=None, overlay=
     rows = list(rows)
     for y, r in EYEWEAR.get(look, {}).get('front' if front else 'prof', {}).items():
         rows[y + 5] = r
-    leg = legend(HAIR.get(look, HAIR_CHESTNUT), {**SHADES, **(extra or {})})
+    leg = legend(HAIR.get(look, HAIR_CHESTNUT), extra)
     p = Pic.text(grid(rows), leg)
     if overlay:
         p.paint(overlay, leg)
@@ -180,7 +190,9 @@ def head(front=False, look='classic', side=None, face=None, extra=None, overlay=
     if side == 'left':
         marks.update(RINGS_FRONT if front else RINGS_PROF)
     if face and not front:
-        marks.update(FACES[face])
+        if look in LENS_EYES:
+            marks.update(FACES[face]['eye'])
+        marks.update(FACES[face]['mouth'])
     for (x, y), ch in marks.items():
         p.set(x, y, leg[ch])
     return centred(p, box)

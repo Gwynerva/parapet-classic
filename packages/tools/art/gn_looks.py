@@ -69,6 +69,8 @@ def heads(look):
     head = {'25': H.head(False, look), '25:left': H.head(False, look, side='left')}
     front = {'29': H.head(True, look), '29:left': H.head(True, look, side='left')}
     faces = {str(f): H.head(False, look, face=f) for f in (76, 77, 78)}
+    # While she runs left, the blinking or wincing face keeps her ear rings.
+    faces.update({f'{f}:left': H.head(False, look, side='left', face=f) for f in (76, 77, 78)})
     return head, front, faces
 
 
