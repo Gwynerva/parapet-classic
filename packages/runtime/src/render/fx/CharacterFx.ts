@@ -203,7 +203,7 @@ export class CharacterFx {
       if (a?.mode === 'snapshot' && !this.reduced) {
         let bits = 0;
         for (const t of a.enter ?? ['roll', 'flip']) bits |= triggerBit(t);
-        if ((m.entered & bits) !== 0) {
+        if ((m.entered & bits) !== 0 && (a.chance === undefined || e.rand() < a.chance)) {
           e.snapshots.push({ pose: { ...pose }, clock: e.clock, age: 0 });
           if (e.snapshots.length > MAX_SNAPSHOTS) e.snapshots.shift();
         }

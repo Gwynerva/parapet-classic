@@ -120,8 +120,10 @@ export interface FxAfterimage {
   colors?: 'accent' | 'rainbow' | string[];
   /** Trail: when it shows. */
   while?: 'running' | 'fast' | 'always';
-  /** Snapshot: what takes one. */
+  /** Snapshot: what takes one… */
   enter?: FxTrigger[];
+  /** …and the chance (0..1) that it does: a flourish on some tricks, not on every one. */
+  chance?: number;
   /** Snapshot: how long it lasts and how it drifts (px/s). */
   life?: number;
   drift?: readonly [number, number];
