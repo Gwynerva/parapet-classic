@@ -73,7 +73,8 @@ def tricks(fx, boss):
         em['smoke-nade'] = {**em['smoke-nade'], 'enter': ['roll'], 'moves': [24, 25], 'chance': 0.22}
     elif boss == 'sir-nobody':
         # His summon sign stays on the roof where he touches down, about one time in three; the
-        # soul is shaken out of his slit on some flips and vaults.
+        # soul is shaken out of his slit on some flips and vaults. (His steel sparks on most of
+        # his contacts with a wall, a roof or a pole bring their own chances: kn_sparks.py.)
         em['sign']['chance'] = 0.3
         em['soul-trick']['chance'] = 0.3
     return fx
