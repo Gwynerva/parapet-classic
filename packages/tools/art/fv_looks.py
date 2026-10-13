@@ -1,105 +1,98 @@
-"""Five's looks: her on the calm girl's face (3), magenta hair swept over with the side shaved;
-him on the spiky man's (2), dark hair and a beard; both with a cyber line down the cheek, the
-roomy leather jacket with its glowing high collar, a cybernetic right forearm; her in leather
-trousers with knee pads, him in dark jeans."""
+"""Five's looks: V of Cyberpunk 2077, "a glowing collar on a short jacket, narrow below", the
+woman and the man (two faces: one V each way the game lets you play). The heads (fv_heads.py)
+and the bodies (fv_parts.py, fv_extra.py) are drawn anew, upright, and the look tool turns them:
+
+* `five-her`: V the woman on Blaise's body: the raspberry undercut, the Samurai jacket with its
+  glowing collar, black leather moto trousers, black knee-high wedge boots.
+* `five-him`: V the man on the man's body, a pixel broader: the black crop and the boxed beard,
+  the same jacket over a black tee with a yellow print, dark jeans, black high-tops with an
+  orange glowing sole.
+* `five-kid`: her as the Street Kid of the lifepath: the undercut hot pink, a crop top with pink
+  sleeves and an X, gold trousers with straps, white platform slip-ons.
+* `five-edgerunner`: him in David's yellow jacket from Edgerunners, olive cargo trousers with a
+  green stripe and lilac straps hanging, chunky black sneakers.
+
+The two without the glowing collar wear the glitch without the collar's light (fv_fx.py)."""
 from lookgen import *
-from heads import Pic, Palette, skin_tones, beard, rim, neat_mouth
-from body import outfit_parts, write_parts
+from heads import Palette
+from body import part, apply_rules, FAMILIES
 from gridpng import sheet
-
-FAIR = ['#fbe2cc', '#f0c8a8', '#dca488', '#b47c64', '#80543e']
-HEAD_SKIN = ['#fdecd8', '#f4d6bc', '#e6bea0', '#d0a284', '#b0826a', '#8a6250', '#68483a']
-KEEP3 = ['#dee3e7', '#fff7de', '#ad4d21', '#634931', '#4a3c29', '#7b1008', '#a50800', '#d6be9c']
-JACKET = ['#a0805a', '#7a5a3a', '#523a22']
-TEE = ['#3a3a42', '#26262c', '#16161a']
-LEATHER = ['#4a4a52', '#3a3a42', '#2c2c34', '#202026', '#16161a']
-JEANS_DARK = ['#4a4a58', '#3a3a48', '#2c2c3a', '#20202c', '#16161e']
-CYAN, CYAN_L = '#3fe8ff', '#bff8ff'
+import fv_heads as H
+import fv_parts as P
+import fv_extra as X
 
 
-def her(front=False):
-    p = Pic.orig(3, front)
-    skin_tones(p, HEAD_SKIN, keep=KEEP3)
-    p.recolor({'#000000': '#c8306e', '#182421': '#7e1a46', '#422c29': '#ff6aa8', '#7b1008': '#b0606a', '#a50800': '#c87a80'})
-    neat_mouth(p, front, '#8a3a4a', '#b8606e', HEAD_SKIN[2])
-    rim(p, ['#c8306e', '#7e1a46', '#ff6aa8'], '#5a1032')
-    hair = {'#c8306e', '#7e1a46', '#ff6aa8', '#5a1032'}
-    # The side shaved to stubble at the back (left of the upright profile).
-    for y in range(7, 12 if not front else 14):
-        for x in range(1, 5 if not front else 3):
-            if p.get(x, y) in hair:
-                p.set(x, y, ['#7a5a52', '#5e443e', '#9a3a62'][(x * 3 + y * 5) % 3])
-    # The cyber line along the cheekbone to the jaw.
-    for x, y in (((9, 11), (9, 12), (10, 13)) if not front else ((3, 11), (3, 12), (4, 13))):
-        if p.get(x, y):
-            p.set(x, y, CYAN if y % 2 else CYAN_L)
-    return p
+def skin_rules(ramp):
+    """The hands in the look's skin (the base hand tones by lightness onto the ramp)."""
+    tones = ['#fff3bd', '#ffd794', '#ffcb84', '#e7aa6b', '#bd7942', '#a56531', '#734521']
+    m = {c: ramp[min(len(ramp) - 1, round(i * (len(ramp) - 1) / (len(tones) - 1)))] for i, c in enumerate(tones)}
+    return [recolor(HAND, m)]
 
 
-def him(front=False):
-    p = Pic.orig(2, front)
-    eye = ['#fff7de', '#fff3bd', '#291810']
-    skin_tones(p, HEAD_SKIN, keep=eye)
-    p.recolor({'#391808': '#2a1e1a', '#000400': '#120e0c', '#6b2c00': '#3a2a22', '#943c00': '#4a3628'})
-    beard(p, 12, 18, 5, ['#4a3a30', '#3a2c24', '#2a201a'], keep=eye)
-    for x, y in (((8, 9), (8, 10), (9, 11)) if not front else ((3, 9), (3, 10), (4, 11))):
-        if p.get(x, y):
-            p.set(x, y, CYAN if y % 2 else CYAN_L)
-    return p
-
-
-def collar(id_, p):
-    """The jacket's high collar, glowing, at the neck of the upright chest."""
-    if id_ == 57:
-        for x, y in ((3, 2), (4, 2), (3, 3), (4, 3), (5, 3), (4, 4)):
-            if p.get(x, y):
-                p.set(x, y, CYAN if (x + y) % 2 else CYAN_L)
-    if id_ in (62, 63, 64, 65):
-        # Knee pads.
-        for y in range(1, min(4, p.h)):
-            for x in range(p.w):
-                if p.get(x, y):
-                    p.set(x, y, '#5a5a64' if (x + y) % 2 else '#3a3a42')
-    return p
-
-
-def rules(base, legs):
-    return [
-        *skin(FAIR, ARMS + HAND + CHEST + TORSO, with_shins=False),
-        recolor(CHEST, ramp(SHIRT if base == 0 else MALE_SHIRT, TEE)),
-        recolor(CHEST, {FAIR[1]: JACKET[0], FAIR[2]: JACKET[1]}),
-        recolor(TORSO, ramp(FAIR, [JACKET[0], JACKET[0], JACKET[1], JACKET[2], JACKET[2]])),
-        recolor(TORSO, ramp(MALE_SHIRT, JACKET)),
-        recolor(TORSO, {BELT[0]: '#c9ced6', BELT[1]: '#0e0e12'}),
-        recolor(UPPER_ARM, ramp(FAIR, [JACKET[0], JACKET[0], JACKET[1], JACKET[2], JACKET[2]])),
-        # A cybernetic forearm on the right.
-        recolor(FOREARM + HAND, {**ramp(FAIR, ['#c9ced6', '#9aa2ae', '#727a86', '#4e5560', '#2e333a']),
-                                 '#ffcb84': '#9aa2ae', '#a56531': '#4e5560', WRIST[0]: CYAN, WRIST[1]: '#2a8ab0'}) | {'on': 'right'},
-        recolor(FOREARM, {WRIST[0]: JACKET[1], WRIST[1]: JACKET[2], WRIST[2]: '#16161a'}) | {'on': 'left'},
-        recolor(TORSO + THIGH + KNEE, ramp(SHORTS, legs)),
-        recolor(SHIN, ramp(SHIN_SKIN, legs[1:4])),
-        recolor(SHOES, {**ramp(SHOE['main'], ['#3a3a40', '#26262c', '#16161a']), '#d64908': '#26262c',
-                        '#fffbe7': '#c9ced6', '#d6cbb5': '#16161a', '#8c8273': '#0e0e12'}),
-    ]
-
-
-def make(id_, base, head, plan, legs, accent):
-    r = rules(base, legs)
-    pal = Palette({'k': '#18121a'})
-    look = {'id': id_, 'base': base, 'accent': accent, '_raw_heads': True, 'recolor': r,
+def write(look_id, base, accent, pics, skin, head, faces=None, ribbons=None, effect=None, turn=()):
+    """Writes a look: the pictures drawn (key -> Pic), the hands in her or his skin, the heads;
+    turns the upright pictures."""
+    pal = Palette()
+    look = {'id': look_id, 'base': base, 'accent': accent, '_raw_heads': True,
             'parts': dict(no_ponytail()) if base == 0 else {}}
-    write_parts(look, outfit_parts(base, r, plan, collar), pal)
-    look['parts']['25'] = pal.rows(head())
-    look['parts']['29'] = pal.rows(head(True))
+    rules = skin_rules(skin)
+    for id_ in FAMILIES['hand']:
+        look['parts'][str(id_)] = pal.rows(apply_rules(part(base, id_), id_, rules))
+    for k, p in {**pics, **head, **(faces or {})}.items():
+        look['parts'][k] = pal.rows(p)
+    if ribbons:
+        look['ribbons'] = ribbons
+    if effect:
+        look['effect'] = effect
     look['palette'] = pal.pal
     path = write_look('five', look)
-    rotate(path, [25])
-    preview(id_)
-    return pal
+    upright = ['25', '57', '34', '49', '53', '62', '30', '1', '5', '9', '39', '43', *turn]
+    rotate(path, [k for k in upright if k in look['parts']])
+    preview(look_id)
+    return pal, look
 
 
-make('five-her', 0, her, {'chest': 1, 'upper-arm': 1, 'thigh': -1, 'knee': 1}, LEATHER, '#ff2fa6')
-pal = make('five-him', 1, him, {'chest': 1, 'upper-arm': 1, 'forearm': 1, 'thigh': 1, 'knee': 1, 'shin': 1},
-           JEANS_DARK, CYAN)
-sheet('fv-heads.png', [(pal.rows(p), pal.pal) for p in (her(), her(True), Pic.orig(2), him(), him(True))], scale=9)
+# The outfits without the glowing collar wear the glitch without the collar's light, and their
+# effect goes by the name of David's implant.
+BARE = ['sandevistan', 'glitch-bare']
+# The hands in the heads' skin, light to dark.
+HER_RAMP = [H.HER_SKIN[k] for k in 'H1234']
+HIM_RAMP = [H.HIM_SKIN[k] for k in 'H1234']
+
+
+def her():
+    head = {'25': H.her_head(), '29': H.her_head(True)}
+    faces = {str(f): H.her_head(face=f) for f in (76, 77, 78)}
+    return write('five-her', 0, '#53cef7', P.pictures('her'), HER_RAMP, head, faces)
+
+
+def him():
+    head = {'25': H.him_head(), '29': H.him_head(True)}
+    faces = {str(f): H.him_head(face=f) for f in (76, 77, 78)}
+    return write('five-him', 1, '#ff9a2a', P.pictures('him'), HIM_RAMP, head, faces)
+
+
+def kid():
+    head = {'25': H.her_head(hair=X.KID_HAIR), '29': H.her_head(True, hair=X.KID_HAIR)}
+    faces = {str(f): H.her_head(face=f, hair=X.KID_HAIR) for f in (76, 77, 78)}
+    return write('five-kid', 0, '#f670b0', X.kid_pictures(), HER_RAMP, head, faces, effect=BARE)
+
+
+def david():
+    head = {'25': H.him_head(), '29': H.him_head(True)}
+    faces = {str(f): H.him_head(face=f) for f in (76, 77, 78)}
+    return write('five-edgerunner', 1, '#f6df1e', X.david_pictures(), HIM_RAMP, head, faces,
+                 ribbons=X.david_ribbons(), effect=BARE)
+
+
+LOOKS = ['five-her', 'five-him', 'five-kid', 'five-edgerunner']
+her_pal, him_pal, kid_pal = her()[0], him()[0], kid()[0]
+david()
+# Their heads magnified, in out/fv-heads.png: her profile, 3/4, blinks and pain face; the Street
+# Kid's; his.
+sheet('fv-heads.png', [(her_pal.rows(p), her_pal.pal) for p in
+                       (H.her_head(), H.her_head(True), *(H.her_head(face=f) for f in (76, 77, 78)))] +
+      [(kid_pal.rows(p), kid_pal.pal) for p in (H.her_head(hair=X.KID_HAIR), H.her_head(True, hair=X.KID_HAIR))] +
+      [(him_pal.rows(p), him_pal.pal) for p in
+       (H.him_head(), H.him_head(True), *(H.him_head(face=f) for f in (76, 77, 78)))], scale=10, per_row=5)
 print('five looks written')

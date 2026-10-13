@@ -2,6 +2,6 @@
   "id": "five",
   "color": "#ff2fa6",
   "gender": "neutral",
-  "looks": ["five-her", "five-him"],
-  "effect": ["glitch", "overdrive"]
+  "looks": ["five-her", "five-him", "five-kid", "five-edgerunner"],
+  "effect": ["glitch", "sandevistan"]
 }

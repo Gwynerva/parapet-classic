@@ -1,142 +1,373 @@
 {
   "palette": {
-    "c": "#3fe8ff",
-    "C": "#bff8ff",
-    "m": "#ff2fa6",
-    "M": "#ffa0d8",
-    "y": "#fff060",
-    "w": "#ffffff",
-    "k": "#16161a"
+    "r": "#ff2a3a",
+    "R": "#ff8a92",
+    "c": "#33e6ff",
+    "C": "#c2f9ff",
+    "m": "#e4136a",
+    "k": "#120c16",
+    "g": "#effdff",
+    "G": "#90e4fc",
+    "Z": "#1db7ed",
+    "L": "#b9ff70",
+    "n": "#5ee6c0",
+    "s": "#5ac8ff",
+    "v": "#8a6cff",
+    "M": "#e4136a",
+    "F": "#ff3a5c",
+    "f": "#a8102e",
+    "h": "#3a0a1ac0",
+    "H": "#5a1428c0",
+    "o": "#0df967",
+    "O": "#b8ffd0"
   },
   "sprites": {
-    "block1": ["cc", "cc"],
-    "block2": ["mm"],
-    "block3": ["m", "m", "c"],
-    "line": ["cccc"],
-    "line2": ["mmmmm"],
-    "chip": ["ckc", "kck", "ckc"]
+    "slice-r1": ["rrrrr.rrrrrr"],
+    "slice-r2": ["rrr.rrrrrrr.", "..rrrr..rr.."],
+    "slice-c1": ["cccccccc.ccc"],
+    "slice-c2": [".cccc.cccccc", "cc....ccc..."],
+    "slice-w": ["CCCC.CCCCCCC"],
+    "dead-1": ["rr.......", ".....cc..", ".........", "..mm.....", ".......rr"],
+    "dead-2": [".........", "cc.......", "......mm.", ".........", "...rr...."],
+    "collar-red-1": ["rRr", "...", "rRr", "...", "rRr"],
+    "collar-red-2": ["...", "rRr", "...", "rRr", "..."],
+    "glint": ["g", "G", "Z"],
+    "scan-n": ["nnnn"],
+    "scan-n2": ["nnnnnn"],
+    "scan-s": ["ssss"],
+    "scan-s2": ["ssssss"],
+    "scan-v": ["vvvv"],
+    "scan-v2": ["vvvvvv"],
+    "scan-m": ["MMMM"],
+    "scan-m2": ["MMMMMM"],
+    "call-0": [
+      ".........",
+      ".........",
+      ".........",
+      "FFFFFFFFF",
+      ".........",
+      ".........",
+      "........."
+    ],
+    "call-1": [
+      ".........",
+      ".........",
+      "FFFFFFFFF",
+      "FhhhhhhhF",
+      "FFFFFFFFF",
+      ".........",
+      "........."
+    ],
+    "call-2": [
+      "FFFFFFFFF",
+      "FhhhhhhhF",
+      "FhhhohhhF",
+      "FhhoHohhF",
+      "FhhhohhhF",
+      "FhhhhhhhF",
+      "fffffffff"
+    ],
+    "call-3": [
+      "FFFFFFFFF",
+      "FhhhOhhhF",
+      "FhhOoOhhF",
+      "FhOoHoOhF",
+      "FhhOoOhhF",
+      "FhhhOhhhF",
+      "fffffffff"
+    ]
   },
   "emitters": {
-    "glitch": {
-      "while": ["run", "air", "wall"],
-      "perSecond": 30,
-      "minSpeed": 30,
-      "anchor": "body",
-      "jitter": [4, 8],
-      "speed": [0, 15],
-      "angle": [-20, 20],
-      "life": [80, 220],
-      "fadeOut": 60,
-      "sprite": {
-        "frames": ["block1", "block2", "block3", "line", "line2"],
-        "random": true
-      },
-      "blend": "add",
-      "max": 30
-    },
-    "tear": {
-      "enter": ["land", "flip", "jump", "dash"],
-      "burst": [4, 7],
-      "anchor": "body",
-      "jitter": [2, 10],
-      "speed": [30, 60],
-      "angle": [-5, 5],
-      "drag": 6,
-      "life": [120, 260],
-      "fadeOut": 100,
-      "sprite": {
-        "frames": ["line", "line2"],
-        "random": true
-      },
-      "blend": "add",
-      "chance": 0.5
-    },
-    "chips": {
-      "while": ["run"],
-      "every": 40,
-      "minSpeed": 80,
-      "anchor": "hand.near",
-      "speed": [10, 20],
-      "angle": [30, 90],
-      "gravity": 100,
-      "life": [400, 600],
-      "fadeOut": 200,
-      "sprite": {
-        "frames": ["chip"],
-        "fps": 1
-      }
-    },
-    "burst": {
-      "burst": 26,
-      "anchor": "body",
-      "jitter": [4, 10],
-      "speed": [10, 70],
-      "angle": [-15, 15],
-      "drag": 3,
-      "life": [150, 400],
-      "fadeOut": 120,
-      "sprite": {
-        "frames": ["block1", "block2", "block3", "line", "line2"],
-        "random": true
-      },
-      "blend": "add"
-    },
-    "idle": {
-      "perSecond": 6,
-      "anchor": "body",
-      "jitter": [5, 9],
+    "relic-slice-r": {
+      "while": ["run", "air"],
+      "perSecond": 0.09,
+      "inherit": 1,
       "speed": 0,
-      "life": [60, 160],
+      "blend": "add",
+      "layer": "front",
+      "max": 1,
+      "anchor": "chest",
+      "offset": [2, -3],
+      "life": [150, 190],
       "fadeOut": 40,
       "sprite": {
-        "frames": ["block1", "block2", "line"],
+        "frames": ["slice-r1", "slice-r2", "slice-r1"],
+        "fps": 20
+      },
+      "reduced": 0
+    },
+    "relic-slice-c": {
+      "while": ["run", "air"],
+      "perSecond": 0.09,
+      "inherit": 1,
+      "speed": 0,
+      "blend": "add",
+      "layer": "front",
+      "max": 1,
+      "anchor": "chest",
+      "offset": [-2, 2],
+      "life": [130, 170],
+      "fadeOut": 40,
+      "sprite": {
+        "frames": ["slice-c2", "slice-c1", "slice-w"],
+        "fps": 20
+      },
+      "reduced": 0
+    },
+    "relic-slice-hips": {
+      "while": ["run", "air"],
+      "perSecond": 0.09,
+      "inherit": 1,
+      "speed": 0,
+      "blend": "add",
+      "layer": "front",
+      "max": 1,
+      "anchor": "hips",
+      "offset": [-1, 0],
+      "life": [110, 150],
+      "fadeOut": 40,
+      "sprite": {
+        "frames": ["slice-r2", "slice-c2"],
+        "fps": 16
+      },
+      "reduced": 0
+    },
+    "relic-dead": {
+      "while": ["run", "air"],
+      "perSecond": 0.09,
+      "inherit": 1,
+      "speed": 0,
+      "blend": "add",
+      "layer": "front",
+      "max": 1,
+      "anchor": "head",
+      "offset": [0, -1],
+      "life": [140, 200],
+      "fadeOut": 30,
+      "sprite": {
+        "frames": ["dead-1", "dead-2"],
+        "fps": 14
+      },
+      "reduced": 0
+    },
+    "relic-collar": {
+      "while": ["run", "air"],
+      "perSecond": 0.09,
+      "inherit": 1,
+      "speed": 0,
+      "blend": "normal",
+      "layer": "front",
+      "max": 1,
+      "anchor": "neck",
+      "offset": [7, 1],
+      "life": [160, 200],
+      "fadeOut": 30,
+      "sprite": {
+        "frames": ["collar-red-1", "collar-red-2"],
+        "fps": 14
+      },
+      "reduced": 0
+    },
+    "collar-glint": {
+      "while": ["run"],
+      "perSecond": 0.45,
+      "minSpeed": 30,
+      "anchor": "neck",
+      "offset": [7, 4],
+      "inherit": 1,
+      "speed": 14,
+      "angle": 90,
+      "life": [180, 220],
+      "fadeIn": 40,
+      "fadeOut": 80,
+      "sprite": {
+        "frames": ["glint"],
+        "fps": 1
+      },
+      "blend": "add",
+      "layer": "front",
+      "max": 1,
+      "reduced": 0
+    },
+    "sande-mint": {
+      "burst": [6, 8],
+      "anchor": "chest",
+      "offset": [7, 4],
+      "jitter": [2, 13],
+      "speed": 0,
+      "inherit": 0,
+      "life": [240, 300],
+      "fadeOut": 140,
+      "sprite": {
+        "frames": ["scan-n", "scan-n2"],
         "random": true
       },
-      "blend": "add"
+      "blend": "add",
+      "reduced": 0
+    },
+    "sande-sky": {
+      "burst": [6, 8],
+      "anchor": "chest",
+      "offset": [13, 4],
+      "jitter": [2, 13],
+      "speed": 0,
+      "inherit": 0,
+      "life": [270, 330],
+      "fadeOut": 140,
+      "sprite": {
+        "frames": ["scan-s", "scan-s2"],
+        "random": true
+      },
+      "blend": "add",
+      "reduced": 0
+    },
+    "sande-violet": {
+      "burst": [6, 8],
+      "anchor": "chest",
+      "offset": [19, 4],
+      "jitter": [2, 13],
+      "speed": 0,
+      "inherit": 0,
+      "life": [300, 360],
+      "fadeOut": 140,
+      "sprite": {
+        "frames": ["scan-v", "scan-v2"],
+        "random": true
+      },
+      "blend": "add",
+      "reduced": 0
+    },
+    "sande-magenta": {
+      "burst": [6, 8],
+      "anchor": "chest",
+      "offset": [25, 4],
+      "jitter": [2, 13],
+      "speed": 0,
+      "inherit": 0,
+      "life": [330, 390],
+      "fadeOut": 140,
+      "sprite": {
+        "frames": ["scan-m", "scan-m2"],
+        "random": true
+      },
+      "blend": "add",
+      "reduced": 0
+    },
+    "idle-dead": {
+      "perSecond": 1.2,
+      "anchor": "head",
+      "jitter": [6, 6],
+      "speed": 0,
+      "life": [90, 160],
+      "fadeOut": 40,
+      "rect": {
+        "size": [1, 2],
+        "colors": ["r", "c", "m"]
+      },
+      "blend": "add",
+      "reduced": 0
+    },
+    "idle-slice": {
+      "perSecond": 0.5,
+      "anchor": "chest",
+      "jitter": [3, 10],
+      "speed": 0,
+      "life": [80, 140],
+      "fadeOut": 30,
+      "sprite": {
+        "frames": ["slice-r1", "slice-c1", "slice-c2"],
+        "random": true
+      },
+      "blend": "add",
+      "reduced": 0
+    },
+    "flatline": {
+      "burst": 14,
+      "anchor": "body",
+      "jitter": [5, 14],
+      "speed": [10, 50],
+      "angle": [-12, 12],
+      "drag": 5,
+      "life": [140, 320],
+      "fadeOut": 120,
+      "sprite": {
+        "frames": ["slice-r1", "slice-r2", "slice-c1", "slice-c2", "slice-w"],
+        "random": true
+      },
+      "blend": "add",
+      "reduced": 0
+    },
+    "holo-call": {
+      "burst": 1,
+      "anchor": "head",
+      "offset": [-12, -4],
+      "speed": 0,
+      "life": 1150,
+      "fadeOut": 120,
+      "sprite": {
+        "frames": [
+          "call-0",
+          "call-1",
+          "call-2",
+          "call-3",
+          "call-2",
+          "call-3",
+          "call-2",
+          "call-1",
+          "call-0"
+        ],
+        "fps": 8,
+        "loop": false
+      },
+      "layer": "front",
+      "reduced": 0
+    },
+    "holo-lines": {
+      "burst": 6,
+      "anchor": "body",
+      "jitter": [6, 14],
+      "speed": 0,
+      "life": [120, 260],
+      "fadeOut": 100,
+      "rect": {
+        "size": 1,
+        "colors": ["c", "C"]
+      },
+      "blend": "add",
+      "reduced": 0
     }
   },
   "variants": {
     "glitch": {
-      "emitters": ["glitch", "tear"]
+      "emitters": [
+        "relic-slice-r",
+        "relic-slice-c",
+        "relic-slice-hips",
+        "relic-dead",
+        "relic-collar",
+        "collar-glint"
+      ]
     },
-    "overdrive": {
-      "emitters": ["chips"],
+    "glitch-bare": {
+      "emitters": ["relic-slice-r", "relic-slice-c", "relic-slice-hips", "relic-dead"]
+    },
+    "sandevistan": {
       "afterimage": {
-        "steps": [
-          {
-            "back": 6,
-            "alpha": 0.25
-          },
-          {
-            "back": 5,
-            "alpha": 0.3
-          },
-          {
-            "back": 4,
-            "alpha": 0.35
-          },
-          {
-            "back": 3,
-            "alpha": 0.4
-          },
-          {
-            "back": 2,
-            "alpha": 0.5
-          },
-          {
-            "back": 1,
-            "alpha": 0.55
-          }
-        ],
-        "colors": "rainbow",
+        "mode": "snapshot",
+        "enter": ["flip", "vault"],
+        "chance": 0.28,
+        "burst": ["sande-mint", "sande-sky", "sande-violet", "sande-magenta"],
+        "colors": ["#b9ff70"],
         "textured": false,
-        "while": "running"
+        "life": 320,
+        "drift": [36, 0],
+        "alpha": 0.6
       }
     }
   },
   "presence": {
-    "idle": ["idle"],
-    "vanish": ["burst"],
-    "appear": ["burst"]
+    "idle": ["idle-dead", "idle-slice"],
+    "vanish": ["flatline"],
+    "appear": ["holo-call", "holo-lines"]
   }
 }

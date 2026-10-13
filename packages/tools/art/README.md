@@ -73,21 +73,21 @@ diff -r /tmp/bosses packages/content/bosses
 
 ## The scripts
 
-| Script            | Writes (in `bosses/<boss>/`)                                                                                                                                              |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pierre.py`       | `fx.json`; looks `swordsman`, `fencer`, `rebel`, `undercover` (`pr_looks.py`)                                                                                             |
-| `rewind.py`       | `fx.json`; looks `hoodie`, `beanie` (`rw_looks.py`); `looks` in `boss.json`                                                                                               |
-| `grove.py`        | `fx.json`; looks `grove-tank`, `grove-green`, `grove-cover` (`gr_looks.py`, `gr_heads.py`, `gr_parts.py`)                                                                 |
-| `vera.py`         | `fx.json`; looks `vera-tank`, `vera-vest`, `vera-street` (`vr_looks.py`, `vr_heads.py`); `looks` and `effect` in `boss.json`                                              |
-| `b2.py`           | `fx.json`; looks `android`, `replica`, `kimono` (`b2_looks.py`, `b2_heads.py`, `b2_parts.py`); `looks` in `boss.json`                                                     |
-| `sir_nobody.py`   | `fx.json`; looks `sunlight`, `onion`, `hollow` (`kn_looks.py`, helms in `kn_helms.py`, materials in `kn_parts.py`); `looks` and `effect` in `boss.json`                   |
-| `granger.py`      | `fx.json` (`gn_fx.py`); looks `classic`, `slipstream`, `punk` (`gn_looks.py`, `gn_heads.py`, `gn_parts.py`); `looks` in `boss.json`                                       |
-| `rush_b.py`       | `fx.json`; looks `phoenix`, `leet`, `arctic`, `guerrilla`, `seal`, `gsg9`, `sas`, `gign` (`rb_looks.py`, `rb_heads.py`, `rb_kit.py`); `looks` and `effect` in `boss.json` |
-| `five.py`         | `fx.json`; looks `five-her`, `five-him` (`fv_looks.py`); `looks` in `boss.json`                                                                                           |
-| `flittermouse.py` | `fx.json` (`fm_fx.py`); looks `asylum`, `armored`, `future` (`fm_heads.py`, `fm_body.py`); `looks` in `boss.json`                                                         |
-| `shahzada.py`     | `fx.json`; looks `sands`, `warrior`, `wanderer`, `dark-prince` (`sh_looks.py`, `sh_heads.py`, `sh_parts.py`); `looks` in `boss.json`                                      |
-| `azure.py`        | `fx.json` (`az_fx.py`); looks `scholar`, `broker`, `leather`, `illium` (`az_looks.py`, `az_heads.py`, `az_parts.py`); the whole `boss.json`                               |
-| `stages.py`       | `stage.json` of every boss, or of the bosses named                                                                                                                        |
+| Script            | Writes (in `bosses/<boss>/`)                                                                                                                                                          |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pierre.py`       | `fx.json`; looks `swordsman`, `fencer`, `rebel`, `undercover` (`pr_looks.py`)                                                                                                         |
+| `rewind.py`       | `fx.json`; looks `hoodie`, `beanie` (`rw_looks.py`); `looks` in `boss.json`                                                                                                           |
+| `grove.py`        | `fx.json`; looks `grove-tank`, `grove-green`, `grove-cover` (`gr_looks.py`, `gr_heads.py`, `gr_parts.py`)                                                                             |
+| `vera.py`         | `fx.json`; looks `vera-tank`, `vera-vest`, `vera-street` (`vr_looks.py`, `vr_heads.py`); `looks` and `effect` in `boss.json`                                                          |
+| `b2.py`           | `fx.json`; looks `android`, `replica`, `kimono` (`b2_looks.py`, `b2_heads.py`, `b2_parts.py`); `looks` in `boss.json`                                                                 |
+| `sir_nobody.py`   | `fx.json`; looks `sunlight`, `onion`, `hollow` (`kn_looks.py`, helms in `kn_helms.py`, materials in `kn_parts.py`); `looks` and `effect` in `boss.json`                               |
+| `granger.py`      | `fx.json` (`gn_fx.py`); looks `classic`, `slipstream`, `punk` (`gn_looks.py`, `gn_heads.py`, `gn_parts.py`); `looks` in `boss.json`                                                   |
+| `rush_b.py`       | `fx.json`; looks `phoenix`, `leet`, `arctic`, `guerrilla`, `seal`, `gsg9`, `sas`, `gign` (`rb_looks.py`, `rb_heads.py`, `rb_kit.py`); `looks` and `effect` in `boss.json`             |
+| `five.py`         | `fx.json` (`fv_fx.py`); looks `five-her`, `five-him`, `five-kid`, `five-edgerunner` (`fv_looks.py`, `fv_heads.py`, `fv_parts.py`, `fv_extra.py`); `looks` and `effect` in `boss.json` |
+| `flittermouse.py` | `fx.json` (`fm_fx.py`); looks `asylum`, `armored`, `future` (`fm_heads.py`, `fm_body.py`); `looks` in `boss.json`                                                                     |
+| `shahzada.py`     | `fx.json`; looks `sands`, `warrior`, `wanderer`, `dark-prince` (`sh_looks.py`, `sh_heads.py`, `sh_parts.py`); `looks` in `boss.json`                                                  |
+| `azure.py`        | `fx.json` (`az_fx.py`); looks `scholar`, `broker`, `leather`, `illium` (`az_looks.py`, `az_heads.py`, `az_parts.py`); the whole `boss.json`                                           |
+| `stages.py`       | `stage.json` of every boss, or of the bosses named                                                                                                                                    |
 
 Pierre's looks `mechanic`, `kate`, `evening` and `birthday`, his and Grove's `boss.json`,
 `bosses.json`, `contests.json` and `theme.json` are written by nothing here.

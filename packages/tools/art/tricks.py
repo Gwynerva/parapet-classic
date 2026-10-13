@@ -55,7 +55,10 @@ def tricks(fx, boss):
         # data squares with it (the snapshot's own chance and burst, in b2.py): nothing to add.
         pass
     elif boss == 'five':
-        em['tear']['chance'] = 0.5
+        # V's Sandevistan comes on about one flip or vault in four, its stepped smear with it (the
+        # snapshot's own chance and burst, in fv_fx.py); the Relic glitch is no trick's: nothing
+        # to add.
+        pass
     elif boss == 'flittermouse':
         # A batarang on about a third of the flips and vaults, ahead from the near hand.
         em['batarang'] = {**em['batarang'], 'enter': ['flip', 'vault'], 'chance': 0.35}
