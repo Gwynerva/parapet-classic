@@ -184,8 +184,9 @@ One particle system draws every boss's effect; only the data differs
   glass, Petra's idea, Rewind's photos). Then `anchor` (feet, hips, chest, back, neck, head,
   hand.near / far, hands, body), `offset` (+x behind), `speed` and `angle` (0 behind), `inherit`,
   `gravity`, `drag`, `life`, `fadeIn` / `fadeOut`, `scale`, `tumble`, `flutter`, `face`,
-  `sprite` frames (or `sets` of them, one played by each particle: a Polaroid of one of several pictures) or `rect` pixels, `blend: add`, `layer`, `max`, and `reduced` for players who
-  ask for less motion.
+  `sprite` frames (or `sets` of them, each particle playing one: a Polaroid of one of several
+  pictures) or `rect` pixels, `blend: add`, `layer`, `max`, and `reduced` for players who ask
+  for less motion.
 - `ribbons` — cloth of the effect, like the looks'.
 - `variants` — named sets of emitters, ribbons and an `afterimage`: echo or rush trails, a
   `snapshot` of the pose on a trick (with a `chance`: on some of them; `burst`: emitters coming
