@@ -11,7 +11,7 @@ these Python scripts write their JSON.
   legs), relit as metal, a fitted suit or cloth with stripes, painted over (a belt, a bat on the
   chest).
 - **Effects** are particle sprites and emitters, with each boss's flourish thrown on some of its
-  tricks (Vera's glass, Pyotr's idea, Rewind's photos).
+  tricks (Vera's glass, Petra's idea, Rewind's photos).
 - **Worlds** are the character screen's dioramas: scenery drawn piece by piece, lit from the
   sun's side, far things hazy.
 
@@ -68,7 +68,7 @@ diff -r /tmp/bosses packages/content/bosses
 - `tricks.py` — the bosses' flourishes on tricks, merged into an effect before it is written.
 - `stages.py`, `stages2.py` — the worlds, one function per boss; `scene.py` draws their scenery
   (lit blobs, foliage, trees, pines, palms, buildings, skylines, ground strips) and `room.py` the
-  author's room, Pyotr's world.
+  author's room, Petra's world.
 - `gridpng.py` — pictures as a magnified PNG.
 
 ## The scripts
@@ -89,5 +89,5 @@ diff -r /tmp/bosses packages/content/bosses
 | `azure.py`        | `fx.json` (`az_fx.py`); looks `scholar`, `broker`, `leather`, `illium` (`az_looks.py`, `az_heads.py`, `az_parts.py`); the whole `boss.json`                                           |
 | `stages.py`       | `stage.json` of every boss, or of the bosses named                                                                                                                                    |
 
-Pyotr's looks `mechanic`, `kate`, `evening` and `birthday`, his and Grove's `boss.json`,
+Petra's looks `mechanic`, `kate`, `evening` and `birthday`, her and Grove's `boss.json`,
 `bosses.json`, `contests.json` and `theme.json` are written by nothing here.
