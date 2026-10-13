@@ -2,6 +2,6 @@
   "id": "grove",
   "color": "#3fae4c",
   "gender": "male",
-  "looks": ["grove-tank"],
-  "effect": ["respect"]
+  "looks": ["grove-tank", "grove-green", "grove-cover"],
+  "effect": ["respect", "tag"]
 }

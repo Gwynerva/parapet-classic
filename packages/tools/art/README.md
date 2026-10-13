@@ -77,7 +77,7 @@ diff -r /tmp/bosses packages/content/bosses
 | ----------------- | ----------------------------------------------------------------------------------------------------------------- |
 | `pierre.py`       | `fx.json`; looks `swordsman`, `fencer`, `rebel`, `undercover` (`pr_looks.py`)                                     |
 | `rewind.py`       | `fx.json`; looks `hoodie`, `beanie` (`rw_looks.py`); `looks` in `boss.json`                                       |
-| `grove.py`        | `fx.json`; look `grove-tank` (`gr_looks.py`)                                                                      |
+| `grove.py`        | `fx.json`; looks `grove-tank`, `grove-green`, `grove-cover` (`gr_looks.py`, `gr_heads.py`, `gr_parts.py`)         |
 | `vera.py`         | `fx.json`; looks `vera-tank`, `vera-vest`, `vera-hood` (`vr_looks.py`); `looks` in `boss.json`                    |
 | `b2.py`           | `fx.json`; look `android` (`b2_looks.py`); `looks` in `boss.json`                                                 |
 | `sir_nobody.py`   | `fx.json`; looks `plate`, `dark-knight`; `looks` in `boss.json`                                                   |

@@ -39,7 +39,10 @@ def tricks(fx, boss):
     elif boss == 'shahzada':
         em['swirl'] = every_way(em['swirl'], 0.5)
     elif boss == 'grove':
-        em['cash'] = every_way(em['cash'], 0.5)
+        # RESPECT + over his head on one flip or vault in five, a bill or two off him on some of
+        # them (each rolls its own chance).
+        em['respect'] = {**em['respect'], 'enter': ['flip', 'vault'], 'chance': 0.2}
+        em['bills'] = {**em['bills'], 'enter': ['flip', 'vault'], 'chance': 0.2}
     elif boss == 'b2':
         em['shatter'] = every_way(em['shatter'], 0.5)
     elif boss == 'five':

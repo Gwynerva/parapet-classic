@@ -1,146 +1,236 @@
 {
   "palette": {
-    "g": "#3fae4c",
-    "G": "#7fe08a",
-    "d": "#1f6b2a",
-    "w": "#f4f4e8",
-    "y": "#e8d36a",
-    "s": "#5fd16b",
-    "S": "#a9f0b0",
-    "o": "#2a8f37",
-    "a": "accent",
-    "l": "accent.light"
+    "g": "#3c9c45",
+    "G": "#86d46e",
+    "d": "#143a1a",
+    "o": "#3c9c4570",
+    "O": "#86d46e50",
+    "p": "#8ad67a90",
+    "P": "#c8f0b8a0",
+    "w": "#ffffff",
+    "W": "#c9c9c9",
+    "k": "#000000",
+    "y": "#f0b43c",
+    "Y": "#b97418",
+    "m": "#4f8a3c",
+    "M": "#94c873",
+    "n": "#1f3b18",
+    "c": "#d8ecc0"
   },
   "sprites": {
-    "bill1": ["ddddddd", "dgGgGgd", "dGgyGgd", "dgGgGgd", "ddddddd"],
-    "bill2": ["...ddd.", ".ddgGd.", "dgGyGd.", "dGgGgd.", "dgGdd..", "ddd...."],
-    "bill3": [".ddd...", "dGgdd..", "dgGyGd.", ".dGgGgd", "..ddGgd", "....ddd"],
-    "puff1": [".sS.", "sSSs", ".ss."],
-    "puff2": ["..ss..", ".sSSs.", "sSSSSs", "sSSSss", ".ssss."],
-    "puff3": ["...ss...", ".ssSSss.", "sSS..SSs", "sS....Ss", "sS....ss", ".ss..ss.", "..ssss.."],
-    "star": [".l.", "lal", ".l."]
+    "tag0": [
+      "........................",
+      "........................",
+      "....P...................",
+      "..p....p................",
+      ".p...P..................",
+      "...p....p...............",
+      "......P.................",
+      "........................",
+      "........................",
+      "........................",
+      "........................",
+      "........................",
+      "........................",
+      "........................"
+    ],
+    "tag1": [
+      "....o.....o.............",
+      ".....GG.................",
+      "o.GG.gdG..G.....p.......",
+      ".G.ddgg.dG.G..P.........",
+      ".gdg.gdg.gdgd....P......",
+      "ogdgdgdgdgdgd..p........",
+      "..ggd.d.d.g.d...........",
+      "...dd......d.p..........",
+      "ogggggggggggg...........",
+      "..ddddddddddd...........",
+      "......o.................",
+      "........................",
+      "........................",
+      "........................"
+    ],
+    "tag2": [
+      "....o.....o......o......",
+      ".....GG......G.G........",
+      "o.GG.gdG..G..gdgdGGG....",
+      ".G.ddgg.dG.G.gdgdgddd..o",
+      ".gdg.gdg.gdgdgdgdgg.....",
+      "ogdgdgdgdgdgd.g.dgdd....",
+      "..ggd.d.d.g.d..d.ggg.Go.",
+      "...dd......d......ddg.d.",
+      "oggggggggggggggggggg.d..",
+      "..ddddddddddddddddddd...",
+      "......o......o...o......",
+      "........................",
+      "........................",
+      "........................"
+    ],
+    "tag3": [
+      "....o.....o......o......",
+      ".....GG......G.G........",
+      "o.GG.gdG..G..gdgdGGG....",
+      ".G.ddgg.dG.G.gdgdgddd..o",
+      ".gdg.gdg.gdgdgdgdgg.....",
+      "ogdgdgdgdgdgd.g.dgdd....",
+      "..ggd.d.d.g.d..d.ggg.Go.",
+      "...dd......d......ddg.d.",
+      "oggggggggggggggggggg.d..",
+      "..ddddddddddddddddddd...",
+      "...d..o......o..go......",
+      "................d.......",
+      "........................",
+      "........................"
+    ],
+    "tag4": [
+      "....o.....o......o......",
+      ".....GG......G.G........",
+      "o.GG.gdG..G..gdgdGGG....",
+      ".G.ddgg.dG.G.gdgdgddd..o",
+      ".gdg.gdg.gdgdgdgdgg.....",
+      "ogdgdgdgdgdgd.g.dgdd....",
+      "..ggd.d.d.g.d..d.ggg.Go.",
+      "...dd......d......ddg.d.",
+      "oggggggggggggggggggg.d..",
+      "..ddddddddddddddddddd...",
+      "...g..o...d..o..go......",
+      "...d............g.......",
+      "................d.......",
+      "........................"
+    ],
+    "respect": [
+      "kkkkkkkkkkkkkkkkkkkkkkkkkkkkk......",
+      "kwwkkwwwkkwwkwwkkwwwkkwwkwwwk..kkk.",
+      "kwkwkwkkkwkkkwkwkwkkkwkkkkwkk.kkwkk",
+      "kwwkkwwkkkwkkwwkkwwkkwk..kwk..kwwwk",
+      "kwkwkwkkkkkwkwkkkwkkkwkkkkwk..kkwkk",
+      "kWkWkWWWkWWkkWk.kWWWkkWWkkWk...kkk.",
+      "kkkkkkkkkkkkkkk.kkkkkkkkkkkk......."
+    ],
+    "passed": [
+      "kkk.kkkkkkkkkkkkkkkkkkkkkkkkkkkk.kkkk.kkk.kkkkkkkkkkkkkkkkkk",
+      "kykkkykyyykkyykkyykyyykkykkykkyk.kyykkkykkkyykkyykyyykyykkyk",
+      "kyykyykkykkykkkykkkkykkykykyykyk.kykykykykykkkykkkykkkykykyk",
+      "kykykykkykkkykkkykkkykkykykykyyk.kyykkyyykkykkkykkyykkykykyk",
+      "kykkkykkykkkkykkkykkykkykykykkyk.kykkkykykkkykkkykykkkykykkk",
+      "kYk.kYkYYYkYYkkYYkkYYYkkYkkYkkYk.kYk.kYkYkYYkkYYkkYYYkYYkkYk",
+      "kkk.kkkkkkkkkkkkkkkkkkkkkkkkkkkk.kkk.kkkkkkkkkkkkkkkkkkkkkkk"
+    ],
+    "bill1": ["nnnnnnn", "nmmMmmn", "nmMcMmn", "nmmMmmn", "nnnnnnn"],
+    "bill2": ["...nnn.", ".nnmMn.", "nmMcMn.", "nMmMmn.", "nmmnn..", "nnn...."],
+    "bill3": ["nnnnnnn", "nMmmmMn", "nnnnnnn"],
+    "puff1": [".p.", "pPp", ".p."],
+    "puff2": [".pp.", "pPPp", "pPPp", ".pp."],
+    "puff3": ["..pp..", ".pPPp.", "pPppPp", "pP..Pp", ".pPPp.", "..pp.."]
   },
   "emitters": {
+    "tag": {
+      "chance": 0.35,
+      "burst": 1,
+      "speed": 0,
+      "inherit": 0,
+      "life": 2400,
+      "fadeIn": 60,
+      "fadeOut": 900,
+      "sprite": {
+        "frames": ["tag0", "tag1", "tag2", "tag3", "tag4"],
+        "fps": 7,
+        "loop": false
+      },
+      "layer": "behind",
+      "max": 2,
+      "reduced": 1,
+      "moves": [33],
+      "anchor": "hand.near",
+      "offset": [-36, -1]
+    },
+    "respect": {
+      "burst": 1,
+      "anchor": "head",
+      "offset": [0, -12],
+      "speed": 12,
+      "angle": 90,
+      "inherit": 0.6,
+      "drag": 1.2,
+      "life": 1150,
+      "fadeIn": 60,
+      "fadeOut": 420,
+      "sprite": {
+        "frames": ["respect"]
+      },
+      "layer": "front",
+      "max": 1,
+      "reduced": 1,
+      "enter": ["flip", "vault"],
+      "chance": 0.2
+    },
     "bills": {
-      "while": ["run", "air"],
-      "every": 14,
-      "minSpeed": 60,
-      "anchor": "hips",
-      "jitter": [3, 4],
-      "speed": [18, 40],
-      "angle": [20, 70],
-      "inherit": 0.15,
-      "gravity": 40,
-      "drag": 1.6,
-      "life": [700, 1100],
+      "burst": [1, 2],
+      "anchor": "chest",
+      "speed": [35, 60],
+      "angle": [70, 140],
+      "inherit": 0.3,
+      "gravity": 75,
+      "drag": 1.4,
+      "life": [1000, 1300],
       "fadeOut": 300,
       "flutter": {
-        "amp": 3,
+        "amp": 2,
+        "freq": 2.5
+      },
+      "sprite": {
+        "frames": ["bill1", "bill2", "bill3", "bill2"],
+        "fps": 7
+      },
+      "max": 4,
+      "enter": ["flip", "vault"],
+      "chance": 0.2
+    },
+    "pocket": {
+      "while": ["run"],
+      "perSecond": 0.07,
+      "minSpeed": 60,
+      "anchor": "hips",
+      "offset": [3, 1],
+      "speed": [12, 24],
+      "angle": [40, 80],
+      "inherit": 0.15,
+      "gravity": 55,
+      "drag": 1.6,
+      "life": [1100, 1400],
+      "fadeOut": 350,
+      "flutter": {
+        "amp": 2,
         "freq": 2.2
       },
       "sprite": {
         "frames": ["bill1", "bill2", "bill3", "bill2"],
-        "fps": 8
+        "fps": 7
       },
-      "max": 18,
-      "reduced": 0.3
+      "max": 1
     },
-    "cash": {
-      "enter": ["flip", "vault", "wall", "roll", "land"],
-      "burst": [4, 7],
-      "anchor": "chest",
-      "speed": [40, 80],
-      "angle": [0, 360],
-      "gravity": 90,
-      "drag": 1.2,
-      "life": [600, 900],
-      "fadeOut": 250,
-      "flutter": {
-        "amp": 2,
-        "freq": 3
-      },
-      "sprite": {
-        "frames": ["bill1", "bill2", "bill3", "bill2"],
-        "fps": 10
-      },
-      "chance": 0.5
-    },
-    "spray": {
-      "while": ["run", "air", "wall"],
-      "every": 9,
-      "minSpeed": 50,
-      "anchor": "hand.near",
-      "jitter": [1, 1],
-      "speed": [10, 25],
-      "angle": [-20, 30],
-      "inherit": 0.1,
-      "gravity": -8,
-      "drag": 2,
-      "life": [500, 800],
-      "fadeOut": 350,
-      "sprite": {
-        "frames": ["puff1", "puff2", "puff3"],
-        "fps": 5,
-        "loop": false
-      },
-      "max": 22,
-      "reduced": 0.3
-    },
-    "drips": {
-      "while": ["run", "air"],
-      "perSecond": 10,
-      "minSpeed": 50,
-      "anchor": "hand.near",
-      "speed": [5, 15],
-      "angle": [-100, -80],
-      "gravity": 260,
-      "life": [300, 500],
+    "mist": {
+      "perSecond": 3,
+      "anchor": "body",
+      "speed": [3, 8],
+      "angle": [60, 120],
+      "gravity": -6,
+      "drag": 1,
+      "life": [700, 1000],
+      "fadeIn": 200,
+      "fadeOut": 400,
       "rect": {
         "size": 1,
-        "colors": ["g", "o", "s"]
+        "colors": ["p", "P", "o"]
       }
     },
-    "tag": {
-      "enter": ["land", "flip", "wall"],
-      "burst": [3, 4],
+    "cloud": {
+      "burst": 12,
       "anchor": "body",
-      "speed": [8, 20],
+      "speed": [12, 40],
       "angle": [0, 360],
-      "gravity": -10,
-      "drag": 2,
-      "life": [500, 800],
-      "fadeOut": 300,
-      "sprite": {
-        "frames": ["puff1", "puff2", "puff3"],
-        "fps": 5,
-        "loop": false
-      }
-    },
-    "burst": {
-      "burst": 16,
-      "anchor": "body",
-      "speed": [40, 110],
-      "angle": [0, 360],
-      "gravity": 60,
-      "drag": 1.4,
-      "life": [700, 1100],
-      "fadeOut": 350,
-      "flutter": {
-        "amp": 2,
-        "freq": 3
-      },
-      "sprite": {
-        "frames": ["bill1", "bill2", "bill3", "bill2"],
-        "fps": 10
-      }
-    },
-    "smoke": {
-      "burst": 10,
-      "anchor": "body",
-      "speed": [10, 35],
-      "angle": [0, 360],
-      "gravity": -15,
-      "drag": 1.5,
+      "gravity": -12,
+      "drag": 1.8,
       "life": [600, 900],
       "fadeOut": 400,
       "sprite": {
@@ -149,32 +239,106 @@
         "loop": false
       }
     },
-    "idle": {
-      "perSecond": 2,
-      "anchor": "body",
-      "speed": [4, 10],
-      "angle": [70, 110],
-      "gravity": -5,
-      "life": [700, 1000],
-      "fadeIn": 150,
+    "cash": {
+      "burst": 3,
+      "anchor": "chest",
+      "speed": [30, 60],
+      "angle": [50, 130],
+      "gravity": 70,
+      "drag": 1.4,
+      "life": [1000, 1300],
       "fadeOut": 300,
+      "flutter": {
+        "amp": 2,
+        "freq": 2.5
+      },
       "sprite": {
-        "frames": ["star"],
-        "fps": 1
+        "frames": ["bill1", "bill2", "bill3", "bill2"],
+        "fps": 7
       }
+    },
+    "passed": {
+      "burst": 1,
+      "anchor": "head",
+      "offset": [0, -14],
+      "speed": 6,
+      "angle": 90,
+      "life": 2000,
+      "fadeIn": 80,
+      "fadeOut": 600,
+      "sprite": {
+        "frames": ["passed"]
+      },
+      "layer": "front",
+      "reduced": 1
+    },
+    "respected": {
+      "burst": 1,
+      "anchor": "head",
+      "offset": [0, -6],
+      "speed": 6,
+      "angle": 90,
+      "life": 2000,
+      "fadeIn": 500,
+      "fadeOut": 600,
+      "sprite": {
+        "frames": ["respect"]
+      },
+      "layer": "front",
+      "reduced": 1
+    },
+    "tag-kick": {
+      "chance": 0.35,
+      "burst": 1,
+      "speed": 0,
+      "inherit": 0,
+      "life": 2400,
+      "fadeIn": 60,
+      "fadeOut": 900,
+      "sprite": {
+        "frames": ["tag0", "tag1", "tag2", "tag3", "tag4"],
+        "fps": 7,
+        "loop": false
+      },
+      "layer": "behind",
+      "max": 2,
+      "reduced": 1,
+      "moves": [20],
+      "anchor": "foot.near",
+      "offset": [9, -4]
+    },
+    "tag-flip": {
+      "chance": 0.35,
+      "burst": 1,
+      "speed": 0,
+      "inherit": 0,
+      "life": 2400,
+      "fadeIn": 60,
+      "fadeOut": 900,
+      "sprite": {
+        "frames": ["tag0", "tag1", "tag2", "tag3", "tag4"],
+        "fps": 7,
+        "loop": false
+      },
+      "layer": "behind",
+      "max": 2,
+      "reduced": 1,
+      "moves": [48],
+      "anchor": "foot.near",
+      "offset": [-16, -4]
     }
   },
   "variants": {
     "respect": {
-      "emitters": ["bills", "cash"]
+      "emitters": ["respect", "bills", "pocket"]
     },
-    "spray": {
-      "emitters": ["spray", "drips", "tag"]
+    "tag": {
+      "emitters": ["tag", "tag-kick", "tag-flip"]
     }
   },
   "presence": {
-    "idle": ["idle"],
-    "vanish": ["burst", "smoke"],
-    "appear": ["burst", "smoke"]
+    "idle": ["mist"],
+    "vanish": ["cloud", "cash"],
+    "appear": ["cloud", "passed", "respected"]
   }
 }
