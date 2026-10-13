@@ -23,16 +23,16 @@ def every_way(e, chance, burst=None, speed=None):
 
 def tricks(fx, boss):
     em = fx['emitters']
-    v = fx['variants']
     if boss == 'vera':
         # Glass breaks off the wall on one kick-off in five. (Her gusts of wind come on a clock of
         # their own, about one flip in two: vr_fx.py.)
         em['kick-glass']['chance'] = 0.2
     elif boss == 'pyotr':
-        em['bulb']['perSecond'] = 0.08
-        em['idea-trick'] = {**em['idea'], 'enter': TRICKS, 'chance': 0.4, 'layer': 'front'}
-        if 'idea-trick' not in v['code']['emitters']:
-            v['code']['emitters'].append('idea-trick')
+        # An idea lights up over her head on one wall move or roll in five; her blade's cut sweeps
+        # over her on one flip in five. (Her quick change comes with its snapshot's own chance,
+        # chain and burst: pr_fx.py.)
+        em['idea']['chance'] = 0.2
+        em['cut']['chance'] = 0.2
     elif boss == 'rewind':
         # A Polaroid (with its flash) on about a third of the tricks, now and then two: each
         # picture rolls its own chance.
