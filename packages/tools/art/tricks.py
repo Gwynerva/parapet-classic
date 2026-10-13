@@ -59,9 +59,9 @@ def tricks(fx, boss):
         # comes with its snapshot's own chance).
         em['newspaper'] = {**em['newspaper'], 'enter': ['flip', 'vault', 'wall'], 'chance': 0.08}
     elif boss == 'rush-b':
-        em['spray'] = every_way(em['spray'], 0.5)
-        em['grenade']['chance'] = 0.3
-        em['flash']['chance'] = 0.4
+        # A smoke grenade on about one hard landing (moves 24 and 25, the landings that need DOWN)
+        # or roll in five; its cloud stays where it fell.
+        em['smoke-nade'] = {**em['smoke-nade'], 'enter': ['roll'], 'moves': [24, 25], 'chance': 0.22}
     elif boss == 'sir-nobody':
         # His summon sign stays on the roof where he touches down, about one time in three; the
         # soul is shaken out of his slit on some flips and vaults.

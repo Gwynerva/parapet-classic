@@ -2,15 +2,6 @@
   "id": "rush-b",
   "color": "#e0a040",
   "gender": "neutral",
-  "looks": [
-    "balaclava",
-    "shades",
-    "bandana",
-    "arctic",
-    "gas-mask",
-    "helmet",
-    "blue-squad",
-    "jungle"
-  ],
+  "looks": ["phoenix", "leet", "arctic", "guerrilla", "seal", "gsg9", "sas", "gign"],
   "effect": ["casings", "smoke"]
 }
