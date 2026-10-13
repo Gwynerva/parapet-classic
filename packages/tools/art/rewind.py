@@ -318,17 +318,18 @@ fx = {
     },
     'variants': {
         'butterflies': {'emitters': ['butterflies', 'flutter']},
-        # Life is Strange: the Polaroids, and on a flip her pose sliding back a moment, pale blue.
+        # Life is Strange: the Polaroids, and on some flips her pose sliding back a moment, pale blue.
         'snapshots': {
             'emitters': [],
-            'afterimage': {'mode': 'snapshot', 'enter': ['flip'], 'colors': ['#bcd8f4'], 'life': 400,
+            'afterimage': {'mode': 'snapshot', 'enter': ['flip'], 'chance': 0.35, 'colors': ['#bcd8f4'], 'life': 400,
                            'drift': [45, 0], 'alpha': 0.35},
         },
-        # Double Exposure (the duffle coat's): the Polaroids, and on a flip or a wall move her other
-        # self from the other timeline, outlined in gold like the Pulse shows it, staying put.
+        # Double Exposure (the duffle coat's): the Polaroids, and on some flips and wall moves her
+        # other self from the other timeline, outlined in gold like the Pulse shows it, staying put.
         'exposure': {
             'emitters': [],
-            'afterimage': {'mode': 'snapshot', 'enter': ['flip', 'wall'], 'colors': ['#f4b844'], 'life': 550,
+            'afterimage': {'mode': 'snapshot', 'enter': ['flip', 'wall'], 'chance': 0.35, 'colors': ['#f4b844'],
+                           'life': 550,
                            'drift': [0, -4], 'alpha': 0.4},
         },
     },

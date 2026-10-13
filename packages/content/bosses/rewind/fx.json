@@ -489,6 +489,7 @@
       "afterimage": {
         "mode": "snapshot",
         "enter": ["flip"],
+        "chance": 0.35,
         "colors": ["#bcd8f4"],
         "life": 400,
         "drift": [45, 0],
@@ -500,6 +501,7 @@
       "afterimage": {
         "mode": "snapshot",
         "enter": ["flip", "wall"],
+        "chance": 0.35,
         "colors": ["#f4b844"],
         "life": 550,
         "drift": [0, -4],
