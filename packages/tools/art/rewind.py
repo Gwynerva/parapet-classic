@@ -336,17 +336,18 @@ fx = {
     'presence': {'idle': ['idle'], 'vanish': ['scatter'], 'appear': ['spiral', 'ghost', 'arrive']},
 }
 
-# The Polaroids, one emitter a picture (tricks.py gives them their tricks and chance).
-for name in PICTURES:
-    fx['emitters'][f'photo-{name}'] = {
-        'enter': ['flip'], 'burst': 1, 'anchor': 'hands', 'speed': [20, 45], 'angle': [60, 120], 'inherit': 0.1,
-        'gravity': 120, 'drag': 1.5, 'life': [1800, 2200], 'fadeOut': 450, 'tumble': [1, 2],
-        'sprite': {'frames': ['flash', f'{name}0', f'{name}0', f'{name}1', f'{name}1', f'{name}2', f'{name}3'],
-                   'fps': 10, 'loop': False},
-        'max': 2, 'reduced': 0,
-    }
-    fx['variants']['snapshots']['emitters'].append(f'photo-{name}')
-    fx['variants']['exposure']['emitters'].append(f'photo-{name}')
+# The Polaroids: one or two at a time, each developing one of the pictures (tricks.py gives them
+# their tricks and chance).
+fx['emitters']['photo'] = {
+    'enter': ['flip'], 'burst': [1, 2], 'anchor': 'hands', 'speed': [20, 45], 'angle': [60, 120], 'inherit': 0.1,
+    'gravity': 120, 'drag': 1.5, 'life': [1800, 2200], 'fadeOut': 450, 'tumble': [1, 2],
+    'sprite': {'frames': [],
+               'sets': [['flash', f'{n}0', f'{n}0', f'{n}1', f'{n}1', f'{n}2', f'{n}3'] for n in PICTURES],
+               'fps': 10, 'loop': False},
+    'max': 2, 'reduced': 0,
+}
+fx['variants']['snapshots']['emitters'].append('photo')
+fx['variants']['exposure']['emitters'].append('photo')
 
 write_json(BOSSES + '/rewind/fx.json', tricks(fx, 'rewind'))
 

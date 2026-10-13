@@ -85,6 +85,32 @@ describe('effects data', () => {
     expect(compileFx(FX, '#00ff00')).not.toBe(fx);
   });
 
+  it('compiles sprite sets, one of them played by each particle', () => {
+    const photos: FxFile = {
+      ...FX,
+      emitters: {
+        photo: {
+          enter: ['flip'],
+          burst: [1, 2],
+          life: 900,
+          sprite: { frames: [], sets: [['bat1', 'bat2'], ['bat2']], fps: 4 },
+        },
+      },
+      variants: { flags: { emitters: ['photo'] } },
+      presence: {},
+    };
+    expect(fxProblems(photos)).toEqual([]);
+    const fx = compileFx(photos, '#00ff00');
+    expect(fx.emitters.get('photo')!.sets).toEqual([[0, 1], [1]]);
+    const bad: FxFile = {
+      ...photos,
+      emitters: { photo: { burst: 1, life: 900, sprite: { frames: [], sets: [['nope'], []] } } },
+    };
+    const text = fxProblems(bad).join('\n');
+    expect(text).toMatch(/emitter photo: sprite "nope" does not exist/);
+    expect(text).toMatch(/emitter photo: an empty sprite set/);
+  });
+
   it('keeps particles within the pool and the emitter maximum', () => {
     const fx = compileFx(FX, '#ff0000');
     const pool = new FxSystem(16);

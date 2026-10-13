@@ -34,10 +34,8 @@ def tricks(fx, boss):
         em['idea']['chance'] = 0.2
         em['cut']['chance'] = 0.2
     elif boss == 'rewind':
-        # A Polaroid (with its flash) on about a third of the tricks, now and then two: each
-        # picture rolls its own chance.
-        for k in [k for k in em if k.startswith('photo-')]:
-            em[k] = {**em[k], 'enter': TRICKS, 'chance': 0.1}
+        # A Polaroid (with its flash) on about a third of the tricks, now and then two: never more.
+        em['photo'] = {**em['photo'], 'enter': TRICKS, 'chance': 0.33}
     elif boss == 'shahzada':
         # His statue of sand (the afterimage, with its chance) brings its grains; sand runs off his
         # boots on a third of the wall moves.

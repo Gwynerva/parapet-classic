@@ -23,6 +23,8 @@ export interface CompiledEmitter {
   moves: ReadonlySet<number>;
   /** Sprite ids in the sheet (`frames` of the compiled effects). */
   frames: number[];
+  /** The `sets` of the sprite, as sprite ids: each particle plays one of them. */
+  sets: number[][];
   /** Resolved CSS colours of rect particles. */
   colors: string[];
 }
@@ -122,6 +124,8 @@ export function compileFx(fx: FxFile, accent: string): CompiledFx {
       }
     }
   });
+  const ids = (names: string[]): number[] =>
+    names.map((f) => spriteIds.get(f) ?? -1).filter((i) => i >= 0);
   const emitters = new Map<string, CompiledEmitter>();
   for (const [name, spec] of Object.entries(fx.emitters ?? {})) {
     emitters.set(name, {
@@ -130,7 +134,8 @@ export function compileFx(fx: FxFile, accent: string): CompiledFx {
       whileBits: bits(spec.while),
       enterBits: bits(spec.enter),
       moves: new Set(spec.moves ?? []),
-      frames: (spec.sprite?.frames ?? []).map((f) => spriteIds.get(f) ?? -1).filter((i) => i >= 0),
+      frames: ids(spec.sprite?.frames ?? []),
+      sets: (spec.sprite?.sets ?? []).map(ids).filter((set) => set.length > 0),
       colors: (spec.rect?.colors ?? []).map((c) => css(colourOf(c))),
     });
   }

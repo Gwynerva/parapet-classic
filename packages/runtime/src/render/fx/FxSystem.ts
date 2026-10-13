@@ -31,6 +31,8 @@ interface Particle {
   phase: number;
   gravity: number;
   drag: number;
+  /** The sprite ids it plays: its emitter's frames, or one of its sets. */
+  frames: readonly number[];
   frame: number;
   fps: number;
   loop: boolean;
@@ -63,6 +65,7 @@ function particle(): Particle {
     phase: 0,
     gravity: 0,
     drag: 0,
+    frames: [],
     frame: 0,
     fps: 0,
     loop: true,
@@ -153,7 +156,8 @@ export class FxSystem {
     p.phase = rand() * Math.PI * 2;
     p.gravity = (spec.gravity ?? 0) * UNITS;
     p.drag = spec.drag ?? 0;
-    const frames = e.frames.length;
+    p.frames = e.sets.length > 0 ? e.sets[Math.floor(rand() * e.sets.length)]! : e.frames;
+    const frames = p.frames.length;
     p.frame = spec.sprite?.random && frames > 0 ? Math.floor(rand() * frames) : 0;
     p.fps = spec.sprite?.random ? 0 : (spec.sprite?.fps ?? 0);
     p.loop = spec.sprite?.loop ?? true;
@@ -213,7 +217,7 @@ export class FxSystem {
       const scale = p.s0 + (p.s1 - p.s0) * t;
       ctx.globalAlpha = savedAlpha * alpha;
       ctx.globalCompositeOperation = p.add ? 'lighter' : 'source-over';
-      const frames = p.emitter.frames;
+      const frames = p.frames;
       if (frames.length === 0) {
         const size = Math.max(1, Math.round(p.size * scale));
         ctx.fillStyle = p.color;

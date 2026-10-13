@@ -387,9 +387,9 @@
       },
       "reduced": 0
     },
-    "photo-lighthouse": {
+    "photo": {
       "enter": ["flip", "vault", "wall", "roll"],
-      "burst": 1,
+      "burst": [1, 2],
       "anchor": "hands",
       "speed": [20, 45],
       "angle": [60, 120],
@@ -400,84 +400,27 @@
       "fadeOut": 450,
       "tumble": [1, 2],
       "sprite": {
-        "frames": [
-          "flash",
-          "lighthouse0",
-          "lighthouse0",
-          "lighthouse1",
-          "lighthouse1",
-          "lighthouse2",
-          "lighthouse3"
+        "frames": [],
+        "sets": [
+          [
+            "flash",
+            "lighthouse0",
+            "lighthouse0",
+            "lighthouse1",
+            "lighthouse1",
+            "lighthouse2",
+            "lighthouse3"
+          ],
+          ["flash", "morpho0", "morpho0", "morpho1", "morpho1", "morpho2", "morpho3"],
+          ["flash", "selfie0", "selfie0", "selfie1", "selfie1", "selfie2", "selfie3"],
+          ["flash", "chloe0", "chloe0", "chloe1", "chloe1", "chloe2", "chloe3"]
         ],
         "fps": 10,
         "loop": false
       },
       "max": 2,
       "reduced": 0,
-      "chance": 0.1
-    },
-    "photo-morpho": {
-      "enter": ["flip", "vault", "wall", "roll"],
-      "burst": 1,
-      "anchor": "hands",
-      "speed": [20, 45],
-      "angle": [60, 120],
-      "inherit": 0.1,
-      "gravity": 120,
-      "drag": 1.5,
-      "life": [1800, 2200],
-      "fadeOut": 450,
-      "tumble": [1, 2],
-      "sprite": {
-        "frames": ["flash", "morpho0", "morpho0", "morpho1", "morpho1", "morpho2", "morpho3"],
-        "fps": 10,
-        "loop": false
-      },
-      "max": 2,
-      "reduced": 0,
-      "chance": 0.1
-    },
-    "photo-selfie": {
-      "enter": ["flip", "vault", "wall", "roll"],
-      "burst": 1,
-      "anchor": "hands",
-      "speed": [20, 45],
-      "angle": [60, 120],
-      "inherit": 0.1,
-      "gravity": 120,
-      "drag": 1.5,
-      "life": [1800, 2200],
-      "fadeOut": 450,
-      "tumble": [1, 2],
-      "sprite": {
-        "frames": ["flash", "selfie0", "selfie0", "selfie1", "selfie1", "selfie2", "selfie3"],
-        "fps": 10,
-        "loop": false
-      },
-      "max": 2,
-      "reduced": 0,
-      "chance": 0.1
-    },
-    "photo-chloe": {
-      "enter": ["flip", "vault", "wall", "roll"],
-      "burst": 1,
-      "anchor": "hands",
-      "speed": [20, 45],
-      "angle": [60, 120],
-      "inherit": 0.1,
-      "gravity": 120,
-      "drag": 1.5,
-      "life": [1800, 2200],
-      "fadeOut": 450,
-      "tumble": [1, 2],
-      "sprite": {
-        "frames": ["flash", "chloe0", "chloe0", "chloe1", "chloe1", "chloe2", "chloe3"],
-        "fps": 10,
-        "loop": false
-      },
-      "max": 2,
-      "reduced": 0,
-      "chance": 0.1
+      "chance": 0.33
     }
   },
   "variants": {
@@ -485,7 +428,7 @@
       "emitters": ["butterflies", "flutter"]
     },
     "snapshots": {
-      "emitters": ["photo-lighthouse", "photo-morpho", "photo-selfie", "photo-chloe"],
+      "emitters": ["photo"],
       "afterimage": {
         "mode": "snapshot",
         "enter": ["flip"],
@@ -497,7 +440,7 @@
       }
     },
     "exposure": {
-      "emitters": ["photo-lighthouse", "photo-morpho", "photo-selfie", "photo-chloe"],
+      "emitters": ["photo"],
       "afterimage": {
         "mode": "snapshot",
         "enter": ["flip", "wall"],

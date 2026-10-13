@@ -95,8 +95,12 @@ export interface FxEmitter {
   flutter?: { amp: number; freq: number };
   /** Mirror the sprite to the runner's facing (a bat flying the runner's way). */
   face?: boolean;
-  /** Animated sprite: names in `sprites`, played at `fps`, one picked at random with `random`. */
-  sprite?: { frames: string[]; fps?: number; loop?: boolean; random?: boolean };
+  /**
+   * Animated sprite: names in `sprites`, played at `fps`, one picked at random with `random`.
+   * `sets`: several animations instead, each particle playing one picked at random (a Polaroid
+   * developing one of several pictures); `frames` is then left empty.
+   */
+  sprite?: { frames: string[]; sets?: string[][]; fps?: number; loop?: boolean; random?: boolean };
   /** Square pixels instead of a sprite: sparks, embers, glitch pixels. */
   rect?: { size: Range; colors: string[] };
   blend?: 'normal' | 'add';
@@ -199,9 +203,10 @@ export function fxProblems(fx: FxFile): string[] {
     }
     if (e.anchor && !FX_ANCHORS.includes(e.anchor)) out.push(`${where}: anchor "${e.anchor}"`);
     if (!e.sprite && !e.rect) out.push(`${where}: needs a sprite or a rect`);
-    for (const f of e.sprite?.frames ?? []) {
+    for (const f of [...(e.sprite?.frames ?? []), ...(e.sprite?.sets ?? []).flat()]) {
       if (!(f in (fx.sprites ?? {}))) out.push(`${where}: sprite "${f}" does not exist`);
     }
+    if (e.sprite?.sets?.some((set) => set.length === 0)) out.push(`${where}: an empty sprite set`);
     for (const c of e.rect?.colors ?? []) if (!colour(c)) out.push(`${where}: colour "${c}"`);
     for (const [k, r] of Object.entries({
       burst: e.burst,
