@@ -1,163 +1,455 @@
 {
   "palette": {
-    "y": "#ffe08a",
-    "o": "#ffa030",
-    "w": "#ffffff",
-    "r": "#e02a2a",
-    "R": "#a01818",
-    "l": "#ff7a6a"
+    "w": "#fffbe6",
+    "Y": "#f8e9a0",
+    "y": "#e2c870",
+    "a": "#b89a48",
+    "A": "#7a6430",
+    "g": "#f8e9a0aa",
+    "G": "#e2c87066",
+    "h": "#fffbe644",
+    "q": "#f8e9a030",
+    "W": "#ffffff",
+    "b": "accent.light",
+    "B": "accent",
+    "d": "accent.dark"
   },
   "sprites": {
-    "feather1": ["..rl", ".rr.", "rr..", "R..."],
-    "feather2": [".lr.", ".rr.", ".rr.", ".R.."],
-    "feather3": ["....", "lrrR", "Rrrl", "...."]
+    "sign1": [
+      ".................",
+      ".................",
+      ".................",
+      ".................",
+      ".................",
+      "........w........",
+      ".................",
+      ".....GyYYYyG.....",
+      "..GyY.a...a.YyG..",
+      "GYw.aY.wWw.Ya.wYG",
+      "..GyY.a...a.YyG..",
+      ".....GyYYYyG....."
+    ],
+    "sign2": [
+      ".................",
+      ".................",
+      ".................",
+      "........h........",
+      "........g........",
+      ".................",
+      "...........w.....",
+      ".....GyYwYyG.....",
+      "..GyY..a.a..YyG..",
+      "GYw.a.YwWwY.a.wYG",
+      "..GyY..a.a..YyG..",
+      ".....GyYwYyG....."
+    ],
+    "sign3": [
+      ".................",
+      "........h........",
+      ".................",
+      "...........g.....",
+      ".................",
+      ".....w...........",
+      ".................",
+      ".....GyYYYyG.....",
+      "..GwY.a...a.YwG..",
+      "GYw.aY.YWY.Ya.wYG",
+      "..GwY.a...a.YwG..",
+      ".....GyYYYyG....."
+    ],
+    "sign4": [
+      ".................",
+      ".................",
+      "...........h.....",
+      ".................",
+      ".....g...........",
+      ".................",
+      ".................",
+      ".....GyYwYyG.....",
+      "..GyY..a.a..YyG..",
+      "GYw.a.YwWwY.a.wYG",
+      "..GyY..a.a..YyG..",
+      ".....GyYwYyG....."
+    ],
+    "soul1": ["..h..", ".hbh.", "hbWbh", ".bWb.", ".hBh.", "..B..", "..d.."],
+    "soul2": ["..h..", ".hbh.", "hbWbh", ".bWb.", "..B..", ".hd..", "....."],
+    "soul3": [".....", "..h..", ".hbh.", "hbWbh", ".bBb.", "..B..", "...d."],
+    "bigsign1": [
+      ".......GgyYYYYYYYygG.......",
+      "...GgyY..a.......a..YygG...",
+      "GYw..aY.w.Y.WwW.Y.w.Ya..wYG",
+      "...GgyY..a.......a..YygG...",
+      ".......GgyYwYYYwYygG......."
+    ],
+    "bigsign2": [
+      ".......GgyYYYYYYYygG.......",
+      "...GgyY...a.....a...YygG...",
+      "GYw.a.Yw.Y.wWWWw.Y.wY.a.wYG",
+      "...GgyY...a.....a...YygG...",
+      ".......GgywYYYYYwygG......."
+    ],
+    "bigsign3": [
+      ".......GgyYYYYYYYygG.......",
+      "...GgwY..a.......a..YwgG...",
+      "GYw..aY.Y.w.WwW.w.Y.Ya..wYG",
+      "...GgwY..a.......a..YwgG...",
+      ".......GgyYYwYwYYygG......."
+    ],
+    "pillar1": [
+      ".qqqqq.",
+      ".qqqqq.",
+      ".qqqqq.",
+      ".qqqqq.",
+      ".qqqqq.",
+      ".qqqqq.",
+      ".qqgqq.",
+      ".qqgqq.",
+      ".qqgqq.",
+      ".qqgqq.",
+      ".qqgqq.",
+      ".qqgqq.",
+      ".qqgqq.",
+      ".qgwgq.",
+      ".qgwgq.",
+      ".qgwgq.",
+      ".qgwgq.",
+      ".qgwgq.",
+      ".qgwgq.",
+      ".qgwgq.",
+      ".GgwgG.",
+      ".GgwgG.",
+      ".GgwgG.",
+      ".GgwgG.",
+      "qGgwgGq",
+      "qGgwgGq",
+      "qGgwgGq",
+      "qGgwgGq",
+      "qGgwgGq",
+      "qGgwgGq",
+      "qGgwgGq",
+      "qGgwgGq",
+      "qGgwgGq",
+      "qGgwgGq",
+      "qGgwgGq",
+      "qGgwgGq",
+      "qGgwgGq",
+      "qGgwgGq",
+      "qGgwgGq",
+      "qGgwgGq",
+      "qGgwgGq",
+      "qGgwgGq",
+      "qGgwgGq",
+      "qGgwgGq"
+    ],
+    "pillar2": [
+      "qqqqq",
+      "qqqqq",
+      "qqqqq",
+      "qqqqq",
+      "qqqqq",
+      "qqqqq",
+      "qqgqq",
+      "qqgqq",
+      "qqgqq",
+      "qqgqq",
+      "qqgqq",
+      "qqgqq",
+      "qqgqq",
+      "qgwgq",
+      "qgwgq",
+      "qgwgq",
+      "qgwgq",
+      "qgwgq",
+      "qgwgq",
+      "qgwgq",
+      "GgwgG",
+      "GgwgG",
+      "GgwgG",
+      "GgwgG",
+      "GgwgG",
+      "GgwgG",
+      "GgwgG",
+      "GgwgG",
+      "GgwgG",
+      "GgwgG",
+      "GgwgG",
+      "GgwgG",
+      "GgwgG",
+      "GgwgG",
+      "GgwgG",
+      "GgwgG",
+      "GgwgG",
+      "GgwgG",
+      "GgwgG",
+      "GgwgG",
+      "GgwgG",
+      "GgwgG",
+      "GgwgG",
+      "GgwgG"
+    ],
+    "pillar3": [
+      "qqq",
+      "qqq",
+      "qqq",
+      "qqq",
+      "qqq",
+      "qqq",
+      "qgq",
+      "qgq",
+      "qgq",
+      "qgq",
+      "qgq",
+      "qgq",
+      "qgq",
+      "gwg",
+      "gwg",
+      "gwg",
+      "gwg",
+      "gwg",
+      "gwg",
+      "gwg",
+      "gwg",
+      "gwg",
+      "gwg",
+      "gwg",
+      "gwg",
+      "gwg",
+      "gwg",
+      "gwg",
+      "gwg",
+      "gwg",
+      "gwg",
+      "gwg",
+      "gwg",
+      "gwg",
+      "gwg",
+      "gwg",
+      "gwg",
+      "gwg",
+      "gwg",
+      "gwg",
+      "gwg",
+      "gwg",
+      "gwg",
+      "gwg"
+    ],
+    "pillar4": [
+      "q",
+      "q",
+      "q",
+      "q",
+      "q",
+      "q",
+      "q",
+      "q",
+      "q",
+      "q",
+      "q",
+      "g",
+      "g",
+      "g",
+      "g",
+      "g",
+      "g",
+      "g",
+      "g",
+      "g",
+      "g",
+      "g",
+      "g",
+      "g",
+      "g",
+      "g",
+      "g",
+      "g",
+      "g",
+      "g",
+      "g",
+      "g",
+      "g",
+      "g",
+      "g",
+      "g",
+      "g",
+      "g",
+      "g",
+      "g",
+      "g",
+      "g",
+      "g",
+      "g"
+    ]
   },
   "emitters": {
-    "scrape": {
-      "while": ["slide", "wall", "roll"],
-      "perSecond": 60,
-      "anchor": "feet",
-      "jitter": [2, 0],
-      "speed": [30, 90],
-      "angle": [10, 70],
-      "gravity": 300,
-      "life": [200, 400],
-      "fadeOut": 150,
-      "rect": {
-        "size": 1,
-        "colors": ["y", "o", "w"]
+    "soul": {
+      "while": ["run", "air"],
+      "perSecond": 0.2,
+      "minSpeed": 30,
+      "anchor": "head",
+      "offset": [-4, -2],
+      "speed": [3, 7],
+      "angle": [75, 105],
+      "inherit": 1,
+      "gravity": -14,
+      "drag": 0.3,
+      "life": [900, 1150],
+      "fadeIn": 60,
+      "fadeOut": 500,
+      "flutter": {
+        "amp": 1,
+        "freq": 1.6
       },
-      "blend": "add"
-    },
-    "clang": {
-      "enter": ["land", "vault", "wall", "hang"],
-      "burst": [8, 14],
-      "anchor": "feet",
-      "speed": [40, 110],
-      "angle": [0, 180],
-      "gravity": 320,
-      "life": [250, 450],
-      "fadeOut": 150,
-      "rect": {
-        "size": [1, 2],
-        "colors": ["y", "o", "w"]
+      "sprite": {
+        "frames": ["soul1", "soul2", "soul3", "soul2"],
+        "fps": 6
       },
       "blend": "add",
-      "chance": 0.6
+      "max": 1,
+      "reduced": 0.5
     },
-    "steps": {
-      "while": ["run"],
-      "every": 22,
-      "minSpeed": 80,
+    "soul-trick": {
+      "enter": ["flip", "vault"],
+      "chance": 0.3,
+      "burst": 1,
+      "anchor": "head",
+      "offset": [-4, -2],
+      "speed": [8, 14],
+      "angle": [60, 120],
+      "inherit": 0.6,
+      "gravity": -14,
+      "drag": 1.5,
+      "life": [900, 1150],
+      "fadeIn": 80,
+      "fadeOut": 500,
+      "flutter": {
+        "amp": 1,
+        "freq": 1.6
+      },
+      "sprite": {
+        "frames": ["soul1", "soul2", "soul3", "soul2"],
+        "fps": 6
+      },
+      "blend": "add",
+      "max": 1,
+      "reduced": 0.5
+    },
+    "sign": {
+      "moves": [25, 51],
+      "enter": ["roll"],
+      "chance": 0.3,
+      "burst": 1,
       "anchor": "feet",
-      "speed": [20, 50],
-      "angle": [20, 80],
-      "gravity": 300,
-      "life": [150, 300],
+      "offset": [0, -5],
+      "speed": 0,
+      "inherit": 0,
+      "gravity": 0,
+      "life": [1400, 1800],
+      "fadeIn": 140,
+      "fadeOut": 700,
+      "sprite": {
+        "frames": ["sign1", "sign2", "sign3", "sign4"],
+        "fps": 5
+      },
+      "layer": "behind",
+      "max": 2,
+      "reduced": 1
+    },
+    "idle-sign": {
+      "perSecond": 3,
+      "anchor": "feet",
+      "offset": [0, -2],
+      "speed": 0,
+      "gravity": 0,
+      "life": 2600,
+      "fadeIn": 700,
+      "fadeOut": 900,
+      "sprite": {
+        "frames": ["bigsign1", "bigsign2", "bigsign3", "bigsign2"],
+        "fps": 4
+      },
+      "layer": "behind",
+      "max": 2
+    },
+    "idle-motes": {
+      "perSecond": 2.5,
+      "anchor": "feet",
+      "offset": [0, -1],
+      "jitter": [11, 0],
+      "speed": [6, 14],
+      "angle": [80, 100],
+      "gravity": -10,
+      "drag": 0.5,
+      "life": [900, 1500],
+      "fadeIn": 150,
+      "fadeOut": 600,
       "rect": {
         "size": 1,
-        "colors": ["y", "o"]
+        "colors": ["w", "Y", "y"]
       },
-      "blend": "add"
+      "blend": "add",
+      "max": 6
     },
-    "feathers": {
-      "while": ["run", "air"],
-      "every": 20,
-      "minSpeed": 50,
-      "anchor": "head",
-      "jitter": [2, 2],
-      "speed": [8, 20],
-      "angle": [30, 100],
-      "inherit": 0.1,
-      "gravity": 30,
-      "drag": 2,
-      "life": [900, 1400],
-      "fadeOut": 400,
-      "flutter": {
-        "amp": 3,
-        "freq": 1.5
-      },
-      "sprite": {
-        "frames": ["feather1", "feather2", "feather3", "feather2"],
-        "fps": 4
-      },
-      "max": 12
-    },
-    "burst": {
-      "burst": 26,
-      "anchor": "body",
-      "speed": [40, 120],
-      "angle": [0, 360],
-      "gravity": 200,
-      "life": [300, 600],
-      "fadeOut": 200,
-      "rect": {
-        "size": [1, 2],
-        "colors": ["y", "o", "w"]
-      },
-      "blend": "add"
-    },
-    "plumes": {
-      "burst": 8,
-      "anchor": "head",
-      "speed": [15, 40],
-      "angle": [30, 150],
-      "gravity": 30,
-      "drag": 2,
-      "life": [900, 1400],
-      "fadeOut": 400,
-      "flutter": {
-        "amp": 3,
-        "freq": 1.5
-      },
-      "sprite": {
-        "frames": ["feather1", "feather2", "feather3", "feather2"],
-        "fps": 4
-      }
-    },
-    "idle": {
-      "perSecond": 1,
-      "anchor": "head",
-      "speed": [4, 10],
-      "angle": [60, 120],
-      "gravity": 20,
-      "drag": 2,
-      "life": [1200, 1600],
-      "fadeOut": 400,
-      "flutter": {
-        "amp": 3,
-        "freq": 1.5
-      },
-      "sprite": {
-        "frames": ["feather1", "feather2", "feather3", "feather2"],
-        "fps": 4
-      }
-    }
-  },
-  "ribbons": {
-    "banner": {
+    "pillar": {
+      "burst": 1,
       "anchor": "chest",
-      "offset": [3, -2],
-      "segments": 6,
-      "length": 3,
-      "width": [4, 2],
-      "colors": ["#c01c1c", "#e02a2a", "#c9a85a"],
-      "gravity": 200,
-      "drag": 2.5
+      "offset": [0, 2],
+      "speed": 0,
+      "life": 520,
+      "fadeIn": 60,
+      "fadeOut": 260,
+      "sprite": {
+        "frames": ["pillar1", "pillar2", "pillar3", "pillar4"],
+        "fps": 8,
+        "loop": false
+      },
+      "blend": "add",
+      "reduced": 1
+    },
+    "ring": {
+      "burst": 1,
+      "anchor": "feet",
+      "offset": [0, -2],
+      "speed": 0,
+      "life": 1300,
+      "fadeIn": 80,
+      "fadeOut": 800,
+      "sprite": {
+        "frames": ["bigsign1", "bigsign2", "bigsign3", "bigsign2"],
+        "fps": 6
+      },
+      "layer": "behind",
+      "reduced": 1
+    },
+    "phantom": {
+      "burst": 22,
+      "anchor": "body",
+      "jitter": [3, 0],
+      "speed": [4, 16],
+      "angle": [70, 110],
+      "gravity": -36,
+      "drag": 0.6,
+      "life": [600, 1200],
+      "fadeOut": 450,
+      "flutter": {
+        "amp": 1,
+        "freq": 2
+      },
+      "rect": {
+        "size": 1,
+        "colors": ["w", "W", "Y", "b"]
+      },
+      "blend": "add",
+      "reduced": 0.3
     }
   },
   "variants": {
-    "sparks": {
-      "emitters": ["scrape", "clang", "steps"]
-    },
-    "plume": {
-      "emitters": ["feathers"],
-      "ribbons": ["banner"]
+    "summon-sign": {
+      "emitters": ["soul", "soul-trick", "sign"]
     }
   },
   "presence": {
-    "idle": ["idle"],
-    "vanish": ["burst", "plumes"],
-    "appear": ["burst", "plumes"]
+    "idle": ["idle-sign", "idle-motes"],
+    "vanish": ["pillar", "ring", "phantom"],
+    "appear": ["pillar", "ring", "phantom"]
   }
 }

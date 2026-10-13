@@ -1,161 +1,230 @@
-"""Sir Nobody: the plate armour looks (drawn here on kn_parts.py), the effects (sparks, plume) and
-his outfits in boss.json."""
-from lookgen import *
-from tricks import tricks
+"""Sir Nobody: the knight who never takes his helm off. His looks (kn_looks.py: helms in
+kn_helms.py, parts in kn_parts.py), his effect, the Summon Sign, and his outfits in boss.json.
+
+The effect is Dark Souls' summon sign, the knight who is always ready to help:
+* while he runs, now and then a little soul wisp slips out of his visor slit and drifts up (there
+  is nobody inside);
+* on about a third of his soft landings, wall-flip landings and rolls a golden summon sign is
+  left glowing on the roof where he touched down (he will be on some roof, should you need him),
+  fading in a second and a half; on some flips and vaults the soul is shaken out of the slit;
+* by the start he stands on his sign, motes rising from it; he leaves as a phantom going back to
+  his world (a thin pillar of light, the motes of him rising) and comes back the same way.
+No sparks, no feathers: his plume does not moult."""
 import json
+import os
 
-from heads import Palette, Pic, shaded
-from body import body_parts, metal, dome, part, apply_rules, keep_from
-from kn_parts import helm, steel_rules, PLAN, OUTLINE
+from lookgen import BOSSES, write_json
+from tricks import tricks
+import kn_looks
 
-STEEL = ['#f6f9ff', '#d2d9e2', '#aab3c0', '#828c9a', '#5c6574', '#3c4350']
-IRON = ['#9a9eaa', '#767a86', '#585c68', '#40434e', '#2c2e37', '#1c1d24']
+# ------------------------------------------------------------------------------------- the effect
+# Gold of the sign (white chalk light → old gold), its glow (with alpha), the soul (the outfit's
+# accent: warm gold on the Sunlight knight, pale tin on the Onion, cold blue on the Hollow).
+PALETTE = {
+    'w': '#fffbe6', 'Y': '#f8e9a0', 'y': '#e2c870', 'a': '#b89a48', 'A': '#7a6430',
+    'g': '#f8e9a0aa', 'G': '#e2c87066', 'h': '#fffbe644', 'q': '#f8e9a030',
+    'W': '#ffffff', 'b': 'accent.light', 'B': 'accent', 'd': 'accent.dark',
+}
 
+# The sign on the roof, seen low from the side: a ring of chalk light, a signature scrawled in
+# it, shimmering; a mote rising from it now and then. The ring lies on the bottom rows; the empty
+# rows above are the motes' room (the sprite is centred on its point: `offset` lifts it).
+_RING = [
+    '.....GyYYYyG.....',
+    '..GyY.a...a.YyG..',
+    'GYw.aY.wWw.Ya.wYG',
+    '..GyY.a...a.YyG..',
+    '.....GyYYYyG.....',
+]
+_RING2 = [
+    '.....GyYwYyG.....',
+    '..GyY..a.a..YyG..',
+    'GYw.a.YwWwY.a.wYG',
+    '..GyY..a.a..YyG..',
+    '.....GyYwYyG.....',
+]
+_RING3 = [
+    '.....GyYYYyG.....',
+    '..GwY.a...a.YwG..',
+    'GYw.aY.YWY.Ya.wYG',
+    '..GwY.a...a.YwG..',
+    '.....GyYYYyG.....',
+]
+_MOTES = [
+    ['.................', '.................', '.................', '.................',
+     '.................', '........w........', '.................'],
+    ['.................', '.................', '.................', '........h........',
+     '........g........', '.................', '...........w.....'],
+    ['.................', '........h........', '.................', '...........g.....',
+     '.................', '.....w...........', '.................'],
+    ['.................', '.................', '...........h.....', '.................',
+     '.....g...........', '.................', '.................'],
+]
+SIGN = [m + r for m, r in zip(_MOTES, (_RING, _RING2, _RING3, _RING2))]
 
-LIMBS = set(range(1, 25)) | set(range(30, 34)) | set(range(39, 57)) | set(range(62, 66))
-FAR_IDS = set(range(9, 13)) | set(range(21, 25)) | set(range(49, 53))
+# The sign he stands on by the start, wider than his stance: it shows either side of his feet.
+BIG_SIGN = [
+    ['.......GgyYYYYYYYygG.......',
+     '...GgyY..a.......a..YygG...',
+     'GYw..aY.w.Y.WwW.Y.w.Ya..wYG',
+     '...GgyY..a.......a..YygG...',
+     '.......GgyYwYYYwYygG.......'],
+    ['.......GgyYYYYYYYygG.......',
+     '...GgyY...a.....a...YygG...',
+     'GYw.a.Yw.Y.wWWWw.Y.wY.a.wYG',
+     '...GgyY...a.....a...YygG...',
+     '.......GgywYYYYYwygG.......'],
+    ['.......GgyYYYYYYYygG.......',
+     '...GgwY..a.......a..YwgG...',
+     'GYw..aY.Y.w.WwW.w.Y.Ya..wYG',
+     '...GgwY..a.......a..YwgG...',
+     '.......GgyYYwYwYYygG.......'],
+]
+BIG_LIFT = -2  # its bottom row on the roof
 
-
-def darker(ramp):
-    return ramp[1:] + [ramp[-1]]
-
-
-def relight(i, p, ramp):
-    if 57 <= i <= 61 or 34 <= i <= 38 or 17 <= i <= 24:
-        return dome(p, ramp, OUTLINE)
-    return metal(p, ramp, OUTLINE, segment=3 if 39 <= i <= 48 else 4)
-
-
-def armour(ramp, trim):
-    """Every body part grown thick and relit as plate, the far limbs a shade darker; the belt
-    stays leather."""
-    rules = steel_rules(ramp) + [recolor(TORSO, {BELT[0]: trim[0], BELT[1]: trim[1]})]
-    grown = body_parts(1, rules, PLAN)
-    out = {}
-    for k, p in grown.items():
-        i = int(k)
-        if i in FAR_IDS:
-            out[k] = relight(i, p.copy(), darker(ramp))
-            continue
-        relit = relight(i, p.copy(), ramp)
-        if 34 <= i <= 38:
-            src = apply_rules(part(1, i), i, rules)
-            keep_from(relit, src, trim, PLAN['torso'])
-        out[k] = relit
-        if i in LIMBS and i not in set(range(5, 9)) | set(range(17, 21)) | set(range(53, 57)):
-            out[f'{k}:far'] = relight(i, p.copy(), darker(ramp))
-    return out
-
-
-PAULDRON = [
-    '...######...',
-    '..########..',
-    '.##########.',
-    '############',
-    '############',
-    '############',
-    '############',
-    '############',
-    '.##########.',
-    '..########..',
-    '...######...',
+# A little soul: a white core, the outfit's light accent round it, a soft halo, its tail below.
+SOUL = [
+    ['..h..',
+     '.hbh.',
+     'hbWbh',
+     '.bWb.',
+     '.hBh.',
+     '..B..',
+     '..d..'],
+    ['..h..',
+     '.hbh.',
+     'hbWbh',
+     '.bWb.',
+     '..B..',
+     '.hd..',
+     '.....'],
+    ['.....',
+     '..h..',
+     '.hbh.',
+     'hbWbh',
+     '.bBb.',
+     '..B..',
+     '...d.'],
 ]
 
 
-def pauldron(ramp):
-    """A big round shoulder plate in three lames over the shoulder end of the arm (the left of
-    the upright arm)."""
-    p = shaded(PAULDRON, ramp, OUTLINE, light=(0.4, -0.7, 0.6))
-    for y in range(1, 10):
-        for x in (4, 8):
-            if p.get(x, y) not in (None, OUTLINE):
-                p.set(x, y, ramp[-2])
-    # Drawn centred on the arm's point: empty columns on the right move it 4 px to the shoulder.
-    return Pic([r[:] + [None] * 8 for r in p.g])
+def pillar(w, h=44):
+    """A thin pillar of light, `w` pixels wide: a white core, gold edges, fading at the top."""
+    rows = []
+    for y in range(h):
+        fade = y / (h - 1)  # 0 at the top, 1 at the foot
+        row = ''
+        for x in range(w):
+            d = abs(x - (w - 1) / 2)
+            if w == 1:
+                ch = 'g' if fade > 0.25 else 'q'
+            elif d < 0.6:
+                ch = 'w' if fade > 0.3 else ('g' if fade > 0.12 else 'q')
+            elif d < 1.6:
+                ch = 'g' if fade > 0.3 else 'q'
+            elif d < 2.6:
+                ch = 'G' if fade > 0.45 else 'q'
+            else:
+                ch = 'q' if fade > 0.55 else '.'
+            row += ch
+        rows.append(row)
+    return rows
 
 
-def plate(id_, ramp, trim, accent, plume):
-    pal = Palette({'k': OUTLINE})
-    parts = {k: pal.rows(p) for k, p in armour(ramp, trim).items()}
-    parts['25'] = pal.rows(helm(ramp, trim=trim[0]))
-    parts['29'] = pal.rows(helm(ramp, True, trim=trim[0]))
-    attachments = {}
-    for key, r in (('5', ramp), ('9', darker(ramp))):
-        rows = pal.rows(pauldron(r))
-        attachments.setdefault('pauldron', {'layer': 'over', 'sprites': {}})['sprites'][key] = rows
-    look = {
-        'id': id_, 'base': 1, 'accent': accent, '_raw_heads': True,
-        'parts': parts,
-        'attachments': attachments,
-        'ribbons': {'plume': {'anchor': 'head', 'offset': [1, -8], 'segments': 6, 'length': 2.5, 'width': [3, 1],
-                              'colors': plume, 'gravity': 120, 'drag': 3}},
-    }
-    look['palette'] = pal.pal
-    path = write_look('sir-nobody', look)
-    rotate(path, [25, 'pauldron@5', 'pauldron@9'])
-    preview(id_)
-
-
-plate('plate', STEEL, ['#8a5a32', '#5a3a1e'], '#b8c2cc', ['#e02a2a', '#c01c1c', '#ff5a4a'])
-plate('dark-knight', IRON, ['#e8b84a', '#a07a20'], '#e8b84a', ['#2a2a34', '#1c1c24', '#4a4a56'])
+SPRITES = {f'sign{i + 1}': rows for i, rows in enumerate(SIGN)}
+SPRITES.update({f'soul{i + 1}': rows for i, rows in enumerate(SOUL)})
+SPRITES.update({f'bigsign{i + 1}': rows for i, rows in enumerate(BIG_SIGN)})
+BIG_FRAMES = ['bigsign1', 'bigsign2', 'bigsign3', 'bigsign2']
+SPRITES.update({'pillar1': pillar(7), 'pillar2': pillar(5), 'pillar3': pillar(3), 'pillar4': pillar(1)})
+SIGN_FRAMES = ['sign1', 'sign2', 'sign3', 'sign4']
+# The ring's bottom row (11) on the roof: the sprite's centre is its row 6.
+SIGN_LIFT = -5
 
 fx = {
-    'palette': {'y': '#ffe08a', 'o': '#ffa030', 'w': '#ffffff', 'r': '#e02a2a', 'R': '#a01818', 'l': '#ff7a6a'},
-    'sprites': {
-        'feather1': ['..rl', '.rr.', 'rr..', 'R...'],
-        'feather2': ['.lr.', '.rr.', '.rr.', '.R..'],
-        'feather3': ['....', 'lrrR', 'Rrrl', '....'],
-    },
+    'palette': PALETTE,
+    'sprites': SPRITES,
     'emitters': {
-        'scrape': {
-            'while': ['slide', 'wall', 'roll'], 'perSecond': 60, 'anchor': 'feet', 'jitter': [2, 0],
-            'speed': [30, 90], 'angle': [10, 70], 'gravity': 300, 'life': [200, 400], 'fadeOut': 150,
-            'rect': {'size': 1, 'colors': ['y', 'o', 'w']}, 'blend': 'add',
+        # Now and then (every five seconds or so) a soul slips out of the visor slit and drifts
+        # up behind him, gone in a second.
+        'soul': {
+            'while': ['run', 'air'], 'perSecond': 0.2, 'minSpeed': 30, 'anchor': 'head', 'offset': [-4, -2],
+            'speed': [3, 7], 'angle': [75, 105], 'inherit': 1, 'gravity': -14, 'drag': 0.3,
+            'life': [900, 1150], 'fadeIn': 60, 'fadeOut': 500, 'flutter': {'amp': 1, 'freq': 1.6},
+            'sprite': {'frames': ['soul1', 'soul2', 'soul3', 'soul2'], 'fps': 6}, 'blend': 'add', 'max': 1,
+            'reduced': 0.5,
         },
-        'clang': {
-            'enter': ['land', 'vault', 'wall', 'hang'], 'burst': [8, 14], 'anchor': 'feet', 'speed': [40, 110],
-            'angle': [0, 180], 'gravity': 320, 'life': [250, 450], 'fadeOut': 150,
-            'rect': {'size': [1, 2], 'colors': ['y', 'o', 'w']}, 'blend': 'add',
+        # On some flips and vaults the soul is shaken out of the slit.
+        'soul-trick': {
+            'enter': ['flip', 'vault'], 'chance': 0.3, 'burst': 1, 'anchor': 'head', 'offset': [-4, -2],
+            'speed': [8, 14], 'angle': [60, 120], 'inherit': 0.6, 'gravity': -14, 'drag': 1.5,
+            'life': [900, 1150], 'fadeIn': 80, 'fadeOut': 500, 'flutter': {'amp': 1, 'freq': 1.6},
+            'sprite': {'frames': ['soul1', 'soul2', 'soul3', 'soul2'], 'fps': 6}, 'blend': 'add', 'max': 1,
+            'reduced': 0.5,
         },
-        'steps': {
-            'while': ['run'], 'every': 22, 'minSpeed': 80, 'anchor': 'feet', 'speed': [20, 50], 'angle': [20, 80],
-            'gravity': 300, 'life': [150, 300], 'rect': {'size': 1, 'colors': ['y', 'o']}, 'blend': 'add',
+        # The summon sign left on the roof where he touches down (a chance): a soft landing (25),
+        # a wall flip's landing (51) or a roll; still, behind him, glowing and fading. Not on the
+        # `land` trigger: a landing he gets ready for (23) starts in the air.
+        'sign': {
+            'moves': [25, 51], 'enter': ['roll'], 'chance': 0.3, 'burst': 1, 'anchor': 'feet',
+            'offset': [0, SIGN_LIFT],
+            'speed': 0, 'inherit': 0, 'gravity': 0, 'life': [1400, 1800], 'fadeIn': 140, 'fadeOut': 700,
+            'sprite': {'frames': SIGN_FRAMES, 'fps': 5}, 'layer': 'behind', 'max': 2, 'reduced': 1,
         },
-        'feathers': {
-            'while': ['run', 'air'], 'every': 20, 'minSpeed': 50, 'anchor': 'head', 'jitter': [2, 2],
-            'speed': [8, 20], 'angle': [30, 100], 'inherit': 0.1, 'gravity': 30, 'drag': 2,
-            'life': [900, 1400], 'fadeOut': 400, 'flutter': {'amp': 3, 'freq': 1.5},
-            'sprite': {'frames': ['feather1', 'feather2', 'feather3', 'feather2'], 'fps': 4}, 'max': 12,
+        # By the start: the sign under his feet, breathing, and motes rising from it.
+        'idle-sign': {
+            'perSecond': 3, 'anchor': 'feet', 'offset': [0, BIG_LIFT], 'speed': 0, 'gravity': 0,
+            'life': 2600, 'fadeIn': 700, 'fadeOut': 900, 'sprite': {'frames': BIG_FRAMES, 'fps': 4},
+            'layer': 'behind', 'max': 2,
         },
-        'burst': {
-            'burst': 26, 'anchor': 'body', 'speed': [40, 120], 'angle': [0, 360], 'gravity': 200, 'life': [300, 600],
-            'fadeOut': 200, 'rect': {'size': [1, 2], 'colors': ['y', 'o', 'w']}, 'blend': 'add',
+        'idle-motes': {
+            'perSecond': 2.5, 'anchor': 'feet', 'offset': [0, -1], 'jitter': [11, 0], 'speed': [6, 14],
+            'angle': [80, 100], 'gravity': -10, 'drag': 0.5, 'life': [900, 1500], 'fadeIn': 150,
+            'fadeOut': 600, 'rect': {'size': 1, 'colors': ['w', 'Y', 'y']}, 'blend': 'add', 'max': 6,
         },
-        'plumes': {
-            'burst': 8, 'anchor': 'head', 'speed': [15, 40], 'angle': [30, 150], 'gravity': 30, 'drag': 2,
-            'life': [900, 1400], 'fadeOut': 400, 'flutter': {'amp': 3, 'freq': 1.5},
-            'sprite': {'frames': ['feather1', 'feather2', 'feather3', 'feather2'], 'fps': 4},
+        # Leaving and coming back as a phantom: a thin pillar of light over the sign, the motes of
+        # him rising.
+        'pillar': {
+            'burst': 1, 'anchor': 'chest', 'offset': [0, 2], 'speed': 0, 'life': 520, 'fadeIn': 60, 'fadeOut': 260,
+            'sprite': {'frames': ['pillar1', 'pillar2', 'pillar3', 'pillar4'], 'fps': 8, 'loop': False},
+            'blend': 'add', 'reduced': 1,
         },
-        'idle': {
-            'perSecond': 1, 'anchor': 'head', 'speed': [4, 10], 'angle': [60, 120], 'gravity': 20, 'drag': 2,
-            'life': [1200, 1600], 'fadeOut': 400, 'flutter': {'amp': 3, 'freq': 1.5},
-            'sprite': {'frames': ['feather1', 'feather2', 'feather3', 'feather2'], 'fps': 4},
+        'ring': {
+            'burst': 1, 'anchor': 'feet', 'offset': [0, BIG_LIFT], 'speed': 0, 'life': 1300, 'fadeIn': 80,
+            'fadeOut': 800, 'sprite': {'frames': BIG_FRAMES, 'fps': 6}, 'layer': 'behind', 'reduced': 1,
         },
-    },
-    'ribbons': {
-        'banner': {'anchor': 'chest', 'offset': [3, -2], 'segments': 6, 'length': 3, 'width': [4, 2],
-                   'colors': ['#c01c1c', '#e02a2a', '#c9a85a'], 'gravity': 200, 'drag': 2.5},
+        'phantom': {
+            'burst': 22, 'anchor': 'body', 'jitter': [3, 0], 'speed': [4, 16], 'angle': [70, 110],
+            'gravity': -36, 'drag': 0.6, 'life': [600, 1200], 'fadeOut': 450, 'flutter': {'amp': 1, 'freq': 2},
+            'rect': {'size': 1, 'colors': ['w', 'W', 'Y', 'b']}, 'blend': 'add', 'reduced': 0.3,
+        },
     },
     'variants': {
-        'sparks': {'emitters': ['scrape', 'clang', 'steps']},
-        'plume': {'emitters': ['feathers'], 'ribbons': ['banner']},
+        'summon-sign': {'emitters': ['soul', 'soul-trick', 'sign']},
     },
-    'presence': {'idle': ['idle'], 'vanish': ['burst', 'plumes'], 'appear': ['burst', 'plumes']},
+    'presence': {'idle': ['idle-sign', 'idle-motes'], 'vanish': ['pillar', 'ring', 'phantom'],
+                 'appear': ['pillar', 'ring', 'phantom']},
 }
-write_json(BOSSES + '/sir-nobody/fx.json', tricks(fx, 'sir-nobody'))
 
-# Its outfits in boss.json (its world, stage.json, is drawn in stages.py / stages2.py).
-b = json.load(open(BOSSES + '/sir-nobody/boss.json', encoding='utf-8'))
-b['looks'] = ['plate', 'dark-knight']
-write_json(BOSSES + '/sir-nobody/boss.json', b)
-print('sir nobody written')
+
+def write_fx():
+    write_json(BOSSES + '/sir-nobody/fx.json', tricks(fx, 'sir-nobody'))
+
+
+def write_boss(looks):
+    path = BOSSES + '/sir-nobody/boss.json'
+    b = json.load(open(path, encoding='utf-8'))
+    b['looks'] = looks
+    b['effect'] = ['summon-sign']
+    write_json(path, b)
+    # The old outfits (a dome helm on grey plate) are gone.
+    for old in ('plate', 'dark-knight'):
+        p = f'{BOSSES}/sir-nobody/looks/{old}.json'
+        if os.path.exists(p):
+            os.remove(p)
+
+
+if __name__ == '__main__':
+    looks = kn_looks.make_all()
+    write_fx()
+    write_boss(looks)
+    print('sir nobody written')

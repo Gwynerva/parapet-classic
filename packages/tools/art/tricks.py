@@ -57,7 +57,10 @@ def tricks(fx, boss):
         em['grenade']['chance'] = 0.3
         em['flash']['chance'] = 0.4
     elif boss == 'sir-nobody':
-        em['clang']['chance'] = 0.6
+        # His summon sign stays on the roof where he touches down, about one time in three; the
+        # soul is shaken out of his slit on some flips and vaults.
+        em['sign']['chance'] = 0.3
+        em['soul-trick']['chance'] = 0.3
     return fx
 
 
