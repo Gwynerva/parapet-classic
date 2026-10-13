@@ -20,7 +20,7 @@ arms, thighs and knees are recoloured and grown here.
   resting over his shoulder.
 
 Each look's accent (its effect's `</>` and the mask's ribbon) is a colour of the outfit. Run it
-(`python3 pr_looks.py`, or pyotr.py) to write the four looks."""
+(`python3 pr_looks.py`, or petra.py) to write the four looks."""
 import json
 
 from lookgen import *
@@ -77,7 +77,7 @@ def make(id_, rules, plan, parts, hair, accent, attachments=None, ribbons=None, 
     if ribbons:
         look['ribbons'] = ribbons
     look['palette'] = pal.pal
-    path = write_look('pyotr', look)
+    path = write_look('petra', look)
     rotate(path, ['25', *[str(k) for k in B.UPRIGHT if str(k) in parts], *turn])
     if post:
         with open(path, encoding='utf-8') as f:
@@ -123,4 +123,4 @@ undercover = make('undercover', [
 # His heads magnified (out/pr-heads.png): each hair's 25, 29 and the faces 76-78.
 pal = Palette()
 sheet('pr-heads.png', [(pal.rows(fn()), pal.pal) for _, fn in F.VIEWS], scale=10, per_row=5)
-print('pyotr looks written')
+print('petra looks written')

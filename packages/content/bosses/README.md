@@ -18,7 +18,7 @@ missions of the original: they do not count towards unlocking levels or the Priz
 
 | Level | Boss         | Folder          |
 | ----- | ------------ | --------------- |
-| 1     | Petra Radko  | `pyotr/`        |
+| 1     | Petra Radko  | `petra/`        |
 | 2     | Rewind       | `rewind/`       |
 | 3     | Grove        | `grove/`        |
 | 4     | Vera         | `vera/`         |

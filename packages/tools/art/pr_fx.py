@@ -1,4 +1,4 @@
-"""Petra Radko's effect (fx.json; pyotr.py imports this module): the master of disguise's, quiet
+"""Petra Radko's effect (fx.json; petra.py imports this module): the master of disguise's, quiet
 until she does a trick. She is also the author of this remake and a longsword fencer.
 
 * disguise (the effect's name): on three flips or vaults in ten she changes costume in the air.
@@ -455,9 +455,9 @@ fx = {
 
 
 def write():
-    write_json(BOSSES + '/pyotr/fx.json', tricks(fx, 'pyotr'))
+    write_json(BOSSES + '/petra/fx.json', tricks(fx, 'petra'))
     # The variants she wears, in step with the file (only `effect` is written in boss.json).
-    path = BOSSES + '/pyotr/boss.json'
+    path = BOSSES + '/petra/boss.json'
     with open(path, encoding='utf-8') as f:
         boss = json.load(f)
     if boss.get('effect') != EFFECT:
@@ -466,4 +466,4 @@ def write():
 
 
 write()
-print('pyotr fx written')
+print('petra fx written')

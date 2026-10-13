@@ -1,4 +1,4 @@
-"""The author's room (from the photos), as the props of Pyotr's world (stages.py)."""
+"""The author's room (from the photos), as the props of Petra's world (stages.py)."""
 from lookgen import Canvas
 
 ROOM_PALETTE = {

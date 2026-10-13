@@ -50,7 +50,7 @@ def make(look_id, pics, rules, accent, attachments=None, ribbons=None, turn=(), 
     if ribbons:
         look['ribbons'] = {k: f(pal) for k, f in ribbons.items()}
     look['palette'] = pal.pal
-    path = write_look('pyotr', look)
+    path = write_look('petra', look)
     upright = [k for k in ('25', '57', '34', '49', '53', '62', '30', '39', '43') if k in look['parts']]
     rotate(path, upright + list(turn))
     preview(look_id)

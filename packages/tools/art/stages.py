@@ -12,9 +12,9 @@ def stage(fn):
     return fn
 
 
-# ----------------------------------------------------------------------------------------- Pyotr
+# ----------------------------------------------------------------------------------------- Petra
 @stage
-def pyotr():
+def petra():
     """The author's room (room.py): the wallpaper with golden rings, the window over the radiator,
     a painting, the glass shelf, the swords, the open wardrobe, a backpack, the mirror, the door;
     dust in the light."""
