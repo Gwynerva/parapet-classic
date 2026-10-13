@@ -11,7 +11,9 @@
   wears its own effect: the butterflies and the Polaroids, and on a flip her other self in gold
   (`exposure` in fx.json) instead of the pale rewind.
 
-Both wear her heads (25, 29) and the profile blinking and wincing (76-78), all drawn in rw_heads.py.
+Both wear her heads (25, 29) and the profile blinking and wincing (76-78), all drawn in
+rw_heads.py; the hoodie's bob also has her left side (the fringe over the brow) for when she faces
+left.
 
 A slim teen of average build on Blaise's body: narrow, slim legs, her silhouette from the soft
 open top, the bag at the hip and the chunky shoes. The upright pictures (chest 57, torso 34,
@@ -242,10 +244,10 @@ def kit_rules(sleeve, wrist_right, wrist_left):
 
 
 def make(look_id, rules, plan, pics, head, front, ribbons, accent, attachments=None, turn=(), faces=None,
-         effect=None):
+         effect=None, sides=None):
     """Writes a look: the recoloured base parts of `plan`, the pictures drawn here (`pics`: key →
-    (rows, legend)), the heads (and the profile blinking, `faces`: id → picture), the bag; turns
-    the upright pictures."""
+    (rows, legend)), the heads (and the profile blinking, `faces`: id → picture; `sides`: key →
+    picture, the head seen from her left), the bag; turns the upright pictures."""
     pal = Palette()
     look = {'id': look_id, 'base': 0, 'accent': accent, 'recolor': rules,
             'parts': {k: v for k, v in no_ponytail().items()}}
@@ -254,7 +256,7 @@ def make(look_id, rules, plan, pics, head, front, ribbons, accent, attachments=N
         look['parts'][k] = enc(rows, leg, pal)
     look['parts']['25'] = pal.rows(head)
     look['parts']['29'] = pal.rows(front)
-    for k, p in (faces or {}).items():
+    for k, p in {**(faces or {}), **(sides or {})}.items():
         look['parts'][str(k)] = pal.rows(p)
     look['ribbons'] = {k: f(pal) for k, f in ribbons.items()}
     if attachments:
@@ -263,7 +265,8 @@ def make(look_id, rules, plan, pics, head, front, ribbons, accent, attachments=N
         look['effect'] = effect
     look['palette'] = pal.pal
     path = write_look('rewind', look)
-    rotate(path, [25, 57, 34, 49, 53, 62, 30, 39, 43, *turn])
+    heads = [25] + (['25:left'] if '25:left' in (sides or {}) else [])
+    rotate(path, [*heads, 57, 34, 49, 53, 62, 30, 39, 43, *turn])
     preview(look_id)
     return path
 
@@ -287,7 +290,9 @@ def hoodie():
     }
     make('hoodie', rules, {'upper-arm': 0, 'forearm': 0, 'hand': 0}, pics, RH.lis_profile(), RH.lis_front(),
          {'bag': lambda pal: bag_ribbon(BAG_ROWS, BAG, pal)}, '#38a8f0',
-         faces={f: RH.lis_profile(f) for f in RH.BLINK})
+         faces={f: RH.lis_profile(f) for f in RH.BLINK},
+         sides={'25:left': RH.lis_profile(side='left'), '29:left': RH.lis_front('left'),
+                **{f'{f}:left': RH.lis_profile(f, 'left') for f in RH.BLINK}})
 
 
 
