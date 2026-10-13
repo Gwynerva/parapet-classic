@@ -124,7 +124,7 @@ const RACE_SHOTS: Shot[] = [
 const OG_SHOTS: Shot[] = [
   { level: 10, mission: 1, at: 3, boss: '', outfit: 0, frame: -1, feet: [0.5, 0.84] },
   { level: 1, mission: 0, at: -1, boss: 'rewind', outfit: 0, frame: -1, feet: [0.5, 0.84] },
-  { level: 6, mission: 1, at: 1, boss: 'granger', outfit: 0, frame: VAULT, feet: [0.5, 0.84], shift: [0, 6] },
+  { level: 6, mission: 1, at: 1, boss: 'widow', outfit: 0, frame: VAULT, feet: [0.5, 0.84], shift: [0, 6] },
   { level: 2, mission: 0, at: -1, boss: 'petra', outfit: 0, frame: JUMP, feet: [0.5, 0.84], shift: [0, 12] },
 ];
 

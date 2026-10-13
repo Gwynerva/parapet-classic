@@ -1,0 +1,7 @@
+{
+  "id": "widow",
+  "color": "#c04ae0",
+  "gender": "female",
+  "looks": ["widow-classic", "noire", "odile", "comtesse"],
+  "effect": ["kiss", "grapple", "venom"]
+}

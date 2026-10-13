@@ -340,80 +340,548 @@ def sir_nobody():
     }
 
 
-# --------------------------------------------------------------------------------------- Granger
+# ----------------------------------------------------------------------------------------- Widow
 @stage
-def granger():
-    """London on a grey afternoon: the clock tower over the river haze, rows of terraced houses
-    with chimneys, a red phone box, a lamp post, a red bus going by, light drizzle."""
-    P = {'s': '#8a6a5a', 'S': '#6a4e42', 't': '#4a3830', 'r': '#c02a24', 'R': '#8a1a16', 'w': '#e8ecf2', 'W': '#c8ccd4',
-         'g': '#5a6270', 'G': '#3e4450', 'y': '#ffe08a', 'k': '#24262c', 'c': '#8a8e9a', 'C': '#6a6e7a', 'b': '#b8a888',
-         'B': '#968668', 'o': '#d8b060'}
+def widow():
+    """Château Guillard, Widowmaker's family house on the lake of Annecy, on a violet autumn night:
+    the full moon in its halo over the snowy Alps, its light broken on the water, thin clouds going
+    by; the round tower with its tall slate cone and a candle in its window, the mansards with a few
+    lit windows, the great gothic window, the gold pennant over the belvedere's bell, all mirrored
+    in the lake under drifting mist; a village's lights on the far shore; in the garden cypresses,
+    a gas lamp and a stone dancer in arabesque (the ballerina she was); fog on the water; she runs
+    along the stone balustrade, its lanterns flickering, a black widow let down on her thread by
+    her web on a pillar; now and then a gold leaf falls."""
+    P = {
+        # the moon, its halo
+        'm': '#f8f4ff', 'n': '#e2daf8', 'N': '#c4bae6', 'o': '#d2c8ee',
+        'h': '#d8ccff0c', 'H': '#d8ccff16', '*': '#d8ccff22',
+        # veils of cloud
+        'c': '#5a5490', 'C': '#403b72', 'd': '#302c5c',
+        # the Alps, far, and the shore under them
+        'a': '#33386c', 'A': '#444c82', 'i': '#a4a6d6', 'I': '#7478ae', 'b': '#232749', 'B': '#30365c',
+        # the lake, the moon's path on it
+        'w': '#252a56', 'W': '#353c6e', 'x': '#1b1f45', 'r': '#e8deff', 'R': '#a49ad6',
+        # château: stone (lit to deep shade), slate, windows, the pennant
+        'S': '#7882a8', 's': '#565f86', 't': '#3e4569', 'T': '#2b3051', 'k': '#16182c',
+        'U': '#5e70a6', 'q': '#404e84', 'Q': '#2e3966', 'u': '#1e2549',
+        'v': '#141530', 'y': '#ffc85e', 'Y': '#fff0b4', 'O': '#b46a34', 'f': '#eabc4c', 'F': '#a87c26',
+        # its reflection
+        '!': '#384070', '$': '#2d3462', '%': '#22284d', '&': '#f0b45070',
+        # rocks
+        'l': '#4c5478', 'L': '#343a5a',
+        # trees at night: gold, rust; cypresses; trunks and iron
+        '4': '#c89c52', '1': '#966c3a', '2': '#66462e', '3': '#402c26',
+        '8': '#cc844e', '5': '#a45c38', '6': '#76402c', '7': '#4c2c24',
+        'p': '#243a3e', 'P': '#17252a', 'e': '#365254', 'j': '#2e2228', 'J': '#14131c',
+        # the balustrade and the flagstones
+        'z': '#68709e', 'Z': '#424a74', 'X': '#2f3558', 'K': '#1f233f',
+        # lamps and their light
+        'G': '#ffd27a', 'E': '#fff6d6', 'D': '#ffc85e1c', 'g': '#ffc85e34',
+        # the web and its spider; mist and fog
+        'V': '#e6e2ff80', '9': '#e02a2a',
+        'M': '#cac2f21c', '0': '#cac2f236', '-': '#b4acec14', '=': '#b4acec26',
+    }
 
-    def clock_tower():
-        c = Canvas(20, 80)
-        c.rect(4, 20, 12, 60, 'b').rect(12, 20, 4, 60, 'B')
-        for y in range(24, 80, 4):
-            c.rect(5, y, 6, 1, 'B')
-        c.rect(3, 14, 14, 8, 'b').rect(13, 14, 4, 8, 'B')
-        blob(c, 10, 17.5, 3.2, 3.2, 'w')
-        c.set(10, 16, 'k').set(10, 17, 'k').set(11, 17, 'k')
-        for i in range(10):
-            c.rect(10 - (10 - i) // 2, 4 + i, 10 - i, 1, 'G' if i % 3 else 'g')
-        c.rect(9, 0, 2, 4, 'g')
+    def moon():
+        c = Canvas(20, 20)
+        lit_blob(c, 10, 10, 9.5, 9.5, 'm', 'n', 'N')
+        for cx, cy, rx, ry in ((7.5, 7, 2.2, 1.6), (12.5, 5.5, 1.6, 1.2), (11.5, 11.5, 2.6, 2.1),
+                               (6.5, 12.5, 1.6, 1.3)):
+            blob(c, cx, cy, rx, ry, 'o')  # the seas
         return c.rows()
 
-    def terrace(seed):
-        c = Canvas(64, 40)
+    def halo():
+        c = Canvas(48, 48)
+        blob(c, 24, 24, 23.5, 23.5, 'h')
+        blob(c, 24, 24, 18, 18, 'H')
+        blob(c, 24, 24, 13.5, 13.5, '*')
+        return c.rows()
+
+    def veil(w, h, seed):
+        """Thin streaks of cloud, their tops silvered by the moon, tapering at the ends."""
+        c = Canvas(w, h)
         r = rng(seed)
-        for i, x in enumerate(range(0, 64, 16)):
-            wall = 's' if i % 2 else 'S'
-            c.rect(x, 8, 16, 32, wall)
-            for y in (12, 22):
-                c.rect(x + 3, y, 4, 6, 'y' if r.random() < 0.4 else 'G').rect(x + 9, y, 4, 6, 'y' if r.random() < 0.3 else 'G')
-                c.rect(x + 3, y, 4, 1, 'w').rect(x + 9, y, 4, 1, 'w')
-            c.rect(x + 6, 31, 5, 9, 'k').rect(x + 6, 31, 5, 1, 'w')
-            c.rect(x, 6, 16, 2, 't').rect(x + 2, 0, 4, 6, 'S').rect(x + 2, 0, 4, 1, 't')
+        for i in range(h // 2 + 2):
+            ln = r.randint(w // 4, w * 3 // 4)
+            x0, y = r.randint(0, w - ln), r.randint(0, h - 2)
+            for x in range(x0, x0 + ln):
+                end = min(x - x0, x0 + ln - 1 - x)
+                if end < 2 and r.random() < 0.5:
+                    continue
+                c.set(x, y, 'c' if c.get(x, y - 1) == '.' else 'C')
+                if end > 3:
+                    c.set(x, y + 1, 'd' if end < 8 else 'C')
         return c.rows()
 
-    def phone():
-        c = Canvas(10, 26)
-        c.rect(0, 2, 10, 24, 'r').rect(7, 2, 3, 24, 'R').rect(1, 0, 8, 2, 'r').rect(2, 4, 6, 2, 'k')
-        for y in range(7, 22, 4):
-            c.rect(2, y, 2, 3, 'W').rect(5, y, 2, 3, 'W')
+    def alps(w, h, seed):
+        """Snowy peaks, the moon's side (left) of each lit; the ridge tiles every `w` px."""
+        c = Canvas(w, h)
+        r = rng(seed)
+        peaks, x = [], 0
+        while x < w - 12:
+            peaks.append((x + r.randint(0, 6), r.randint(int(h * 0.4), h - 2)))
+            x += r.randint(18, 30)
+        peaks = [(px - w, ph) for px, ph in peaks] + peaks + [(px + w, ph) for px, ph in peaks]
+        pts = []
+        for (x0, h0), (x1, h1) in zip(peaks, peaks[1:]):
+            pts.append((x0, h0))
+            pts.append(((x0 + x1) / 2 + r.uniform(-3, 3), min(h0, h1) - r.randint(6, 14)))
+        pts.append(peaks[-1])
+
+        def ridge(x):
+            for (x0, h0), (x1, h1) in zip(pts, pts[1:]):
+                if x0 <= x <= x1:
+                    return h0 + (h1 - h0) * (x - x0) / max(1e-6, x1 - x0)
+            return 0
+
+        valleys = pts[1::2]
+
+        def owner(x, y):
+            # Below a valley the next peak's lit flank runs on down in front of this one's shade.
+            for i, (vx, vh) in enumerate(valleys):
+                if x < vx - max(0, y - (h - vh)) * 0.3:
+                    return peaks[i]
+            return peaks[-1]
+
+        for x in range(w):
+            rough = 1.3 * math.sin(x * 0.8 + seed) + 0.8 * math.sin(x * 2.1) + r.choice((0, 0, 1))
+            top = h - int(round(ridge(x) + rough))
+            for y in range(max(0, top), h):
+                # the crease from the peak down and a little right: left of it faces the moon
+                near = owner(x, y)
+                lit = x < near[0] + (y - (h - near[1])) * 0.2
+                cap = 4 + (near[1] - h * 0.56) * 0.4 + (x * 7 + near[0]) % 3
+                snow = near[1] > h * 0.56 and y < h - near[1] + cap
+                c.set(x, y, ('i' if lit else 'I') if snow else ('A' if lit else 'a'))
         return c.rows()
 
-    def lamp():
-        c = Canvas(9, 34)
-        c.rect(4, 6, 1, 28, 'k').rect(2, 0, 5, 6, 'k').rect(3, 1, 3, 4, 'y').rect(3, 31, 3, 3, 'k')
+    def shore(w, h, seed):
+        """Wooded hills on the far shore, a village's lights by the water (Annecy)."""
+        c = Canvas(w, h)
+        r = rng(seed)
+        ph = [r.uniform(0, math.tau) for _ in range(3)]
+        for x in range(w):
+            t = x / w * math.tau
+            hh = 0.5 + 0.18 * math.sin(2 * t + ph[0]) + 0.1 * math.sin(5 * t + ph[1]) + 0.05 * math.sin(13 * t + ph[2])
+            top = h - int(h * hh)
+            c.rect(x, top, 1, h - top, 'b')
+            c.set(x, top, 'B')
+            if math.sin(5 * t + ph[1] + 0.25) > math.sin(5 * t + ph[1]):  # rising: the slope faces the moon
+                c.set(x, top + 1, 'B')
+        for vx in (r.randrange(10, w // 2 - 20), r.randrange(w // 2 + 10, w - 20)):
+            for i in range(5):
+                bw, bh = r.randint(3, 5), r.randint(2, 4)
+                x0 = vx + i * 4
+                c.rect(x0, h - bh, bw, bh, 'B')
+                if r.random() < 0.7:
+                    c.set(x0 + 1, h - bh + 1, 'O')
+            c.rect(vx + 9, h - 9, 1, 5, 'B')
         return c.rows()
 
-    def bus():
-        c = Canvas(48, 28)
-        c.rect(0, 2, 48, 22, 'r').rect(0, 2, 48, 1, 'w').rect(0, 13, 48, 1, 'R')
-        for x in range(3, 44, 7):
-            c.rect(x, 5, 5, 5, 'W').rect(x, 16, 5, 5, 'W')
-        for x in (8, 38):
-            blob(c, x, 25, 3, 3, 'k')
+    def lake(frame, w=128, h=34):
+        """Calm far off (the shore's shine), long slow ripples nearer."""
+        c = Canvas(w, h)
+        c.rect(0, 0, w, h, 'w')
+        c.rect(0, 0, w, 2, 'W')
+        r = rng(21 + frame)
+        for y in range(2, h, 2):
+            step = 14 + y // 2
+            for x in range(0, w, step):
+                xx = (x + r.randrange(step // 2) + frame * 3) % w
+                ln = 2 + y // 5
+                for i in range(ln):
+                    c.set((xx + i) % w, y, 'W' if y < 10 or (x // step + y // 2) % 2 else 'x')
         return c.rows()
 
+    def glitter(frame, w=26, h=20):
+        """The moon's path on the water: short silver streaks under it, wider and broken nearer."""
+        c = Canvas(w, h)
+        r = rng(40 + frame)
+        for y in range(1, h, 2):
+            half = 2 + y * 0.5
+            for _ in range(1 + (y > 6) + (y > 13)):
+                ln = r.randint(2, 3 + y // 6)
+                x0 = int(w / 2 - half + r.random() * (2 * half - ln))
+                c.rect(x0, y, ln, 1, 'r' if r.random() < 0.25 else 'R')
+        return c.rows()
+
+    def chateau():
+        W, H, R = 124, 72, 14
+        c = Canvas(W, H + R)
+
+        def window(x, y, h, lit):
+            """Three wide, arched: the top corners stone, a lit sill under it."""
+            c.rect(x, y, 3, h, 'y' if lit else 'v')
+            c.set(x + 1, y, 'Y' if lit else 'U')
+            c.set(x, y, 's').set(x + 2, y, 's')
+            if lit:
+                c.set(x, y + 1, 'Y')
+            c.rect(x, y + h, 3, 1, 'S')
+
+        def dormer(x, y, lit):
+            """A gabled dormer 5 wide, its peak at row y."""
+            c.set(x + 2, y, 'S')
+            c.rect(x + 1, y + 1, 3, 1, 'S').set(x + 3, y + 1, 's')
+            c.rect(x, y + 2, 5, 5, 's').rect(x, y + 2, 1, 5, 'S').rect(x + 4, y + 2, 1, 5, 't')
+            c.rect(x + 1, y + 3, 3, 3, 'y' if lit else 'v')
+            c.set(x + 2, y + 3, 'Y' if lit else 'U')
+
+        def mansard(x0, x1, top, bottom):
+            for y in range(top, bottom + 1):
+                inset = (bottom - y) // 2
+                a, b = x0 + inset, x1 - inset
+                c.rect(a, y, b - a + 1, 1, 'Q').set(a, y, 'U').set(a + 1, y, 'q').set(b, y, 'u')
+            c.rect(x0 + (bottom - top) // 2, top - 1, x1 - x0 + 1 - (bottom - top) // 2 * 2, 1, 'U')
+
+        def chimney(x, top, bottom):
+            h = bottom - top
+            c.rect(x, top, 3, h, 's').rect(x, top, 1, h, 'S').rect(x + 2, top, 1, h, 't')
+            c.rect(x - 1, top, 5, 1, 'S').set(x + 3, top, 't')
+
+        # The main block, its mansard with a cresting, dormers, the belvedere with the bell.
+        c.rect(62, 31, 43, 30, 's')
+        c.rect(61, 30, 45, 1, 'S').rect(62, 31, 43, 1, 'T')
+        mansard(61, 105, 22, 29)
+        c.rect(65, 19, 37, 1, 'S')
+        for x in range(65, 102, 2):
+            c.set(x, 20, 's')
+        chimney(67, 14, 21)
+        chimney(98, 13, 21)
+        for x, lit in ((70, False), (77, True), (92, False)):
+            dormer(x, 22, lit)
+        c.rect(79, 11, 9, 9, 's').rect(79, 11, 1, 9, 'S').rect(87, 11, 1, 9, 't')
+        c.rect(81, 13, 5, 6, 'v').set(81, 13, 's').set(85, 13, 's')
+        c.rect(82, 15, 3, 2, 'F').set(83, 14, 'f').set(82, 15, 'f').set(83, 17, 'F')
+        c.rect(78, 10, 11, 1, 'S')
+        for i, (a, b) in enumerate(((79, 87), (80, 86), (81, 85), (82, 84))):
+            c.rect(a, 9 - i, b - a + 1, 1, 'Q').set(a, 9 - i, 'U').set(b, 9 - i, 'u')
+        c.rect(83, 0, 1, 6, 's')
+        for i, x in enumerate(range(65, 102, 6)):
+            window(x, 36, 5, i in (2, 5))
+            window(x, 46, 5, i in (4,))
+        # The right wing, lower.
+        c.rect(105, 40, 17, 21, 's').rect(119, 40, 3, 21, 't')
+        c.rect(104, 39, 19, 1, 'S').rect(105, 40, 14, 1, 'T')
+        mansard(104, 122, 33, 38)
+        chimney(116, 27, 33)
+        window(108, 44, 5, False)
+        window(114, 44, 5, True)
+        # The left wing (shaded by the tower on its left), its dormers and chimney.
+        c.rect(21, 34, 19, 27, 's').rect(21, 34, 4, 27, 't')
+        c.rect(20, 33, 21, 1, 'S').rect(21, 34, 19, 1, 'T')
+        mansard(20, 40, 26, 32)
+        chimney(35, 18, 26)
+        dormer(23, 25, False)
+        dormer(30, 25, True)
+        window(26, 38, 5, False)
+        window(33, 38, 5, False)
+        window(33, 48, 5, True)
+        # The pavilion: a steep roof with finials, a lit dormer, the great gothic window.
+        c.rect(40, 25, 22, 36, 's').rect(40, 25, 1, 36, 'S').rect(59, 25, 3, 36, 't')
+        c.rect(39, 24, 24, 1, 'S').rect(40, 25, 22, 1, 'T')
+        for y in range(6, 24):
+            t = (y - 6) / 17
+            a, b = round(47 - t * 8), round(55 + t * 8)
+            c.rect(a, y, b - a + 1, 1, 'Q').set(a, y, 'U').set(a + 1, y, 'q').set(b, y, 'u').set(b - 1, y, 'u')
+        c.rect(47, 5, 9, 1, 'k').rect(47, 3, 1, 2, 'k').rect(55, 3, 1, 2, 'k').set(51, 4, 'k')
+        dormer(49, 11, True)
+        gx, gy, gw, gh = 45, 30, 11, 21
+        for y in range(gh):
+            half = min(gw // 2, y)
+            c.rect(gx + gw // 2 - half, gy + y, half * 2 + 1, 1, 't')
+            if y >= 1:
+                inner = min(gw // 2 - 1, y - 1)
+                for x in range(gx + gw // 2 - inner, gx + gw // 2 + inner + 1):
+                    c.set(x, gy + y, 'O' if (x + y) % 4 else 'y')
+        for y in range(gy + 3, gy + gh):
+            c.set(gx + gw // 2, y, 't')
+        c.rect(gx + 1, gy + 11, gw - 2, 1, 't')
+        c.set(gx + gw // 2, gy + 6, 'Y').set(gx + 3, gy + 14, 'Y').set(gx + 7, gy + 16, 'Y')
+        c.rect(gx, gy + gh, gw, 1, 'S')
+        # The round tower: courses of stone round a cylinder lit from the left, the cornice on its
+        # corbels (its slate cone comes last, taller than the canvas).
+        cx, rad = 12, 9
+        for y in range(21, 67):
+            for x in range(cx - rad, cx + rad + 1):
+                nx = (x + 0.5 - cx) / (rad + 0.5)
+                c.set(x, y, 'S' if nx < -0.5 else 's' if nx < 0.15 else 't' if nx < 0.65 else 'T')
+        for y in (31, 45, 57):
+            for x in range(cx - rad + 1, cx + rad):
+                if (x + y) % 5 == 0:
+                    c.set(x, y, {'S': 's', 's': 't', 't': 'T', 'T': 'T'}[c.get(x, y)])
+        for x in range(cx - rad - 1, cx + rad + 2):
+            nx = (x + 0.5 - cx) / (rad + 1.5)
+            c.set(x, 18, 'S' if nx < 0.1 else 's').set(x, 19, 'S' if nx < -0.4 else 's' if nx < 0.4 else 't')
+            c.set(x, 20, 'T' if x % 2 else 't')
+        window(cx - 2, 26, 4, False)
+        window(cx - 1, 36, 4, True)
+        window(cx - 2, 50, 4, False)
+        # The arcade over the water and the terrace wall with its balustrade.
+        c.rect(21, 55, 24, 17, 's').rect(21, 55, 24, 1, 'S')
+        for x in (24, 30, 36):
+            c.rect(x, 59, 4, 13, 'k').set(x, 59, 's').set(x + 3, 59, 's').rect(x, 70, 4, 2, 'T')
+            c.set(x - 1, 60, 'S')
+        c.rect(44, 57, 80, 15, 's').rect(44, 57, 80, 1, 'S').rect(44, 58, 80, 1, 'T').rect(44, 69, 80, 3, 't')
+        for row, y in enumerate(range(61, 69, 4)):
+            for x in range(44 + (row % 2) * 4, 121, 8):
+                c.rect(x, y, 5, 1, 't').set(x + 5, y - 1, 't').set(x + 5, y - 2, 't')
+        c.rect(121, 57, 3, 15, 'T')
+        c.rect(60, 54, 61, 1, 'S')
+        for x in range(60, 121):
+            c.set(x, 55, 'S' if x % 2 == 0 else 'T').set(x, 56, 's' if x % 2 == 0 else 'T')
+        # Rocks at the tower's foot.
+        for x, y, rx, ry in ((5, 68, 6, 4.5), (15, 70, 5, 3), (24, 71, 4, 2.5)):
+            lit_blob(c, x, y, rx, ry, 'l', 'L', 'T')
+        # Trees of the grounds: gold by the tower, rust by the right wing, a cypress.
+        c.paste(tree(22, ['4', '1', '2', '3'], ('j', 'J'), seed=5), 17, 41)
+        c.paste(tree(20, ['8', '5', '6', '7'], ('j', 'J'), seed=9), 98, 39)
+        c.paste(cypress(19), 59, 38)
+        # The reflection: the lower house upside down, darker, broken by ripples.
+        tone = {**{k: '&' for k in 'yYOf4'}, **{k: '!' for k in 'SsUl18'}, **{k: '$' for k in 'tqQL25ep6F'}}
+        deeper = {'!': '$', '$': '%', '%': 'w', '&': '&'}
+        for r in range(R):
+            src = H - 1 - int(r * 1.5)
+            dx = (0, 1, 0, -1)[(r // 2) % 4] if r > 2 else 0
+            for x in range(W):
+                k = c.get(x - dx, src)
+                # Every other row mostly the lake's: the reflection in streaks.
+                if k == '.' or (r > 1 and r % 2 == 1 and ((x + r * 5) // 4) % 3 != 0):
+                    continue
+                t = tone.get(k, '%')
+                # Fainter further from the wall, the lake's own ripples showing through.
+                if r > R // 2 or (r > 3 and (x + r) % 7 == 0):
+                    t = deeper[t]
+                c.set(x, H + r, t)
+        # The tower's tall cone: the canvas grows on top, the bottom stays where it was.
+        top = 8
+        out = Canvas(W, top + H + R)
+        out.paste(c.rows(), 0, top)
+        for y in range(2, top + 17):
+            half = 0.6 + (y - 2) * (rad + 1.5) / (top + 15)
+            half += max(0, y - (top + 13)) * 0.4  # the eaves flare out
+            a, b = round(cx - half), round(cx + half)
+            for x in range(a, b + 1):
+                nx = (x + 0.5 - cx) / max(1, half)
+                out.set(x, y, 'U' if nx < -0.55 else 'q' if nx < -0.1 else 'Q' if nx < 0.5 else 'u')
+            if y % 4 == 1 and y > 5:
+                out.set(round(cx + half * 0.2), y, 'u')
+        out.rect(cx - rad - 1, top + 17, 2 * rad + 3, 1, 'u')
+        out.set(cx, 0, 'S').set(cx, 1, 'S')
+        return out.rows()
+
+    def cypress(h):
+        c = Canvas(7, h)
+        for y in range(h - 2):
+            u = (y + 1) / (h - 2)
+            half = 3.2 * min(1, u * 1.7) ** 0.8 * (1 - max(0, u - 0.82) * 2.5)
+            for x in range(7):
+                nx = (x + 0.5 - 3.5) / max(0.6, half)
+                if abs(nx) <= 1:
+                    c.set(x, y, 'e' if nx < -0.35 else 'p' if nx < 0.4 else 'P')
+            if y % 4 == 2 and half > 1.5:
+                c.set(int(3.5 + half * 0.2), y, 'P')
+        c.rect(3, h - 2, 1, 2, 'j')
+        return c.rows()
+
+    def flag(frame):
+        return [['ffff......', 'FFfffffff.', '...FFFF.ff'],
+                ['fffff.....', 'FFffffffff', '....FFF...'],
+                ['ffff....ff', 'FFfffffff.', '..FFF.....']][frame]
+
+    def candle(frame):
+        return [['YY', 'yY', 'yy', 'yy'], ['Yy', 'yy', 'yy', 'Oy'], ['YY', 'YY', 'yy', 'yy']][frame]
+
+    def haze(w, h, seed):
+        """Mist lying on the water: long thin streaks, thicker in the middle, fading at the ends."""
+        c = Canvas(w, h)
+        r = rng(seed)
+        for _ in range(h + 2):
+            ln = r.randint(w // 5, w // 2)
+            x0, y = r.randint(0, w - ln), r.randint(0, h - 1)
+            for x in range(x0, x0 + ln):
+                end = min(x - x0, x0 + ln - 1 - x)
+                if end > 1 or r.random() < 0.5:
+                    c.set(x, y, '0' if end > ln // 4 and c.get(x, y) == 'M' else 'M')
+        return c.rows()
+
+    def statue():
+        """A stone dancer en pointe in arabesque on her pedestal: the ballerina she was."""
+        return ['..........ss.....',
+                '.........Sss.....',
+                '.........SSs...s.',
+                '.........Sst..s..',
+                '..........t..s...',
+                '.........SSss....',
+                '......ssSSSt.....',
+                '....ss..SSt......',
+                '...s....SSt......',
+                'ss......SSt......',
+                '.SSSs.SSSSSSs....',
+                '...sSSSSssssst...',
+                '........SSt......',
+                '........Ss.......',
+                '........Ss.......',
+                '........Ss.......',
+                '........St.......',
+                '.........s.......',
+                '.........s.......',
+                '...SSSSSSSSSSSt..',
+                '....tttttttttt...',
+                '....SSsssssstt...',
+                '....Sssssssstt...',
+                '....Sssssssstt...',
+                '....Sssssssstt...',
+                '....Sssssssstt...',
+                '....Sssssssstt...',
+                '...SSSSSSSSSSSt..',
+                '...sssssssssstt..']
+
+    def fog(w, h, seed):
+        """The fog lying on the lake by the terrace: thicker low down, in long drifting streaks."""
+        c = Canvas(w, h)
+        r = rng(seed)
+        for y in range(h):
+            x = r.randrange(8)
+            while x < w:
+                ln = r.randint(10, 30)
+                for i in range(ln):
+                    if r.random() < 0.15 + 0.85 * y / h:
+                        c.set((x + i) % w, y, '=' if y > h * 0.6 and 2 < i < ln - 3 else '-')
+                x += ln + r.randint(2, 10)
+        return c.rows()
+
+    def lamp(h=40):
+        c = Canvas(19, h + 6)
+        top = 6
+        blob(c, 9, top + 4, 9.2, 9.2, 'D')
+        blob(c, 9, top + 4, 5.2, 5.2, 'g')
+        c.rect(8, top - 1, 3, 1, 'J').set(9, top - 2, 'J')
+        c.rect(7, top, 5, 1, 'J').rect(7, top + 1, 5, 5, 'J').rect(8, top + 1, 3, 5, 'G')
+        c.set(9, top + 2, 'E').set(9, top + 3, 'E').rect(7, top + 6, 5, 1, 'J')
+        for x, y in ((9, 7), (8, 8), (10, 8), (7, 9), (11, 9)):  # the bracket's scrolls
+            c.set(x, top + y, 'J')
+        c.rect(9, top + 7, 1, h - 10, 'J')
+        c.rect(8, h - 1, 3, 4, 'J').rect(7, h + 3, 5, 3, 'J')
+        return c.rows()
+
+    def lantern(frame):
+        c = Canvas(15, 16)
+        blob(c, 7, 8, 7.4 if frame != 1 else 6.6, 7.4 if frame != 1 else 6.6, 'D')
+        blob(c, 7, 8, 3.6 if frame != 2 else 4.2, 3.6 if frame != 2 else 4.2, 'g')
+        c.set(7, 3, 'J').rect(6, 4, 3, 1, 'J').rect(5, 5, 5, 1, 'J')
+        c.rect(5, 6, 5, 6, 'J').rect(6, 6, 3, 6, 'G')
+        c.set(7, 8 if frame != 1 else 9, 'E').set(7, 9 if frame != 2 else 7, 'E')
+        if frame == 2:
+            c.set(6, 8, 'E')
+        c.rect(5, 12, 5, 1, 'J').rect(6, 13, 3, 3, 'J')
+        return c.rows()
+
+    def balustrade():
+        c = Canvas(48, 15)
+        c.rect(0, 0, 6, 15, 'Z').rect(0, 0, 6, 1, 'z').rect(0, 1, 1, 14, 'z').rect(5, 1, 1, 14, 'X')
+        c.rect(1, 1, 5, 1, 'Z').rect(2, 5, 2, 6, 'X').rect(2, 5, 2, 1, 'K')
+        c.rect(6, 2, 42, 1, 'z').rect(6, 3, 42, 1, 'Z').rect(6, 4, 42, 1, 'X')
+        vase = ['zZX', '.Z.', 'zZX', 'zZX', 'zZX', '.Z.', 'zZX', 'zZX']
+        for x in range(8, 46, 5):
+            c.paste(vase, x, 5)
+        c.rect(6, 13, 42, 1, 'Z').rect(6, 14, 42, 1, 'X')
+        return c.rows()
+
+    def web():
+        """A quarter web in the corner of a pillar and the rail."""
+        c = Canvas(11, 9)
+        for ex, ey in ((10, 2), (8, 7), (3, 8)):
+            c.line(0, 0, ex, ey, 'V')
+        for rad in (4, 8):
+            for a in range(10, 84, 3):
+                t = math.radians(a)
+                c.set(round(math.cos(t) * rad), round(math.sin(t) * rad * 0.9), 'V')
+        return c.rows()
+
+    def spider(drop):
+        """The black widow let down on her thread, the red hourglass on her belly."""
+        c = Canvas(5, 9)
+        c.rect(2, 0, 1, drop, 'V')
+        c.paste(['J.J.J', '.JJJ.', 'J.9.J', '.JJJ.', 'J...J'], 0, drop)
+        return c.rows()
+
+    def terrace():
+        c = Canvas(48, 12)
+        c.rect(0, 0, 48, 12, 'X').rect(0, 0, 48, 1, 'z').rect(0, 1, 48, 1, 'Z').rect(0, 10, 48, 2, 'K')
+        for x in (0, 24):
+            c.rect(x, 2, 1, 8, 'K').rect(x + 1, 2, 6, 1, 'Z')
+        r = rng(12)
+        for _ in range(26):
+            c.set(r.randrange(48), r.randrange(3, 10), r.choice(['K', 'K', 'Z']))
+        return c.rows()
+
+    leaves = {'leaf-a': ['44', '1.'], 'leaf-b': ['.8', '55'], 'leaf-c': ['5.', '66'], 'leaf-d': ['4', '1']}
+    house = chateau()
+    ch_x, ch_y = 150, 10
+
+    def on_house(row, h):
+        """The `y` of a thing `h` px tall at this row of the château's picture."""
+        return ch_y + len(house) - row - h
     return {
         'palette': P,
-        'sky': ['#6a7484', '#7a8494', '#8a94a2', '#9aa2ae', '#a8b0ba', '#b6bcc4', '#c4c8ce'],
-        'sprites': {'tower': clock_tower(), 'far': skyline(160, 46, ch(P, '#8a909c'), seed=6, min_h=0.3),
-                    'terrace': terrace(1), 'phone': phone(), 'lamp': lamp(), 'bus': bus(),
-                    'cloud': cloud(60, 18, 9, chs(P, ['#c8ccd2', '#aeb4bc', '#959ca6'])),
-                    'pavement': strip(32, 10, chs(P, ['#9aa0aa', '#6e747e', '#585e68']), seed=7, noise=0.1)},
-        'ground': 'pavement',
+        'sky': ['#0a0a1e', '#0f0f2a', '#151535', '#1c1b41', '#24224c', '#2e2a58', '#3a3264', '#473b70', '#56457a',
+                '#664f82'],
+        'stars': {'count': 26, 'colors': ['#e8e2ff', '#ffffff', '#c4bcf0']},
+        'tint': '#20104008',
+        'sprites': {
+            'halo': halo(), 'moon': moon(), 'veil-a': veil(84, 7, 3), 'veil-b': veil(60, 6, 8),
+            'alps': alps(220, 44, 4), 'shore': shore(180, 16, 6),
+            'lake1': lake(0), 'lake2': lake(1), 'lake3': lake(2),
+            'glitter1': glitter(0), 'glitter2': glitter(1), 'glitter3': glitter(2),
+            'chateau': house, 'flag1': flag(0), 'flag2': flag(1), 'flag3': flag(2),
+            'candle1': candle(0), 'candle2': candle(1), 'candle3': candle(2),
+            'haze': haze(120, 8, 2), 'fog': fog(160, 16, 5),
+            'cypress': cypress(34), 'cypress-s': cypress(28),
+            'statue': statue(), 'lamp': lamp(),
+            'lantern1': lantern(0), 'lantern2': lantern(1), 'lantern3': lantern(2),
+            'balustrade': balustrade(), 'web': web(),
+            'spider1': spider(2), 'spider2': spider(3), 'spider3': spider(4),
+            'terrace': terrace(), **leaves,
+        },
+        'ground': 'terrace',
         'layers': [
-            {'speed': 0.02, 'period': 280, 'drift': 4, 'items': [{'sprite': 'cloud', 'x': 0, 'y': 60}, {'sprite': 'cloud', 'x': 150, 'y': 74}]},
-            {'speed': 0.05, 'period': 160, 'alpha': 0.6, 'items': [{'sprite': 'far', 'x': 0, 'y': 0}]},
-            {'speed': 0.08, 'period': 400, 'alpha': 0.8, 'items': [{'sprite': 'tower', 'x': 110, 'y': 0}]},
-            {'speed': 0.45, 'period': 64, 'items': [{'sprite': 'terrace', 'x': 0, 'y': 0}]},
-            {'speed': 0.6, 'period': 420, 'drift': -30, 'items': [{'sprite': 'bus', 'x': 0, 'y': 0}]},
-            {'speed': 1, 'period': 200, 'items': [{'sprite': 'phone', 'x': 20, 'y': 0}, {'sprite': 'lamp', 'x': 120, 'y': 0}]},
+            {'speed': 0, 'period': 1000, 'items': [{'sprite': 'halo', 'x': 22, 'y': 48},
+                                                    {'sprite': 'moon', 'x': 36, 'y': 62}]},
+            {'speed': 0.02, 'period': 320, 'drift': 2, 'alpha': 0.8, 'items': [{'sprite': 'veil-a', 'x': 10, 'y': 92},
+                                                                               {'sprite': 'veil-b', 'x': 190, 'y': 104}]},
+            {'speed': 0.03, 'period': 220, 'items': [{'sprite': 'alps', 'x': 0, 'y': 34}]},
+            {'speed': 0.06, 'period': 180, 'items': [{'sprite': 'shore', 'x': 0, 'y': 34}]},
+            {'speed': 0.1, 'period': 128, 'items': [{'sprite': 'lake1', 'x': 0, 'y': 0, 'frames': ['lake1', 'lake2', 'lake3'],
+                                                      'fps': 2}]},
+            {'speed': 0, 'period': 1000, 'items': [{'sprite': 'glitter1', 'x': 33, 'y': 14,
+                                                    'frames': ['glitter1', 'glitter2', 'glitter3'], 'fps': 3}]},
+            {'speed': 0.12, 'period': 400, 'items': [
+                {'sprite': 'chateau', 'x': ch_x, 'y': ch_y},
+                {'sprite': 'flag1', 'x': ch_x + 84, 'y': on_house(8, 3), 'frames': ['flag1', 'flag2', 'flag3', 'flag2'],
+                 'fps': 4},
+                {'sprite': 'candle1', 'x': ch_x + 11, 'y': on_house(8 + 36, 4),
+                 'frames': ['candle1', 'candle2', 'candle1', 'candle3'], 'fps': 5}]},
+            {'speed': 0.14, 'period': 300, 'drift': 4, 'items': [{'sprite': 'haze', 'x': 0, 'y': 20},
+                                                                 {'sprite': 'haze', 'x': 170, 'y': 26}]},
+            {'speed': 0.3, 'period': 160, 'drift': 5, 'items': [{'sprite': 'fog', 'x': 0, 'y': 13}]},
+            {'speed': 0.45, 'period': 330, 'items': [
+                {'sprite': 'cypress', 'x': 0, 'y': 0}, {'sprite': 'cypress-s', 'x': 9, 'y': 0},
+                {'sprite': 'statue', 'x': 110, 'y': 8}, {'sprite': 'lamp', 'x': 230, 'y': 0}]},
+            {'speed': 1, 'period': 48, 'items': [{'sprite': 'balustrade', 'x': 0, 'y': 0}]},
+            {'speed': 1, 'period': 240, 'items': [
+                {'sprite': 'lantern1', 'x': -4, 'y': 15, 'frames': ['lantern1', 'lantern2', 'lantern1', 'lantern3'],
+                 'fps': 6},
+                {'sprite': 'web', 'x': 150, 'y': 1},
+                {'sprite': 'spider1', 'x': 155, 'y': 1,
+                 'frames': ['spider1', 'spider2', 'spider3', 'spider3', 'spider2', 'spider1'], 'fps': 1.5}]},
         ],
-        'ambient': ['drizzle'],
-        'emitters': {'drizzle': rain(['#c8d0dc', '#aab4c4'], per=18)},
+        'ambient': ['leaves'],
+        'emitters': {
+            'leaves': {'perSecond': 1.5, 'anchor': 'head', 'jitter': [0, 20], 'offset': [0, -36], 'speed': [8, 18],
+                       'angle': [-140, -100], 'gravity': 18, 'drag': 1, 'life': [2600, 3600], 'fadeOut': 700,
+                       'flutter': {'amp': 3, 'freq': 1.1}, 'tumble': [1, 2],
+                       'sprite': {'frames': list(leaves), 'random': True}},
+        },
     }
 
 

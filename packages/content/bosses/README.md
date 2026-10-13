@@ -24,7 +24,7 @@ missions of the original: they do not count towards unlocking levels or the Priz
 | 4     | Vera         | `vera/`         |
 | 5     | B-2          | `b2/`           |
 | 6     | Sir Nobody   | `sir-nobody/`   |
-| 7     | Granger      | `granger/`      |
+| 7     | Widow        | `widow/`        |
 | 8     | Rush B       | `rush-b/`       |
 | 9     | Five         | `five/`         |
 | 10    | Flittermouse | `flittermouse/` |

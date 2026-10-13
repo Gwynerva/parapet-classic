@@ -1,7 +1,0 @@
-{
-  "id": "granger",
-  "color": "#3fd2ff",
-  "gender": "neutral",
-  "looks": ["classic", "slipstream", "punk"],
-  "effect": ["blink", "recall"]
-}

@@ -60,10 +60,16 @@ def tricks(fx, boss):
         # bats scattering every way on about one trick in six.
         em['batarang'] = {**em['batarang'], 'enter': ['flip', 'vault'], 'chance': 0.35}
         em['swarm'] = {**em['swarm'], 'enter': TRICKS, 'chance': 0.18}
-    elif boss == 'granger':
-        # The news from the future flies off her on a few flips, vaults and wall moves (her blink
-        # comes with its snapshot's own chance).
-        em['newspaper'] = {**em['newspaper'], 'enter': ['flip', 'vault', 'wall'], 'chance': 0.08}
+    elif boss == 'widow':
+        # Her grappling hook on about half of the tic-tac jumps and wall runs (moves 20 and 33) and
+        # one jump in seven (18, 19); a kiss blown on one landing in ten; a Venom Mine left behind
+        # on about two rolls or hard landings (moves 24 and 25) in five. (Her spectral shot comes on
+        # a third of the flips and vaults with its snapshot's own chance: wd_fx.py.)
+        em['grapple']['chance'] = 0.45
+        em['grapple-kick']['chance'] = 0.45
+        em['grapple-jump']['chance'] = 0.14
+        em['kiss-land']['chance'] = 0.1
+        em['mine']['chance'] = 0.4
     elif boss == 'rush-b':
         # A smoke grenade on about one hard landing (moves 24 and 25, the landings that need DOWN)
         # or roll in five; its cloud stays where it fell.
