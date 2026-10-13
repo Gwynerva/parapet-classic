@@ -189,7 +189,8 @@ One particle system draws every boss's effect; only the data differs
 - `ribbons` — cloth of the effect, like the looks'.
 - `variants` — named sets of emitters, ribbons and an `afterimage`: echo or rush trails, a
   `snapshot` of the pose on a trick (with a `chance`: on some of them; `burst`: emitters coming
-  with it), colours or the rainbow.
+  with it; `repeat`: a chain of copies as the trick goes on, taking the `colors` in turn),
+  `scanlines`, colours or the rainbow.
 - `presence` — the haze by the start (`idle`) and the bursts as the boss leaves (`vanish`) and
   comes back (`appear`).
 
