@@ -2,25 +2,28 @@
 on her tricks, quiet on the run (only, now and then, a kiss).
 
 * kiss (the effect's name, "Widow's Kiss": her rifle's and her own, the emote and the "Bisous"):
-  - the spectral shot, on about a third of her flips and vaults: she fires as she takes off. Her
-    visor's lens glints (a red lens star, the sniper's glint), a pink muzzle flash bursts ahead of
-    her, a charged shot's tracer 128 px long (a white-hot core in a pink glow in a violet haze)
-    hangs in the air where she fired and burns out from the outside in, the bullet's own streak
-    flies on ahead, and the recoil leaves three spectral copies of her behind (hot pink, then the
-    outfit's colour, then that colour paled; hologram scanlines), one every 80 ms, sliding back and
-    fading in 0.4 s;
+  - the spectral shot, on about a third of her flips and vaults, in two beats, both the way she is
+    going (off a wall, the way she leaps from it), not the way she faces:
+    - the aim, from the trick's start: her scope's red reticle closes in on a point ahead of her
+      and locks into a crosshair, while motes of pink light are drawn in to her heart (the charge
+      of a scoped shot); both keep up with her, taken again from where she is in three beats;
+    - the shot, 0.33 s in, mid-air: the reticle flashes white as her visor's lens glints, the
+      muzzle flashes in a ring of light and a spray of sparks, a charged shot's tracer 128 px long
+      (a white-hot core in a pink glow in a violet haze) hangs where she fired and burns out from
+      the outside in, the bullet streaks on, and the recoil leaves three spectral copies of her
+      along her way (hot pink, then the outfit's colour, then that colour paled; hologram
+      scanlines), one every 70 ms, rising a little and fading in 0.4 s;
   - now and then as she runs (about one every eight seconds) a lipstick kiss in plum leaves her
     lips and floats back and up, twinkling once; one landing in ten she blows one too.
-* grapple: on about half of her tic-tac jumps and wall runs and one jump in seven her grappling
+* grapple: on about half of her runs up a wall (only there has it a wall to bite) her grappling
   hook is shot from the gauntlet like a bullet: a twisted steel line flies up ahead of her, its
   leading stretch a pink tracer, a flash at the wrist in the outfit's colour (`accent`, the
-  gauntlet's light), the grapnel bites (another flash), the line holds taut a moment with a glint
-  running up it, then reels back in; 0.4 s, behind her, flying with her (the runner's own launch
-  and gravity) so that it keeps to her hand.
-* venom: on about two rolls and hard landings in five she leaves a Venom Mine behind: a little
-  spider of steel with a violet core blinks twice and pops into a cloud of violet poison, round
-  puffs lit from the upper front, their shade and underside toxic green, green glints in it,
-  which swells along the ground up to her hips where it was dropped, rises a little and thins out
+  gauntlet's light), the grapnel bites the wall's top (another flash), the line holds taut a moment
+  with a glint running up it, then reels back in; 0.4 s, behind her, climbing with her.
+* venom: on about two rolls and hard landings in five she lets out her poison along her way: puffs
+  one after another over half a second, each blooming from a knot into a round billow (violet,
+  lit from the upper front, its shade and underside toxic green, green glints in it), drifting back
+  behind her the way she is going, rising a little and thinning: one trail of poison behind her
   ("A deadly fragrance").
 * presence: by the start (and where she waits at the end) the line she came down hangs beside
   her, her visor glints now and then, and wisps of venom curl at her feet; leaving, she blows a
@@ -28,12 +31,12 @@ on her tricks, quiet on the run (only, now and then, a kiss).
   venom; coming back, a line drops from above and she comes down it, her visor glinting as she
   arrives.
 
-Reduced motion keeps the kisses (the running ones half as often), the hook, the mine and its
-cloud, and at the start and the goal the kiss, the cloud, the line and the glint; the spectral
-shot is off (the engine takes no snapshots then: its tracer, flash and glint come only with
-them), and so is the haze by the start (the engine draws none).
+Reduced motion keeps the kisses (the running ones half as often), the hook, the venom (half the
+puffs), and at the start and the goal the kiss, the cloud, the line and the glint; the spectral
+shot is off (the engine takes no snapshots then: its aim and shot come only with them), and so is
+the haze by the start (the engine draws none).
 
-`write()` writes fx.json (tricks.py gives the hook, the landing kiss and the mine their chances)
+`write()` writes fx.json (tricks.py gives the hook, the landing kiss and the venom their chances)
 and keeps the variants in boss.json's `effect` in step; `python3 wd_fx.py` does it."""
 import json
 import math
@@ -170,7 +173,7 @@ S['glint5'] = P.rows(star(13, 2, 1, 0), GLINT)
 GLINT_FRAMES = ['glint1', 'glint2', 'glint3', 'glint3', 'glint4', 'glint5']
 
 # ------------------------------------------------------------------------ the spectral shot
-# Widow's Kiss fired as she turns over: drawn for a runner facing right, from the muzzle ahead.
+# Widow's Kiss fired mid-air: drawn for a runner going right, from the muzzle ahead.
 # The tracer of a charged shot, 128 px of it, a white-hot core in a pink glow in a violet haze, the
 # haze and glow tapering off toward its far end; it burns out from the outside in (four frames).
 # The bullet's own streak flies on ahead of it; at the muzzle a flash, mostly forward.
@@ -232,7 +235,106 @@ BEAM_OFFSET = [-(MUZZLE_AHEAD + BW // 2), -2]
 # Noire, teal for Odile, gold for the Comtesse).
 SHOT_COLOURS = ['#ff5aa8', 'accent', 'accent.light']
 SHOT_CHANCE = 0.35
-SHOT_CHAIN = {'count': 3, 'every': 80}
+SHOT_CHAIN = {'count': 3, 'every': 70}
+# The aim: from the trick's start (and a breath more, so that the way she is going is known) to the
+# shot, mid-air in every trick she takes it on (a flip lasts 0.7-0.8 s, a vault 0.5 s).
+AIM_FROM = 60
+SHOT_AT = 330
+
+# ----------------------------------------------------------------------------------- the aim
+# Her scope's reticle, as on her "Scope" spray: a red ring broken at the four quarters, ticks in
+# the gaps, a diamond at its heart. It closes in on a point ahead of her, the way she will fire,
+# locks (the ticks grown into a crosshair) and flashes white as she fires through it.
+RETICLE = {'R': '#ff3048', 'r': '#ff3048a0', 'q': '#ff304860', 'T': '#ff8a9c', 'W': '#ffffff',
+           'P': '#ffc8d4'}
+RS = 27
+
+
+def reticle(r, fade=1.0, lock=False, flash=False):
+    g = blank(RS, RS)
+    c = RS // 2
+    ring = RETICLE['W'] if flash else RETICLE['R']
+    for i in range(720):
+        a = math.radians(i / 2)
+        x, y = round(c + r * math.cos(a)), round(c - r * math.sin(a))
+        # Broken at the quarters.
+        if min(abs(x - c), abs(y - c)) <= max(1, r // 4):
+            continue
+        g[y][x] = ring + alpha(fade)
+    # Ticks in the gaps, pointing in; grown into a crosshair once it locks.
+    inner, outer = (r - 2, r + 5) if lock else (r - 1, r + 1)
+    for d in range(inner, outer + 1):
+        col = RETICLE['P'] if (flash or d <= r) else RETICLE['T']
+        for dx, dy in ((d, 0), (-d, 0), (0, d), (0, -d)):
+            if 0 <= c + dx < RS and 0 <= c + dy < RS:
+                g[c + dy][c + dx] = col + alpha(fade * (1.0 if d <= r + 2 else 0.6))
+    # The heart: a dot, a diamond once locked.
+    g[c][c] = RETICLE['W'] + alpha(fade)
+    if lock:
+        for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            g[c + dy][c + dx] = (RETICLE['W'] if flash else RETICLE['R']) + alpha(fade)
+    return g
+
+
+for _i, (_r, _f) in enumerate(((13, 0.6), (11, 0.8), (9, 0.9), (7, 1.0))):
+    S[f'aim{_i + 1}'] = P.grid(reticle(_r, _f))
+S['lock'] = P.grid(reticle(5, 1.0, lock=True))
+S['lock-fire'] = P.grid(reticle(5, 1.0, lock=True, flash=True))
+S['lock-out'] = P.grid(reticle(6, 0.5, lock=True))
+# The aim in three beats, each taken again from where she is by then (a sniper keeps her mark as
+# she flies): the ring closing in, closing in, locked; it flashes as she fires through it, at
+# SHOT_AT. (delay, frames, ms a frame)
+AIM_BEATS = [(AIM_FROM, ['aim1', 'aim2'], 55), (AIM_FROM + 110, ['aim3', 'aim4'], 50),
+             (SHOT_AT - 60, ['lock', 'lock', 'lock-fire', 'lock-fire', 'lock-out', 'lock-out'], 30)]
+
+# Her charge gathering as she aims (her rifle's scoped shot charges): eight motes of pink light on
+# a ring round her, drawn in, a trail behind each, till they meet at her heart.
+CHARGE = {'W': '#ffffff', 'h': '#ffe6f6', 'p': '#ff6ec0', 'v': '#c45cff'}
+CS = 37
+
+
+def charge(r, turn):
+    g = blank(CS, CS)
+    c = CS // 2
+    if r <= 0:
+        for dx, dy, k in ((0, 0, 'W'), (1, 0, 'h'), (-1, 0, 'h'), (0, 1, 'h'), (0, -1, 'h'), (2, 0, 'p'),
+                          (-2, 0, 'p'), (0, 2, 'p'), (0, -2, 'p')):
+            g[c + dy][c + dx] = CHARGE[k]
+        return g
+    for k in range(8):
+        a = 2 * math.pi * (k / 8 + turn)
+        for j, col in ((0, 'W'), (0.6, 'W'), (1.3, 'h'), (2.4, 'p'), (3.6, 'p'), (4.8, 'v')):
+            rr = r + j
+            x, y = round(c + rr * math.cos(a)), round(c - rr * math.sin(a))
+            if 0 <= x < CS and 0 <= y < CS and g[y][x] is None:
+                g[y][x] = CHARGE[col] + ('' if j < 2 else alpha(0.85 - j * 0.1))
+    return g
+
+
+for _i, (_r, _t) in enumerate(((16, 0.0), (13, 0.02), (10, 0.04), (7, 0.06), (4, 0.08), (0, 0))):
+    S[f'charge{_i + 1}'] = P.grid(charge(_r, _t))
+# The charge in the same three beats.
+CHARGE_BEATS = [(AIM_FROM, ['charge1', 'charge2'], 55), (AIM_FROM + 110, ['charge3', 'charge4'], 50),
+                (SHOT_AT - 60, ['charge5', 'charge5', 'charge6'], 30)]
+
+# As she fires: a ring of the shot's light bursting round the muzzle.
+def burst_ring(r, fade):
+    g = blank(19, 19)
+    c = 9
+    for i in range(360):
+        a = math.radians(i)
+        x, y = round(c + r * math.cos(a)), round(c - r * math.sin(a))
+        g[y][x] = (SHOT['hot'] if r < 5 else SHOT['glow']) + alpha(fade)
+    return g
+
+
+S['ring1'] = P.grid(burst_ring(3, 1.0))
+S['ring2'] = P.grid(burst_ring(5, 0.85))
+S['ring3'] = P.grid(burst_ring(7, 0.6))
+S['ring4'] = P.grid(burst_ring(8.5, 0.35))
+RING_FRAMES = ['ring1', 'ring2', 'ring3', 'ring4']
+# The point she aims at, ahead of her chest on the tracer's line.
+AIM_AHEAD = 62
 
 # --------------------------------------------------------------------------- the grapple
 # Drawn for a runner facing right: the hand at the bottom left, the line up ahead two rows for
@@ -321,13 +423,11 @@ S['hook9'] = P.grid(grapple(5, claw='shut'))
 HOOK_FRAMES = [f'hook{i}' for i in range(1, 10)]
 # Where the sprite's middle is from the hand (+x behind, as offsets go).
 HOOK_OFFSET = [-(GW // 2 - HAND[0]), -(HAND[1] - GH // 2)]
-# The runner's own flight (reference/notes/03-physics.md), so that the line keeps to her hand as
-# she flies: gravity 8800 (261 px/s^2); a run jump's launch 3630 ahead and 4325 up, a tic-tac's
-# 3759 and 4478 (about 172 px/s, 50 degrees up ahead).
-FALL = 261
 # Running up a wall she climbs faster than she went in: the line rises a little faster than that.
 WALL_RISE = 100
-FLIGHT = {'speed': 172, 'angle': 130, 'gravity': FALL, 'inherit': 0}
+# The runner's own gravity (reference/notes/03-physics.md: 8800, 261 px/s^2): what keeps up with
+# her in the air (the reticle, her charge) falls with her.
+FALL = 261
 
 # ------------------------------------------------------------------------- venom: the gas
 # Violet poison in round puffs, each lit from the upper front as a ball (pinkish lilac where the
@@ -394,7 +494,7 @@ def gas(w, h, balls, fade=1.0, sparks=0, seed=1, swirl=0.0):
     return g
 
 
-# The cloud of a mine, 45 x 35: its foot on the bottom row, the mine in the middle of it.
+# The cloud she leaves in (presence), 45 x 35: its foot on the bottom row.
 VW, VH = 45, 35
 VX, VY = 22.5, VH - 0.5
 # Its puffs grown full, (x, height, radius): wide on the ground, billowing up to her hips.
@@ -409,34 +509,8 @@ def cloud(e, thin=0.0):
             for x, y, r in CLOUD]
 
 
-MINE = {'k': '#1e1c26', 'b': '#3c3a48', 'B': '#6c6a7c', 'h': '#a8a6b8', 'c': '#5a46c8', 'C': '#9a86ff',
-        'W': '#ffffff', 'g': '#a894ffb0', 'G': '#e0d8ff90'}
-MINE_DIM = [
-    '..........',
-    '...kbBh...',
-    '..kbcCcB..',
-    '..kbbbbbk.',
-    '.k.k...k.k',
-    'k........k',
-]
-MINE_LIT = [
-    '...gGGg...',
-    '..gkbBhg..',
-    'GgkCWWWCgG',
-    '.gkbbbbbkg',
-    '.k.k...k.k',
-    'k........k',
-]
-
-
-def mine(lit):
-    g = blank(VW, VH)
-    stamp(g, MINE_LIT if lit else MINE_DIM, MINE, (VW - 10) // 2 + 1, VH - 6)
-    return g
-
-
 def pop():
-    """The mine bursting: a white-violet flash, its rays tipped toxic green, over the first knot of gas."""
+    """A burst of venom: a white-violet flash, its rays tipped toxic green, over the first knot of gas."""
     g = gas(VW, VH, cloud(0.0), sparks=1, seed=11)
     cx, cy = VW // 2, VH - 4
     rays = ['#ffffff', '#ffffff', '#ffffffe0', '#f6dcffc0', '#d6a2f6a0', '#7ee0a0a0', '#7ee0a060', '#7ee0a040']
@@ -450,8 +524,6 @@ def pop():
     return g
 
 
-S['mine0'] = P.grid(mine(False))
-S['mine1'] = P.grid(mine(True))
 S['pop'] = P.grid(pop())
 # The cloud: (growth, thinning, opacity), at 12 frames a second.
 CLOUD_SEQ = [(0.15, 0, 1), (0.36, 0, 1), (0.55, 0, 1), (0.7, 0, 1), (0.82, 0, 0.95), (0.9, 0, 0.92),
@@ -461,9 +533,33 @@ for _i, (_e, _t, _f) in enumerate(CLOUD_SEQ):
     S[f'gas{_i + 1}'] = P.grid(gas(VW, VH, cloud(_e, _t), fade=_f, sparks=4 if _i < 9 else 1, seed=_i + 1,
                                    swirl=_i * 0.3))
 GAS_FRAMES = [f'gas{i + 1}' for i in range(len(CLOUD_SEQ))]
-VENOM_FRAMES = ['mine0', 'mine1', 'mine0', 'mine1', 'pop'] + GAS_FRAMES
-# From the feet (on the ground) to the sprite's middle; the mine left a little behind her.
-VENOM_OFFSET = [7, -(VH // 2) + 1]
+
+# Her venom on a roll or a hard landing: puffs let out one after another along her way, each
+# blooming from a knot with a green glint into a round billow, drifting back behind her, rising a
+# little and thinning; overlapping, they make one trail of poison. Two shapes, 23 x 19, mirrored to
+# her way.
+TW, TH = 23, 19
+
+
+def trail(shape, e, fade):
+    if shape == 0:
+        balls = [(11.5, 12.5 - 2.5 * e, 2.4 + 4.6 * e), (7.5 + e, 13.5 - 1.5 * e, 1.6 + 3.6 * e),
+                 (15.5 - 0.5 * e, 11.5 - 3.0 * e, 1.4 + 3.2 * e), (11.0, 9.5 - 4 * e, 1.0 + 2.6 * e)]
+    else:
+        balls = [(11.0, 12.8 - 2.5 * e, 2.2 + 4.2 * e), (15.0, 13.6 - 1.2 * e, 1.8 + 3.8 * e),
+                 (7.5 + 0.5 * e, 11.0 - 3.0 * e, 1.4 + 3.0 * e), (12.5, 9.0 - 3.5 * e, 1.0 + 2.4 * e)]
+    return gas(TW, TH, balls, fade=fade, sparks=2 if e < 0.7 else 1, seed=int(e * 10) + 50 + shape * 7,
+               swirl=e + shape)
+
+
+TRAIL_STEPS = [(0.0, 1.0), (0.25, 1.0), (0.45, 0.95), (0.62, 0.9), (0.76, 0.8), (0.88, 0.62), (1.0, 0.42)]
+TRAIL_SETS = []
+for _s in (0, 1):
+    names = []
+    for _k, (_e, _f) in enumerate(TRAIL_STEPS):
+        S[f'trail{_s}{_k + 1}'] = P.grid(trail(_s, _e, _f))
+        names.append(f'trail{_s}{_k + 1}')
+    TRAIL_SETS.append(names)
 
 
 # A wisp of venom, 13 x 8, curling at her feet by the start (her "perfume").
@@ -543,52 +639,61 @@ EMITTERS = {
         'sprite': {'frames': KISS_FRAMES, 'fps': 5, 'loop': False}, 'face': True, 'max': 2, 'layer': 'front',
         'reduced': 1,
     },
-    # --- grapple: from the gauntlet up ahead, on some wall moves and jumps (tricks.py: chances).
-    # Running up a wall (move 33): the line climbs with her, its claw biting at the wall's top.
+    # --- grapple: only running up a wall (move 33), where it has something to bite: from the
+    # gauntlet up ahead, the line climbs with her, its claw biting at the wall's top (tricks.py: the
+    # chance).
     'grapple': {
         'moves': [33], 'burst': 1, 'anchor': 'hand.far', 'offset': HOOK_OFFSET, 'speed': WALL_RISE,
         'angle': 90, 'inherit': 1, 'life': 420, 'fadeOut': 90, 'face': True,
         'sprite': {'frames': HOOK_FRAMES, 'fps': 22, 'loop': False}, 'max': 1, 'reduced': 1,
     },
-    # Her tic-tac kick off a wall (move 20) and her jumps (18, 19): the line flies with her.
-    'grapple-kick': {
-        'moves': [20], 'burst': 1, 'anchor': 'hand.far', 'offset': HOOK_OFFSET, **FLIGHT, 'life': 420,
-        'fadeOut': 90, 'face': True, 'sprite': {'frames': HOOK_FRAMES, 'fps': 22, 'loop': False}, 'max': 1,
-        'reduced': 1,
+    # --- venom: on some rolls and hard landings (moves 24 and 25: on the ground; a plain landing
+    # starts in the air), puffs let out one after another over half a second from where her hips
+    # are by then (low in a roll, at her hips as she runs on), all along her way; each drifts
+    # back behind her (the way she is going, not the way she faces), rises a little, blooms and
+    # thins (tricks.py: the chance).
+    'venom': {
+        'enter': ['roll'], 'moves': [24, 25], 'burst': [10, 12], 'delay': [0, 450], 'toward': 'motion',
+        'anchor': 'hips', 'offset': [4, -1], 'jitter': [3, 1], 'speed': [10, 22], 'angle': [5, 30],
+        'inherit': 0, 'drag': 1.2, 'gravity': -6, 'life': [1100, 1500], 'fadeIn': 50, 'fadeOut': 650,
+        'face': True, 'sprite': {'frames': [], 'sets': TRAIL_SETS, 'fps': 5.5, 'loop': False}, 'max': 16,
+        'reduced': 0.5,
     },
-    'grapple-jump': {
-        'moves': [18, 19], 'burst': 1, 'anchor': 'hand.far', 'offset': HOOK_OFFSET, **FLIGHT, 'life': 420,
-        'fadeOut': 90, 'face': True, 'sprite': {'frames': HOOK_FRAMES, 'fps': 22, 'loop': False}, 'max': 1,
-        'reduced': 1,
-    },
-    # --- venom: the mine left behind on some rolls and hard landings (moves 24 and 25: on the ground;
-    # a plain landing starts in the air); it stays where it fell, blinks, pops and its cloud thins out.
-    'mine': {
-        'enter': ['roll'], 'moves': [24, 25], 'burst': 1, 'anchor': 'feet', 'offset': VENOM_OFFSET,
-        'speed': 0, 'inherit': 0, 'life': 1600, 'fadeOut': 260, 'face': True,
-        'sprite': {'frames': VENOM_FRAMES, 'fps': 12, 'loop': False}, 'max': 2, 'reduced': 1,
-    },
-    # --- the spectral shot: these come only with her copies (the snapshot's `burst`).
-    # The tracer, left in the air where she fired, burning out.
-    'shot-beam': {
-        'burst': 1, 'anchor': 'chest', 'offset': BEAM_OFFSET, 'speed': 0, 'inherit': 0, 'life': 300,
-        'fadeOut': 120, 'face': True, 'sprite': {'frames': BEAM_FRAMES, 'fps': 13, 'loop': False},
-    },
-    # The bullet streaking on ahead.
-    'shot-bolt': {
-        'burst': 1, 'anchor': 'chest', 'offset': [-(MUZZLE_AHEAD + 12), -2], 'speed': 900, 'angle': 180,
-        'inherit': 0, 'life': 170, 'fadeOut': 60, 'face': True, 'sprite': {'frames': ['bolt']}, 'blend': 'add',
-    },
-    # The muzzle's flash, keeping up with her a moment.
-    'shot-flash': {
-        'burst': 1, 'anchor': 'chest', 'offset': [-(MUZZLE_AHEAD + 4), -2], 'speed': 0, 'inherit': 1, 'life': 140,
-        'fadeOut': 40, 'face': True, 'sprite': {'frames': ['muzzle1', 'muzzle2'], 'fps': 18, 'loop': False},
-        'blend': 'add', 'layer': 'front',
-    },
-    # Her visor's lens glints as she takes aim.
+    # --- the spectral shot: these come only with her copies (the snapshot's `burst`), all sided
+    # with the way she is going (off a wall, the way she leaps from it), in two beats: the aim (its
+    # emitters are made below, from AIM_BEATS and CHARGE_BEATS), then the shot.
+    # The shot, when the aim is done (mid-air): her visor's lens glints, the muzzle flashes in a
+    # ring of light and a spray of sparks, the tracer hangs where she fired and burns out, the
+    # bullet streaks on; the recoil copies come with the snapshot's own delay.
     'shot-glint': {
-        'burst': 1, 'anchor': 'head', 'offset': [-3, -3], 'speed': 0, 'inherit': 0.5, 'life': 300,
-        'fadeOut': 60, 'sprite': {'frames': GLINT_FRAMES, 'fps': 20, 'loop': False}, 'layer': 'front',
+        'burst': 1, 'delay': SHOT_AT, 'anchor': 'head', 'offset': [-3, -3], 'speed': 0, 'inherit': 0.5,
+        'life': 300, 'fadeOut': 60, 'sprite': {'frames': GLINT_FRAMES, 'fps': 20, 'loop': False},
+        'layer': 'front',
+    },
+    'shot-flash': {
+        'burst': 1, 'delay': SHOT_AT, 'toward': 'motion', 'anchor': 'chest', 'offset': [-(MUZZLE_AHEAD + 4), -2],
+        'speed': 0, 'inherit': 1, 'life': 140, 'fadeOut': 40, 'face': True,
+        'sprite': {'frames': ['muzzle1', 'muzzle2'], 'fps': 18, 'loop': False}, 'blend': 'add', 'layer': 'front',
+    },
+    'shot-ring': {
+        'burst': 1, 'delay': SHOT_AT, 'toward': 'motion', 'anchor': 'chest', 'offset': [-MUZZLE_AHEAD, -2],
+        'speed': 0, 'inherit': 0.5, 'life': 180, 'fadeOut': 60, 'face': True,
+        'sprite': {'frames': RING_FRAMES, 'fps': 22, 'loop': False}, 'blend': 'add',
+    },
+    'shot-sparks': {
+        'burst': [9, 12], 'delay': SHOT_AT, 'toward': 'motion', 'anchor': 'chest', 'offset': [-MUZZLE_AHEAD, -2],
+        'speed': [70, 190], 'angle': [158, 202], 'inherit': 0.4, 'drag': 4, 'life': [140, 300], 'fadeOut': 120,
+        'rect': {'size': 1, 'colors': [SHOT['core'], SHOT['hot'], SHOT['glow']]}, 'blend': 'add',
+    },
+    'shot-beam': {
+        'burst': 1, 'delay': SHOT_AT, 'toward': 'motion', 'anchor': 'chest', 'offset': BEAM_OFFSET, 'speed': 0,
+        'inherit': 0, 'life': 320, 'fadeOut': 130, 'face': True,
+        'sprite': {'frames': BEAM_FRAMES, 'fps': 13, 'loop': False},
+    },
+    'shot-bolt': {
+        'burst': 1, 'delay': SHOT_AT, 'toward': 'motion', 'anchor': 'chest', 'offset': [-(MUZZLE_AHEAD + 12), -2],
+        'speed': 900, 'angle': 180, 'inherit': 0, 'life': 170, 'fadeOut': 60, 'face': True,
+        'sprite': {'frames': ['bolt']}, 'blend': 'add',
     },
     # --- presence
     # By the start: the line she came down, hanging beside her (always there: three copies of it on
@@ -644,6 +749,21 @@ EMITTERS = {
     },
 }
 
+# The aim's beats (see AIM_BEATS): each a particle of its own, from where she is by then, keeping
+# up with her (her speed, her gravity) till the next.
+for _n, _beats, _extra in (('aim-reticle', AIM_BEATS, {'offset': [-AIM_AHEAD, -2], 'layer': 'front'}),
+                           ('aim-charge', CHARGE_BEATS, {'offset': [0, -2], 'blend': 'add'})):
+    for _k, (_d, _frames, _ms) in enumerate(_beats):
+        EMITTERS[f'{_n}{_k + 1}'] = {
+            'burst': 1, 'delay': _d, 'toward': 'motion', 'anchor': 'chest', 'speed': 0, 'inherit': 1,
+            # Each beat lasts a step longer than its frames, so that no gap opens between them.
+            'gravity': FALL, 'life': _ms * len(_frames) + (30 if _k < len(_beats) - 1 else 0),
+            'fadeIn': 40 if _k == 0 else 0,
+            'fadeOut': 60 if _k == len(_beats) - 1 else 0, 'face': True,
+            'sprite': {'frames': _frames, 'fps': round(1000 / _ms, 2), 'loop': False}, **_extra,
+        }
+AIM_EMITTERS = [f'{n}{k + 1}' for n in ('aim-reticle', 'aim-charge') for k in range(3)]
+
 fx = {
     'palette': P.pal,
     'sprites': S,
@@ -654,15 +774,16 @@ fx = {
         # visor's glint, three copies of her left behind by the recoil).
         'kiss': {
             'emitters': ['kiss', 'kiss-land'],
-            'afterimage': {'mode': 'snapshot', 'enter': ['flip', 'vault'], 'chance': SHOT_CHANCE, 'repeat': SHOT_CHAIN,
-                           'colors': SHOT_COLOURS, 'textured': True, 'scanlines': True,
-                           'burst': ['shot-beam', 'shot-bolt', 'shot-flash', 'shot-glint'], 'life': 400,
-                           'drift': [60, 0], 'alpha': 0.75},
+            'afterimage': {'mode': 'snapshot', 'enter': ['flip', 'vault'], 'chance': SHOT_CHANCE, 'delay': SHOT_AT,
+                           'repeat': SHOT_CHAIN, 'colors': SHOT_COLOURS, 'textured': True, 'scanlines': True,
+                           'burst': AIM_EMITTERS + ['shot-glint', 'shot-flash', 'shot-ring', 'shot-sparks',
+                                                    'shot-beam', 'shot-bolt'],
+                           'life': 420, 'drift': [0, -8], 'alpha': 0.75},
         },
         # The grappling hook on some wall moves and jumps.
-        'grapple': {'emitters': ['grapple', 'grapple-kick', 'grapple-jump']},
+        'grapple': {'emitters': ['grapple']},
         # A Venom Mine on some rolls and hard landings.
-        'venom': {'emitters': ['mine']},
+        'venom': {'emitters': ['venom']},
     },
     'presence': {'idle': ['idle-line', 'idle-glint', 'idle-wisp'],
                  'vanish': ['vanish-gas', 'vanish-puff', 'vanish-kiss'],
