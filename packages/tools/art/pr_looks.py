@@ -1,4 +1,4 @@
-"""Pierre's looks, after the photos: the boyish round face of the orange-haired runner (1), the
+"""Pyotr's looks, after the photos: the boyish round face of the orange-haired runner (1), the
 hair gone light brown; an ordinary build in roomy clothes. The swordsman (navy V-neck tee, black
 joggers, knitted slippers, a longsword on the back), the fencer (sleeveless top, two training
 swords), the rebel (an oversized maroon tee with a sprayed A, hair wet and dishevelled), the
@@ -164,7 +164,7 @@ def make(id_, rules, plan, head, chest, attachments, accent='#a96bff'):
             for name, rows in attachments.items()
         }
     look['palette'] = pal.pal
-    path = write_look('pierre', look)
+    path = write_look('pyotr', look)
     rotate(path, [25] + [f'{n}@57' for n in attachments])
     preview(id_)
     return pal
@@ -198,4 +198,4 @@ pal = make('undercover', [
 ], {'chest': 1, 'upper-arm': 1, 'forearm': 1, 'torso': 1}, wig, 'shirt',
     {'katana': sword_rows(24, 20, 'z', 'x', 'Z')})
 sheet('pr-heads.png', [(pal.rows(p), pal.pal) for p in (Pic.orig(1), brown(), wet(), wig(), brown(True), wig(True))], scale=9)
-print('pierre looks written')
+print('pyotr looks written')

@@ -1,4 +1,4 @@
-"""Pierre: four of his looks (pr_looks.py) and his effect (code: glyphs and ideas). His other
+"""Pyotr Radko: four of his looks (pr_looks.py) and his effect (code: glyphs and ideas). His other
 looks (mechanic, kate, evening, birthday) and boss.json are not drawn here."""
 from lookgen import *
 from tricks import tricks
@@ -64,5 +64,5 @@ fx = {
     'variants': {'code': {'emitters': ['code', 'code-burst', 'bulb']}},
     'presence': {'idle': ['idle'], 'vanish': ['burst', 'idea'], 'appear': ['burst', 'idea']},
 }
-write_json(BOSSES + '/pierre/fx.json', tricks(fx, 'pierre'))
-print('pierre written')
+write_json(BOSSES + '/pyotr/fx.json', tricks(fx, 'pyotr'))
+print('pyotr written')

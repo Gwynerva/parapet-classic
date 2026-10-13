@@ -11,7 +11,7 @@ these Python scripts write their JSON.
   legs), relit as metal, a fitted suit or cloth with stripes, painted over (a belt, a bat on the
   chest).
 - **Effects** are particle sprites and emitters, with each boss's flourish thrown on some of its
-  tricks (Vera's glass, Pierre's idea, Rewind's photos).
+  tricks (Vera's glass, Pyotr's idea, Rewind's photos).
 - **Worlds** are the character screen's dioramas: scenery drawn piece by piece, lit from the
   sun's side, far things hazy.
 
@@ -68,14 +68,14 @@ diff -r /tmp/bosses packages/content/bosses
 - `tricks.py` — the bosses' flourishes on tricks, merged into an effect before it is written.
 - `stages.py`, `stages2.py` — the worlds, one function per boss; `scene.py` draws their scenery
   (lit blobs, foliage, trees, pines, palms, buildings, skylines, ground strips) and `room.py` the
-  author's room, Pierre's world.
+  author's room, Pyotr's world.
 - `gridpng.py` — pictures as a magnified PNG.
 
 ## The scripts
 
 | Script            | Writes (in `bosses/<boss>/`)                                                                                                                                                          |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pierre.py`       | `fx.json`; looks `swordsman`, `fencer`, `rebel`, `undercover` (`pr_looks.py`)                                                                                                         |
+| `pyotr.py`        | `fx.json`; looks `swordsman`, `fencer`, `rebel`, `undercover` (`pr_looks.py`)                                                                                                         |
 | `rewind.py`       | `fx.json`; looks `hoodie`, `beanie` (`rw_looks.py`); `looks` in `boss.json`                                                                                                           |
 | `grove.py`        | `fx.json`; looks `grove-tank`, `grove-green`, `grove-cover` (`gr_looks.py`, `gr_heads.py`, `gr_parts.py`)                                                                             |
 | `vera.py`         | `fx.json` (`vr_fx.py`); looks `vera-tank`, `vera-vest`, `vera-street` (`vr_looks.py`, `vr_heads.py`); `looks` and `effect` in `boss.json`                                             |
@@ -89,5 +89,5 @@ diff -r /tmp/bosses packages/content/bosses
 | `azure.py`        | `fx.json` (`az_fx.py`); looks `scholar`, `broker`, `leather`, `illium` (`az_looks.py`, `az_heads.py`, `az_parts.py`); the whole `boss.json`                                           |
 | `stages.py`       | `stage.json` of every boss, or of the bosses named                                                                                                                                    |
 
-Pierre's looks `mechanic`, `kate`, `evening` and `birthday`, his and Grove's `boss.json`,
+Pyotr's looks `mechanic`, `kate`, `evening` and `birthday`, his and Grove's `boss.json`,
 `bosses.json`, `contests.json` and `theme.json` are written by nothing here.

@@ -117,7 +117,7 @@ const RACE_SHOTS: Shot[] = [
     frame: -1,
     feet: [0.24, 0.86],
     zoom: 2,
-    rival: { boss: 'pierre', outfit: 0, frame: JUMP, ahead: 58, rise: 16 },
+    rival: { boss: 'pyotr', outfit: 0, frame: JUMP, ahead: 58, rise: 16 },
   },
 ];
 /** The link preview: the place under the pennant, then the cards. */
@@ -125,7 +125,7 @@ const OG_SHOTS: Shot[] = [
   { level: 10, mission: 1, at: 3, boss: '', outfit: 0, frame: -1, feet: [0.5, 0.84] },
   { level: 1, mission: 0, at: -1, boss: 'rewind', outfit: 0, frame: -1, feet: [0.5, 0.84] },
   { level: 6, mission: 1, at: 1, boss: 'granger', outfit: 0, frame: VAULT, feet: [0.5, 0.84], shift: [0, 6] },
-  { level: 2, mission: 0, at: -1, boss: 'pierre', outfit: 0, frame: JUMP, feet: [0.5, 0.84], shift: [0, 12] },
+  { level: 2, mission: 0, at: -1, boss: 'pyotr', outfit: 0, frame: JUMP, feet: [0.5, 0.84], shift: [0, 12] },
 ];
 
 const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
@@ -555,7 +555,7 @@ async function main(): Promise<void> {
               level: id,
               mission,
               at,
-              boss: 'pierre',
+              boss: 'pyotr',
               outfit: 0,
               frame: -1,
               feet: [0.5, 0.75],

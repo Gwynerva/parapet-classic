@@ -1,5 +1,5 @@
 """Signature flourishes on tricks: on some flips, vaults, wall moves and rolls (not all: a chance)
-each boss throws its own thing every way: Vera breaks glass, Pierre gets an idea, Rewind's
+each boss throws its own thing every way: Vera breaks glass, Pyotr gets an idea, Rewind's
 photos fly, the knight's armour sparks... Applied to an effects file before it is written."""
 import json
 import sys
@@ -28,7 +28,7 @@ def tricks(fx, boss):
         # Glass breaks off the wall on one kick-off in five. (Her gusts of wind come on a clock of
         # their own, about one flip in two: vr_fx.py.)
         em['kick-glass']['chance'] = 0.2
-    elif boss == 'pierre':
+    elif boss == 'pyotr':
         em['bulb']['perSecond'] = 0.08
         em['idea-trick'] = {**em['idea'], 'enter': TRICKS, 'chance': 0.4, 'layer': 'front'}
         if 'idea-trick' not in v['code']['emitters']:

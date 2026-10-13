@@ -18,7 +18,7 @@ missions of the original: they do not count towards unlocking levels or the Priz
 
 | Level | Boss         | Folder          |
 | ----- | ------------ | --------------- |
-| 1     | Pierre       | `pierre/`       |
+| 1     | Pyotr Radko  | `pyotr/`        |
 | 2     | Rewind       | `rewind/`       |
 | 3     | Grove        | `grove/`        |
 | 4     | Vera         | `vera/`         |
@@ -181,7 +181,7 @@ One particle system draws every boss's effect; only the data differs
 - `emitters` — what a move gives off. `while` (run, air, wall, slide…) emits all along, every
   `every` pixels run or `perSecond`; `enter` (flip, vault, wall, roll, land…) emits a `burst`
   once, with a `chance`: a boss's flourish on some of its tricks, not on every one (Vera's
-  glass, Pierre's idea, Rewind's photos). Then `anchor` (feet, hips, chest, back, neck, head,
+  glass, Pyotr's idea, Rewind's photos). Then `anchor` (feet, hips, chest, back, neck, head,
   hand.near / far, hands, body), `offset` (+x behind), `speed` and `angle` (0 behind), `inherit`,
   `gravity`, `drag`, `life`, `fadeIn` / `fadeOut`, `scale`, `tumble`, `flutter`, `face`,
   `sprite` frames or `rect` pixels, `blend: add`, `layer`, `max`, and `reduced` for players who
