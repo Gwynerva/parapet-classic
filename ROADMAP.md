@@ -164,6 +164,35 @@ instead:
   on the head through resizes and rotations; the record's name field waits to be tapped instead
   of popping the keyboard up.
 
+## 7. Faces of their own (0.4.0)
+
+- **Every boss redrawn** from references of the hero it stands for: a face of its own (lit,
+  shaded, the eyes and mouth readable at the game's size), its own build, outfits and shoes.
+  Rush B is eight soldiers, each with his own head, kit and boots; Five comes as her, him, the
+  kid and the edgerunner.
+- **Two new bosses.** Level 1 is Petra Radko, a master of disguise, and her twin brother (no one
+  has seen them together), four looks each; her effect is a quick change behind porcelain masks.
+  Level 7 is Widow, a sniper, in a world of her own (a château at night): she aims, then fires a
+  spectral shot the way she flies (off a wall, the way she leaps), throws her hook only up a
+  wall, and on a hard landing drops a venom mine that spills poison curling up behind her.
+  Progress and records stay with the level (character numbers follow the level, not the name).
+- **Effects with a meaning.** Each boss's effect plays its hero: a pose sliding back and one or
+  two Polaroids, a respect counter and a tag on the wall, gusts of wind, a hologram chain with a
+  glitch tear, a summon sign and sparks off plate, casings and smoke, a Sandevistan, a colony
+  of bats, crumbling sand, a singularity and a biotic aura. The flourishes come on some tricks
+  only, so they stay a surprise.
+- **Their own words.** The briefings, wins and losses were checked against who the bosses are
+  now, in English and Russian.
+- **Effects as data, further.** A snapshot of the pose on a trick may come with a chance, bring
+  emitters with it, leave a chain of copies taking colours in turn, with scanlines, and come
+  later than its trick; an emitter may play one of several animations per particle
+  (`sprite.sets`), burst after its trigger (`delay`) and side with the way the body is going
+  (`toward: motion`). Reduced motion thins the rare emitters instead of silencing them.
+- **Pictures.** The README's banner and the link previews show the bosses in the middle of
+  their tricks with their effects; `docs/collage.png` has all twelve in their worlds, without
+  the logo (`/dev/art.html`). `/dev/showcase.html` runs a boss's outfit through its world or
+  any move, every flourish on demand.
+
 ## Next
 
 - **Contests** re-searched with longer budgets to remove the last frame-perfect moments.
