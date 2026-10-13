@@ -330,9 +330,11 @@ def write(look_id, accent, head, parts, effect=None, ribbons=None, attachments=N
         return json.load(f)
 
 
-def trunk(rows, legend, mats, key, light_dir=LIGHT, over=(), w0=None, h0=None, ox=None, oy=0):
+def trunk(rows, legend, mats, key, light_dir=LIGHT, over=(), w0=None, h0=None, ox=None, oy=0, below=0):
     """A chest or torso picture from region rows (legend: character → material), lit, aligned
-    on the man's box (w0 x h0, its corner at (ox, oy)): by default centred across."""
+    on the man's box (w0 x h0, its corner at (ox, oy)): by default centred across. `below`: the
+    volume goes on that many rows under the picture's last one (a vest plate that carries on into
+    the torso's picture): its lower edge is neither outlined nor shaded as the form's end."""
     p = Part(key, [[ch != '.' for ch in r] for r in rows])
     p.text(rows, legend)
     ow, oh = {57: (10, 12), 61: (11, 13), 34: (9, 16), 38: (11, 16), 53: (8, 14), 49: (8, 14), 62: (8, 7),
@@ -341,7 +343,12 @@ def trunk(rows, legend, mats, key, light_dir=LIGHT, over=(), w0=None, h0=None, o
     if ox is None:
         ox = (p.w - w0) // 2
     aligned(p, ox, oy, w0, h0)
-    return p.render(mats, light_dir, over=over)
+    shape = None
+    if below:
+        last = max(y for y in range(p.h) if any(p.mask[y]))
+        shape = [r[:] for r in p.mask[:last + 1]] + [p.mask[last][:] for _ in range(below)]
+        shape += [[False] * p.w for _ in range(p.h - len(shape))]
+    return p.render(mats, light_dir, over=over, shape=shape)
 
 
 def leg(rows, legend, mats, key, far_side=False, ox=None, oy=0):
@@ -351,11 +358,11 @@ def leg(rows, legend, mats, key, far_side=False, ox=None, oy=0):
 
 
 
-def piece(rows, mats, key, light_dir=LIGHT, over=(), ox=None, oy=0, far_side=False):
+def piece(rows, mats, key, light_dir=LIGHT, over=(), ox=None, oy=0, far_side=False, below=0):
     """A picture from rows of material letters (keys of `mats`)."""
     legend = {ch: ch for r in rows for ch in r if ch != '.'}
     ms = {k: far(v) for k, v in mats.items()} if far_side else mats
-    return trunk(rows, legend, ms, key, light_dir, over, ox=ox, oy=oy)
+    return trunk(rows, legend, ms, key, light_dir, over, ox=ox, oy=oy, below=below)
 
 
 def legmap(pid, plan, fill, shaft=0, shaft_ch='o', blouse=0, edits=()):
@@ -427,9 +434,11 @@ def phoenix():
         'c': Mat(['#4c669a', '#354b7c', '#26385f', '#1b2747', '#121a31'], '#0a0f1e', '#1b2747'),
         's': skin_of(H.TAN),
         'g': leather(),
-        'v': Mat(['#626b76', '#454d57', '#30363e', '#22272c', '#15181c'], '#08090b', '#30363e'),
-        'p': Mat(['#707a86', '#525b66', '#3c434c', '#2a2f35', '#1a1d21'], '#08090b', '#3c434c'),
-        'x': Mat(['#2a2f35', '#22272c', '#1a1d21', '#121417', '#0c0d0f'], '#060607', '#1a1d21'),
+        # The vest and its pouches lit as a stiff plate (flat), the edge toward the light a step up.
+        'v': Mat(['#626b76', '#454d57', '#30363e', '#22272c', '#15181c'], '#08090b', '#454d57', flat=PLATE_FLAT),
+        'p': Mat(['#707a86', '#525b66', '#3c434c', '#2a2f35', '#1a1d21'], '#08090b', '#707a86', bias=-0.5,
+                 flat=PLATE_FLAT),
+        'x': Mat(['#2a2f35', '#22272c', '#1a1d21', '#121417', '#0c0d0f'], '#060607', '#1a1d21', flat=PLATE_FLAT),
         'b': leather(['#4c4c4c', '#333333', '#232323', '#171717', '#0e0e0e']),
         'k': Mat(STEEL, '#22262a', STEEL[2]),
         't': Mat(['#e4ecee', '#c8d4d8', '#a6b6bc', '#82949c', '#5e6e76'], '#2a3236', '#82949c',
@@ -449,15 +458,15 @@ def phoenix():
         '....nnnn....',  # 1
         '...cnnnnc...',  # 2  the tee's collar
         '...cccccc...',  # 3
-        '..vvcccvvv..',  # 4  the vest's armhole, the tee's shoulder in it
-        '..vvvccvvvv.',  # 5
-        '.vvvvvvvvppv',  # 6  pouches on the front
-        'vvvvvvvvvppv',  # 7
-        'vvvvvvvvvxxv',  # 8
-        'vvvvvvvvvppv',  # 9
-        '.vvvvvvvvppv',  # 10
-        '.vvvvvvvvvv.',  # 11
-    ], m, 57, over=over)
+        '..vvcccvvvv.',  # 4  the vest's armhole, the tee's shoulder in it; its top square in front
+        '..vvvccvvvv.',  # 5  its front one straight line down, its back flat
+        '.vvvvvvvvvv.',  # 6
+        '.vvvvvvvvvv.',  # 7
+        '.vvvvvvvvvv.',  # 8
+        '.vvvvvvppxp.',  # 9  magazine pouches low on the front, a dark gap between
+        '.vvvvvvppxp.',  # 10
+        '.vvvvvvppxp.',  # 11
+    ], m, 57, over=over, below=4)
     parts['61'] = piece([
         #0123456789ABC
         '....nnnn.....',  # 0
@@ -467,22 +476,22 @@ def phoenix():
         'vvvcccccvvvv.',  # 4
         'vvvvcccvvvvv.',  # 5
         'vvvvvcvvvvvv.',  # 6
-        'vppvvxvvvppv.',  # 7  pouches either side of the front
-        'vppvvxvvvppvv',  # 8
-        'vvvvvxvvvvvvv',  # 9
+        'vvvvvxvvvvvv.',  # 7  the vest's closure down the front
+        'vvvvvxvvvvvvv',  # 8
+        'vppvvxvvvppvv',  # 9  pouches either side, low on the front
         'vppvvxvvvppvv',  # 10
         'vppvvxvvvppvv',  # 11
         '.vvvvvvvvvvv.',  # 12
-    ], m, 61, over=over)
+    ], m, 61, over=over, below=4)
     parts['34'] = piece([
         #0123456789A
-        '...vvvvvv..',  # 0  the vest's lower part
-        '..vvvvvvvp.',  # 1
-        '..vvvvvvvp.',  # 2
-        '..vvvvvvvv.',  # 3
-        '..vvvvvvvv.',  # 4
-        '..vvvvvvvv.',  # 5
-        '..vvvvvvv..',  # 6
+        '...vvvvvvv.',  # 0  the vest's lower part, its front straight on from the chest's
+        '..vvvvvvvvv',  # 1
+        '..vvvvvppxp',  # 2  the pouches' lower ends
+        '..vvvvvppxp',  # 3
+        '..vvvvvppxp',  # 4
+        '..vvvvvvvvv',  # 5
+        '..vvvvvvvvv',  # 6  its straight hem just over the belt
         '..bbbbbbbk.',  # 7  the belt, its buckle in front
         '..bbbbbbbk.',  # 8
         '.ttttttttt.',  # 9  the tiger stripe
@@ -745,8 +754,9 @@ def guerrilla():
         'n': skin_of(H.RUDDY),
         's': skin_of(H.RUDDY),
         'a': Mat(['#8c8456', '#6e683e', '#58532f', '#403c20', '#2a2814'], '#14120a', '#403c20'),
-        'v': Mat(['#5a5a54', '#3c3c38', '#2a2a26', '#1c1c1a', '#111110'], '#060605', '#2a2a26'),
-        'p': Mat(['#66665e', '#4a4a44', '#363632', '#262624', '#181816'], '#060605', '#363632'),
+        # The vest's stiff canvas lit nearly flat, its edge toward the light a step up.
+        'v': Mat(['#5a5a54', '#3c3c38', '#2a2a26', '#1c1c1a', '#111110'], '#060605', '#3c3c38', flat=0.6),
+        'p': Mat(['#66665e', '#4a4a44', '#363632', '#262624', '#181816'], '#060605', '#4a4a44', flat=0.6),
         'b': leather(['#4a3e30', '#342a20', '#241c16', '#18120e', '#0e0a08']),
         'k': Mat(['#d8d2b8', '#b0a888', '#867e60', '#5e5840', '#3c3828'], '#1c1a10', '#867e60'),
         'w': Mat(['#c4b27c', '#ab9764', '#927e50', '#72603a', '#524428'], '#2a2214', '#72603a', pattern=WOODLAND),
@@ -768,15 +778,15 @@ def guerrilla():
         '....nnnn....',  # 1
         '...annnna...',  # 2  the tank top's straps
         '..aaannaaa..',  # 3
-        '.vvaaaaavvva',  # 4  the sleeveless vest, open in front
-        '.vvvaaavvvva',  # 5
-        'vvvvvvvvvvpa',  # 6
-        'vvvvvvvvvvpa',  # 7
-        'vvvvvvvvvvva',  # 8
-        'vvvvvvvvvvpa',  # 9
-        '.vvvvvvvvvpa',  # 10
-        '.vvvvvvvvvva',  # 11
-    ], m, 57, over=over)
+        '.vvaaaaavva.',  # 4  the sleeveless vest, open in front: the tank top's front one
+        '.vvvaaavvva.',  # 5  straight line down, the vest's back flat
+        '.vvvvvvvvva.',  # 6
+        '.vvvvvvvvva.',  # 7
+        '.vvvvvvvvva.',  # 8
+        '.vvvvvvvppa.',  # 9  its pockets low on the front
+        '.vvvvvvvppa.',  # 10
+        '.vvvvvvvppa.',  # 11
+    ], m, 57, over=over, below=4)
     parts['61'] = piece([
         #0123456789ABC
         '....nnnn.....',  # 0
@@ -796,12 +806,12 @@ def guerrilla():
     parts['34'] = piece([
         #0123456789A
         '...vvvvvva.',  # 0
-        '..vvvvvvvpa',  # 1
-        '..vvvvvvvpa',  # 2
+        '..vvvvvvppa',  # 1  the pockets' lower ends
+        '..vvvvvvppa',  # 2
         '..vvvvvvvva',  # 3
         '..vvvvvvvva',  # 4
         '..vvvvvvvva',  # 5
-        '..vvvvvvvaa',  # 6
+        '..vvvvvvvaa',  # 6  the vest's hem, the tank top's front straight on
         '..bbbbbbbk.',  # 7  the belt
         '..bbbbbbbk.',  # 8
         '.wwwwwwwww.',  # 9  woodland camouflage
@@ -853,6 +863,10 @@ def guerrilla():
 
 # ============================================================== the counter-terrorists' kit
 # A uniform with long sleeves under a tactical vest, a belt; the variants are each soldier's.
+# The vest is a stiff plate carrier, not a curve: in profile (57, then the torso 34 under it) its
+# front is one straight line from the square top corner under the strap down to its hem over the
+# belt, its back flat too; magazine pouches (a step lighter, a dark gap X between them) sit low on
+# the front. Its materials are lit flat (`blacks`): an even face, a lit edge, a shaded edge.
 # fmt: off
 CT_57 = [
     #0123456789AB
@@ -860,14 +874,14 @@ CT_57 = [
     '....nnnn....',  # 1
     '...cnnnnc...',  # 2  the uniform's collar
     '...cccccc...',  # 3
-    '..vvcccvvv..',  # 4  the vest
-    '..vvvvvvvvv.',  # 5
-    '.vvvvvvvvppv',  # 6  pouches on the front
-    'vvvvvvvvvppv',  # 7
-    'vvvvvvvvvvvv',  # 8
-    'vvvvvvvvvppv',  # 9
-    '.vvvvvvvvppv',  # 10
-    '.vvvvvvvvvv.',  # 11
+    '..vvcccvvvv.',  # 4  the plate carrier: its top edge, square at the front
+    '.vvvvvvvvvv.',  # 5  its front one straight line down
+    '.vvvvvvvvvv.',  # 6
+    '.vvvvvvvvvv.',  # 7
+    '.vvvvvvvvvv.',  # 8
+    '.vvvvvvppXp.',  # 9  magazine pouches low on the front
+    '.vvvvvvppXp.',  # 10
+    '.vvvvvvppXp.',  # 11
 ]
 CT_61 = [
     #0123456789ABC
@@ -878,22 +892,22 @@ CT_61 = [
     'vvvccnnccvvv.',  # 4
     'vvvvcccvvvvv.',  # 5
     'vvvvvcvvvvvv.',  # 6
-    'vppvvvvvvppv.',  # 7
-    'vppvvvvvvppvv',  # 8
-    'vvvvvvvvvvvvv',  # 9
-    'vppvvvvvvppvv',  # 10
-    'vppvvvvvvppvv',  # 11
+    'vvvvvvvvvvvv.',  # 7
+    'vvvvvvvvvvvvv',  # 8
+    'vvppXppXppvvv',  # 9  magazine pouches low across the front, dark gaps between them
+    'vvppXppXppvvv',  # 10
+    'vvppXppXppvvv',  # 11
     '.vvvvvvvvvvv.',  # 12
 ]
 CT_34 = [
     #0123456789A
-    '...vvvvvv..',  # 0
-    '..vvvvvvvp.',  # 1
-    '..vvvvvvvp.',  # 2
-    '..vvvvvvvv.',  # 3
-    '..vvvvvvvv.',  # 4
-    '..vvvvvvvv.',  # 5
-    '..vvvvvvv..',  # 6
+    '...vvvvvvv.',  # 0  the plate on down from the chest (under it but where he bends)
+    '..vvvvvvvvv',  # 1  its front straight on
+    '..vvvvvppXp',  # 2  the pouches' lower ends
+    '..vvvvvppXp',  # 3
+    '..vvvvvppXp',  # 4
+    '..vvvvvvvvv',  # 5
+    '..vvvvvvvvv',  # 6  its straight hem just over the belt
     '..bbbbbbbk.',  # 7
     '..bbbbbbbk.',  # 8
     '.ttttttttt.',  # 9
@@ -938,9 +952,10 @@ def ct(look_id, accent, head, m, boot_kind, boot_letters, e57=None, e61=None, e3
     """A counter-terrorist: his vest's trunk (the kit's, or rows of his own `r57`...) with his
     edits, his legs and boots."""
     over = [('v', 'c'), ('p', 'v'), ('b', 't'), ('v', 'b'), ('t', 'o')] + list(over)
+    m = {'X': gap(m['v']), **m}
     parts = {
-        '57': piece(edited(r57, e57 or {}), m, 57, over=over),
-        '61': piece(edited(r61, e61 or {}), m, 61, over=over),
+        '57': piece(edited(r57, e57 or {}), m, 57, over=over, below=4),
+        '61': piece(edited(r61, e61 or {}), m, 61, over=over, below=4),
         '34': piece(edited(r34, e34 or {}), m, 34, over=over),
         '38': piece(edited(r38, e38 or {}), m, 38, over=over),
     }
@@ -957,11 +972,21 @@ def ct(look_id, accent, head, m, boot_kind, boot_letters, e57=None, e61=None, e3
 BOOT_LETTERS = {'U': 'o', 'T': 'o', 'L': 'l', 'S': 'S', 's': 'S', 'H': 'S', 'B': 't', 'W': 'o', 'G': 'G'}
 
 
+PLATE_FLAT = 0.7
+
+
 def blacks(vest, pouch=None):
-    """A vest's black (a hue of its own) and its pouches a step lighter."""
+    """A vest's black (a hue of its own) and its pouches a step lighter, lit as a stiff plate:
+    `flat` evens the face out, the edge toward the light a step lighter than the face."""
     v = ramp5(vest, 1, hi=0.3, li=0.13, sh=-0.3, dp=-0.55, sat=0.02, hue=0.0)
     p = ramp5(mix(vest, '#ffffff', 0.08), 1, hi=0.3, li=0.13, sh=-0.3, dp=-0.55, sat=0.02, hue=0.0)
-    return Mat(v, mix(v[4], '#000000', 0.5), v[2]), Mat(p, mix(p[4], '#000000', 0.5), p[2])
+    return (Mat(v, mix(v[4], '#000000', 0.5), v[1], flat=PLATE_FLAT),
+            Mat(p, mix(p[4], '#000000', 0.5), p[0], bias=-1.0, flat=PLATE_FLAT))
+
+
+def gap(m):
+    """The dark gap between two pouches: the vest's material in its deepest shade."""
+    return Mat(m.ramp, m.edge, m.edge, bias=2.0, flat=m.flat)
 
 
 # ===================================================================================== SEAL
@@ -1018,13 +1043,13 @@ def gsg9():
         '....nnnn....',  # 1
         '...vnnnnv...',  # 2  the high collar
         '...vvccvv...',  # 3
-        '..vvvccvvv..',  # 4
-        '..vvvvvvvvv.',  # 5
-        '.vvvvvvvvvvv',  # 6
-        'wwwvvvvvvvvv',  # 7  POLIZEI across the back
-        'vvvvvvvvvvvv',  # 8
-        'vvvvvvvvvvvv',  # 9
-        '.vvvvvvvvvvv',  # 10
+        '..vvvccvvvv.',  # 4  the plate's top, square in front
+        '.vvvvvvvvvv.',  # 5  its front one straight line down, its back flat
+        '.vvvvvvvvvv.',  # 6
+        '.wwwvvvvvvv.',  # 7  POLIZEI across the back
+        '.vvvvvvvvvv.',  # 8
+        '.vvvvvvvvvv.',  # 9
+        '.vvvvvvvvvv.',  # 10
         '.vvvvvvvvvv.',  # 11
     ]
     r61 = [
@@ -1044,7 +1069,7 @@ def gsg9():
         '.vvvvvvvvvvv.',  # 12
     ]
     # fmt: on
-    r34 = edited(CT_34, {(9, 1): 'v', (9, 2): 'v'})
+    r34 = [r.replace('p', 'v').replace('X', 'v') for r in CT_34]
     r38 = edited(CT_38, {(x, y): 'v' for y in (3, 4) for x in (3, 4, 8, 9)})
     knee = legmap(62, 0, 'q', edits=[(6, 0, 't'), (7, 0, 't'), (4, 1, 't'), (5, 1, 't')])
     parts = ct('gsg9', '#4e5888', H.GSG9, m, 'gloss', BOOT_LETTERS, knee=knee, r57=r57, r61=r61, r34=r34, r38=r38)
@@ -1083,14 +1108,14 @@ def sas():
         '....nnnn....',  # 1
         '..rcnnnnc...',  # 2  the radio
         '..rcccccc...',  # 3
-        '.rrRccsvvv..',  # 4  the bag's strap over the shoulder
-        '.rrrvvvsvvv.',  # 5
-        '.vvvvvvvsppv',  # 6
-        'vvvvvvvvvspv',  # 7
-        'vvvvvvvvvpsv',  # 8
-        'vvvvvvvvvpps',  # 9
-        '.vvvvvvvvppv',  # 10
-        '.vvvvvvvvvv.',  # 11
+        '.rrRccsvvvv.',  # 4  the bag's strap over the shoulder; the plate's top square in front
+        '.rrrvvvsvvv.',  # 5  its front one straight line down, its back flat
+        '.vvvvvvvsvv.',  # 6
+        '.vvvvvvvvsv.',  # 7
+        '.vvvvvvvvvs.',  # 8  the strap round the front edge
+        '.vvvvvvppXp.',  # 9  magazine pouches low on the front
+        '.vvvvvvppXp.',  # 10
+        '.vvvvvvppXp.',  # 11
     ]
     r61 = [
         #0123456789ABC
@@ -1101,22 +1126,22 @@ def sas():
         'vsvccnnccvvv.',  # 4  the strap from his right shoulder
         'vvsvcccvvvvv.',  # 5
         'vvvsvcvvvvvv.',  # 6
-        'vpppsppppvvv.',  # 7  magazine pouches across, the strap over them
-        'vpppvspppvvvv',  # 8
-        'vvvvvvsvvvvvv',  # 9
-        'vvvvvvvsvvvvv',  # 10
+        'vvvvsvvvvvvv.',  # 7
+        'vvvvvsvvvvvvv',  # 8
+        'vpppXpsppXppv',  # 9  magazine pouches low across the front, the strap over them
+        'vpppXppspXppv',  # 10
         'vvvvvvvvsvvvv',  # 11
         '.vvvvvvvvsvv.',  # 12
     ]
     r34 = [
         #0123456789A
-        '...vvvvvv..',  # 0
-        '..vvvvvvsp.',  # 1
-        '..vvvvvsvp.',  # 2
-        '..vvvvsvvv.',  # 3
-        '..vvvsvvvv.',  # 4
-        '..vvsvvvvv.',  # 5
-        '..vvhhhvv..',  # 6  the gas-mask bag on his hip
+        '...vvvvvvv.',  # 0  the plate on down from the chest, its front straight on
+        '..vvvvvvvvs',  # 1  the strap back from the front to the bag
+        '..vvvvvppsp',  # 2  the pouches' lower ends
+        '..vvvvvpsXp',  # 3
+        '..vvvvvsvvv',  # 4
+        '..vvvvsvvvv',  # 5
+        '..vvhhhvvvv',  # 6  the gas-mask bag on his hip; the plate's straight hem
         '..bhHHHhbk.',  # 7  its flap
         '..bhhhhhbk.',  # 8
         '.thhhhhttt.',  # 9
@@ -1173,19 +1198,19 @@ def gign():
         'G': leather(['#4c4c4e', '#303032', '#202022', '#161617', '#0d0d0e']),
     }
     # The vest laced up the back.
-    lace57 = {(0, 6): 'L', (1, 7): 'L', (0, 8): 'L', (1, 9): 'L', (1, 10): 'L'}
-    lace34 = {(2, 1): 'L', (3, 2): 'L', (2, 3): 'L'}
-    # A shorter vest: the uniform shows between it and the belt.
+    lace57 = {(1, 6): 'L', (2, 7): 'L', (1, 8): 'L', (2, 9): 'L', (1, 10): 'L'}
+    lace34 = {(2, 1): 'L', (3, 2): 'L', (2, 3): 'L', (3, 4): 'L'}
+    # A shorter vest: a strip of the uniform shows between its straight hem and the belt.
     # fmt: off
     r34 = [
         #0123456789A
-        '...vvvvvv..',  # 0
-        '..vvvvvvvp.',  # 1
-        '..vvvvvvvp.',  # 2
-        '..vvvvvvvv.',  # 3  the vest's lower edge
-        '..cccccccc.',  # 4  the uniform under it
-        '..cccccccc.',  # 5
-        '..ccccccc..',  # 6
+        '...vvvvvvv.',  # 0
+        '..vvvvvvvvv',  # 1  the plate's front straight on from the chest's
+        '..vvvvvppXp',  # 2  the pouches' lower ends
+        '..vvvvvppXp',  # 3
+        '..vvvvvvvvv',  # 4
+        '..vvvvvvvvv',  # 5  its straight hem
+        '..ccccccc..',  # 6  the uniform under it
         '..bbbbbbbk.',  # 7  the belt
         '..bbbbbbbk.',  # 8
         '.ttttttttt.',  # 9
@@ -1202,9 +1227,9 @@ def gign():
         '..vvvvvvvvv.',  # 1
         '..vppvvvppv.',  # 2  its pockets
         '..vppvvvppv.',  # 3
-        '..vvvvvvvvv.',  # 4  its lower edge
-        '..ccccccccc.',  # 5  the uniform under it
-        '..ccccccccc.',  # 6
+        '..vvvvvvvvv.',  # 4
+        '..vvvvvvvvv.',  # 5  its straight hem
+        '..ccccccccc.',  # 6  the uniform under it
         '..bbbbkkbbb.',  # 7
         '..bbbbkkbbb.',  # 8
         '.ttttttttttt',  # 9
