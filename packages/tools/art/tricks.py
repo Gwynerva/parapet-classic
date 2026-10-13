@@ -25,11 +25,8 @@ def tricks(fx, boss):
     em = fx['emitters']
     v = fx['variants']
     if boss == 'vera':
-        # Her red route crumbles into triangles on about a third of the landings she comes down
-        # into from a trick (move 23, the crouch after DOWN in the air), the edge she lands on
-        # lights up red on one landing in ten; glass breaks off the wall on one kick-off in five.
-        em['crumble']['chance'] = 0.35
-        em['edge']['chance'] = 0.1
+        # Glass breaks off the wall on one kick-off in five. (Her gusts of wind come on a clock of
+        # their own, about one flip in two: vr_fx.py.)
         em['kick-glass']['chance'] = 0.2
     elif boss == 'pierre':
         em['bulb']['perSecond'] = 0.08

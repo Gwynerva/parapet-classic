@@ -3,5 +3,5 @@
   "color": "#e5332a",
   "gender": "female",
   "looks": ["vera-tank", "vera-vest", "vera-street"],
-  "effect": ["vision", "glass"]
+  "effect": ["gust", "glass"]
 }
