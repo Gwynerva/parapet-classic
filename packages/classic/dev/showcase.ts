@@ -67,11 +67,14 @@ interface Options {
   seed: number;
 }
 
-/** Every chance emitter of an effect firing every time. */
+/** Every chance emitter (and snapshot) of an effect firing every time. */
 function forced(file: FxFile): FxFile {
   const copy = JSON.parse(JSON.stringify(file)) as FxFile;
   for (const em of Object.values(copy.emitters ?? {})) {
     if (em.chance !== undefined) em.chance = 1;
+  }
+  for (const v of Object.values(copy.variants ?? {})) {
+    if (v.afterimage?.chance !== undefined) v.afterimage.chance = 1;
   }
   return copy;
 }
