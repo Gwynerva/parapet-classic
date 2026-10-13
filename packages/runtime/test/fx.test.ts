@@ -57,6 +57,7 @@ describe('effects data', () => {
       variants: {
         flags: { emitters: ['missing'] },
         sprint: { afterimage: { mode: 'snapshot', chance: 0.3, burst: ['gone'] } },
+        dodge: { afterimage: { mode: 'snapshot', repeat: { count: 9, every: 60 } } },
       },
     };
     const text = fxProblems(bad).join('\n');
@@ -67,6 +68,7 @@ describe('effects data', () => {
     expect(text).toMatch(/life is not a number/);
     expect(text).toMatch(/emitter "missing" does not exist/);
     expect(text).toMatch(/variant sprint afterimage: emitter "gone" does not exist/);
+    expect(text).toMatch(/variant dodge afterimage: repeat needs a count of 1-6/);
   });
 
   it('compiles sprites and colours for an accent', () => {

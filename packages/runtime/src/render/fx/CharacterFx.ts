@@ -69,7 +69,7 @@ const RUSH_STEPS = [
   { back: 2, alpha: 0.36 },
   { back: 1, alpha: 0.45 },
 ] as const;
-const MAX_SNAPSHOTS = 6;
+const MAX_SNAPSHOTS = 8;
 /** Milliseconds of game clock per simulation step. */
 const STEP_MS = 30;
 
@@ -77,6 +77,8 @@ interface Snapshot {
   pose: CharacterPose;
   clock: number;
   age: number;
+  /** Its place in its trick's chain (0 first): the colour it takes. */
+  index: number;
 }
 
 interface Entry {
@@ -91,6 +93,8 @@ interface Entry {
   emitters: CompiledEmitter[];
   afterimage: FxAfterimage | null;
   snapshots: Snapshot[];
+  /** A snapshot chain under way: copies still to take, when the next is due, its place. */
+  chain: { left: number; next: number; index: number } | null;
   ribbons: { ribbon: Ribbon; anchor: FxAnchor; front: boolean }[];
   rand: () => number;
   clock: number;
@@ -155,6 +159,7 @@ export class CharacterFx {
       emitters,
       afterimage: variants.find((v) => v.afterimage)?.afterimage ?? null,
       snapshots: [],
+      chain: null,
       ribbons: ribbonSpecs.map(({ spec, color }) => ({
         ribbon: new Ribbon(spec, color),
         anchor: spec.anchor,
@@ -204,9 +209,17 @@ export class CharacterFx {
         let bits = 0;
         for (const t of a.enter ?? ['roll', 'flip']) bits |= triggerBit(t);
         if ((m.entered & bits) !== 0 && (a.chance === undefined || e.rand() < a.chance)) {
-          e.snapshots.push({ pose: { ...pose }, clock: e.clock, age: 0 });
-          if (e.snapshots.length > MAX_SNAPSHOTS) e.snapshots.shift();
+          this.snap(e, pose, 0);
           if (a.burst) this.burstWith(e, pose, m, a.burst);
+          const r = a.repeat;
+          e.chain =
+            r && r.count > 1 ? { left: r.count - 1, next: e.clock + r.every, index: 1 } : null;
+        } else if (e.chain && a.repeat && e.clock >= e.chain.next) {
+          // The rest of the chain, as the trick goes on (the chance was taken by its first).
+          const { left, next, index } = e.chain;
+          this.snap(e, pose, index);
+          e.chain =
+            left > 1 ? { left: left - 1, next: next + a.repeat.every, index: index + 1 } : null;
         }
       }
     }
@@ -338,6 +351,12 @@ export class CharacterFx {
     }
   }
 
+  /** A snapshot of the pose this step, the `index`-th of its chain. */
+  private snap(e: Entry, pose: CharacterPose, index: number): void {
+    e.snapshots.push({ pose: { ...pose }, clock: e.clock, age: 0, index });
+    if (e.snapshots.length > MAX_SNAPSHOTS) e.snapshots.shift();
+  }
+
   /** A burst of the named emitters on a body this step (what a snapshot brings with it). */
   private burstWith(e: Entry, pose: CharacterPose, m: MotionStep, names: readonly string[]): void {
     const fx = e.style.fx;
@@ -462,21 +481,33 @@ export class CharacterFx {
       if (e.snapshots.length === 0) return;
       const life = a.life ?? 450;
       const [dx, dy] = a.drift ?? [0, -10];
-      ctx.save();
+      // With scanlines the copies are drawn on a layer of their own, then dimmed row by row.
+      const layer = a.scanlines ? this.ensureLayer(view) : null;
+      const lctx = layer?.getContext('2d') ?? null;
+      let target = ctx;
+      if (layer && lctx) {
+        lctx.clearRect(0, 0, layer.width, layer.height);
+        target = lctx;
+      }
+      target.save();
       for (const s of e.snapshots) {
         const k = 1 - s.age / life;
-        const color = this.pickColour(a, e, 0, nowMs);
+        const color = this.pickColour(a, e, s.index, nowMs);
         const scene = this.echo.scene(color, a.textured ?? false, e.style.source);
-        ctx.globalAlpha = (a.alpha ?? 0.55) * k;
+        target.globalAlpha = (a.alpha ?? 0.55) * k;
         const behind = s.pose.flipX ? 1 : -1;
         const pose = {
           ...s.pose,
           x: s.pose.x + dx * behind * UNITS * (s.age / 1000),
           y: s.pose.y + dy * UNITS * (s.age / 1000),
         };
-        drawCulled(ctx, scene, view, pose, cam, e.style.swap(s.clock));
+        drawCulled(target, scene, view, pose, cam, e.style.swap(s.clock));
       }
-      ctx.restore();
+      target.restore();
+      if (layer && lctx) {
+        applyScanlines(lctx, layer.width, layer.height, nowMs);
+        ctx.drawImage(layer, 0, 0);
+      }
       return;
     }
     const when = a.while ?? 'running';

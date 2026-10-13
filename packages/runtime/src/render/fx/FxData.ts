@@ -115,8 +115,10 @@ export interface FxAfterimage {
   steps?: { back: number; alpha: number }[];
   /** Silhouettes keep the sprites' shading (`textured`) or are flat. */
   textured?: boolean;
+  /** Dim every few rows, rolling: a hologram (trail and snapshot alike). */
   scanlines?: boolean;
-  /** `accent`, `rainbow` (one hue per afterimage, turning) or colours. */
+  /** `accent`, `rainbow` (one hue per afterimage, turning) or colours (a snapshot chain's copies
+   * take them in turn). */
   colors?: 'accent' | 'rainbow' | string[];
   /** Trail: when it shows. */
   while?: 'running' | 'fast' | 'always';
@@ -126,6 +128,8 @@ export interface FxAfterimage {
   chance?: number;
   /** Snapshot: emitters bursting with it, and only when it comes (the sand it crumbles into). */
   burst?: string[];
+  /** Snapshot: a chain from one trick, `count` copies in all, one every `every` ms as it goes on. */
+  repeat?: { count: number; every: number };
   /** Snapshot: how long it lasts and how it drifts (px/s). */
   life?: number;
   drift?: readonly [number, number];
@@ -161,6 +165,9 @@ function rangeOk(r: Range | undefined): boolean {
 }
 
 /** What is wrong with an effects file, or nothing. */
+/** The most copies one trick's snapshot chain may take. */
+export const MAX_CHAIN = 6;
+
 export function fxProblems(fx: FxFile): string[] {
   const out: string[] = [];
   const palette = fx.palette ?? {};
@@ -228,6 +235,10 @@ export function fxProblems(fx: FxFile): string[] {
     names('ribbons', v.ribbons, `variant ${name}`);
     const a = v.afterimage;
     names('emitters', a?.burst, `variant ${name} afterimage`);
+    const r = a?.repeat;
+    if (r && !(Number.isInteger(r.count) && r.count >= 1 && r.count <= MAX_CHAIN && r.every > 0)) {
+      out.push(`variant ${name} afterimage: repeat needs a count of 1-${MAX_CHAIN} and every > 0`);
+    }
     if (a && Array.isArray(a.colors)) {
       for (const c of a.colors) if (!colour(c)) out.push(`variant ${name}: colour "${c}"`);
     }
