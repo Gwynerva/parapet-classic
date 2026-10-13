@@ -25,7 +25,12 @@ def tricks(fx, boss):
     em = fx['emitters']
     v = fx['variants']
     if boss == 'vera':
-        em['rare-glass'] = every_way(em['rare-glass'], 0.3, [5, 8], [40, 90])
+        # Her red route crumbles into triangles on about a third of the landings she comes down
+        # into from a trick (move 23, the crouch after DOWN in the air), the edge she lands on
+        # lights up red on one landing in ten; glass breaks off the wall on one kick-off in five.
+        em['crumble']['chance'] = 0.35
+        em['edge']['chance'] = 0.1
+        em['kick-glass']['chance'] = 0.2
     elif boss == 'pierre':
         em['bulb']['perSecond'] = 0.08
         em['idea-trick'] = {**em['idea'], 'enter': TRICKS, 'chance': 0.4, 'layer': 'front'}
