@@ -73,21 +73,21 @@ diff -r /tmp/bosses packages/content/bosses
 
 ## The scripts
 
-| Script            | Writes (in `bosses/<boss>/`)                                                                           |
-| ----------------- | ------------------------------------------------------------------------------------------------------ |
-| `pierre.py`       | `fx.json`; looks `swordsman`, `fencer`, `rebel`, `undercover` (`pr_looks.py`)                          |
-| `rewind.py`       | `fx.json`; looks `hoodie`, `beanie` (`rw_looks.py`); `looks` in `boss.json`                            |
-| `grove.py`        | `fx.json`; look `grove-tank` (`gr_looks.py`)                                                           |
-| `vera.py`         | `fx.json`; looks `vera-tank`, `vera-vest`, `vera-hood` (`vr_looks.py`); `looks` in `boss.json`         |
-| `b2.py`           | `fx.json`; look `android` (`b2_looks.py`); `looks` in `boss.json`                                      |
-| `sir_nobody.py`   | `fx.json`; looks `plate`, `dark-knight`; `looks` in `boss.json`                                        |
-| `granger.py`      | `fx.json`; looks `classic`, `pink`, `silver` (`gn_looks.py`); `looks` in `boss.json`                   |
-| `rush_b.py`       | `fx.json`; its eight looks (`rb_looks.py`); `looks` in `boss.json`                                     |
-| `five.py`         | `fx.json`; looks `five-her`, `five-him` (`fv_looks.py`); `looks` in `boss.json`                        |
-| `flittermouse.py` | `fx.json`; looks `armored`, `future`; `looks` in `boss.json`                                           |
-| `shahzada.py`     | `fx.json`; looks `sands`, `warrior`, `wanderer`, `dark-prince` (`sh_looks.py`); `looks` in `boss.json` |
-| `azure.py`        | `fx.json`; looks `scholar`, `broker`, `leather`, `twilight`; the whole `boss.json`                     |
-| `stages.py`       | `stage.json` of every boss, or of the bosses named                                                     |
+| Script            | Writes (in `bosses/<boss>/`)                                                                                      |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `pierre.py`       | `fx.json`; looks `swordsman`, `fencer`, `rebel`, `undercover` (`pr_looks.py`)                                     |
+| `rewind.py`       | `fx.json`; looks `hoodie`, `beanie` (`rw_looks.py`); `looks` in `boss.json`                                       |
+| `grove.py`        | `fx.json`; look `grove-tank` (`gr_looks.py`)                                                                      |
+| `vera.py`         | `fx.json`; looks `vera-tank`, `vera-vest`, `vera-hood` (`vr_looks.py`); `looks` in `boss.json`                    |
+| `b2.py`           | `fx.json`; look `android` (`b2_looks.py`); `looks` in `boss.json`                                                 |
+| `sir_nobody.py`   | `fx.json`; looks `plate`, `dark-knight`; `looks` in `boss.json`                                                   |
+| `granger.py`      | `fx.json`; looks `classic`, `pink`, `silver` (`gn_looks.py`); `looks` in `boss.json`                              |
+| `rush_b.py`       | `fx.json`; its eight looks (`rb_looks.py`); `looks` in `boss.json`                                                |
+| `five.py`         | `fx.json`; looks `five-her`, `five-him` (`fv_looks.py`); `looks` in `boss.json`                                   |
+| `flittermouse.py` | `fx.json` (`fm_fx.py`); looks `asylum`, `armored`, `future` (`fm_heads.py`, `fm_body.py`); `looks` in `boss.json` |
+| `shahzada.py`     | `fx.json`; looks `sands`, `warrior`, `wanderer`, `dark-prince` (`sh_looks.py`); `looks` in `boss.json`            |
+| `azure.py`        | `fx.json`; looks `scholar`, `broker`, `leather`, `twilight`; the whole `boss.json`                                |
+| `stages.py`       | `stage.json` of every boss, or of the bosses named                                                                |
 
 B-2's sword is not drawn here: `b2_looks.py` takes it from her current `android.json`. Pierre's
 looks `mechanic`, `kate`, `evening` and `birthday`, his and Grove's `boss.json`, `bosses.json`,

@@ -44,7 +44,8 @@ def tricks(fx, boss):
     elif boss == 'five':
         em['tear']['chance'] = 0.5
     elif boss == 'flittermouse':
-        em['swarm'] = every_way(em['swarm'], 0.45)
+        # A batarang on about a third of the flips and vaults, ahead from the near hand.
+        em['batarang'] = {**em['batarang'], 'enter': ['flip', 'vault'], 'chance': 0.35}
     elif boss == 'granger':
         em['blink']['chance'] = 0.6
     elif boss == 'rush-b':
