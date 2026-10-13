@@ -1,20 +1,22 @@
 """Vera's heads, drawn from scratch as pixel art (no original head under them): Faith Connors of
 Mirror's Edge (2008) and Mirror's Edge Catalyst (2016).
 
-* The face: light warm skin, a heart-shaped face with high cheekbones and a small pointed chin,
-  almond eyes in heavy black liner flicked back at the outer corner, dark brown irises, a small
-  straight nose, full natural lips; her runner tattoo, black, under her RIGHT eye only: the liner
-  of the lower lid drawn back and a spike pointing down to the cheekbone.
+* The face: light warm skin, a heart-shaped face with soft round cheeks and a small pointed chin,
+  almond eyes of the same size under a black upper liner that runs a pixel past the outer corner
+  (the flick), dark brown irises, a nose of one shade and a lit tip, small rose lips (the darker
+  line, a lighter lower lip), a touch of blush; her runner tattoo, black, under her RIGHT eye only:
+  a thin spike pointing down to the cheekbone, a pixel below the eye so the eyes stay even.
 * Mirror's Edge (`me1`): a smooth blue-black bob to the jaw, the ears hidden, the ends flicked
   out, and the straight blunt fringe at the brows that juts over the forehead like a visor.
 * Catalyst (`cat`): the asymmetric A-line, short at the nape and long at the front, the fringe
   from a parting on her left swept down over her right eye.
 
 One light for the cast, from the upper front: the crown's blue sheen band and the fringe's front
-lit, the back of the head, the nape and under the fringe dark; the fringe's shade across the
-brows, the far cheek, the nose's side and underside, the lip's underside and the jaw in shade, the
-cheekbone and the nose's tip lit. Skin in five tones that warm toward red in the shadow and toward
-yellow in the light, a dark outline only in the shade, a warm lit edge where the light meets it.
+lit, the back of the head, the nape and under the fringe dark; the fringe's soft shade on the
+upper lids, the far cheek a tone darker, the nose's side and the chin's underside in shade, the
+near cheek and the nose's tip lit. Skin in soft, low-contrast tones that warm toward red in the
+shadow and toward yellow in the light; the outline a warm dark skin tone, never black, and nothing
+dark on the cheeks or the jaw.
 
 The profile `25` faces right on Blaise's 16 x 17 box; the look tool turns it into 26-28. `29` is
 the face turned to us (3/4, facing right, the near side on the left). Each comes in two: her
@@ -31,10 +33,16 @@ SKIN = {'W': '#fff2d8', 'S': '#f8d2b0', 's': '#e8a585', 't': '#c97461', 'T': '#9
 # Blue-black hair: sheen, light, mid-light, mid, dark, deep, outline.
 HAIR = {'y': '#a4c0e6', 'Y': '#5f7eac', 'H': '#384f78', 'h': '#243354', 'm': '#172138', 'd': '#0d1322',
         'k': '#05070e'}
-# Liner and lashes, eye white (lit, shaded), iris, the tattoo, lips (light, line, highlight).
-FACE = {'p': '#140d18', 'w': '#f2e6e0', 'v': '#c9aeb0', 'i': '#5a2a26', 'x': '#1c1024', 'L': '#cc6f7c',
-        'l': '#8a3c4e', 'r': '#eaa096'}
+# Liner and lashes, eye white (lit, shaded), iris, the tattoo, lips (rose, the mouth's line, the
+# lower lip's light), a touch of blush on the cheek.
+FACE = {'p': '#140d18', 'w': '#fcf6f2', 'v': '#c9aeb0', 'i': '#5a2a26', 'x': '#22142c', 'L': '#d4707e',
+        'l': '#9a4458', 'r': '#f2aaa2', 'B': '#f09a90'}
 LEG = {**SKIN, **HAIR, **FACE}
+
+# The face, the same in every picture: the eyes on rows 8-9 (the upper lash line, then the white
+# and the iris), even in size, the liner running a pixel past the outer corner (the flick); the
+# nose a shade and a lit tip; the small rose mouth on row 13 (12 in profile); the jaw curving in to
+# a small pointed chin; the outline a warm dark skin tone, never black.
 
 # fmt: off
 # Mirror's Edge, the profile facing right (her right side: the tattoo).
@@ -47,16 +55,16 @@ ME1_25 = [
     '.kdmYYHHHHHHYHhk',  # 4
     'kdmhHHhhhhhhhYHk',  # 5
     'kdhhdHhmmhhmhmhk',  # 6
-    'kdmhdHhdTtttsSs.',  # 7
-    'kdmhdhhdtsppppS.',  # 8
-    'kdhmdhhdtsSwipS.',  # 9
-    'kdhmdhmdtsxxSWWe',  # 10
-    'kdmmdmmdtsSxSSt.',  # 11
-    'kdmmdmmdTtsSSlL.',  # 12
-    'kddmddmKTtssSL..',  # 13
-    '.kkdk.kk.KtsSt..',  # 14
-    '...k.....KttT...',  # 15
-    '........KTtK....',  # 16
+    'kdmhdHhdtssSSSs.',  # 7
+    'kdmhdhhdtsSpppS.',  # 8
+    'kdhmdhhdtsSSwiS.',  # 9
+    'kdhmdhmdtsSxSSSe',  # 10
+    'kdmmdmmdtsSxBSs.',  # 11
+    'kdmmdmmdtsSSSlL.',  # 12
+    'kddmddmktsSSsr..',  # 13
+    '.kkdk.kk.TtsSs..',  # 14
+    '...k.....TttT...',  # 15
+    '........TttT....',  # 16
 ]
 # Mirror's Edge, the 3/4 face turned right, her right eye near (the tattoo under it).
 ME1_29 = [
@@ -68,16 +76,16 @@ ME1_29 = [
     'kdmYYHHHHHHHHhdk',  # 4
     'kdhHHhhhhhhhYhmk',  # 5
     'kdhhdmhhmhhmhmdk',  # 6
-    'kdhdTttsssttTddk',  # 7
-    'kdhdpppSsspppdmk',  # 8
-    'kdhdpwiSsSwiptmk',  # 9
-    'kdhdxxWSWtsSstmk',  # 10
-    'kdmdtxSSStssTdmk',  # 11
-    'kdmdKtSSllstTdmk',  # 12
-    '.kddkTtsLtstKdk.',  # 13
-    '.k.k.KtSssTK.k..',  # 14
-    '.....KTttTK.....',  # 15
-    '......KTTK......',  # 16
+    'kdhdtssSSSsstddk',  # 7
+    'kdhdpppSSpppsdmk',  # 8
+    'kdhdSwiSSwiStdmk',  # 9
+    'kdhdSSSSsSSstdmk',  # 10
+    'kdhdsxBStWSBtdmk',  # 11
+    'kdmdsxSSSSstddmk',  # 12
+    '.kddksSLlLstkdk.',  # 13
+    '.k.k..TsrsT..k..',  # 14
+    '.......TsT......',  # 15
+    '......TttT......',  # 16
 ]
 
 # Catalyst, the profile facing right (her right side): the fringe from the parting on her left
@@ -92,16 +100,16 @@ CAT_25R = [
     '.kdmYYHHHHYyYHk.',  # 4
     'kdmhHHhhhHYYHhhk',  # 5
     'kdmhHhhhHYYhhdSe',  # 6
-    'kdmhdhhHYYhdTsS.',  # 7
-    'kdmhdhHYhhdpppS.',  # 8
-    'kdmhdhYhhdtwipS.',  # 9
-    'kdmmdHhhdtsxSSWe',  # 10
-    '.kdmdhhdTtsxSSt.',  # 11
-    '..kkdhmdTtsSSlL.',  # 12
-    '....kdhdKtsSSL..',  # 13
-    '.....kdmKKtsSt..',  # 14
-    '......kk.KttT...',  # 15
-    '........KTtK....',  # 16
+    'kdmhdhhHYYhdtsS.',  # 7
+    'kdmhdhHYhhhdppS.',  # 8
+    'kdmhdhYhhdtSwiS.',  # 9
+    'kdmmdHhhdtsxSSSe',  # 10
+    '.kdmdhhdtsSxBSs.',  # 11
+    '..kkdhmdtsSSSlL.',  # 12
+    '....kdhdtsSSsr..',  # 13
+    '.....kdmkTtsSs..',  # 14
+    '......kk.TttT...',  # 15
+    '........TttT....',  # 16
 ]
 # Her left side: the parting, the hair swept back from the forehead (bare under it), the eye clear.
 CAT_25L = [
@@ -111,18 +119,18 @@ CAT_25L = [
     '..kdmhhHYyYHhk..',  # 2
     '.kdmhHYyyYYHHk..',  # 3
     '.kdmYYHHHHHhdtk.',  # 4
-    'kdmhHHhhhhhdtSSe',  # 5
-    'kdmhHhhhhhdTtsSe',  # 6
-    'kdmhdhhhhdTtssS.',  # 7
-    'kdmhdhhhdtppppS.',  # 8
-    'kdmhdhhhdtSwipS.',  # 9
-    'kdmmdhhhdtsSSWWe',  # 10
-    '.kdmdhhmdtsSSSt.',  # 11
-    '..kkdhmdTtsSSlL.',  # 12
-    '....kdhdKtsSSL..',  # 13
-    '.....kdmKKtsSt..',  # 14
-    '......kk.KttT...',  # 15
-    '........KTtK....',  # 16
+    'kdmhHHhhhhhdsSSe',  # 5
+    'kdmhHhhhhhdtsSSe',  # 6
+    'kdmhdhhhhdtssSS.',  # 7
+    'kdmhdhhhdtspppS.',  # 8
+    'kdmhdhhhdtSSwiS.',  # 9
+    'kdmmdhhhdtsWSSSe',  # 10
+    '.kdmdhhmdtsBSSs.',  # 11
+    '..kkdhmdtsSSSlL.',  # 12
+    '....kdhdtsSSsr..',  # 13
+    '.....kdmkTtsSs..',  # 14
+    '......kk.TttT...',  # 15
+    '........TttT....',  # 16
 ]
 # The 3/4 face, her right eye near: the fringe from the parting on the far side swept down over
 # the near eye's outer corner, the far temple bare, the near lock long past the jaw.
@@ -132,22 +140,23 @@ CAT_29R = [
     '..kkdmhhhHhkk...',  # 1
     '.kdmhhHHYyYHhk..',  # 2
     '.kmhHYyyyYYHdk..',  # 3
-    'kdmYYHHHHHHdTtk.',  # 4
-    'kdhHHhhhhHYdtsdk',  # 5
-    'kdhHYYhhHYhdtstk',  # 6
-    'kdhdHYYHhdTtssdk',  # 7
-    'kdhhHYdTsspppthk',  # 8
-    'kdhHdwiSsSwiptmk',  # 9
-    'kdhdxxWSWtsSstmk',  # 10
-    'kdmdtxSSStssTdmk',  # 11
-    'kdmdKtSSllstTdk.',  # 12
-    '.kddkTtsLtstKk..',  # 13
-    '..kdkKtSssTK....',  # 14
-    '...kkKTttTK.....',  # 15
-    '......KTTK......',  # 16
+    'kdmYYHHHHHHdtsk.',  # 4
+    'kdhHHhhhhHYdsSdk',  # 5
+    'kdhHYYhhHYhdsSsk',  # 6
+    'kdhdHYYHhdtsSsdk',  # 7
+    'kdhHYdpSSpppsdmk',  # 8
+    'kdhHdwiSSwiStdmk',  # 9
+    'kdhdSSSSsSSstdmk',  # 10
+    'kdhdsxBStWSBtdmk',  # 11
+    'kdmdsxSSSSstdk..',  # 12
+    '.kddksSLlLstk...',  # 13
+    '..kdk.TsrsT.....',  # 14
+    '...kk..TsT......',  # 15
+    '......TttT......',  # 16
 ]
-# Seen mirrored (her left eye near): the parting on the near side, the fringe swept over the far
-# eye, her right, the tattoo under it.
+# Seen mirrored (her left eye near): the parting on the near side, the temple bare under it, the
+# fringe swept over the outer corner of the far eye, her right, the tattoo under it, the far lock
+# long past the jaw.
 CAT_29L = [
     # 0123456789012345
     '....kkkkkkk.....',  # 0
@@ -157,27 +166,27 @@ CAT_29L = [
     '.ktdhHHHHHHYYhdk',  # 4
     'kdtSdhhhhhHYYhdk',  # 5
     'kdtSsdhhhHYYhhdk',  # 6
-    'kdTtsTdHHYYhhhdk',  # 7
-    'kdtpppSsdYYhhmdk',  # 8
-    'kdtpwiSsSdYhhmdk',  # 9
-    'kdtsSSWSWtdYhmdk',  # 10
-    '.ktsSSSStsdxhhdk',  # 11
-    '.ktKtSSllsKdhmdk',  # 12
-    '..kKTtsLtKkdmdk.',  # 13
-    '...KKtSssTKkdk..',  # 14
-    '....kKTttTKkk...',  # 15
-    '......KTTK......',  # 16
+    'kdtSssdHHYYhhhdk',  # 7
+    'kdtspppSSpdYhhdk',  # 8
+    'kdhdSwiSSwidYhdk',  # 9
+    'kdhdSSSSsSSsdhdk',  # 10
+    'kdhdsSBStWxsdhdk',  # 11
+    'kdmdsSSSSSxtdhdk',  # 12
+    '.kddksSLlLstdhdk',  # 13
+    '.k.k..TsrsTkdk..',  # 14
+    '.......TsT.kk...',  # 15
+    '......TttT......',  # 16
 ]
 # fmt: on
 
-# The tattoo's pixels ('x') in each picture, and where it goes under the far eye of the 3/4 face
-# seen mirrored (her right eye then).
-FAR_TATTOO = [(11, 10), (12, 10), (11, 11)]
+# The tattoo ('x'): a thin spike a pixel under the eye, apart from it so both eyes stay the same
+# size. Where it goes under the far eye when the 3/4 face is seen mirrored (her right eye far).
+FAR_TATTOO = [(10, 11), (10, 12)]
 
-# The profile's faces, as edits of its eye (the liner row 8, the eye row 9, x 9-13) and mouth:
+# The profile's faces, as edits of its eye (the lash line on row 8, the eye on row 9) and mouth:
 # the eyes shut (76), half shut (77), screwed up with the mouth open (78), wide (79).
 FACES = (76, 77, 78, 79)
-EYE = range(9, 14)
+EYE = range(11, 14)
 
 
 def with_face(rows, face):
@@ -185,27 +194,27 @@ def with_face(rows, face):
     top, eye = rows[8], rows[9]
     for x in EYE:
         a, b = top[x], eye[x]
-        if face == 76:  # shut: the lid down, the lashes a line
-            if a == 'p' and x > 10:
+        if face == 76:  # shut: the lid down, the lashes a line where the eye was
+            if a == 'p':
                 top[x] = 's'
             if b in 'wi':
                 eye[x] = 'p'
         elif face == 77:  # half shut: the lid over the white
             if b == 'w':
                 eye[x] = 'p'
-        elif face == 78:  # screwed up
-            if a == 'p' and x > 11:
-                top[x] = 'T'
+        elif face == 78:  # screwed up: the lid creased, the eye a line
+            if a == 'p':
+                top[x] = 't'
             if b in 'wi':
                 eye[x] = 'p'
-        elif face == 79:  # wide: the white round a small pupil
-            if b == 'i':
-                eye[x] = 'p'
-            if b == 'p' and x == 13:
+        elif face == 79:  # wide: the white round a small dark pupil
+            if b == 'S' and a == 'p':
                 eye[x] = 'w'
+            elif b == 'i':
+                eye[x] = 'p'
     if face == 78:  # the mouth open
         rows[12][13] = 'K'
-        rows[13][13] = 'l'
+        rows[13][13] = 'L'
     return [''.join(r) for r in rows]
 
 
@@ -215,10 +224,10 @@ def tattoo_side(rows, front, side):
     one (seen mirrored) facing left."""
     rows = [list(r) for r in rows]
     if side == 'left':
-        for y, r in enumerate(rows):
+        for r in rows:
             for x, c in enumerate(r):
                 if c == 'x':
-                    r[x] = 'p' if y == 10 and front else ('s' if r[x - 1] in 'tT' else 'S')
+                    r[x] = 'S'
         if front:
             for x, y in FAR_TATTOO:
                 rows[y][x] = 'x'
