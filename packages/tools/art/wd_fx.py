@@ -20,23 +20,25 @@ on her tricks, quiet on the run (only, now and then, a kiss).
   leading stretch a pink tracer, a flash at the wrist in the outfit's colour (`accent`, the
   gauntlet's light), the grapnel bites the wall's top (another flash), the line holds taut a moment
   with a glint running up it, then reels back in; 0.4 s, behind her, climbing with her.
-* venom: on about two rolls and hard landings in five she lets out her poison along her way: puffs
-  one after another over half a second, each blooming from a knot into a round billow (violet,
-  lit from the upper front, its shade and underside toxic green, green glints in it), drifting back
-  behind her the way she is going, rising a little and thinning: one trail of poison behind her
-  ("A deadly fragrance").
+* venom: on about two rolls and hard landings in five she drops her Venom Mine just behind her
+  heels (a small dark spider of a device, a violet glow in its belly, a red light on its back): it
+  skids a little, blinks twice and bursts, and its poison spills back along the floor the way she
+  came, fast, braking hard, its front rolling over; tendrils of violet mist rise out of it one after
+  another, lean back and curl over into volutes (a toxic green underside, green glints), then fray
+  and fade where it fell ("A deadly fragrance"). One picture, so the mine and its poison always come
+  together; behind her, never over her.
 * presence: by the start (and where she waits at the end) the line she came down hangs beside
   her, her visor glints now and then, and wisps of venom curl at her feet; leaving, she blows a
   kiss (it stays in the air where her lips were and floats away) and dissolves into a burst of
   venom; coming back, a line drops from above and she comes down it, her visor glinting as she
   arrives.
 
-Reduced motion keeps the kisses (the running ones half as often), the hook, the venom (half the
-puffs), and at the start and the goal the kiss, the cloud, the line and the glint; the spectral
+Reduced motion keeps the kisses (the running ones half as often), the hook, the mine and its spill,
+and at the start and the goal the kiss, the cloud, the line and the glint; the spectral
 shot is off (the engine takes no snapshots then: its aim and shot come only with them), and so is
 the haze by the start (the engine draws none).
 
-`write()` writes fx.json (tricks.py gives the hook, the landing kiss and the venom their chances)
+`write()` writes fx.json (tricks.py gives the hook, the landing kiss and the mine their chances)
 and keeps the variants in boss.json's `effect` in step; `python3 wd_fx.py` does it."""
 import json
 import math
@@ -55,7 +57,9 @@ LIGHT = (0.45, -0.6, 0.65)
 class FxPalette:
     """Palette characters for the effect's colours, given out as pictures need them."""
     POOL = ('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!$%&*=?@^~<>/|;:#()[]{}_-,'
-            + ''.join(chr(c) for c in range(0x3b1, 0x3ca)) + ''.join(chr(c) for c in range(0x430, 0x450)))
+            + ''.join(chr(c) for c in range(0x3b1, 0x3ca)) + ''.join(chr(c) for c in range(0x430, 0x450))
+            + ''.join(chr(c) for c in range(0x391, 0x3aa) if c != 0x3a2) + ''.join(chr(c) for c in range(0x410, 0x430))
+            + ''.join(chr(c) for c in range(0xc0, 0x100) if c not in (0xd7, 0xf7)))
 
     def __init__(self):
         self.pal = {}
@@ -429,8 +433,9 @@ WALL_RISE = 100
 # her in the air (the reticle, her charge) falls with her.
 FALL = 261
 
-# ------------------------------------------------------------------------- venom: the gas
-# Violet poison in round puffs, each lit from the upper front as a ball (pinkish lilac where the
+# ------------------------------------------------------------- venom by the start and leaving
+# Violet poison in round puffs (her presence's: the wisps at her feet, the cloud she leaves in),
+# each lit from the upper front as a ball (pinkish lilac where the
 # light falls, deep blue violet in the shade), see-through, their thin edges ragged; the
 # underside glows toxic green (a bounce light in another hue) and green glints sparkle in it.
 GAS = ['#f6dcff', '#d6a2f6', '#b06ae4', '#8644c6', '#5e2e9c']
@@ -534,32 +539,184 @@ for _i, (_e, _t, _f) in enumerate(CLOUD_SEQ):
                                    swirl=_i * 0.3))
 GAS_FRAMES = [f'gas{i + 1}' for i in range(len(CLOUD_SEQ))]
 
-# Her venom on a roll or a hard landing: puffs let out one after another along her way, each
-# blooming from a knot with a green glint into a round billow, drifting back behind her, rising a
-# little and thinning; overlapping, they make one trail of poison. Two shapes, 23 x 19, mirrored to
-# her way.
-TW, TH = 23, 19
+# ------------------------------------------------------------------- venom: the mine's spill
+# Her Venom Mine on a roll or a hard landing, one picture of 22 frames (all of it in one burst, so
+# the mine and its poison always come together), drawn for a runner going right: the spill runs
+# left, behind her.
+# - The mine (her official one, small): a dark spider of a device on four hooked legs, a violet
+#   glow in its belly, a red light on its back; it lands where she touched down and blinks twice.
+# - It bursts (a white-violet flash) and its poison spills out along the floor, back the way she
+#   came: a low fog racing out, fast, then braking hard, its front rolling over into a volute.
+# - Out of it tendrils rise one after another, lean back and curl over (each unrolls from the
+#   ground up: a swirl opening into a volute), lit from the upper front, a toxic green underside,
+#   green glints in it; the fog creeps on a little.
+# - Then it all frays (in tatters) and fades where it fell, the mine dimming with it.
+# What Vera's wind taught it (vr_fx.py): strokes along curves that draw themselves in windows, a
+# bright head leading them, an edge of another colour under them, tatters as they go; but poison is
+# heavy: it hugs the ground, rises slowly and curls over instead of whipping past.
+SW, SH = 90, 46
+SRC = 78          # the mine's middle
+SGY = SH - 1      # the ground (the mine's feet)
+MIST = {'hi': '#ecc8ff', 'body': '#b06ae6', 'shade': '#7c40c4', 'under': '#6fd496', 'haze': '#b880ec',
+        'head': '#fbeeff'}
+MIST_LIGHT = _unit((0.6, -0.8))
+MINE = {'k': '#16141c', 'b': '#3a3846', 'B': '#4c4a5a', 'h': '#8a889c', 'v': '#6a3ec8', 'V': '#a070ff',
+        'W': '#e8dcff', 'R': '#ff3b3b', 'r': '#6a1a22', 'q': '#ff3b3b70'}
+MINE_ON = ['....qRq....', '...kBhhk...', '..kbBBBhk..', '..kvVWVvk..', '.h.kbbbk.h.', 'b..b...b..b']
+MINE_OFF = ['.....r.....', '...kBhhk...', '..kbBBBhk..', '..kvVVVvk..', '.h.kbbbk.h.', 'b..b...b..b']
 
 
-def trail(shape, e, fade):
-    if shape == 0:
-        balls = [(11.5, 12.5 - 2.5 * e, 2.4 + 4.6 * e), (7.5 + e, 13.5 - 1.5 * e, 1.6 + 3.6 * e),
-                 (15.5 - 0.5 * e, 11.5 - 3.0 * e, 1.4 + 3.2 * e), (11.0, 9.5 - 4 * e, 1.0 + 2.6 * e)]
+def path(x0, y0, theta0, length, turn, power, wobble=0.0, waves=0.0, step=0.25):
+    """Points along a whiplash from (x0, y0): heading theta0 (degrees, 0 right, 90 up), turning by
+    `turn` along it, most of the turn at its end (a volute); `wobble` waves its heading."""
+    pts, x, y = [], x0, y0
+    n = max(2, int(length / step))
+    for i in range(n + 1):
+        u = i / n
+        th = math.radians(theta0 + turn * u ** power + wobble * math.sin(u * waves * 2 * math.pi) * (1 - u))
+        pts.append((x, y))
+        x += math.cos(th) * step
+        y -= math.sin(th) * step
+    return pts
+
+
+class Mist:
+    """Mist drawn as dabs along curves, each pixel shaded by the front dab: lit on its upper front
+    side, shaded on the other, a toxic green underside, a haze round it, a light head."""
+
+    def __init__(self):
+        self.best = blank(SW, SH)
+
+    def dab(self, cx, cy, r, f, kind, order, head):
+        rr = r + 1.2
+        for y in range(int(cy - rr - 1), int(cy + rr + 2)):
+            for x in range(int(cx - rr - 1), int(cx + rr + 2)):
+                if not (0 <= x < SW and 0 <= y < SH):
+                    continue
+                dx, dy = x + 0.5 - cx, y + 0.5 - cy
+                d = math.hypot(dx, dy)
+                if d > rr:
+                    continue
+                inside = d <= r
+                depth = (1 - d / rr) + (1.0 if inside else 0) + order * 0.001
+                lit = (dx * MIST_LIGHT[0] + dy * MIST_LIGHT[1]) / max(r, 0.6)
+                cur = self.best[y][x]
+                if cur is None or depth > cur[0]:
+                    self.best[y][x] = (depth, lit if inside else None, f, kind, dy / max(r, 0.6), head)
+
+    def stroke(self, pts, width, f, kind, order, lo=0.0, hi=1.0, torn=False):
+        """The part lo..hi of a curve (it unrolls: its head leads, light); torn: in tatters."""
+        n = len(pts) - 1
+        i0, i1 = int(lo * n), int(hi * n)
+        for i in range(i0, i1 + 1):
+            if torn and (i // 6) % 3 == 2:
+                continue
+            u = i / n
+            r = width(u)
+            if r > 0.25:
+                self.dab(pts[i][0], pts[i][1], r, f, kind, order + u, i1 - i < 3 and hi < 0.999)
+
+    def grid(self):
+        g = blank(SW, SH)
+        for y in range(SH):
+            for x in range(SW):
+                b = self.best[y][x]
+                if b is None:
+                    continue
+                _, lit, f, kind, down, head = b
+                if lit is None:
+                    g[y][x] = MIST['haze'] + alpha(0.22 * f)
+                elif head and lit > -0.2:
+                    g[y][x] = MIST['head'] + alpha(0.9 * f)
+                elif lit > (0.6 if kind == 'fog' else 0.4):
+                    g[y][x] = MIST['hi'] + alpha(0.8 * f)
+                elif down > 0.45 and kind == 'fog':
+                    g[y][x] = MIST['under'] + alpha(0.75 * f)
+                elif lit < -0.45:
+                    g[y][x] = (MIST['under'] if kind == 'curl' and down > 0.5 else MIST['shade']) + alpha(0.62 * f)
+                else:
+                    g[y][x] = MIST['body'] + alpha((0.6 if kind == 'fog' else 0.68) * f)
+        return g
+
+
+# The fog along the floor (and a thinner roll over it), its front a volute; the tendrils rising out of
+# it, (curve, width at the root, frame it starts in).
+FOG = path(SRC - 3, SGY - 2.4, 180, 64, -330, 7, wobble=5, waves=2.2)
+FOG2 = path(SRC - 6, SGY - 4.0, 181, 44, -310, 6, wobble=7, waves=1.6)
+TENDRILS = [(path(SRC - 14, SGY - 2, 97, 21, 430, 3.8), 2.2, 6), (path(SRC - 28, SGY - 2, 102, 30, 450, 4.0), 2.5, 7),
+            (path(SRC - 42, SGY - 2, 99, 19, 410, 3.8), 2.0, 8), (path(SRC - 54, SGY - 2, 106, 12, 370, 3.5), 1.6, 9)]
+# How far along the floor the fog's head has run, frame by frame from the burst: fast, braking hard.
+SPILL_RUN = [0.12, 0.42, 0.66, 0.8, 0.88, 0.93, 0.96, 0.98, 1.0]
+SPILL_FRAMES_N = 22
+# Quick: the mine is down and burst in a quarter of a second, the curls up in the next half (she
+# runs on: the spill must be seen while it is still near her).
+SPILL_FPS = 15
+BURST_AT = 4
+
+
+def _ease(x):
+    return 1 - (1 - min(1.0, max(0.0, x))) ** 2.2
+
+
+def spill(k):
+    m = Mist()
+    fade = 1.0 if k < 15 else max(0.0, 1 - (k - 14) / 7.5)
+    torn = k >= 16
+    if k >= BURST_AT:
+        s = k - BURST_AT
+        thick = 3.0 if s < 4 else max(1.1, 3.0 - (s - 3) * 0.14)
+        hi = SPILL_RUN[min(s, len(SPILL_RUN) - 1)]
+        lo = 0.0 if s < 9 else min(0.8, (s - 8) * 0.08)
+        m.stroke(FOG, lambda u: thick * (1 - 0.5 * u) * (0.9 + 0.15 * math.sin(u * 13 + s)) + 0.25, fade, 'fog', 0,
+                 lo, hi, torn)
+        m.stroke(FOG2, lambda u: thick * 0.7 * (1 - 0.5 * u) + 0.2, fade * 0.85, 'fog', 1, lo, hi * 0.97, torn)
+        for j, (pts, w0, born) in enumerate(TENDRILS):
+            if k < born:
+                continue
+            c = k - born
+            hi_c = _ease(c / 7.0)
+            lo_c = 0.0 if c < 8 else min(0.8, (c - 7) * 0.11)
+            w = w0 if c < 7 else max(0.7, w0 - (c - 6) * 0.15)
+            if hi_c - lo_c > 0.04:
+                m.stroke(pts, lambda u, w=w: w * (1 - u) ** 0.9 + 0.3, fade, 'curl', 2 + j, lo_c, hi_c, torn)
+    g = m.grid()
+    # The mine: lands (a pixel high in its first frame), blinks twice, bursts, dims with the rest.
+    if k < BURST_AT:
+        stamp(g, MINE_ON if k in (1, 3) else MINE_OFF, MINE, SRC - 5, SGY - 5 - (1 if k == 0 else 0))
     else:
-        balls = [(11.0, 12.8 - 2.5 * e, 2.2 + 4.2 * e), (15.0, 13.6 - 1.2 * e, 1.8 + 3.8 * e),
-                 (7.5 + 0.5 * e, 11.0 - 3.0 * e, 1.4 + 3.0 * e), (12.5, 9.0 - 3.5 * e, 1.0 + 2.4 * e)]
-    return gas(TW, TH, balls, fade=fade, sparks=2 if e < 0.7 else 1, seed=int(e * 10) + 50 + shape * 7,
-               swirl=e + shape)
+        mine_fade = [[(MINE[c] if len(MINE[c]) == 7 else MINE[c][:7]) + alpha(fade * (int(MINE[c][7:], 16) / 255
+                                                                               if len(MINE[c]) == 9 else 1.0))
+                      if c != '.' else None for c in r] for r in MINE_OFF]
+        for y, r in enumerate(mine_fade):
+            for x, c in enumerate(r):
+                if c:
+                    g[SGY - 5 + y][SRC - 5 + x] = c
+    if k == BURST_AT:
+        for d, c in enumerate(['#ffffff', '#ffffff', '#f6dcffd0', '#d6a2f6a0', '#7ee0a080', '#7ee0a040']):
+            for dx, dy in ((d, 0), (-d, 0), (0, -d)):
+                if 0 <= SRC + dx < SW:
+                    g[SGY - 3 + dy][SRC + dx] = c
+    rnd = random.Random(k)
+    cells = [(x, y) for y in range(SH) for x in range(SW) if g[y][x] and g[y][x][:7] in (MIST['body'], MIST['shade'])]
+    for _ in range(3 if BURST_AT <= k < 15 else 1 if k < 18 else 0):
+        if cells:
+            x, y = rnd.choice(cells)
+            g[y][x] = SPARK
+    return g
 
 
-TRAIL_STEPS = [(0.0, 1.0), (0.25, 1.0), (0.45, 0.95), (0.62, 0.9), (0.76, 0.8), (0.88, 0.62), (1.0, 0.42)]
-TRAIL_SETS = []
-for _s in (0, 1):
-    names = []
-    for _k, (_e, _f) in enumerate(TRAIL_STEPS):
-        S[f'trail{_s}{_k + 1}'] = P.grid(trail(_s, _e, _f))
-        names.append(f'trail{_s}{_k + 1}')
-    TRAIL_SETS.append(names)
+_spill = [spill(k) for k in range(SPILL_FRAMES_N)]
+# Cropped to what any frame uses, the same for all (so the picture stays put).
+_ys = [y for g in _spill for y in range(SH) if any(g[y])]
+_xs = [x for g in _spill for row in g for x, c in enumerate(row) if c]
+_y0, _x0, _x1 = min(_ys), min(_xs), max(_xs)
+for _k, _g in enumerate(_spill):
+    S[f'spill{_k + 1}'] = P.grid([row[_x0:_x1 + 1] for row in _g[_y0:]])
+SPILL_FRAMES = [f'spill{k + 1}' for k in range(SPILL_FRAMES_N)]
+# From her feet (on the ground) to the picture's middle: the mine dropped just behind her heels, where
+# her body does not hide it.
+_cw, _ch = _x1 + 1 - _x0, SH - _y0
+SPILL_OFFSET = [(SRC - _x0) - _cw // 2 + 9, -(_ch // 2) + 1]
 
 
 # A wisp of venom, 13 x 8, curling at her feet by the start (her "perfume").
@@ -647,17 +804,17 @@ EMITTERS = {
         'angle': 90, 'inherit': 1, 'life': 420, 'fadeOut': 90, 'face': True,
         'sprite': {'frames': HOOK_FRAMES, 'fps': 22, 'loop': False}, 'max': 1, 'reduced': 1,
     },
-    # --- venom: on some rolls and hard landings (moves 24 and 25: on the ground; a plain landing
-    # starts in the air), puffs let out one after another over half a second from where her hips
-    # are by then (low in a roll, at her hips as she runs on), all along her way; each drifts
-    # back behind her (the way she is going, not the way she faces), rises a little, blooms and
-    # thins (tricks.py: the chance).
+    # --- venom: her Venom Mine on some rolls and hard landings (moves 24 and 25: on the ground; a
+    # plain landing starts in the air) where she touched down, and its spill behind her, the way she
+    # is going (not the way she faces); one particle, so the mine and its poison come together
+    # (tricks.py: the chance). Dropped as she goes, the mine skids on a little after her (its share
+    # of her speed, braking hard) and stops as it bursts.
     'venom': {
-        'enter': ['roll'], 'moves': [24, 25], 'burst': [10, 12], 'delay': [0, 450], 'toward': 'motion',
-        'anchor': 'hips', 'offset': [4, -1], 'jitter': [3, 1], 'speed': [10, 22], 'angle': [5, 30],
-        'inherit': 0, 'drag': 1.2, 'gravity': -6, 'life': [1100, 1500], 'fadeIn': 50, 'fadeOut': 650,
-        'face': True, 'sprite': {'frames': [], 'sets': TRAIL_SETS, 'fps': 5.5, 'loop': False}, 'max': 16,
-        'reduced': 0.5,
+        'enter': ['roll'], 'moves': [24, 25], 'burst': 1, 'toward': 'motion', 'anchor': 'feet',
+        'offset': SPILL_OFFSET, 'speed': 0, 'inherit': 0.35, 'drag': 4,
+        'life': round(SPILL_FRAMES_N * 1000 / SPILL_FPS),
+        'fadeOut': 80, 'face': True, 'sprite': {'frames': SPILL_FRAMES, 'fps': SPILL_FPS, 'loop': False}, 'max': 2,
+        'reduced': 1,
     },
     # --- the spectral shot: these come only with her copies (the snapshot's `burst`), all sided
     # with the way she is going (off a wall, the way she leaps from it), in two beats: the aim (its

@@ -62,7 +62,7 @@ def tricks(fx, boss):
         em['swarm'] = {**em['swarm'], 'enter': TRICKS, 'chance': 0.18}
     elif boss == 'widow':
         # Her grappling hook on about half of her runs up a wall (move 33: only there has it a wall
-        # to bite); a kiss blown on one landing in ten; her venom let out along her way on about two
+        # to bite); a kiss blown on one landing in ten; her Venom Mine and its spill on about two
         # rolls or hard landings (moves 24 and 25) in five. (Her spectral shot comes on a third of
         # the flips and vaults with its snapshot's own chance: wd_fx.py.)
         em['grapple']['chance'] = 0.45
