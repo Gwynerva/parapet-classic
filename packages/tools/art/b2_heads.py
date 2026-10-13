@@ -4,8 +4,9 @@ The black velvet blindfold across the face (two rows and a sheen, a pixel past t
 profile), the warm yellowish-white bob to the chin covering the ears, its tips chopped into points
 at the cheeks and a little longer at the face than at the nape, the solid fringe swept from her
 part (her right) over her left eye and the top of the blindfold, the black hairband behind the
-hairline (in profile a near-vertical arc behind the crown), pink lips, the beauty mark under the
-left corner of her lips.
+hairline (in profile a near-vertical arc behind the crown), small pink lips, the beauty mark a
+pixel apart under the left corner of her lips; under the bob the jaw curves in to a small narrow
+chin (set back from the lips in profile), the neck slender.
 
 One light for the cast, from the upper front: the crown's highlight band and the fringe's lit
 strands, the back of the head and the nape in shade, the dark under the clumps; the face lit, the
@@ -53,11 +54,11 @@ PROFILE = [
     '0dmhmhhHhHkkkkkk',
     '0dmmhmhHhHttssS.',
     '0dmmhmhHhHtsWSSS',
-    '0ddmhmhhmHtsSst.',
-    '.0dmmdmhmhTtslL.',
-    '.0ddmdmhdhTtssp.',
-    '..0d.dmdmhKTtsS.',
-    '.....0.0dm.KTTK.',
+    '0ddmhmhhmHtsSSs.',
+    '.0dmmdmhmhttslL.',
+    '.0ddmdmhdhttssp.',
+    '..0d.dmdmhTtsS..',
+    '.....0.0dm.KTT..',
     '................',
 ]
 # Her left side (the runner facing left): the mark under the lip.
@@ -85,12 +86,12 @@ FRONT = [
     '0hHqQQqkkHhhmmdd',
     '0hHkkkkkkkkkkmd0',
     '0hhkkkkkkkkkkmd0',
-    '0hhksSWSStsstmd0',
-    '0mhtsSSSWtsttmd0',
-    '.0mtssSLlsstdd0.',
-    '.0dmtsspsxttd0..',
-    '..0dTtsSstTd0...',
-    '.....KTTTK......',
+    '0hhksSWSSssstmd0',
+    '0mhtsSSSWtsstmd0',
+    '.0mdtsLlLsstdd0.',
+    '.0dmdtspsxtdd0..',
+    '..0dmTtSsTd0....',
+    '.....KTtTK......',
 ]
 # The face mirrored on screen (her left cheek near): the mark under the near corner, the fringe
 # sweeping from the far temple over the near end of the blindfold.
@@ -106,12 +107,12 @@ FRONT_LEFT = [
     '0hHhHhhkqQQQqmdd',
     '0hHkkkkkkkkkkmd0',
     '0hhkkkkkkkkkkmd0',
-    '0hhksSWSStsstmd0',
-    '0mhtsSSSWtsttmd0',
-    '.0mtssSLlsstdd0.',
-    '.0dmtsxpssttd0..',
-    '..0dTtsSstTd0...',
-    '.....KTTTK......',
+    '0hhksSWSSssstmd0',
+    '0mhtsSSSWtsstmd0',
+    '.0mdtssLlLstdd0.',
+    '.0dmdtxspstdd0..',
+    '..0dmTtSsTd0....',
+    '.....KTtTK......',
 ]
 
 

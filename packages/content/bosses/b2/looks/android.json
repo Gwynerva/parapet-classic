@@ -129,15 +129,14 @@
       "uyvzvzzAzAwwwwww",
       "uyvvzvzAzAhhggn.",
       "uyvvzvzAzAhgEnnn",
-      "uyyvzvzzvAhgngh.",
-      ".uyvvyvzvzfhgFG.",
-      ".uyyvyvzyzfhggH.",
-      "..uy.yvyvzIfhgn.",
-      ".....u.uyv.IffI.",
+      "uyyvzvzzvAhgnng.",
+      ".uyvvyvzvzhhgFG.",
+      ".uyyvyvzyzhhggH.",
+      "..uy.yvyvzfhgn..",
+      ".....u.uyv.Iff..",
       "................"
     ],
     "26": [
-      "..................",
       "......uuyuvw......",
       "....uuyzzAAwxv....",
       "...uuzzAAwwxBBv...",
@@ -151,14 +150,12 @@
       ".uyvvvzAzAhhhwwDx.",
       ".uyvvyzzvAhgggnw..",
       "..y.yvzvzzhgnnn...",
-      "....yvyyzfhgghhn..",
-      "......yvzfhgFG....",
-      "......yv.IhggH....",
-      ".........Ifgn.....",
-      "...........fI....."
+      "....yvyyzhhgnngn..",
+      "......yvzhhgFG....",
+      "......yv.hgggH....",
+      ".........Ifn......"
     ],
     "27": [
-      "..................",
       ".......uuuuy......",
       ".....uuuzzyzzv....",
       "....uyyzzAAAAAw...",
@@ -172,11 +169,10 @@
       "...yvzzzAAwwwAzBBv",
       "..uvvzvAAhhwwDAAv.",
       "....yyzzhgggwwDv..",
-      "....yvzfhgnnnww...",
-      "....vvIfhggnn.....",
-      "......IfggGhn.....",
-      "......IfgHH.......",
-      ".......fIn........"
+      "....yvzhhgnnnww...",
+      "....vvfhhgnnn.....",
+      "......IhggGgn.....",
+      "......IfnHH......."
     ],
     "28": [
       ".......uuuuu......",
@@ -191,11 +187,11 @@
       "..vvzzzzzAAAABCCz.",
       "..uyyvvAAwwABBCBv.",
       "..yvzzAhhhwwBBBBv.",
-      "...vzfhhggwxzBBB..",
-      "....IfhgnggwDAAv..",
-      "....fhggnnnwDvv...",
-      "....fggFhnnwx.....",
-      "....fnHG..n......."
+      "...vzhhhggwxzBBB..",
+      "....hhhgnggwDAAv..",
+      "....hgggnnnwDvv...",
+      "....fggFgnnwx.....",
+      ".......G..n......."
     ],
     "29": [
       "....uzzwxzvu....",
@@ -209,12 +205,12 @@
       "uzAxDDxwwAzzvvyy",
       "uzAwwwwwwwwwwvyu",
       "uzzwwwwwwwwwwvyu",
-      "uzzwgnEnnhgghvyu",
-      "uvzhgnnnEhghhvyu",
-      ".uvhggnGFgghyyu.",
-      ".uyvhggHgJhhyu..",
-      "..uyfhgnghfyu...",
-      ".....IfffI......"
+      "uzzwgnEnnggghvyu",
+      "uvzhgnnnEhgghvyu",
+      ".uvyhgGFGgghyyu.",
+      ".uyvyhgHgJhyyu..",
+      "..uyvfhngfyu....",
+      ".....IfhfI......"
     ],
     "30": [
       ".aqa.",
@@ -699,11 +695,11 @@
       "uyvzvzzAzAwwwwww",
       "uyvvzvzAzAhhggn.",
       "uyvvzvzAzAhgEnnn",
-      "uyyvzvzzvAhgngh.",
-      ".uyvvyvzvzfhgFG.",
-      ".uyyvyvzyzfhJgH.",
-      "..uy.yvyvzIfhgn.",
-      ".....u.uyv.IffI.",
+      "uyyvzvzzvAhgnng.",
+      ".uyvvyvzvzhhgFG.",
+      ".uyyvyvzyzhhJgH.",
+      "..uy.yvyvzfhgn..",
+      ".....u.uyv.Iff..",
       "................"
     ],
     "29:left": [
@@ -718,15 +714,14 @@
       "uzAzAzzwxDDDxvyy",
       "uzAwwwwwwwwwwvyu",
       "uzzwwwwwwwwwwvyu",
-      "uzzwgnEnnhgghvyu",
-      "uvzhgnnnEhghhvyu",
-      ".uvhggnGFgghyyu.",
-      ".uyvhgJHgghhyu..",
-      "..uyfhgnghfyu...",
-      ".....IfffI......"
+      "uzzwgnEnnggghvyu",
+      "uvzhgnnnEhgghvyu",
+      ".uvyhggGFGghyyu.",
+      ".uyvyhJgHghyyu..",
+      "..uyvfhngfyu....",
+      ".....IfhfI......"
     ],
     "26:flip": [
-      "..................",
       "......uuyuvw......",
       "....uuyzzAAwxv....",
       "...uuzzAAwwxBBv...",
@@ -740,14 +735,12 @@
       ".uyvvvzAzAhhhwwDx.",
       ".uyvvyzzvAhgggnw..",
       "..y.yvzvzzhgnnn...",
-      "....yvyyzfhgghhn..",
-      "......yvzfhgFG....",
-      "......yv.IhhgH....",
-      ".........Ifgn.....",
-      "...........fI....."
+      "....yvyyzhhgnngn..",
+      "......yvzhhJFG....",
+      "......yv.hgggH....",
+      ".........Ifn......"
     ],
     "27:flip": [
-      "..................",
       ".......uuuuy......",
       ".....uuuzzyzzv....",
       "....uyyzzAAAAAw...",
@@ -761,11 +754,10 @@
       "...yvzzzAAwwwAzBBv",
       "..uvvzvAAhhwwDAAv.",
       "....yyzzhgggwwDv..",
-      "....yvzfhgnnnww...",
-      "....vvIfhggnn.....",
-      "......IfhgGhn.....",
-      "......IfgHH.......",
-      ".......fIn........"
+      "....yvzhhgnnnww...",
+      "....vvfhhgnnn.....",
+      "......IhJgGgn.....",
+      "......IfnHH......."
     ],
     "28:flip": [
       ".......uuuuu......",
@@ -780,11 +772,11 @@
       "..vvzzzzzAAAABCCz.",
       "..uyyvvAAwwABBCBv.",
       "..yvzzAhhhwwBBBBv.",
-      "...vzfhhggwxzBBB..",
-      "....IfhgnggwDAAv..",
-      "....fhggnnnwDvv...",
-      "....fggFhnnwx.....",
-      "....fnHG..n......."
+      "...vzhhhggwxzBBB..",
+      "....hhhgnggwDAAv..",
+      "....hgJgnnnwDvv...",
+      "....fggFgnnwx.....",
+      ".......G..n......."
     ],
     "2:far": ["..a.....", "aad.a...", "abball..", "abbamlll", ".aaammmm", "...a.mmm", "........"],
     "3:far": [".aaa....", "aabaaa..", ".bbaa...", ".aaaml..", ".a.mmml.", "..a.mmml", ".....mm."],
