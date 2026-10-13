@@ -79,7 +79,7 @@ diff -r /tmp/bosses packages/content/bosses
 | `rewind.py`       | `fx.json`; looks `hoodie`, `beanie` (`rw_looks.py`); `looks` in `boss.json`                                                                                                           |
 | `grove.py`        | `fx.json`; looks `grove-tank`, `grove-green`, `grove-cover` (`gr_looks.py`, `gr_heads.py`, `gr_parts.py`)                                                                             |
 | `vera.py`         | `fx.json`; looks `vera-tank`, `vera-vest`, `vera-street` (`vr_looks.py`, `vr_heads.py`); `looks` and `effect` in `boss.json`                                                          |
-| `b2.py`           | `fx.json`; looks `android`, `replica`, `kimono` (`b2_looks.py`, `b2_heads.py`, `b2_parts.py`); `looks` in `boss.json`                                                                 |
+| `b2.py`           | `fx.json` (`b2_fx.py`); looks `android`, `replica`, `kimono` (`b2_looks.py`, `b2_heads.py`, `b2_parts.py`); `looks` in `boss.json`                                                    |
 | `sir_nobody.py`   | `fx.json`; looks `sunlight`, `onion`, `hollow` (`kn_looks.py`, helms in `kn_helms.py`, materials in `kn_parts.py`); `looks` and `effect` in `boss.json`                               |
 | `granger.py`      | `fx.json` (`gn_fx.py`); looks `classic`, `slipstream`, `punk` (`gn_looks.py`, `gn_heads.py`, `gn_parts.py`); `looks` in `boss.json`                                                   |
 | `rush_b.py`       | `fx.json`; looks `phoenix`, `leet`, `arctic`, `guerrilla`, `seal`, `gsg9`, `sas`, `gign` (`rb_looks.py`, `rb_heads.py`, `rb_kit.py`); `looks` and `effect` in `boss.json`             |

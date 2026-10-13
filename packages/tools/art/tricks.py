@@ -51,8 +51,9 @@ def tricks(fx, boss):
         em['respect'] = {**em['respect'], 'enter': ['flip', 'vault'], 'chance': 0.2}
         em['bills'] = {**em['bills'], 'enter': ['flip', 'vault'], 'chance': 0.2}
     elif boss == 'b2':
-        # Her Perfect Evade comes on two in five of the rolls, dashes and flips, its glints and
-        # data squares with it (the snapshot's own chance and burst, in b2.py): nothing to add.
+        # Her Perfect Evade comes on three in ten of the rolls, dashes and flips, its flash, slices
+        # and cubes with it (the snapshot's own chance, chain and burst, in b2_fx.py): nothing to
+        # add.
         pass
     elif boss == 'five':
         # V's Sandevistan comes on about one flip or vault in four, its stepped smear with it (the
