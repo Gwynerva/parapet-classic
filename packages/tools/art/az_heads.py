@@ -4,24 +4,26 @@ Effect, an asari, 106 years old and barely grown up by her people's measure.
 No hair: a scalp crest of smooth cartilage, ONE shell sweeping back from a high clean forehead over
 the skull and past it into a single point (four pixels behind the head, a little above the eyes),
 grooves running along it from the front to the point; under its back edge the neck tendrils, a
-dark bundle down to the collar; no ears. Saturated azure skin, big blue eyes under heavy dark lids,
-thin painted brows arched high, plum freckles on the cheeks and the nose, full lilac lips, a small
-upturned nose, a soft small chin.
+dark bundle down to the collar; no ears. Saturated azure skin, a soft young heart-shaped face (the
+cheeks rounding in to a small narrow chin), big blue eyes under dark upper lashes flicked up at the
+outer corner, thin painted brows set high, plum freckles under the eyes, a small upturned nose (a
+shade and a lit tip), small lilac lips.
 
-One light for the cast, from the upper front: the crest's top and the forehead catch it (the crest
-speckled lighter on its lobes), each lobe lit on top and dark under it, the grooves darkest; the
-face lit on the planes that face forward (the forehead, the cheekbone, the bridge and the tip of
-the nose, the chin), the brow shading the eye socket, the shadow under the nose and the lower lip,
-the cheek turning darker toward the jaw, the jaw's shade on the neck. Skin in six tones that shift
-from a cool cyan-blue in the light to a violet indigo in the shade, a dark indigo outline in the
-shade and a lighter edge where the light hits.
+One light for the cast, from the upper front, in soft broad tones rather than carved planes: the
+crest's tops and the forehead catch it (the crest speckled lighter on its front lobe), the grooves
+dark slits with the lobe lit under them; the face light and low in contrast, the near cheek and the
+nose's tip lit, the far side of the face a tone darker, the underside of the jaw and the neck in
+shade, nothing dark on the cheeks or the jaw. Skin in six tones that shift from a cool cyan-blue in
+the light to a violet indigo in the shade, a dark indigo outline in the shade and a lighter edge
+where the light hits.
 
 The profile (25) faces right on Blaise's 16 x 17 box (the chin and the neck where hers are); the
-look tool turns it into 26-28. 29 is the face turned to us, nearly front on and facing right as
-the other bosses' are: the crest's lobes fanning up from the forehead, the near cheek on the left
-going into shade, the far one lit; the tendrils behind the jaw. 76-78 are the profile blinking
-(shut, half shut) and wincing. Every grid marks Blaise's head box (`*_BOX`, its top left corner in
-the grid): `centred` pads the picture so the box sits where the game puts a head."""
+look tool turns it into 26-28. 29 is the face turned to us, nearly front on and facing right as the
+other bosses' are: the crest's three lobes over the forehead (as she is seen from the front), the
+grooves meeting above it, the temples flaring, the face narrowing to the chin; the tendrils are
+behind the neck there. 76-78 are the profile blinking (shut, half shut) and wincing. Every grid
+marks Blaise's head box (`*_BOX`, its top left corner in the grid): `centred` pads the picture so
+the box sits where the game puts a head."""
 from heads import Pic
 
 # Skin: highlight (cool, a little cyan) → light → mid-light → mid → shadow → deep (violet) → the
@@ -51,17 +53,17 @@ PROF = [
     '.KDTTgggggtSSSWWSs...',  #  3
     'KDTggtsSSShSggSWSs...',  #  4  the point; the lower groove starts
     '..KDTTTgggggtsSWSSs..',  #  5
-    '....KggsSSSSSsttbbS..',  #  6  the brow
-    '......KDTTtttssbSWS..',  #  7
-    '.......KDTTttstlllS..',  #  8  the lid
-    '.......KnNTtssteIIsS.',  #  9  the eye: white, the iris under the lid's shade
-    '.......KnNnTtsftijSW.',  # 10  the iris and its glint, a freckle, the nose's tip
-    '.......KnNnTtsSfWft..',  # 11  freckles round the cheekbone
-    '.......KnNnTtsSWSmL..',  # 12  the lips
-    '.......KnNnDTtssSML..',  # 13
-    '........KnNDDTtsWS...',  # 14  the chin
-    '.........KnTDDDTt....',  # 15
-    '..........KnTTTt.....',  # 16  the neck
+    '....KggnTsSSSSssbbS..',  #  6  the brow; the tendrils start under the crest
+    '......KnNtsSSSlsssS..',  #  7  the lash's flick
+    '......KnNTtsSSSlllS..',  #  8  the upper lashes
+    '.......KnNtsSSSeiSS..',  #  9  the eye: white, the iris lit
+    '.......KnNtsSSWEISSW.',  # 10  the iris darker below; the cheekbone's light, the nose's tip
+    '.......KnNTtsSfSfSs..',  # 11  freckles under the eye, the dip under the nose
+    '........KnNtsSSSSMm..',  # 12  the lips
+    '........KnNTtsSSSL...',  # 13  the lower lip
+    '.........KnTttsSSs...',  # 14  the small chin, the jaw climbing back
+    '..........KnTttsT....',  # 15
+    '..........KnTttK.....',  # 16  the neck
 ]
 
 # --------------------------------------------------------------------------------------------
@@ -69,32 +71,33 @@ PROF = [
 # --------------------------------------------------------------------------------------------
 FRONT_BOX = (1, 0)
 FRONT = [
-    '.....TT.TttT.TT...',  #  0  the lobes' tops
-    '....KtsgSWWgWSt...',  #  1
-    '...KTtsgSSWgWSt...',  #  2
-    '..KThtsgSWWgSWSt..',  #  3
-    '..KDtgtsSSSSShSsT.',  #  4
-    '..KDgtsbbbSSbbSst.',  #  5  the brows
-    '..KnDtbsssSSsssbt.',  #  6
-    '..KnTlllltSslllst.',  #  7  the lids
-    '..KnTteIISWSeIISt.',  #  8  the eyes
-    '..KnTteijSWSeijSt.',  #  9
-    '..KnTtfsfsWSSfSst.',  # 10  freckles, the nose's tip
-    '...KnTtsstTsSSsT..',  # 11
-    '...KnTtssmLmSstK..',  # 12  the lips
-    '....KnTtsMLMstK...',  # 13
-    '.....KnTtstsTK....',  # 14  the shade under the lower lip
-    '......KDTsStK.....',  # 15  the chin
-    '.......KDDTK......',  # 16  the neck
+    '........TssT......',  #  0  the front lobe's top
+    '.....Tt.SWhS.tT...',  #  1  the side lobes, the notches between
+    '....TsSgSWWSgsD...',  #  2  the grooves
+    '...TsSSsgWSgsstD..',  #  3  meeting over the forehead
+    '..TgssSSSWSSsstD..',  #  4  the near lobe's end over the temple
+    '..DtgsbbSSSSbbtD..',  #  5  the painted brows
+    '...TsSSSSSSSsstD..',  #  6
+    '...TslsssSSssslD..',  #  7  the lashes' flicks
+    '...TSslllSSllltD..',  #  8  the upper lashes
+    '...TSseijSSeijtD..',  #  9  the eyes: white, the iris lit, its glint
+    '...TSsEIisSEIitD..',  # 10  the iris darker below
+    '...TsWfSstWsfstD..',  # 11  freckles, the nose's shade and tip
+    '....TsSSSsSsstD...',  # 12  the cheeks rounding in
+    '.....TsSSmMmtD....',  # 13  the lips
+    '......TsSsLsD.....',  # 14  the lower lip's light
+    '.......DtSsD......',  # 15  the small chin
+    '.......DttsD......',  # 16  the neck
 ]
 
 # The profile's eyes shut (76), half shut (77), screwed up with the mouth open (78): rows painted
 # over the profile ('.' keeps a pixel).
 FACES = {
-    76: {8: '...............ssS...', 9: '...............lll...', 10: '...............tsS...'},
-    77: {8: '...............sss...', 9: '...............lll...', 10: '...............eij...'},
-    78: {6: '...............sbs...', 7: '...............bbs...', 8: '...............sss...',
-         9: '...............lll...', 10: '...............tsS...', 12: '.................mL..', 13: '.................Mm..'},
+    76: {7: '..............s......', 8: '...............sSS...', 9: '..............lllS...',
+         10: '...............sS....'},
+    77: {8: '...............ssS...', 9: '...............lll...'},
+    78: {6: '................ss...', 7: '..............sbbs...', 8: '...............ssS...',
+         9: '..............lllS...', 10: '...............sS....', 13: '.................ML..'},
 }
 
 
