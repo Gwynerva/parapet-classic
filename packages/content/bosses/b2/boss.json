@@ -2,6 +2,6 @@
   "id": "b2",
   "color": "#d9c38a",
   "gender": "female",
-  "looks": ["android"],
+  "looks": ["android", "replica", "kimono"],
   "effect": ["evade"]
 }

@@ -71,6 +71,8 @@
   "boss.b2.lost": "Миссия выполнена. Твоя — не очень.",
   "boss.b2.fx.evade": "Уклонение",
   "boss.b2.look.android": "Андроид",
+  "boss.b2.look.replica": "2P",
+  "boss.b2.look.kimono": "Кимоно YoRHa",
   "boss.sir-nobody.name": "Сэр Некто",
   "boss.sir-nobody.desc": "Таинственный, но всегда готов помочь. Шлем не снимает даже на финише. Кто внутри — не знает никто. Даже он сам.",
   "boss.sir-nobody.briefing.flags": "Помощь нужна? А, это гонка. Тогда помоги себе сам: пять флагов, {time}.",

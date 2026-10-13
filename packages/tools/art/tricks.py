@@ -46,7 +46,9 @@ def tricks(fx, boss):
         em['respect'] = {**em['respect'], 'enter': ['flip', 'vault'], 'chance': 0.2}
         em['bills'] = {**em['bills'], 'enter': ['flip', 'vault'], 'chance': 0.2}
     elif boss == 'b2':
-        em['shatter'] = every_way(em['shatter'], 0.5)
+        # Her Perfect Evade comes on two in five of the rolls, dashes and flips, its glints and
+        # data squares with it (the snapshot's own chance and burst, in b2.py): nothing to add.
+        pass
     elif boss == 'five':
         em['tear']['chance'] = 0.5
     elif boss == 'flittermouse':

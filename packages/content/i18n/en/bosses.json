@@ -71,6 +71,8 @@
   "boss.b2.lost": "Mission complete. Yours, not so much.",
   "boss.b2.fx.evade": "Evade",
   "boss.b2.look.android": "Android",
+  "boss.b2.look.replica": "2P",
+  "boss.b2.look.kimono": "YoRHa Kimono",
   "boss.sir-nobody.name": "Sir Nobody",
   "boss.sir-nobody.desc": "Mysterious, but always ready to help. Never takes off the helmet, not even at the goal. Who's inside? Nobody knows. Not even him.",
   "boss.sir-nobody.briefing.flags": "Need help? Ah, a race. Then help yourself: five flags, {time}.",
