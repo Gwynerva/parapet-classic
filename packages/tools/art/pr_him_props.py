@@ -4,18 +4,15 @@
   guard with flared ends, the scabbard's silver chape; the hilt over the shoulder behind his head;
 - the fencer's two synthetic feders: yellow blades with black bands, a wide flared schilt under
   the black-and-yellow guard, black grips, yellow pommels; fanned behind the shoulders;
-- the undercover cosplayer's white katana: a white braided grip with black diamonds, a round
-  black guard rimmed in white, a bright blade, a white tassel from the pommel; resting over the
-  shoulder as in the photo (over the chest, so the grip shows on his back and the blade rises
-  behind his head), over a slim black backpack whose straps cross his chest.
+- the undercover cosplayer's slim black backpack, its straps crossing his chest (no katana: the
+  blade rising behind his head read as a stray white stick).
 
 Pictures are text grids; '+' marks the pixel on the part's point."""
 SILVER = {'X': '#f2f5fa', 'x': '#bcc4d0', 'y': '#808a9a', 'Y': '#4c5462'}
 SCABBARD = {'Z': '#16161c', 'z': '#3a3a46'}
 FEDER = {'a': '#f6dc4a', 'A': '#c09a1c', 'n': '#16140e', 'N': '#3a3628'}
-KATANA = {'w': '#ffffff', 'W': '#cfd3dc', 'k': '#121216', 'b': '#e8eef6', 'B': '#9aa4b4'}
 PACK = {'q': '#1e1f26', 'Q': '#3c3e4a', 'p': '#0e0e12', 'P': '#8a8e9a'}
-PROPS = {**SILVER, **SCABBARD, **FEDER, **KATANA, **PACK}
+PROPS = {**SILVER, **SCABBARD, **FEDER, **PACK}
 
 # fmt: off
 # On the chest (57; the front to the right, '+' the chest's point): the round pommel and the
@@ -91,34 +88,7 @@ FEDERS = [
     '....aA...a......',  # 27
     '.....a..........',  # 28
 ]
-# Over the chest: the grip behind the shoulder, the blade rising behind the head.
-KATANA_SHOULDER = [
-    #0123456789ABCDEFGHIJK
-    'b....................',  # 0  the tip, high behind the head
-    'bB...................',  # 1
-    '.bB..................',  # 2
-    '..bB.................',  # 3
-    '...bB................',  # 4
-    '....bB...............',  # 5
-    '.....bB..............',  # 6
-    '......bB.............',  # 7
-    '.......bB............',  # 8  (behind the head)
-    '........bB...........',  # 9
-    '.........bB..........',  # 10
-    '..........bB.........',  # 11 over the shoulder
-    '...........kk........',  # 12 the round guard, black rimmed white
-    '..........kwwk.......',  # 13
-    '............wW.......',  # 14 the white braided grip, black diamonds
-    '............Wk.......',  # 15
-    '.............wW......',  # 16
-    '.............Wk...+..',  # 17
-    '..............wW.....',  # 18
-    '..............kk.....',  # 19 the pommel
-    '..............wW.....',  # 20 the white tassel hanging from it
-    '..............Ww.....',  # 21
-    '.............w.W.....',  # 22
-]
-# The black backpack on his back (the photo shows its straps), slim, under the katana.
+# The black backpack on his back (the photo shows its straps), slim.
 BACKPACK = [
     #0123456789ABCDEF
     '................',  # 0
@@ -145,7 +115,7 @@ BACKPACK = [
 
 
 def check():
-    for name, rows in (('longsword', LONGSWORD), ('feders', FEDERS), ('katana', KATANA_SHOULDER), ('pack', BACKPACK)):
+    for name, rows in (('longsword', LONGSWORD), ('feders', FEDERS), ('pack', BACKPACK)):
         for y, r in enumerate(rows):
             assert len(r) == len(rows[0]), f'{name} row {y}: {len(r)} wide'
             for ch in r:

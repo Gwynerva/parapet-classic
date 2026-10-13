@@ -16,8 +16,8 @@ arms, thighs and knees are recoloured and grown here.
 - undercover: him as a 2B cosplayer in street clothes: a white bob wig with a long fringe swept
   over one eye (no blindfold), a sly half-smile, big black headphones round the neck, a long open
   black cardigan with tails over a white shirt, the straps of a black backpack, white gloves, a
-  green band on the right wrist, slim indigo jeans, white canvas low-tops, the white katana
-  resting over his shoulder.
+  green band on the right wrist, slim indigo jeans, white canvas low-tops (no katana: on his back
+  it read as a stray white stick).
 
 Each look's accent (its effect's `</>` and the mask's ribbon) is a colour of the outfit. Run it
 (`python3 pr_looks.py`, or petra.py) to write the four looks."""
@@ -116,9 +116,8 @@ undercover = make('undercover', [
     recolor(FOREARM, {WRIST[0]: CARD5[1], WRIST[1]: CARD5[2], WRIST[2]: CARD5[3]}) | {'on': 'left'},
     legs(JEANS5),
 ], {'upper-arm': 1, 'forearm': 1, 'hand': 0, 'thigh': 0, 'knee': 0}, B.parts('undercover'), 'bob', '#d8def0',
-    attachments={'pack': ('back', {'57': P.BACKPACK}), 'katana': ('over', {'57': P.KATANA_SHOULDER}),
-                 'tails': ('hips', B.tails(), B.CARD)},
-    turn=['pack@57', 'katana@57', 'tails@34'], smirk=True)
+    attachments={'pack': ('back', {'57': P.BACKPACK}), 'tails': ('hips', B.tails(), B.CARD)},
+    turn=['pack@57', 'tails@34'], smirk=True)
 
 # His heads magnified (out/pr-heads.png): each hair's 25, 29 and the faces 76-78.
 pal = Palette()

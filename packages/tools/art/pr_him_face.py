@@ -180,18 +180,19 @@ SWEPT_29 = [
 # fmt: on
 
 # The rebel's after training: wet, darker, in clumps with a wet shine, waves to the jaw curling
-# out at the tips, strands stuck to the forehead.
+# out at the tips, the forehead under a wet fringe (no bare strip at the parting: it read as a
+# bald patch).
 WET = {'w': '#ad8a68', 'H': '#80603f', 'h': '#5e4028', 'm': '#422a18', 'd': '#2c1a0e', 'k': '#160c06'}
 # fmt: off
 WAVES_25 = [              # (padded a pixel each side: the curls stick out)
     #0123456789ABCDEFGHI
     '......kkkkk........',  # 0
-    '....kkmhhhhkk......',  # 1
-    '...kmhHwhmhhmk.....',  # 2  wet clumps, a shine streaking along them
-    '..kmhmhhHwmhhhk....',  # 3
-    '..kdmhmmhhmdmhhk...',  # 4  swept forward over the forehead
-    '.kdmhmdmmhhmdmhdk..',  # 5
-    '.kddmhmdmmhmdkdS...',  # 6  their wet tips
+    '....kkmhhhhkkk.....',  # 1
+    '...kmhHwhmhhmhkk...',  # 2  wet clumps, a shine streaking along them
+    '..kmhmhhHwmhhhmhk..',  # 3
+    '..kdmhmmhhmdmhhmhk.',  # 4  swept forward over the whole forehead
+    '.kdmhmdmmhhmdmhdhk.',  # 5
+    '.kddmhmdmmhmdkdmdk.',  # 6  their wet tips down to the brow
     '.kdmhmmdmhdkdS.....',  # 7  a curl at the temple
     '.kmdmhmdmhd........',  # 8  waves over the ear
     '.kdmhdmhmdk........',  # 9
@@ -206,11 +207,11 @@ WAVES_29 = [
     #0123456789ABCDEFGHI
     '......kkkkkk.......',  # 0
     '....kkhhHhmhkk.....',  # 1
-    '...khHwhmhhhmdk....',  # 2  wet clumps, a shine streaking along them
-    '..khhmhHwmhhhmMk...',  # 3  parted on the far side
-    '..kdhmhhmhhmhkMMdk.',  # 4  a strip of forehead there
-    '.khmhhmhhmhdkSMMdk.',  # 5  the rest swept across it in wet clumps
-    '.kdhmhhmdhkS...Mdk.',  # 6
+    '...khHwhmhhhmhdk...',  # 2  wet clumps, a shine streaking along them
+    '..khhmhHwmhhhmhhdk.',  # 3  combed over to the far side,
+    '..kdhmhhmhhmhhmhdk.',  # 4  the forehead covered to the brows
+    '.khmhhmhhmhdmhmhdk.',  # 5  in wet clumps
+    '.kdhmhhmdhkSdkMhdk.',  # 6  their tips stuck to it
     '.kmhmdhdkS......dk.',  # 7  their tips over the near brow
     '.kdhmdkS........dk.',  # 8
     '.khdm..........dhk.',  # 9  waves down both sides
