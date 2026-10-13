@@ -53,7 +53,9 @@ def tricks(fx, boss):
         # A batarang on about a third of the flips and vaults, ahead from the near hand.
         em['batarang'] = {**em['batarang'], 'enter': ['flip', 'vault'], 'chance': 0.35}
     elif boss == 'granger':
-        em['blink']['chance'] = 0.6
+        # The news from the future flies off her on a few flips, vaults and wall moves (her blink
+        # comes with its snapshot's own chance).
+        em['newspaper'] = {**em['newspaper'], 'enter': ['flip', 'vault', 'wall'], 'chance': 0.08}
     elif boss == 'rush-b':
         em['spray'] = every_way(em['spray'], 0.5)
         em['grenade']['chance'] = 0.3

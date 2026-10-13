@@ -81,7 +81,7 @@ diff -r /tmp/bosses packages/content/bosses
 | `vera.py`         | `fx.json`; looks `vera-tank`, `vera-vest`, `vera-hood` (`vr_looks.py`); `looks` in `boss.json`                                                          |
 | `b2.py`           | `fx.json`; look `android` (`b2_looks.py`); `looks` in `boss.json`                                                                                       |
 | `sir_nobody.py`   | `fx.json`; looks `sunlight`, `onion`, `hollow` (`kn_looks.py`, helms in `kn_helms.py`, materials in `kn_parts.py`); `looks` and `effect` in `boss.json` |
-| `granger.py`      | `fx.json`; looks `classic`, `pink`, `silver` (`gn_looks.py`); `looks` in `boss.json`                                                                    |
+| `granger.py`      | `fx.json` (`gn_fx.py`); looks `classic`, `slipstream`, `punk` (`gn_looks.py`, `gn_heads.py`, `gn_parts.py`); `looks` in `boss.json`                     |
 | `rush_b.py`       | `fx.json`; its eight looks (`rb_looks.py`); `looks` in `boss.json`                                                                                      |
 | `five.py`         | `fx.json`; looks `five-her`, `five-him` (`fv_looks.py`); `looks` in `boss.json`                                                                         |
 | `flittermouse.py` | `fx.json` (`fm_fx.py`); looks `asylum`, `armored`, `future` (`fm_heads.py`, `fm_body.py`); `looks` in `boss.json`                                       |
