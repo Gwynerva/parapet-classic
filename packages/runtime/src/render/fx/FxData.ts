@@ -109,6 +109,16 @@ export interface FxEmitter {
   max?: number;
   /** Multiplier of the amount with reduced motion (default 0: off). */
   reduced?: number;
+  /**
+   * A burst's particles come this many ms after their trigger (each its own, from a range),
+   * from where the body is by then: a shot after its aim, puffs strung out along the way.
+   */
+  delay?: Range;
+  /**
+   * `motion`: the particle's sides (offset, angle, mirrored sprite) follow the way the body
+   * is going across rather than the way it faces (a shot fired off a wall, the way it leaps).
+   */
+  toward?: 'facing' | 'motion';
 }
 
 export interface FxAfterimage {
@@ -134,6 +144,8 @@ export interface FxAfterimage {
   burst?: string[];
   /** Snapshot: a chain from one trick, `count` copies in all, one every `every` ms as it goes on. */
   repeat?: { count: number; every: number };
+  /** Snapshot: ms from its trigger to its first copy (its `burst` comes at the trigger). */
+  delay?: number;
   /** Snapshot: how long it lasts and how it drifts (px/s). */
   life?: number;
   drift?: readonly [number, number];
@@ -216,10 +228,16 @@ export function fxProblems(fx: FxFile): string[] {
       scale: e.scale,
       tumble: e.tumble,
       size: e.rect?.size,
+      delay: e.delay,
     })) {
       if (!rangeOk(r)) out.push(`${where}: ${k} is not a number or a [min, max] range`);
     }
     if (e.life === undefined) out.push(`${where}: no life`);
+    if (e.delay !== undefined && Math.min(...[e.delay].flat()) < 0)
+      out.push(`${where}: a negative delay`);
+    if (e.toward && e.toward !== 'facing' && e.toward !== 'motion') {
+      out.push(`${where}: toward "${e.toward as string}"`);
+    }
   }
   for (const [name, r] of Object.entries(fx.ribbons ?? {})) {
     out.push(...ribbonProblems(r).map((s) => `ribbon ${name}: ${s}`));
@@ -243,6 +261,9 @@ export function fxProblems(fx: FxFile): string[] {
     const r = a?.repeat;
     if (r && !(Number.isInteger(r.count) && r.count >= 1 && r.count <= MAX_CHAIN && r.every > 0)) {
       out.push(`variant ${name} afterimage: repeat needs a count of 1-${MAX_CHAIN} and every > 0`);
+    }
+    if (a?.delay !== undefined && !(a.delay >= 0)) {
+      out.push(`variant ${name} afterimage: delay must be 0 or more`);
     }
     if (a && Array.isArray(a.colors)) {
       for (const c of a.colors) if (!colour(c)) out.push(`variant ${name}: colour "${c}"`);

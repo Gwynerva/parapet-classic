@@ -186,11 +186,15 @@ One particle system draws every boss's effect; only the data differs
   `gravity`, `drag`, `life`, `fadeIn` / `fadeOut`, `scale`, `tumble`, `flutter`, `face`,
   `sprite` frames (or `sets` of them, each particle playing one: a Polaroid of one of several
   pictures) or `rect` pixels, `blend: add`, `layer`, `max`, and `reduced` for players who ask
-  for less motion.
+  for less motion. A burst can come later (`delay`, ms after its trigger, from where the body is
+  by then: a shot after its aim, puffs strung out along the way), and `toward: motion` sides it
+  with the way the body is going across rather than the way it faces (a shot fired off a wall,
+  the way it leaps).
 - `ribbons` — cloth of the effect, like the looks'.
 - `variants` — named sets of emitters, ribbons and an `afterimage`: echo or rush trails, a
   `snapshot` of the pose on a trick (with a `chance`: on some of them; `burst`: emitters coming
-  with it; `repeat`: a chain of copies as the trick goes on, taking the `colors` in turn),
+  with it; `repeat`: a chain of copies as the trick goes on, taking the `colors` in turn;
+  `delay`: the copies only that long after the trick starts, their `burst` at once),
   `scanlines`, colours or the rainbow.
 - `presence` — the haze by the start (`idle`) and the bursts as the boss leaves (`vanish`) and
   comes back (`appear`).

@@ -5,9 +5,12 @@
  */
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { fxProblems, type FxFile, type FxTrigger } from '../src/render/fx/FxData.ts';
 import { compileFx } from '../src/render/fx/FxSheet.ts';
+import { CharacterFx, type FxStyle } from '../src/render/fx/CharacterFx.ts';
+import type { EchoColor, EchoSheets } from '../src/render/EchoSkin.ts';
+import type { SceneRenderer } from '../src/render/SceneRenderer.ts';
 import { FxSystem } from '../src/render/fx/FxSystem.ts';
 import { MotionTracker, triggerBit } from '../src/render/fx/Motion.ts';
 import { traceDemo, type MoveDemoData } from '../src/moves/MoveDemo.ts';
@@ -109,6 +112,59 @@ describe('effects data', () => {
     const text = fxProblems(bad).join('\n');
     expect(text).toMatch(/emitter photo: sprite "nope" does not exist/);
     expect(text).toMatch(/emitter photo: an empty sprite set/);
+  });
+
+  it('delays a burst and sides it with the motion', () => {
+    const file: FxFile = {
+      palette: { w: '#ffffff' },
+      sprites: { dot: ['w'] },
+      emitters: {
+        shot: {
+          enter: ['flip'],
+          burst: 1,
+          delay: 90,
+          toward: 'motion',
+          speed: 0,
+          life: 1000,
+          sprite: { frames: ['dot'] },
+        },
+      },
+      variants: { v: { emitters: ['shot'] } },
+    };
+    expect(fxProblems(file)).toEqual([]);
+    expect(
+      fxProblems({ ...file, emitters: { shot: { ...file.emitters!.shot!, delay: -1 } } }),
+    ).toEqual(['emitter shot: a negative delay']);
+    const fx = compileFx(file, '#ff0000');
+    const cfx = new CharacterFx({} as EchoSheets);
+    const spawned: { facingRight: boolean }[] = [];
+    vi.spyOn(cfx.particles, 'spawn').mockImplementation((_f, _e, at) => {
+      spawned.push(at);
+    });
+    let move = 2;
+    let x = 0;
+    const body = {
+      pose: () => ({ x, y: 0, a: 0, b: 0, t: 0, flipX: false, anchored: false }),
+      move: () => move,
+    };
+    const style: FxStyle = {
+      fx,
+      variants: ['v'],
+      color: {} as EchoColor,
+      source: { compose: () => null } as unknown as SceneRenderer,
+      swap: () => ({}) as ReturnType<FxStyle['swap']>,
+    };
+    cfx.add({}, body, style);
+    cfx.step();
+    // A flip while going left, facing right (off a wall): nothing yet, then the shot leftward.
+    move = 48;
+    for (let i = 0; i < 4; i++) {
+      x -= 4 * 1024;
+      cfx.step();
+      if (i < 3) expect(spawned).toHaveLength(0);
+    }
+    expect(spawned).toHaveLength(1);
+    expect(spawned[0]!.facingRight).toBe(false);
   });
 
   it('keeps particles within the pool and the emitter maximum', () => {

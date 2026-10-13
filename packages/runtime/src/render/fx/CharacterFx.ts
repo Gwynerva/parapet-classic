@@ -72,6 +72,10 @@ const RUSH_STEPS = [
 const MAX_SNAPSHOTS = 8;
 /** Milliseconds of game clock per simulation step. */
 const STEP_MS = 30;
+/** Delayed particles waiting for their time, per body, at most. */
+const MAX_PENDING = 64;
+/** Below this speed across (world units a second) a body is not going either way. */
+const ACROSS = 10 * UNITS;
 
 interface Snapshot {
   pose: CharacterPose;
@@ -95,6 +99,8 @@ interface Entry {
   snapshots: Snapshot[];
   /** A snapshot chain under way: copies still to take, when the next is due, its place. */
   chain: { left: number; next: number; index: number } | null;
+  /** Particles of delayed bursts, each due at a time of the body's clock. */
+  pending: { em: CompiledEmitter; due: number }[];
   ribbons: { ribbon: Ribbon; anchor: FxAnchor; front: boolean }[];
   rand: () => number;
   clock: number;
@@ -160,6 +166,7 @@ export class CharacterFx {
       afterimage: variants.find((v) => v.afterimage)?.afterimage ?? null,
       snapshots: [],
       chain: null,
+      pending: [],
       ribbons: ribbonSpecs.map(({ spec, color }) => ({
         ribbon: new Ribbon(spec, color),
         anchor: spec.anchor,
@@ -209,18 +216,64 @@ export class CharacterFx {
         let bits = 0;
         for (const t of a.enter ?? ['roll', 'flip']) bits |= triggerBit(t);
         if ((m.entered & bits) !== 0 && (a.chance === undefined || e.rand() < a.chance)) {
-          this.snap(e, pose, 0);
           if (a.burst) this.burstWith(e, pose, m, a.burst);
           const r = a.repeat;
-          e.chain =
-            r && r.count > 1 ? { left: r.count - 1, next: e.clock + r.every, index: 1 } : null;
-        } else if (e.chain && a.repeat && e.clock >= e.chain.next) {
+          if (a.delay) {
+            // The whole chain later (an aim before the shot); its burst came now.
+            e.chain = { left: r?.count ?? 1, next: e.clock + a.delay, index: 0 };
+          } else {
+            this.snap(e, pose, 0);
+            e.chain =
+              r && r.count > 1 ? { left: r.count - 1, next: e.clock + r.every, index: 1 } : null;
+          }
+        } else if (e.chain && e.clock >= e.chain.next) {
           // The rest of the chain, as the trick goes on (the chance was taken by its first).
           const { left, next, index } = e.chain;
           this.snap(e, pose, index);
-          e.chain =
-            left > 1 ? { left: left - 1, next: next + a.repeat.every, index: index + 1 } : null;
+          const every = a.repeat?.every ?? 0;
+          e.chain = left > 1 ? { left: left - 1, next: next + every, index: index + 1 } : null;
         }
+      }
+      this.release(e, pose, m);
+    }
+  }
+
+  /** The particles of delayed bursts whose time has come, from where the body is now. */
+  private release(e: Entry, pose: CharacterPose, m: MotionStep): void {
+    if (e.pending.length === 0) return;
+    const fx = e.style.fx;
+    const due = e.pending.filter((p) => p.due <= e.clock);
+    if (due.length === 0) return;
+    e.pending = e.pending.filter((p) => p.due > e.clock);
+    if (!fx) return;
+    for (const p of due) this.spawnNow(e, pose, m, p.em);
+  }
+
+  /** One particle of an emitter from the body this step. */
+  private spawnNow(e: Entry, pose: CharacterPose, m: MotionStep, em: CompiledEmitter): void {
+    const fx = e.style.fx;
+    if (!fx) return;
+    const vx = m.vx * (1000 / STEP_MS);
+    const vy = m.vy * (1000 / STEP_MS);
+    const right = em.spec.toward === 'motion' && Math.abs(vx) > ACROSS ? vx > 0 : e.facingRight;
+    const p = this.anchorPoint(e, pose, em.spec.anchor);
+    this.particles.spawn(fx, em, { x: p.x, y: p.y, facingRight: right, vx, vy }, e.rand);
+  }
+
+  /** `count` particles of a burst: now, or each after its delay. */
+  private burstOf(
+    e: Entry,
+    pose: CharacterPose,
+    m: MotionStep,
+    em: CompiledEmitter,
+    count: number,
+  ): void {
+    for (let i = 0; i < count; i++) {
+      const delay = em.spec.delay === undefined ? 0 : pick(em.spec.delay, e.rand, 0);
+      if (delay > 0) {
+        if (e.pending.length < MAX_PENDING) e.pending.push({ em, due: e.clock + delay });
+      } else {
+        this.spawnNow(e, pose, m, em);
       }
     }
   }
@@ -319,8 +372,6 @@ export class CharacterFx {
   private emit(e: Entry, pose: CharacterPose, m: MotionStep): void {
     const fx = e.style.fx;
     if (!fx) return;
-    const vx = m.vx * (1000 / STEP_MS);
-    const vy = m.vy * (1000 / STEP_MS);
     for (const em of e.emitters) {
       const spec = em.spec;
       const amount = this.reduced ? (spec.reduced ?? 0) : 1;
@@ -335,20 +386,15 @@ export class CharacterFx {
         count += Math.floor(owed);
         e.owed.set(em, owed - Math.floor(owed));
       }
+      // The burst's chance and size are drawn before any particle, as they always were.
+      let burst = 0;
       if ((m.entered & em.enterBits) !== 0 || (m.enteredMove >= 0 && em.moves.has(m.enteredMove))) {
         if (spec.chance === undefined || e.rand() < spec.chance) {
-          count += Math.round(pick(spec.burst, e.rand, 6) * amount);
+          burst = Math.round(pick(spec.burst, e.rand, 6) * amount);
         }
       }
-      for (let i = 0; i < count; i++) {
-        const p = this.anchorPoint(e, pose, spec.anchor);
-        this.particles.spawn(
-          fx,
-          em,
-          { x: p.x, y: p.y, facingRight: e.facingRight, vx, vy },
-          e.rand,
-        );
-      }
+      for (let i = 0; i < count; i++) this.spawnNow(e, pose, m, em);
+      this.burstOf(e, pose, m, em, burst);
     }
   }
 
@@ -362,21 +408,10 @@ export class CharacterFx {
   private burstWith(e: Entry, pose: CharacterPose, m: MotionStep, names: readonly string[]): void {
     const fx = e.style.fx;
     if (!fx) return;
-    const vx = m.vx * (1000 / STEP_MS);
-    const vy = m.vy * (1000 / STEP_MS);
     for (const n of names) {
       const em = fx.emitters.get(n);
       if (!em) continue;
-      const count = Math.round(pick(em.spec.burst, e.rand, 6));
-      for (let i = 0; i < count; i++) {
-        const p = this.anchorPoint(e, pose, em.spec.anchor);
-        this.particles.spawn(
-          fx,
-          em,
-          { x: p.x, y: p.y, facingRight: e.facingRight, vx, vy },
-          e.rand,
-        );
-      }
+      this.burstOf(e, pose, m, em, Math.round(pick(em.spec.burst, e.rand, 6)));
     }
   }
 
