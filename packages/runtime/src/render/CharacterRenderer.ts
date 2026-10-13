@@ -193,6 +193,28 @@ export class CharacterRenderer {
     return visual;
   }
 
+  /**
+   * Start tracking a runner that branches off `from` on this step (a copy of its world going
+   * its own way): it takes `from`'s animation as it stands instead of the idle loop.
+   */
+  attachBranch(
+    runner: RunnerState,
+    from: RunnerState,
+    options: RunnerVisualOptions = {},
+  ): RunnerVisual {
+    const visual = this.attach(runner, options);
+    const source = this.visuals.get(from);
+    if (!source) return visual;
+    visual.animator.copyFrom(source.animator);
+    visual.prevX = source.prevX;
+    visual.prevY = source.prevY;
+    visual.x = source.x;
+    visual.y = source.y;
+    visual.flipX = source.flipX;
+    visual.anchored = source.anchored;
+    return visual;
+  }
+
   detach(runner: RunnerState): void {
     this.visuals.delete(runner);
   }

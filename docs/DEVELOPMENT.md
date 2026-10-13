@@ -82,6 +82,9 @@ Pages of the dev server, never published:
   middle of their tricks with every flourish of their effects: the README's banner and Play
   button, a collage of all twelve in their worlds without the logo (`docs/`) and the link
   previews (`packages/classic/public/og-*.png`).
+- `/dev/reel.html` — footage of how the bosses' records were found: a boss runs its local TAS
+  record through the level among hundreds of pale attempts that went wrong, and the page
+  records itself in 4K. See [TAS-REEL.md](TAS-REEL.md).
 - `/dev/sprites.html` — a gallery of the extracted sprites.
 - `/dev/loudness.html` — measures the music tracks and saves the levels they are played at.
 

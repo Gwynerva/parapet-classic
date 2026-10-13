@@ -189,3 +189,42 @@ describe.skipIf(!hasContent())('animator against the oracle traces', () => {
     });
   }
 });
+
+describe.skipIf(!hasContent())('an animation branching off with its world', () => {
+  it('plays on as the one it was copied from', () => {
+    const moves = loadMoves();
+    const clips = buildClipTable(loadAnims().clips);
+    const table = new MoveTable(moves);
+    const make = () =>
+      new World({
+        level: loadLevel(0),
+        moves,
+        tables: loadTables(),
+        rules: { missionType: 0 },
+        levelId: 0,
+        rivals: [],
+      });
+    const input = (step: number): number => (step % 37 === 5 ? 1 : step % 53 === 20 ? 4 | 16 : 0);
+    const play = (world: World, animator: Animator): void => {
+      world.step(input(world.stepCount));
+      for (const ev of world.events) {
+        if (ev.type === 'move') animator.setMove(table.get(ev.to), ev.timer, ev.entry);
+      }
+      animator.update(STEP, world.player, world.clock);
+    };
+    const world = make();
+    const animator = new Animator(clips, 1);
+    animator.setIdle(world.player);
+    for (let i = 0; i < 150; i++) play(world, animator);
+    const branch = make();
+    branch.restoreState(world.saveState(false));
+    const copy = new Animator(clips, 2);
+    copy.copyFrom(animator);
+    expect(animSnapshot(copy)).toEqual(animSnapshot(animator));
+    for (let i = 0; i < 150; i++) {
+      play(world, animator);
+      play(branch, copy);
+      expect(drawSnapshot(copy, branch.player)).toEqual(drawSnapshot(animator, world.player));
+    }
+  });
+});

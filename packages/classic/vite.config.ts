@@ -1,4 +1,5 @@
 import { defineConfig, loadEnv, type Plugin, type UserConfig } from 'vite';
+import { createWriteStream } from 'node:fs';
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -10,6 +11,8 @@ const content = fileURLToPath(new URL('../content', import.meta.url));
 
 /** Local TAS runs (git-ignored), served to the dev server only (`?tas=`). */
 const tasOut = fileURLToPath(new URL('../tools/tas-out', import.meta.url)).replace(/\\/g, '/');
+/** Where the TAS reel (dev/reel.html) saves its videos: with the runs, never committed. */
+const reelDir = join(fileURLToPath(new URL('../tools/tas-out', import.meta.url)), 'reel');
 
 /**
  * Development helpers (`dev/`): recorded input logs for `?replay=`, the sprite gallery, the
@@ -118,6 +121,32 @@ function devHelpersPlugin(): Plugin {
             res.statusCode = 500;
             res.end(String(err));
           });
+      });
+      // The TAS reel saves its recordings here (dev/reel.html), next to the runs: git-ignored.
+      server.middlewares.use('/dev/save-reel', (req, res, next) => {
+        if (req.method !== 'POST') return next();
+        const name = new URL(req.url ?? '/', 'http://dev').searchParams.get('name') ?? '';
+        if (!/^[\w.-]+\.(?:mp4|webm)$/.test(name)) {
+          res.statusCode = 400;
+          res.end('not a video name');
+          return;
+        }
+        const file = join(reelDir, name);
+        mkdir(reelDir, { recursive: true }).then(
+          () => {
+            const out = createWriteStream(file);
+            out.on('finish', () => res.end(file));
+            out.on('error', (err) => {
+              res.statusCode = 500;
+              res.end(String(err));
+            });
+            req.pipe(out);
+          },
+          (err: unknown) => {
+            res.statusCode = 500;
+            res.end(String(err));
+          },
+        );
       });
       // The loudness page saves its table here (dev/loudness.html).
       server.middlewares.use('/dev/loudness', (req, res, next) => {

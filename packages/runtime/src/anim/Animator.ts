@@ -199,6 +199,28 @@ export class Animator {
     this.rng = new Prng(seed);
   }
 
+  /** Takes over another animator's playback as it stands (not its blink PRNG). */
+  copyFrom(other: Animator): void {
+    this.clipLength = other.clipLength;
+    this.frame = other.frame;
+    this.clipStart = other.clipStart;
+    this.mode = other.mode;
+    this.prevClipLength = other.prevClipLength;
+    this.prevFrame = other.prevFrame;
+    this.prevClipStart = other.prevClipStart;
+    this.notFacingAtSet = other.notFacingAtSet;
+    this.anchorX = other.anchorX;
+    this.anchorY = other.anchorY;
+    this.tween = other.tween;
+    this.prevHandsAnchored = other.prevHandsAnchored;
+    this.handsAnchored = other.handsAnchored;
+    this.time = other.time;
+    this.duration = other.duration;
+    this.face = other.face;
+    this.faceUntil = other.faceUntil;
+    this.flags = other.flags;
+  }
+
   /** `y(int)`: the idle loop shown before the first move change (clip 228 at 4 fps). */
   setIdle(runner: AnimRunner): void {
     this.setClip(IDLE_CLIP_OFFSET, 0, AnimMode.LOOP, 0, runner);
