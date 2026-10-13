@@ -1,184 +1,360 @@
 {
   "palette": {
-    "y": "#ffd060",
     "Y": "#fff2b0",
-    "o": "#e8a33a",
-    "O": "#b8781e",
+    "y": "#f0cb63",
+    "o": "#d9a441",
+    "O": "#a8752c",
     "w": "#ffffff",
+    "j": "#bfe8f8",
+    "W": "#7a4a1e",
+    "V": "#c48a3c",
+    "g": "#e6f2f6b0",
     "k": "#1c1a22",
-    "K": "#3a2e4a",
-    "r": "#ff9a2a",
-    "R": "#ff5a1a"
+    "K": "#3a3446",
+    "r": "#ff8a1a",
+    "R": "#c8400a",
+    "e": "#ffd060"
   },
   "sprites": {
     "glint1": [".Y.", "YwY", ".Y."],
-    "glint2": ["..y..", "..Y..", "yYwYy", "..Y..", "..y.."],
-    "hourglass": ["ooooo", ".yYy.", "..y..", ".y.y.", ".yyy.", "ooooo"],
-    "wisp1": [".KK.", "KkkK", ".KK."],
-    "wisp2": ["..KK..", ".KkkK.", "KkkkkK", ".KkkK.", "..KK.."]
+    "glint2": ["..j..", "..Y..", "jYwYj", "..Y..", "..j.."],
+    "hg0": [
+      ".VVVVVVV.",
+      ".WWWWWWW.",
+      "..g...g..",
+      "...g.g...",
+      "....y....",
+      "...gYg...",
+      "..gyyyg..",
+      ".WWWWWWW.",
+      ".VVVVVVV."
+    ],
+    "hg90": [
+      ".........",
+      "VW.....WV",
+      "VWg...gWV",
+      "VWyg.g.WV",
+      "VWyYy..WV",
+      "VWyg.g.WV",
+      "VWg...gWV",
+      "VW.....WV",
+      "........."
+    ],
+    "hg180": [
+      ".VVVVVVV.",
+      ".WWWWWWW.",
+      "..gyyyg..",
+      "...gYg...",
+      "....y....",
+      "...g.g...",
+      "..g...g..",
+      ".WWWWWWW.",
+      ".VVVVVVV."
+    ],
+    "hg180t": [
+      ".VVVVVVV.",
+      ".WWWWWWW.",
+      "..gyyyg..",
+      "...gYg...",
+      "....Y....",
+      "...g.g...",
+      "..g.y.g..",
+      ".WWWWWWW.",
+      ".VVVVVVV."
+    ]
   },
   "emitters": {
-    "sand": {
-      "while": ["run", "air", "wall"],
-      "every": 2.5,
-      "minSpeed": 40,
-      "anchor": "body",
-      "jitter": [2, 2],
-      "speed": [10, 35],
-      "angle": [-10, 50],
-      "inherit": 0.1,
-      "gravity": 60,
-      "drag": 1.2,
-      "life": [400, 900],
-      "fadeOut": 300,
-      "rect": {
-        "size": 1,
-        "colors": ["y", "o", "Y", "O"]
-      },
-      "max": 120,
-      "reduced": 0.2
-    },
-    "glints": {
+    "glint": {
       "while": ["run", "air"],
-      "perSecond": 4,
+      "perSecond": 0.22,
       "minSpeed": 40,
-      "anchor": "body",
-      "jitter": [4, 6],
-      "speed": [2, 6],
-      "angle": [80, 100],
-      "life": [250, 450],
-      "fadeIn": 80,
-      "fadeOut": 200,
+      "anchor": "hips",
+      "offset": [-3, -4],
+      "jitter": [1, 1],
+      "speed": 0,
+      "inherit": 1,
+      "life": 320,
+      "fadeIn": 60,
+      "fadeOut": 160,
       "sprite": {
         "frames": ["glint1", "glint2", "glint1"],
         "fps": 10,
         "loop": false
       },
-      "blend": "add"
+      "blend": "add",
+      "layer": "front",
+      "max": 1,
+      "reduced": 1
     },
-    "swirl": {
-      "enter": ["flip", "vault", "wall", "roll", "land"],
-      "burst": [14, 20],
-      "anchor": "body",
-      "speed": [30, 70],
-      "angle": [0, 360],
-      "gravity": 40,
-      "drag": 2,
-      "life": [500, 800],
-      "fadeOut": 300,
-      "rect": {
-        "size": [1, 2],
-        "colors": ["y", "Y", "o"]
-      },
-      "chance": 0.5
-    },
-    "dark-sand": {
+    "grain": {
       "while": ["run", "air", "wall"],
-      "every": 2.5,
+      "perSecond": 0.7,
       "minSpeed": 40,
-      "anchor": "body",
-      "jitter": [2, 2],
-      "speed": [10, 35],
-      "angle": [-10, 50],
-      "inherit": 0.1,
-      "gravity": 50,
-      "drag": 1.2,
-      "life": [400, 900],
-      "fadeOut": 300,
-      "rect": {
-        "size": 1,
-        "colors": ["k", "K", "k", "r"]
-      },
-      "max": 120,
-      "reduced": 0.2
-    },
-    "embers": {
-      "while": ["run", "air"],
-      "perSecond": 10,
-      "minSpeed": 40,
-      "anchor": "hand.far",
-      "speed": [15, 40],
-      "angle": [60, 120],
-      "gravity": -30,
-      "life": [300, 600],
+      "anchor": "hips",
+      "offset": [-3, -2],
+      "jitter": [1, 1],
+      "speed": [0, 6],
+      "angle": [-100, -80],
+      "inherit": 0.25,
+      "gravity": 180,
+      "life": [450, 700],
       "fadeOut": 200,
       "rect": {
         "size": 1,
-        "colors": ["r", "R", "y"]
+        "colors": ["y", "Y", "o"]
       },
-      "blend": "add"
+      "max": 3
     },
-    "wisps": {
-      "enter": ["flip", "wall", "roll", "land"],
-      "burst": [3, 5],
+    "crumble": {
+      "burst": [12, 16],
       "anchor": "body",
-      "speed": [8, 20],
-      "angle": [0, 360],
-      "gravity": -20,
-      "drag": 2,
-      "life": [500, 800],
-      "fadeOut": 400,
-      "sprite": {
-        "frames": ["wisp1", "wisp2"],
-        "fps": 4,
-        "loop": false
-      }
-    },
-    "burst": {
-      "burst": 40,
-      "anchor": "body",
-      "speed": [30, 110],
-      "angle": [0, 360],
-      "gravity": 50,
-      "drag": 1.5,
-      "life": [600, 1100],
-      "fadeOut": 400,
+      "jitter": [1, 2],
+      "speed": [0, 10],
+      "angle": [-120, -60],
+      "inherit": 0,
+      "gravity": 150,
+      "drag": 0.5,
+      "life": [380, 700],
+      "fadeOut": 260,
       "rect": {
-        "size": [1, 2],
-        "colors": ["y", "Y", "o", "O"]
-      }
+        "size": 1,
+        "colors": ["y", "o", "Y", "O"]
+      },
+      "max": 40
+    },
+    "wall-sand": {
+      "enter": ["wall"],
+      "chance": 0.3,
+      "burst": [3, 5],
+      "anchor": "feet",
+      "jitter": [2, 1],
+      "speed": [4, 14],
+      "angle": [-150, -30],
+      "inherit": 0.1,
+      "gravity": 160,
+      "life": [350, 600],
+      "fadeOut": 200,
+      "rect": {
+        "size": 1,
+        "colors": ["y", "o", "Y", "O"]
+      },
+      "max": 10
     },
     "hourglass": {
+      "enter": ["fail"],
       "burst": 1,
       "anchor": "head",
-      "offset": [0, -10],
-      "speed": 4,
-      "angle": 90,
-      "life": 900,
-      "fadeIn": 150,
-      "fadeOut": 400,
+      "offset": [0, -13],
+      "speed": 0,
+      "inherit": 0.6,
+      "life": 1200,
+      "fadeIn": 90,
+      "fadeOut": 350,
       "sprite": {
-        "frames": ["hourglass"],
-        "fps": 1
+        "frames": [
+          "hg0",
+          "hg0",
+          "hg0",
+          "hg90",
+          "hg90",
+          "hg180",
+          "hg180",
+          "hg180t",
+          "hg180",
+          "hg180t",
+          "hg180",
+          "hg180t"
+        ],
+        "fps": 10,
+        "loop": false
       },
-      "tumble": 2
+      "layer": "front",
+      "max": 1,
+      "reduced": 1
     },
-    "idle": {
-      "perSecond": 6,
-      "anchor": "feet",
-      "jitter": [8, 0],
-      "speed": [6, 14],
-      "angle": [70, 110],
-      "gravity": 20,
-      "life": [500, 900],
+    "ring": {
+      "enter": ["fail"],
+      "burst": [22, 28],
+      "anchor": "hips",
+      "jitter": [1, 1],
+      "speed": [55, 80],
+      "angle": [0, 360],
+      "inherit": 0.3,
+      "gravity": 25,
+      "drag": 3.2,
+      "life": [450, 750],
       "fadeOut": 300,
       "rect": {
         "size": 1,
-        "colors": ["y", "o"]
+        "colors": ["y", "o", "Y", "O"]
+      },
+      "reduced": 0.4
+    },
+    "ember": {
+      "while": ["run", "air"],
+      "perSecond": 0.9,
+      "minSpeed": 40,
+      "anchor": "hand.far",
+      "jitter": [1, 1],
+      "speed": [6, 16],
+      "angle": [60, 120],
+      "inherit": 0.2,
+      "gravity": -30,
+      "life": [300, 550],
+      "fadeOut": 220,
+      "rect": {
+        "size": 1,
+        "colors": ["r", "e", "R"]
+      },
+      "blend": "add",
+      "max": 3
+    },
+    "cinder": {
+      "while": ["run", "air", "wall"],
+      "perSecond": 0.6,
+      "minSpeed": 40,
+      "anchor": "chest",
+      "jitter": [3, 4],
+      "speed": [0, 6],
+      "angle": [-100, -80],
+      "inherit": 0.25,
+      "gravity": 160,
+      "life": [450, 700],
+      "fadeOut": 200,
+      "rect": {
+        "size": 1,
+        "colors": ["k", "K", "R"]
+      },
+      "max": 3
+    },
+    "dark-crumble": {
+      "burst": [12, 16],
+      "anchor": "body",
+      "jitter": [1, 2],
+      "speed": [0, 10],
+      "angle": [-120, -60],
+      "inherit": 0,
+      "gravity": 150,
+      "drag": 0.5,
+      "life": [380, 700],
+      "fadeOut": 260,
+      "rect": {
+        "size": 1,
+        "colors": ["k", "K", "k", "r", "R"]
+      },
+      "max": 40
+    },
+    "dark-ring": {
+      "enter": ["fail"],
+      "burst": [22, 28],
+      "anchor": "hips",
+      "jitter": [1, 1],
+      "speed": [55, 80],
+      "angle": [0, 360],
+      "inherit": 0.3,
+      "gravity": 25,
+      "drag": 3.2,
+      "life": [450, 750],
+      "fadeOut": 300,
+      "rect": {
+        "size": 1,
+        "colors": ["k", "K", "k", "r", "R"]
+      },
+      "reduced": 0.4
+    },
+    "idle": {
+      "perSecond": 3,
+      "anchor": "body",
+      "jitter": [7, 0],
+      "speed": [0, 4],
+      "angle": [-100, -80],
+      "gravity": 50,
+      "life": [600, 1000],
+      "fadeIn": 100,
+      "fadeOut": 300,
+      "rect": {
+        "size": 1,
+        "colors": ["y", "o", "Y", "O"]
       }
+    },
+    "turn": {
+      "burst": 1,
+      "anchor": "head",
+      "offset": [0, -10],
+      "speed": 0,
+      "life": 1200,
+      "fadeIn": 90,
+      "fadeOut": 350,
+      "sprite": {
+        "frames": [
+          "hg0",
+          "hg0",
+          "hg0",
+          "hg90",
+          "hg90",
+          "hg180",
+          "hg180",
+          "hg180t",
+          "hg180",
+          "hg180t",
+          "hg180",
+          "hg180t"
+        ],
+        "fps": 10,
+        "loop": false
+      },
+      "layer": "front",
+      "reduced": 1
+    },
+    "scatter": {
+      "burst": [26, 32],
+      "anchor": "body",
+      "speed": [40, 80],
+      "angle": [0, 360],
+      "gravity": 40,
+      "drag": 2.6,
+      "life": [500, 900],
+      "fadeOut": 350,
+      "rect": {
+        "size": 1,
+        "colors": ["y", "o", "Y", "O"]
+      },
+      "reduced": 0.4
     }
   },
   "variants": {
     "sands": {
-      "emitters": ["sand", "glints", "swirl"]
+      "emitters": ["glint", "grain", "wall-sand", "hourglass", "ring"],
+      "afterimage": {
+        "mode": "snapshot",
+        "enter": ["flip", "vault"],
+        "chance": 0.35,
+        "burst": ["crumble"],
+        "colors": ["#d9a441"],
+        "textured": true,
+        "life": 420,
+        "drift": [0, 14],
+        "alpha": 0.5
+      }
     },
     "dark-sands": {
-      "emitters": ["dark-sand", "embers", "wisps"]
+      "emitters": ["ember", "cinder", "hourglass", "dark-ring"],
+      "afterimage": {
+        "mode": "snapshot",
+        "enter": ["flip", "vault"],
+        "chance": 0.35,
+        "burst": ["dark-crumble"],
+        "colors": ["#2a2430"],
+        "textured": true,
+        "life": 420,
+        "drift": [0, 14],
+        "alpha": 0.72
+      }
     }
   },
   "presence": {
     "idle": ["idle"],
-    "vanish": ["burst", "hourglass"],
-    "appear": ["burst", "hourglass"]
+    "vanish": ["turn", "scatter"],
+    "appear": ["turn", "scatter"]
   }
 }

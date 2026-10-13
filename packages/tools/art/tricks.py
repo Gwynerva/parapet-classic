@@ -37,7 +37,9 @@ def tricks(fx, boss):
         for k in [k for k in em if k.startswith('photo-')]:
             em[k] = {**em[k], 'enter': TRICKS, 'chance': 0.1}
     elif boss == 'shahzada':
-        em['swirl'] = every_way(em['swirl'], 0.5)
+        # His statue of sand (the afterimage, with its chance) brings its grains; sand runs off his
+        # boots on a third of the wall moves.
+        em['wall-sand'] = {**em['wall-sand'], 'enter': ['wall'], 'chance': 0.3}
     elif boss == 'grove':
         # RESPECT + over his head on one flip or vault in five, a bill or two off him on some of
         # them (each rolls its own chance).
