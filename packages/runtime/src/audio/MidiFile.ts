@@ -1,3 +1,5 @@
+import type { PatchSet } from './Instruments.ts';
+
 /**
  * Standard MIDI file parser (formats 0 and 1) that resolves everything the synthesiser needs
  * up front: a flat list of notes with absolute start times and durations in ms, each carrying
@@ -42,6 +44,8 @@ export interface MidiSong {
   notes: MidiNote[];
   /** Level the loader chose for the song (from measured loudness); estimated when absent. */
   gain?: number;
+  /** Patches of the song's own in place of the synthesiser's (`MusicDirector.trackPatches`). */
+  patches?: PatchSet;
   /**
    * Channel volume changes in time order. When present the synthesiser applies them to the
    * channels as they happen (and ignores `MidiNote.volume`); songs without them (our own

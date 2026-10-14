@@ -224,6 +224,45 @@ export function patchFor(program: number): Patch {
   return FAMILIES[family] ?? FAMILIES[0]!;
 }
 
+/** Patches a song plays some GM programs with instead of the families above. */
+export type PatchSet = Readonly<Record<number, Patch>>;
+
+/** The patch of `program` in a song with its own `patches`. */
+export function songPatch(patches: PatchSet | null | undefined, program: number): Patch {
+  return patches?.[program] ?? patchFor(program);
+}
+
+/**
+ * The menu track's own sound. Its chords are held for up to eleven seconds by a string section
+ * (program 50) and two synth leads (81) a second apart; the leads' square and saw, unfiltered
+ * and held flat, grate over that long. Here they are mellow (triangles under a low-pass) and
+ * every chord swells in and slowly settles.
+ */
+export const MENU_PATCHES: PatchSet = {
+  50: {
+    wave: 'triangle',
+    wave2: 'sine',
+    detune: 6,
+    attack: 0.35,
+    decay: 1.6,
+    sustain: 0.55,
+    release: 0.7,
+    gain: 0.24,
+    lowpass: 1500,
+  },
+  81: {
+    wave: 'triangle',
+    wave2: 'sawtooth',
+    detune: 5,
+    attack: 0.25,
+    decay: 1.4,
+    sustain: 0.45,
+    release: 0.6,
+    gain: 0.3,
+    lowpass: 1300,
+  },
+};
+
 export const PATCH_COUNT = 128;
 
 /** General MIDI percussion keys (channel 10). */

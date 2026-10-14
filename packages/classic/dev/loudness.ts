@@ -1,10 +1,12 @@
 /**
- * The loudness page (dev server only): measures every track on the synthesiser and saves the
- * table through the dev server (`vite.config.ts`, POST /dev/loudness).
+ * The loudness page (dev server only): measures every track on the synthesiser, with the patches
+ * of its own a track has (`trackPatches`), and saves the table through the dev server
+ * (`vite.config.ts`, POST /dev/loudness). A track's trim (`trackTrim`) is left out: the table
+ * levels the tracks, the trim then keeps one below the rest on purpose.
  */
 import { parseMidi, stripEndMarker, type MidiSong } from '@parapet/runtime/audio/MidiFile.ts';
 import { scoreToSong, type Score } from '@parapet/runtime/audio/Score.ts';
-import { CONTEST_TRACK } from '@parapet/runtime/audio/MusicDirector.ts';
+import { CONTEST_TRACK, trackPatches } from '@parapet/runtime/audio/MusicDirector.ts';
 import {
   integratedLoudness,
   renderSong,
@@ -28,6 +30,7 @@ async function tracks(): Promise<Map<number, MidiSong>> {
     out.set(id, stripEndMarker(parseMidi(bytes)));
   }
   out.set(CONTEST_TRACK, scoreToSong(themeJson as unknown as Score));
+  for (const [id, song] of out) song.patches = trackPatches(id);
   return out;
 }
 

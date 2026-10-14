@@ -7,6 +7,7 @@
  */
 import { drumFor, PATCH_COUNT, patchFor } from './Instruments.ts';
 import { songEvents, type MidiSong } from './MidiFile.ts';
+import { TRACK_PATCHES } from './MusicDirector.ts';
 import { Synth, SYNTH_VERSION } from './Synth.ts';
 
 /** Sample rate the K-weighting coefficients below are given for. */
@@ -65,11 +66,11 @@ export function integratedLoudness(channels: readonly Float32Array[]): number {
   return lufs(mean(gated));
 }
 
-/** A stable fingerprint of the synthesiser's sound: version and every patch. */
+/** A stable fingerprint of the synthesiser's sound: version, every patch, the songs' own. */
 export function synthFingerprint(): string {
   const patches = Array.from({ length: PATCH_COUNT }, (_, i) => patchFor(i));
   const drums = Array.from({ length: 128 }, (_, k) => drumFor(k));
-  const text = JSON.stringify([patches, drums]);
+  const text = JSON.stringify([patches, drums, TRACK_PATCHES]);
   // FNV-1a, 32 bits.
   let hash = 0x811c9dc5;
   for (let i = 0; i < text.length; i++) {
@@ -107,6 +108,7 @@ export async function renderSong(song: MidiSong, tailSeconds = 1.5): Promise<Flo
     const ctx = new OfflineAudioContext(2, Math.ceil((to - from) * METER_RATE), METER_RATE);
     const synth = new Synth(ctx, ctx.destination);
     synth.channelVolumes = controlled;
+    synth.patches = song.patches ?? null;
     synth.resetChannels(0);
     // The channel volumes as the song has set them by `from`.
     const volumes = new Map<number, number>();

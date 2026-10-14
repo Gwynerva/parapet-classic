@@ -204,6 +204,7 @@ export class MusicPlayer {
       gain.connect(songGain);
       const synth = new Synth(ctx, gain);
       synth.channelVolumes = (song.controls?.length ?? 0) > 0;
+      synth.patches = song.patches ?? null;
       return { synth, gain, pass: -1 };
     };
     const cursor = new SongCursor(song, loop, start);

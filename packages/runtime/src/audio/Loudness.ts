@@ -5,7 +5,7 @@
  * player estimates each song's loudness from its notes and the instrument gains and scales
  * the song so every track lands near the same level.
  */
-import { drumFor, patchFor } from './Instruments.ts';
+import { drumFor, songPatch } from './Instruments.ts';
 import type { MidiSong } from './MidiFile.ts';
 
 /** Loudness the songs are scaled towards (the figure of a typical game track). */
@@ -20,7 +20,7 @@ export function estimateLoudness(song: MidiSong): number {
   if (song.durationMs <= 0) return 0;
   let energy = 0;
   for (const n of song.notes) {
-    const gain = n.channel === 9 ? drumFor(n.note).gain : patchFor(n.program).gain;
+    const gain = n.channel === 9 ? drumFor(n.note).gain : songPatch(song.patches, n.program).gain;
     const level = (n.velocity / 127) * n.volume * gain;
     const duration = n.channel === 9 ? Math.min(n.duration, DRUM_DURATION_CAP_MS) : n.duration;
     energy += level * duration;

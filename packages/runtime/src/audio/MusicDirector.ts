@@ -5,6 +5,7 @@
  * (`CONTEST_TRACK`) in their contests. Tracks are loaded on demand through `loadTrack` and
  * cached.
  */
+import { MENU_PATCHES, type PatchSet } from './Instruments.ts';
 import type { MidiSong } from './MidiFile.ts';
 import type { MusicPlayer } from './MusicPlayer.ts';
 
@@ -16,6 +17,24 @@ export const THEME_COUNT = 4;
 export const TRACKS_PER_THEME = 3;
 /** Volume of the options slider, in percent. */
 export const MAX_VOLUME = 100;
+
+/** Tracks played with patches of their own (`MidiSong.patches`): the menu's mellow sound. */
+export const TRACK_PATCHES: Readonly<Record<number, PatchSet>> = { [MENU_TRACK]: MENU_PATCHES };
+
+/**
+ * Tracks kept below the measured common level, whatever the volume: the menu's long chords,
+ * as if the slider stood 35 % lower (it is squared, `volumeGain`).
+ */
+const TRACK_TRIM: Readonly<Record<number, number>> = { [MENU_TRACK]: 0.65 ** 2 };
+
+export function trackPatches(id: number): PatchSet | undefined {
+  return TRACK_PATCHES[id];
+}
+
+/** Gain a track gets on top of its loudness normalisation. */
+export function trackTrim(id: number): number {
+  return TRACK_TRIM[id] ?? 1;
+}
 
 /** Gain for a slider level: squared, so the slider feels even to the ear. */
 export function volumeGain(level: number): number {

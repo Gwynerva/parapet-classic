@@ -5,7 +5,7 @@
  * cost nothing noticeable. Each MIDI channel ends in a gain of its own that follows the song's
  * channel volume changes, so a held chord swells and fades as written.
  */
-import { drumFor, patchFor, type DrumPatch, type Patch } from './Instruments.ts';
+import { drumFor, songPatch, type DrumPatch, type Patch, type PatchSet } from './Instruments.ts';
 import { DEFAULT_CHANNEL_VOLUME, type MidiControl, type MidiNote } from './MidiFile.ts';
 
 export const MAX_VOICES = 32;
@@ -36,6 +36,8 @@ export class Synth {
    * applied again. Songs without controller changes play each note at its `volume`.
    */
   channelVolumes = false;
+  /** The song's own patches for some programs (`MidiSong.patches`). */
+  patches: PatchSet | null = null;
 
   constructor(ctx: BaseAudioContext, output: AudioNode) {
     this.ctx = ctx;
@@ -77,7 +79,7 @@ export class Synth {
     this.prune(when);
     if (this.voices.length >= MAX_VOICES) return;
     if (note.channel === 9) this.drumAt(note, when, drumFor(note.note));
-    else this.toneAt(note, when, patchFor(note.program));
+    else this.toneAt(note, when, songPatch(this.patches, note.program));
   }
 
   /** Stop every scheduled voice at audio time `when`. */

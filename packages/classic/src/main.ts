@@ -44,9 +44,15 @@ import type { ContestKind } from '@parapet/runtime/storage/profile.ts';
 import { installWebFont } from '@parapet/runtime/ui/TextInputOverlay.ts';
 import { parseMidi, stripEndMarker, type MidiSong } from '@parapet/runtime/audio/MidiFile.ts';
 import { tableGain, type LoudnessTable } from '@parapet/runtime/audio/LoudnessMeter.ts';
+import { normalisationGain } from '@parapet/runtime/audio/Loudness.ts';
 import loudnessJson from '@content/audio/loudness.json';
 import { MusicPlayer, unlockOnGesture } from '@parapet/runtime/audio/MusicPlayer.ts';
-import { CONTEST_TRACK, MusicDirector } from '@parapet/runtime/audio/MusicDirector.ts';
+import {
+  CONTEST_TRACK,
+  MusicDirector,
+  trackPatches,
+  trackTrim,
+} from '@parapet/runtime/audio/MusicDirector.ts';
 import { scoreToSong, type Score } from '@parapet/runtime/audio/Score.ts';
 import themeJson from '@content/bosses/theme.json';
 import terminusUrl from '../../content/fonts/src/terminus/TerminusTTF-4.49.3.ttf';
@@ -118,8 +124,11 @@ async function main(): Promise<void> {
         if (!res.ok) throw new Error(`music track ${id}: HTTP ${res.status}`);
         song = stripEndMarker(parseMidi(await res.arrayBuffer()));
       }
-      // Every track at the same measured loudness (packages/content/audio/loudness.json).
-      song.gain = tableGain(loudnessJson as LoudnessTable, id) ?? undefined;
+      // The menu's own mellow patches; every track at the same measured loudness
+      // (packages/content/audio/loudness.json), then the menu's kept lower.
+      song.patches = trackPatches(id);
+      const level = tableGain(loudnessJson as LoudnessTable, id) ?? normalisationGain(song);
+      song.gain = level * trackTrim(id);
       return song;
     },
   });

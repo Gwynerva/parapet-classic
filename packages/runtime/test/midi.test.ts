@@ -3,9 +3,9 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parseMidi, songEvents, stripEndMarker, type MidiSong } from '../src/audio/MidiFile.ts';
 import { estimateLoudness, normalisationGain } from '../src/audio/Loudness.ts';
-import { drumFor, PATCH_COUNT, patchFor } from '../src/audio/Instruments.ts';
+import { drumFor, PATCH_COUNT, patchFor, songPatch } from '../src/audio/Instruments.ts';
 import { SongCursor, type DueEvent } from '../src/audio/MusicPlayer.ts';
-import { MENU_TRACK, MusicDirector } from '../src/audio/MusicDirector.ts';
+import { MENU_TRACK, MusicDirector, trackPatches, trackTrim } from '../src/audio/MusicDirector.ts';
 import type { MusicPlayer } from '../src/audio/MusicPlayer.ts';
 import { CONTENT_DIR, hasContent } from './helpers/content.ts';
 
@@ -146,6 +146,22 @@ describe('instruments', () => {
       expect(patch.attack).toBeGreaterThanOrEqual(0);
     }
     for (let k = 27; k < 88; k++) expect(drumFor(k).decay).toBeGreaterThan(0);
+  });
+
+  it('plays the menu track with mellow patches of its own, kept below the rest', () => {
+    const own = trackPatches(MENU_TRACK)!;
+    for (const program of [50, 81]) {
+      const patch = songPatch(own, program);
+      expect(patch).not.toBe(patchFor(program));
+      expect(patch.wave).not.toBe('square');
+      expect(patch.lowpass ?? Infinity).toBeLessThanOrEqual(2000);
+      expect(patch.attack).toBeGreaterThanOrEqual(0.2);
+    }
+    expect(songPatch(own, 0)).toBe(patchFor(0));
+    expect(songPatch(undefined, 81)).toBe(patchFor(81));
+    expect(trackPatches(2)).toBeUndefined();
+    expect(trackTrim(MENU_TRACK)).toBeCloseTo(0.4225);
+    expect(trackTrim(2)).toBe(1);
   });
 });
 
