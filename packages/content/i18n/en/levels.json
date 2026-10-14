@@ -31,7 +31,6 @@
   "level.complete.done": "Every mission of {name} is done.",
   "level.complete.character": "New character: {name}!",
   "level.complete.boss": "{boss} takes your challenge now.",
-  "level.complete.repeat": "Play this mission again",
   "level.complete.fight": "Challenge {boss}",
   "level.complete.next": "On to {name}",
   "level.record": "Record:",

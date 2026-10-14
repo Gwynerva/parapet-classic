@@ -31,7 +31,6 @@
   "level.complete.done": "Все миссии уровня «{name}» выполнены.",
   "level.complete.character": "Новый персонаж: {name}!",
   "level.complete.boss": "{boss} теперь принимает вызов.",
-  "level.complete.repeat": "Повторить миссию",
   "level.complete.fight": "Бой с боссом: {boss}",
   "level.complete.next": "Дальше: {name}",
   "level.record": "Рекорд:",

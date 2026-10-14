@@ -155,6 +155,31 @@ describe('Menu', () => {
     expect(m.onGesture({ kind: 'key', action: 'confirm' })).toBe(true);
     expect(deltas).toEqual([-1, 1]);
   });
+
+  it('presses and hovers a row on the picture in its indent', () => {
+    let selected = 0;
+    const m = menu([
+      { label: 'a', indent: 46 },
+      { label: 'b', indent: 46, onSelect: () => selected++ },
+    ]);
+    m.onPointer(mouse('move', 10, 5));
+    expect(m.cursor).toBe(0);
+    m.onPointer(mouse('down', 10, 25));
+    expect(m.pressedRow).toBe(1);
+    m.onPointer(mouse('up', 10, 25));
+    expect(selected).toBe(1);
+  });
+
+  it('tells where a visible row is', () => {
+    const m = menu(
+      Array.from({ length: 10 }, (_, i) => ({ label: String(i) })),
+      3,
+    );
+    m.setCursor(9);
+    expect(m.rowRect(7)).toEqual({ x: 0, y: 0, w: 200, h: 20 });
+    expect(m.rowRect(9)).toEqual({ x: 0, y: 40, w: 200, h: 20 });
+    expect(m.rowRect(0)).toBeNull();
+  });
 });
 
 describe('TileGrid', () => {

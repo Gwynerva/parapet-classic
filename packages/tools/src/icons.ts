@@ -3,6 +3,7 @@
  * (nothing from the original game). Drawn once at 32×32 and scaled by whole pixels to every
  * size the browsers and phones ask for.
  */
+import { APP_ICON_ART } from '@parapet/runtime/ui/appIcon.ts';
 import { encodePng } from './png.ts';
 
 const PALETTE: Readonly<Record<string, readonly [number, number, number]>> = {
@@ -17,40 +18,8 @@ const PALETTE: Readonly<Record<string, readonly [number, number, number]>> = {
   c: [38, 178, 204],
 };
 
-export const ICON_ART: readonly string[] = [
-  '................................',
-  '................................',
-  '................................',
-  '....................aa..........',
-  '...................aaaa.........',
-  '...................aaaa.........',
-  '...................aaa..........',
-  '..dddddddd......................',
-  '.................Aaaaa....aa....',
-  '................Aaaaaaa.aaaa....',
-  '..............AAAaaaaaaaaaa.....',
-  'ddddddd......AAAaaaa..aaa.......',
-  '.............AA.aaaa............',
-  '............AAAaaaa.............',
-  '.......AA...AAAaaaaa............',
-  '.......AAAA.AAAaaaaaaa..........',
-  '........AAAAAA.....aaa..........',
-  '...ddd....AAA.......aa..........',
-  '....................aaa.........',
-  '.....................aa.........',
-  '.....................aaa........',
-  'GGGGGGGGGGGGGGGGGGG.............',
-  'ddddddddddddddddddd.............',
-  'gggggdgggggggdggggd.............',
-  'gggggdgggggggdggggd.............',
-  'gggggdgggggggdggggd.............',
-  'ddddddddddddddddddd.............',
-  'gggggggggdgggggggdd.............',
-  'gggggggggdgggggggdd.............',
-  'gggggggggdgggggggdd.............',
-  'ddddddddddddddddddd.............',
-  'ggggggggggggggggggd.............',
-];
+/** The art, shared with the game's menus (`@parapet/runtime/ui/appIcon.ts`). */
+export const ICON_ART: readonly string[] = APP_ICON_ART;
 
 /** How far behind the runner its echo runs in the race icon, in art pixels. */
 const ECHO_BEHIND = 10;

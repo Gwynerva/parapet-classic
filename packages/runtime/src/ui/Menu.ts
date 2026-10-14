@@ -2,7 +2,9 @@
  * A vertical list of selectable items drawn with bitmap fonts. Keyboard/gamepad move the
  * cursor; a pointer shows the row under it as pressed and selects it on release (a finger that
  * moves scrolls the list instead). Items can carry a value label on the right (the options
- * screen) and react to left/right to change it, or a slider dragged with the pointer.
+ * screen) and react to left/right to change it, or a slider dragged with the pointer. A row can
+ * keep room on its left for a picture the screen draws (pressing the picture presses the row),
+ * be set apart from the rows above by a line, and have colours of its own.
  */
 import type { BitmapFont } from '../text/BitmapFont.ts';
 import type { UiGesture, UiKey, UiPointer, UiWheel } from '../app/Screen.ts';
@@ -18,6 +20,18 @@ export interface MenuSlider {
   step: number;
   /** Label next to the bar (default: the value). */
   format?: (value: number) => string;
+}
+
+/** Colours of a row of its own (a boss's contest) in place of the theme's accent. */
+export interface MenuTint {
+  /** The edge bar of the chosen row and the fill of a pressed one. */
+  edge: string;
+  /** Fill of the chosen row. */
+  fill: string;
+  /** A band behind the row while it is not chosen (with a thin edge bar). */
+  idle?: string;
+  label?: string;
+  value?: string;
 }
 
 export interface MenuItem {
@@ -41,6 +55,14 @@ export interface MenuItem {
    * handler. A gamepad confirm still selects from the queue; the action then needs a fallback.
    */
   gesture?: boolean;
+  /**
+   * Room on the left of the row for a picture the screen draws (an icon): the label and the
+   * highlight start after it, while the whole row, picture included, is pressed and hovered.
+   */
+  indent?: number;
+  /** A line across the top of the row, setting it apart from the rows above. */
+  divider?: boolean;
+  tint?: MenuTint;
 }
 
 export interface MenuLayout {
@@ -54,6 +76,8 @@ export interface MenuLayout {
 
 /** Width of a slider bar, without its label. */
 const SLIDER_WIDTH = 96;
+/** Space between a divider and the highlight of its row. */
+const DIVIDER_GAP = 3;
 
 export class Menu {
   items: MenuItem[] = [];
@@ -92,6 +116,14 @@ export class Menu {
   /** Height the visible rows take. */
   get height(): number {
     return this.visibleRows * this.layout.rowHeight;
+  }
+
+  /** The whole of row `index` on screen (its picture included), or null while scrolled away. */
+  rowRect(index: number): { x: number; y: number; w: number; h: number } | null {
+    if (index < this.scroll || index >= this.scroll + this.maxVisible) return null;
+    if (index >= this.items.length) return null;
+    const { x, y, width, rowHeight } = this.layout;
+    return { x, y: y + (index - this.scroll) * rowHeight, w: width, h: rowHeight };
   }
 
   /** The row being pressed by a pointer, or -1. */
@@ -390,37 +422,55 @@ export class Menu {
       const rowY = y + (i - this.scroll) * rowHeight;
       const selected = i === this.cursor;
       const down = i === pressed && !item.slider;
-      if (down) {
-        ctx.fillStyle = Theme.accent;
-        ctx.fillRect(x, rowY, width, rowHeight);
-      } else if (selected) {
-        ctx.fillStyle = Theme.accentDark;
-        ctx.fillRect(x, rowY, width, rowHeight);
-        ctx.fillStyle = Theme.accent;
-        ctx.fillRect(x, rowY, 3, rowHeight);
-        if (centred) ctx.fillRect(x + width - 3, rowY, 3, rowHeight);
+      const tint = item.tint;
+      // The highlight: right of the row's picture, under its divider.
+      const indent = item.indent ?? 0;
+      const gap = item.divider ? DIVIDER_GAP : 0;
+      const hx = x + indent;
+      const hw = width - indent;
+      const hy = rowY + gap;
+      const hh = rowHeight - gap;
+      if (item.divider) {
+        ctx.fillStyle = Theme.panelBorder;
+        ctx.fillRect(x, rowY, width, 1);
       }
-      const color =
-        item.disabled || (item.muted && !down) ? Theme.muted : down ? Theme.background : Theme.text;
+      if (down) {
+        ctx.fillStyle = tint?.edge ?? Theme.accent;
+        ctx.fillRect(hx, hy, hw, hh);
+      } else if (selected) {
+        ctx.fillStyle = tint?.fill ?? Theme.accentDark;
+        ctx.fillRect(hx, hy, hw, hh);
+        ctx.fillStyle = tint?.edge ?? Theme.accent;
+        ctx.fillRect(hx, hy, 3, hh);
+        if (centred) ctx.fillRect(hx + hw - 3, hy, 3, hh);
+      } else if (tint?.idle) {
+        ctx.fillStyle = tint.idle;
+        ctx.fillRect(hx, hy, hw, hh);
+        ctx.fillStyle = tint.edge;
+        ctx.fillRect(hx, hy, 1, hh);
+        if (centred) ctx.fillRect(hx + hw - 1, hy, 1, hh);
+      }
+      const dim = item.disabled || (item.muted && !down);
+      const color = dim ? Theme.muted : down ? Theme.background : (tint?.label ?? Theme.text);
       // A pressed row sinks by a pixel, like a key.
-      const textY = rowY + Math.floor((rowHeight - this.font.lineHeight) / 2) + (down ? 1 : 0);
+      const textY = hy + Math.floor((hh - this.font.lineHeight) / 2) + (down ? 1 : 0);
       if (item.slider) {
-        this.drawSliderRow(ctx, item, x, rowY, width, rowHeight, textY, i === pressed);
+        this.drawSliderRow(ctx, item, hx, rowY, hw, rowHeight, textY, i === pressed);
         continue;
       }
       const value =
         item.value === undefined ? null : item.onAdjust ? `< ${item.value} >` : item.value;
       const valueWidth = value === null ? 0 : this.font.lineWidth(value) + 16;
-      const label = this.font.fit(item.label, width - 18 - valueWidth);
+      const label = this.font.fit(item.label, hw - 18 - valueWidth);
       if (centred && value === null) {
-        this.font.draw(ctx, label, x + (width >> 1), textY, { align: 'center', color });
+        this.font.draw(ctx, label, hx + (hw >> 1), textY, { align: 'center', color });
       } else {
-        this.font.draw(ctx, label, x + 10, textY, { color });
+        this.font.draw(ctx, label, hx + 10, textY, { color });
       }
       if (value !== null) {
         this.font.draw(ctx, value, x + width - 8, textY, {
           align: 'right',
-          color: item.disabled ? Theme.muted : down ? Theme.background : Theme.accent,
+          color: dim ? Theme.muted : down ? Theme.background : (tint?.value ?? Theme.accent),
         });
       }
     }

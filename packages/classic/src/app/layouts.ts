@@ -181,3 +181,87 @@ export function dialogLayout(viewport: ViewportLike, m: DialogMetrics): DialogLa
   };
   return { panel, menu: { x: panel.x + 8, y: panel.y + 8 + m.header, w, h: menuH } };
 }
+
+export interface ResultsMetrics {
+  /** Height of the text (title, lines, sections, name field) wrapped to a width. */
+  textHeight: (width: number) => number;
+  rows: number;
+  rowHeight: number;
+}
+
+export interface ResultsLayout {
+  panel: Rect;
+  /** Where the text goes (its height is the text's own). */
+  text: Rect;
+  menu: Rect;
+  /** The text and the menu side by side. */
+  side: boolean;
+}
+
+/** Widest text of the results; the menu beside it gets at most `RESULTS_SIDE_MENU`. */
+const RESULTS_WIDTH = 300;
+const RESULTS_SIDE_MENU = 260;
+/** Narrowest text column worth putting beside the menu. */
+const RESULTS_SIDE_TEXT = 220;
+/** Padding inside the panel, and between the columns side by side. */
+const RESULTS_PAD = 8;
+const RESULTS_GAP = 12;
+
+/**
+ * The results of a run in a panel over the game: the text over its actions, centred; side by
+ * side when the screen is too short for both (a phone on its side) and wide enough for two
+ * columns; else the text at the top and the actions scrolling under it.
+ */
+export function resultsLayout(viewport: ViewportLike, m: ResultsMetrics): ResultsLayout {
+  const safe = inset(safeRect(viewport), 8, 6);
+  const room = safe.h - 2 * RESULTS_PAD;
+  const rowsIn = (h: number): number => Math.max(0, Math.floor(h / m.rowHeight));
+  const w = Math.max(80, Math.min(RESULTS_WIDTH, safe.w - 2 * RESULTS_PAD));
+  const textH = m.textHeight(w);
+  const stacked = (menuRows: number): ResultsLayout => {
+    const menuH = menuRows * m.rowHeight;
+    const panelH = textH + menuH + 2 * RESULTS_PAD;
+    const panel: Rect = {
+      x: safe.x + ((safe.w - w - 2 * RESULTS_PAD) >> 1),
+      y: safe.y + Math.max(0, (safe.h - panelH) >> 1),
+      w: w + 2 * RESULTS_PAD,
+      h: panelH,
+    };
+    const text: Rect = { x: panel.x + RESULTS_PAD, y: panel.y + RESULTS_PAD, w, h: textH };
+    const menu: Rect = { x: text.x, y: text.y + textH, w, h: menuH };
+    return { panel, text, menu, side: false };
+  };
+  if (rowsIn(room - textH) >= m.rows) return stacked(m.rows);
+  const inner = safe.w - 2 * RESULTS_PAD - RESULTS_GAP;
+  const sideW = Math.min(RESULTS_WIDTH, inner - SIDE_MENU_MIN);
+  if (sideW >= RESULTS_SIDE_TEXT) {
+    const sideH = m.textHeight(sideW);
+    const menuRows = Math.min(m.rows, rowsIn(room));
+    if (sideH <= room && menuRows >= Math.min(m.rows, 3)) {
+      const menuW = Math.min(RESULTS_SIDE_MENU, inner - sideW);
+      const menuH = menuRows * m.rowHeight;
+      const h = Math.max(sideH, menuH);
+      const panelW = sideW + RESULTS_GAP + menuW + 2 * RESULTS_PAD;
+      const panel: Rect = {
+        x: safe.x + ((safe.w - panelW) >> 1),
+        y: safe.y + Math.max(0, (safe.h - h - 2 * RESULTS_PAD) >> 1),
+        w: panelW,
+        h: h + 2 * RESULTS_PAD,
+      };
+      const text: Rect = {
+        x: panel.x + RESULTS_PAD,
+        y: panel.y + RESULTS_PAD + ((h - sideH) >> 1),
+        w: sideW,
+        h: sideH,
+      };
+      const menu: Rect = {
+        x: text.x + sideW + RESULTS_GAP,
+        y: panel.y + RESULTS_PAD + ((h - menuH) >> 1),
+        w: menuW,
+        h: menuH,
+      };
+      return { panel, text, menu, side: true };
+    }
+  }
+  return stacked(Math.max(1, Math.min(m.rows, rowsIn(room - textH))));
+}

@@ -34,9 +34,10 @@ import { countEvent } from '../analytics.ts';
 import { CameraTour } from '@parapet/runtime/render/CameraTour.ts';
 import { CharacterRenderer, type NpcVisual } from '@parapet/runtime/render/CharacterRenderer.ts';
 import { EchoRenderer } from '@parapet/runtime/render/EchoRenderer.ts';
+import type { SceneRenderer, SpriteSwap } from '@parapet/runtime/render/SceneRenderer.ts';
 import { CharacterFx } from '@parapet/runtime/render/fx/CharacterFx.ts';
 import { compileFx } from '@parapet/runtime/render/fx/FxSheet.ts';
-import { echoColor, makeEchoColor, type EchoColor } from '@parapet/runtime/render/EchoSkin.ts';
+import { echoColor, type EchoColor } from '@parapet/runtime/render/EchoSkin.ts';
 import {
   defaultLevelArtFrame,
   MarkerBounce,
@@ -62,7 +63,14 @@ import {
   loadProgress,
 } from '@parapet/runtime/storage/profile.ts';
 import { COACH_IDLE_KEYFRAME, COACH_TALK_CLIP } from '../ui/sprites.ts';
-import { drawEdgeArrow, drawMarkerLabel, drawNameTag, formatGap } from '../ui/GhostOverlay.ts';
+import {
+  drawEdgeSign,
+  drawMarkerLabel,
+  drawNameTag,
+  formatGap,
+  type EdgePicture,
+} from '../ui/GhostOverlay.ts';
+import { drawPortrait } from '../ui/portrait.ts';
 import {
   bossCharacterFor,
   bossOfCharacter,
@@ -76,6 +84,8 @@ import {
   WORKSHOP_COLOR,
 } from '../bosses.ts';
 import { BossGlimpse } from '../ui/BossGlimpse.ts';
+import { showsFinishPointer } from '../ui/finishPointer.ts';
+import { drawFinishFlag } from '../ui/icons.ts';
 import { BossPresence, HEAD_HEIGHT } from '../ui/BossPresence.ts';
 import {
   glimpseCells,
@@ -86,11 +96,7 @@ import {
   type PresenceSpot,
 } from '../ui/bossSpots.ts';
 import type { GlimpseTrack } from '@parapet/runtime/content/glimpses.ts';
-import {
-  LevelCompleteScreen,
-  levelCompletion,
-  type LevelCompletion,
-} from './LevelCompleteScreen.ts';
+import { holdLevelNews, levelCompletion, type LevelCompletion } from './LevelCompleteScreen.ts';
 import { PauseScreen } from './PauseScreen.ts';
 import { ResultsScreen } from './ResultsScreen.ts';
 
@@ -112,11 +118,15 @@ const SPLIT_SHOW_MS = 2500;
  * player runs in the rival's own skin, the rival is see-through so the two never mix up.
  */
 const RIVAL_MIRROR_OPACITY = 0.55;
-/** The edge arrow towards the rival. */
-const RIVAL_ARROW_COLOR = makeEchoColor('rival', '#ff6a4d');
-/** The edge arrow towards the finish of a score run (see-through, it only shows the way). */
-const FINISH_ARROW_COLOR = makeEchoColor('finish', '#ffd23f');
-const FINISH_ARROW_OPACITY = 0.5;
+/**
+ * The signs at the screen's edge: the heads of the ghost (a hologram in its colour, with the
+ * gap), the rival and the boss (with its time), and a small finish flag towards the finish (in
+ * a score run, and once the flags are taken where the finish comes after them,
+ * `showsFinishPointer`).
+ */
+const FINISH_SIGN: EdgePicture = { radius: 8, draw: drawFinishFlag };
+/** Side of a head on its sign. */
+const SIGN_HEAD = 20;
 
 export class PlayScreen implements Screen {
   private readonly ctx: GameContext;
@@ -147,8 +157,10 @@ export class PlayScreen implements Screen {
   readonly flow: MissionFlow;
   private tour: CameraTour | null = null;
   private coach: NpcVisual | null = null;
-  /** The sprint rival's name, on the arrow towards it. */
-  private rivalName: string | null = null;
+  /** The heads on the signs at the screen's edge (`drawEdgeSigns`). */
+  private rivalSign: EdgePicture | null = null;
+  private ghostSign: EdgePicture | null = null;
+  private bossSign: EdgePicture | null = null;
   private artFrames: [number, number];
   private readonly pulsing: boolean;
   private resultsShown = false;
@@ -238,8 +250,10 @@ export class PlayScreen implements Screen {
         seed: i + 1,
       });
     });
-    this.rivalName =
-      this.ctx.skins.find((s) => s.character === mission.rivalCharacter)?.name ?? null;
+    this.rivalSign = this.headSign(
+      render.skins.sceneFor(mission.rivalCharacter),
+      render.skins.swapFor(mission.rivalCharacter),
+    );
     this.addFx(world.player, this.setup.character);
     const ghostWorld = this.session.ghostWorld;
     if (ghostWorld && this.setup.ghost && this.ghostColor) {
@@ -249,12 +263,17 @@ export class PlayScreen implements Screen {
         echo: true,
         seed: world.runners.length + 1,
       });
+      const source = render.skins.sceneFor(this.setup.ghost.replay.character);
       this.echo.add(runner, {
         color: this.ghostColor,
         textured: true,
-        source: render.skins.sceneFor(this.setup.ghost.replay.character),
+        source,
         swap: (clock) => this.characters.swapFor(runner, clock),
       });
+      this.ghostSign = this.headSign(
+        render.echo.scene(this.ghostColor, true, source),
+        render.skins.swapFor(this.setup.ghost.replay.character),
+      );
       this.session.onGhostStep((events, w) => this.onGhostStep(events, w));
     }
     this.splitFlash = null;
@@ -370,9 +389,11 @@ export class PlayScreen implements Screen {
     const scene = look
       ? render.skins.sceneFor(contest.character, outfit)
       : render.echo.scene(WORKSHOP_COLOR, false);
+    const swap = render.skins.swapFor(contest.character, -1, outfit);
+    this.bossSign = this.headSign(scene, swap);
     return new BossPresence({
       scene,
-      swap: render.skins.swapFor(contest.character, -1, outfit),
+      swap,
       color: look ? characterColor(contest.character, outfit) : (boss?.color ?? WORKSHOP_COLOR),
       start,
       end,
@@ -383,6 +404,13 @@ export class PlayScreen implements Screen {
       echo: render.echo,
       reducedMotion: prefersReducedMotion(),
     });
+  }
+
+  /** A runner's head as a sign at the screen's edge. */
+  private headSign(scene: SceneRenderer, swap: SpriteSwap): EdgePicture {
+    const r = SIGN_HEAD >> 1;
+    const rect = (x: number, y: number) => ({ x: x - r, y: y - r, w: SIGN_HEAD, h: SIGN_HEAD });
+    return { radius: r, draw: (c, x, y) => drawPortrait(c, this.ctx, scene, rect(x, y), swap) };
   }
 
   /** The boss's glimpse: its outfit of the run as a hologram in its colour. */
@@ -932,7 +960,7 @@ export class PlayScreen implements Screen {
     if (world.rules.missionType >= MissionType.WARM_UP_1) {
       // The coach congratulates and the warm-up counts as completed (state 6).
       const set = this.setup.mode === 'warmup2' ? 2 : 1;
-      // A warm-up done last completes the level: the level-complete box follows the coach's.
+      // A warm-up done last completes the level: its news waits for the level's menu.
       let completion: LevelCompletion | null = null;
       if (this.missionIndex >= 0) {
         const before = loadProgress();
@@ -946,15 +974,8 @@ export class PlayScreen implements Screen {
         title: i18n.t('results.done'),
         tail: true,
         onClose: () => {
+          if (completion) holdLevelNews(completion);
           screens.pop();
-          if (!completion) return;
-          screens.push(
-            new LevelCompleteScreen(this.ctx, {
-              ...completion,
-              repeat: () => screens.push(new PlayScreen(this.ctx, this.setup)),
-              leaveRun: () => {},
-            }),
-          );
         },
       });
       return;
@@ -1080,45 +1101,54 @@ export class PlayScreen implements Screen {
   }
 
   /**
-   * Arrows at the screen edge towards the boss, the ghost, the rival, and the finish of a score
-   * run, while they are off screen.
+   * Signs at the screen's edge towards the boss (waiting, with its time), the rival, the finish
+   * (of a score run, or once the flags are taken) and the ghost (with the gap), while they are
+   * off screen.
    */
-  private drawEchoArrows(c: CanvasRenderingContext2D, cam: CameraPos, alpha: number): void {
+  private drawEdgeSigns(c: CanvasRenderingContext2D, cam: CameraPos, alpha: number): void {
     const area = safeRect(this.ctx.viewport);
     const small = this.ctx.fonts.small;
     const world = this.session.world;
     const presence = this.presence;
-    if (presence?.state === 'end' && this.setup.contest) {
+    if (presence?.state === 'end' && this.setup.contest && this.bossSign) {
       const spot = presence.end;
       const sx = toScreen(spot.x, cam.x);
       const sy = toScreen(spot.y, cam.y) - 30;
-      drawEdgeArrow(c, small, area, sx, sy, presence.color, formatTime(this.setup.contest.timeMs));
+      const text = formatTime(this.setup.contest.timeMs);
+      drawEdgeSign(c, area, sx, sy, this.bossSign, {
+        font: small,
+        text,
+        color: presence.color.light,
+      });
     }
     for (const runner of world.runners) {
-      if (runner === world.player) continue;
+      if (runner === world.player || !this.rivalSign) continue;
       const pose = this.characters.pose(runner, alpha);
       if (!pose) continue;
       const sx = toScreen(pose.x, cam.x);
       const sy = toScreen(pose.y, cam.y) - 30;
-      drawEdgeArrow(c, small, area, sx, sy, RIVAL_ARROW_COLOR, this.rivalName);
+      drawEdgeSign(c, area, sx, sy, this.rivalSign);
     }
-    // A score run ends at the finish, which is easy to lose on a big level.
+    // The finish is easy to lose on a big level; a boss waiting there has its own sign.
     const finish = world.level.finish;
-    if (this.setup.mode === 'score' && finish) {
-      c.save();
-      c.globalAlpha = FINISH_ARROW_OPACITY;
+    const bossAtFinish = presence?.state === 'end' && this.setup.mode === 'sprint';
+    if (
+      finish &&
+      !bossAtFinish &&
+      showsFinishPointer(this.setup.mode, world.level, world.rules.remainingMask)
+    ) {
       const fx = toScreen((finish.x << 10) + 512, cam.x);
       const fy = toScreen(finish.y << 10, cam.y);
-      drawEdgeArrow(c, small, area, fx, fy, FINISH_ARROW_COLOR, null);
-      c.restore();
+      drawEdgeSign(c, area, fx, fy, FINISH_SIGN);
     }
     const ghostWorld = this.session.ghostWorld;
-    if (!ghostWorld || !this.ghostColor) return;
+    if (!ghostWorld || !this.ghostColor || !this.ghostSign) return;
     const pos = this.echo.screenPosition(ghostWorld.player, cam, alpha);
     if (!pos) return;
     const gap = this.ghostGap();
-    const text = gap === null ? null : formatGap(gap);
-    drawEdgeArrow(c, small, area, pos.x, pos.y - 30, this.ghostColor, text);
+    const label =
+      gap === null ? null : { font: small, text: formatGap(gap), color: this.ghostColor.light };
+    drawEdgeSign(c, area, pos.x, pos.y - 30, this.ghostSign, label);
   }
 
   render(c: CanvasRenderingContext2D): void {
@@ -1165,7 +1195,7 @@ export class PlayScreen implements Screen {
     // The HUD is not drawn while a message box is up (`bj()`, line 10610).
     if (!this.covered && this.flow.phase !== 'tutorial' && this.flow.phase !== 'briefing') {
       this.hud.draw(c, world, viewport, this.hudOptions());
-      if (playing) this.drawEchoArrows(c, cam, alpha);
+      if (playing) this.drawEdgeSigns(c, cam, alpha);
     }
     const cx = viewport.width >> 1;
     const cy = viewport.height >> 1;

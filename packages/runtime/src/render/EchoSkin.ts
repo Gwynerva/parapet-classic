@@ -47,7 +47,9 @@ function mix(a: Rgb, b: Rgb, t: number): Rgb {
   ];
 }
 
-function css(c: Rgb): string {
+/** CSS colour of a tone: `#rrggbb`, or `rgba(...)` with an alpha. */
+export function rgbCss(c: Rgb, alpha?: number): string {
+  if (alpha !== undefined) return `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${alpha})`;
   return '#' + c.map((v) => v.toString(16).padStart(2, '0')).join('');
 }
 
@@ -61,7 +63,7 @@ export function makeEchoColor(id: string, hex: string): EchoColor {
   return {
     id,
     css: hex,
-    light: css(rim),
+    light: rgbCss(rim),
     ramp: { shadow: mix(body, BLACK, 0.55), body, highlight: mix(body, WHITE, 0.5), rim },
   };
 }

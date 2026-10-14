@@ -24,13 +24,14 @@ import {
   type LookData,
   type ResolvedLook,
 } from '@parapet/runtime/render/Look.ts';
-import { makeEchoColor, type EchoColor } from '@parapet/runtime/render/EchoSkin.ts';
+import { makeEchoColor, rgbCss, type EchoColor } from '@parapet/runtime/render/EchoSkin.ts';
 import type { FxFile } from '@parapet/runtime/render/fx/FxData.ts';
 import { compileFx } from '@parapet/runtime/render/fx/FxSheet.ts';
 import type { FxStyle } from '@parapet/runtime/render/fx/CharacterFx.ts';
 import type { SpriteSwap } from '@parapet/runtime/render/SceneRenderer.ts';
 import type { SkinLibrary } from '@parapet/runtime/render/SkinLibrary.ts';
 import type { StageFile } from '@parapet/runtime/render/Stage.ts';
+import type { MenuTint } from '@parapet/runtime/ui/Menu.ts';
 import {
   isContestBeaten,
   type ContestKind,
@@ -67,6 +68,20 @@ export const WORKSHOP_COLOR: EchoColor = makeEchoColor('workshop', '#7d2a63');
 export const CONTEST_KINDS: readonly ContestKind[] = ['flags', 'sprint'];
 /** First character number of the bosses (the original's are 0..9). */
 export const FIRST_BOSS_CHARACTER = 10;
+
+/**
+ * The colours of a boss's rows in the menus (its contests, the challenge to it): a band of its
+ * dark tone, its name in its light tone, the chosen row in its colour.
+ */
+export function bossTint(color: EchoColor): MenuTint {
+  return {
+    edge: color.css,
+    fill: rgbCss(color.ramp.shadow),
+    idle: rgbCss(color.ramp.shadow, 0.45),
+    label: color.light,
+    value: color.css,
+  };
+}
 
 export interface Boss {
   id: string;

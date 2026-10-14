@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { safeRect, type Rect } from '@parapet/runtime/ui/layout.ts';
-import { dialogLayout, showcaseLayout, titleLayout } from '../src/app/layouts.ts';
+import { dialogLayout, resultsLayout, showcaseLayout, titleLayout } from '../src/app/layouts.ts';
 
 /** Logical sizes of real screens, with and without notches. */
 const SIZES: [number, number][] = [
@@ -93,4 +93,61 @@ describe('dialogs', () => {
       expect(d.menu.h % 32).toBe(0);
     });
   }
+});
+
+describe('results', () => {
+  // A plain run, and a new record that completed its level (the news, the name field and two
+  // more actions), measured with the game's fonts; the text wraps to more lines when narrow.
+  const runs = {
+    plain: { textHeight: (w: number) => (w < 240 ? 101 : 87), rows: 5 },
+    level: { textHeight: (w: number) => (w < 256 ? 250 : 222), rows: 7 },
+  };
+  for (const vp of cases) {
+    for (const coarse of [false, true]) {
+      for (const [name, run] of Object.entries(runs)) {
+        const label = `${name} ${vp.width}×${vp.height} inset ${JSON.stringify(vp.safeArea)}${coarse ? ' touch' : ''}`;
+        it(`fit ${label}`, () => {
+          const row = coarse ? 30 : 22;
+          const l = resultsLayout(vp, { ...run, rowHeight: row });
+          const safe = safeRect(vp);
+          expect(l.text.h).toBe(run.textHeight(l.text.w));
+          expect(inside(l.text, l.panel)).toBe(true);
+          expect(inside(l.menu, l.panel)).toBe(true);
+          expect(overlap(l.text, l.menu)).toBe(false);
+          expect(l.menu.h).toBeGreaterThanOrEqual(row);
+          expect(l.menu.h % row).toBe(0);
+          // The panel stays on screen whenever the text and one action can.
+          if (l.text.h + row + 16 <= safe.h - 12) expect(inside(l.panel, safe)).toBe(true);
+        });
+      }
+    }
+  }
+
+  it('puts the text beside the actions on a phone on its side', () => {
+    for (const [width, height] of [
+      [480, 300],
+      [640, 360],
+      [844, 390],
+    ] as const) {
+      for (const safeArea of NOTCHES) {
+        const l = resultsLayout({ width, height, safeArea }, { ...runs.level, rowHeight: 30 });
+        expect(l.side, `${width}×${height}`).toBe(true);
+        expect(l.menu.h).toBe(7 * 30);
+      }
+    }
+  });
+
+  it('stacks the text over every action on a tall screen', () => {
+    for (const [width, height] of [
+      [960, 540],
+      [292, 633],
+    ] as const) {
+      const l = resultsLayout(
+        { width, height, safeArea: NOTCHES[0]! },
+        { ...runs.level, rowHeight: 22 },
+      );
+      expect(l.side).toBe(false);
+      expect(l.menu.h).toBe(7 * 22);
+    }
+  });
 });

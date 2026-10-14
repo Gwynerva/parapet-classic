@@ -2,10 +2,11 @@
  * End-of-run screen (the original's state 7, d.java line 5349): the outcome judged by
  * `evaluateMission`, the goal line, time and score, the local record with name entry, the
  * unlock bookkeeping, and retry / next mission / main menu. A win that completes its level
- * brings up the level-complete box over it (`LevelCompleteScreen`). After a ghost race it also tells
- * who won and by how much; every ranked run can go out as a challenge link or a replay file.
- * After a contest with a boss it judges the run against her time only (contests are not
- * missions) and hands out her look on a first win (plain, then with her effect).
+ * keeps the level's news for the level's menu, and Next leads there (`holdLevelNews`).
+ * After a ghost race it also tells who won and by how much; every ranked run can go out as a
+ * challenge link or a replay file. After a contest with a boss it judges the run against her
+ * time only (contests are not missions) and hands out her look on a first win (plain, then
+ * with her effect). Text over actions, or side by side on a short wide screen (`resultsLayout`).
  */
 import {
   cleanReplayName,
@@ -25,14 +26,7 @@ import { countEvent } from '../analytics.ts';
 import type { Screen, UiGesture, UiKey, UiPointer, UiWheel } from '@parapet/runtime/app/Screen.ts';
 import { Menu, type MenuItem } from '@parapet/runtime/ui/Menu.ts';
 import { panel } from '@parapet/runtime/ui/draw.ts';
-import {
-  contains,
-  fitWidth,
-  inset,
-  rowHeight,
-  safeRect,
-  type Rect,
-} from '@parapet/runtime/ui/layout.ts';
+import { contains, rowHeight, type Rect } from '@parapet/runtime/ui/layout.ts';
 import { TextInputOverlay } from '@parapet/runtime/ui/TextInputOverlay.ts';
 import {
   completeMission,
@@ -66,11 +60,8 @@ import {
   upgradeCharacter,
 } from '../bosses.ts';
 import { CharacterSelectScreen } from './CharacterSelectScreen.ts';
-import {
-  LevelCompleteScreen,
-  levelCompletion,
-  type LevelCompletion,
-} from './LevelCompleteScreen.ts';
+import { goToLevel, holdLevelNews, levelCompletion } from './LevelCompleteScreen.ts';
+import { resultsLayout, type ResultsLayout } from '../layouts.ts';
 import { PlayScreen } from './PlayScreen.ts';
 import { TitleScreen } from './TitleScreen.ts';
 import { PrizeScreen } from './PrizeScreen.ts';
@@ -80,8 +71,18 @@ const NAME_LETTER = /^[\p{L}\p{N}]$/u;
 const NAME_JOINERS = ' -_.';
 /** How long a status line ("link copied") stays, in ms. */
 const STATUS_MS = 4000;
-/** The level-complete box comes up this long after the results, so they are seen first. */
-const LEVEL_BOX_DELAY_MS = 700;
+
+/** Where the parts of the text sit below its top, at the width it was wrapped to. */
+interface TextParts {
+  lines: number;
+  quote: number;
+  status: number;
+  nameLabel: number;
+  nameField: number;
+  height: number;
+}
+
+const NO_RECT: Rect = { x: 0, y: 0, w: 0, h: 0 };
 
 type RaceVerdict = 'won' | 'lost' | 'draw';
 
@@ -102,13 +103,22 @@ export class ResultsScreen implements Screen {
   private nameRect: Rect = { x: 0, y: 0, w: 0, h: 0 };
   /** A finger is down on the name field: it opens on release (where phones allow a keyboard). */
   private nameArmed = false;
-  /** This run completed its level: the box to show over the results (once). */
-  private completion: LevelCompletion | null = null;
+  /** This run completed its level: Next leads to its menu, where the news waits. */
+  private completedLevel = false;
   private prizeUnlocked = false;
   private shownAt = 0;
   private lines: string[] = [];
-  /** The lines wrapped to the panel's width (`onResize`). */
+  /** The lines wrapped to the text's width (`onResize`). */
   private wrapped: string[] = [];
+  private box: ResultsLayout = { panel: NO_RECT, text: NO_RECT, menu: NO_RECT, side: false };
+  private parts: TextParts = {
+    lines: 0,
+    quote: 0,
+    status: 0,
+    nameLabel: 0,
+    nameField: 0,
+    height: 0,
+  };
   /** The boss's word on the race, set apart as a quote, and its lines wrapped. */
   private quote: { text: string; boss: string; color: string } | null = null;
   private quoteLines: string[] = [];
@@ -312,7 +322,11 @@ export class ResultsScreen implements Screen {
     const { firstTime, total, progress } = completeMission(setup.levelId, slot);
     if (!firstTime) return;
     countEvent(`level/${setup.levelId + 1}`);
-    this.completion = levelCompletion(this.ctx.content, setup.levelId, before, progress);
+    const completion = levelCompletion(this.ctx.content, setup.levelId, before, progress);
+    if (completion) {
+      holdLevelNews(completion);
+      this.completedLevel = true;
+    }
     const all = missions.reduce((n, m) => n + m.missionCount, 0);
     if (total >= all && !progress.prizeSeen) {
       this.prizeUnlocked = true;
@@ -421,7 +435,14 @@ export class ResultsScreen implements Screen {
           }),
       });
     }
-    const next = setup.contest ? null : this.nextMission();
+    // A completed level: on to its menu, where its news (the boss, the next level) waits.
+    if (this.completedLevel) {
+      items.push({
+        label: i18n.t('results.nextMission'),
+        onSelect: () => this.leave(() => goToLevel(this.ctx, setup.levelId)),
+      });
+    }
+    const next = setup.contest || this.completedLevel ? null : this.nextMission();
     if (next && setup.ghost?.kind !== 'challenger') {
       items.push({
         label: i18n.t('results.nextMission'),
@@ -473,21 +494,6 @@ export class ResultsScreen implements Screen {
     this.closeNameInput(true);
     this.ctx.screens.pop();
     then();
-  }
-
-  /** The level-complete box over the results: this mission again, the boss, the next level. */
-  private showCompletion(): void {
-    const completion = this.completion;
-    if (!completion) return;
-    this.completion = null;
-    this.closeNameInput(true);
-    this.ctx.screens.push(
-      new LevelCompleteScreen(this.ctx, {
-        ...completion,
-        repeat: () => this.leave(() => this.play.restart()),
-        leaveRun: () => this.leave(() => this.ctx.screens.pop()),
-      }),
-    );
   }
 
   /**
@@ -555,47 +561,53 @@ export class ResultsScreen implements Screen {
 
   onResize(): void {
     const { viewport, fonts } = this.ctx;
-    const safe = safeRect(viewport);
-    const col = fitWidth(inset(safe, 8, 0), 300);
     const row = rowHeight(22, viewport.isCoarsePointer);
-    // Every line within the panel, the quote within its own box.
-    this.wrapped = this.lines.flatMap((line) => fonts.small.wrap(line, col.w - 8));
-    this.quoteLines = this.quote
-      ? fonts.small.wrap(this.quote.text, col.w - 8 - QUOTE_INDENT - QUOTE_PAD)
-      : [];
-    const headerH = this.headerHeight();
-    this.menu.layout.x = col.x;
-    this.menu.layout.width = col.w;
-    this.menu.layout.rowHeight = row;
-    this.menu.layout.align = 'center';
-    // On a short screen the actions scroll instead of running off the bottom.
-    this.menu.fit(Math.max(row, safe.h - 16 - headerH - 16));
-    const total = headerH + this.menu.height + 16;
-    const top = Math.max(safe.y + 8, safe.y + ((safe.h - total) >> 1));
-    this.menu.layout.y = top + headerH;
+    this.box = resultsLayout(viewport, {
+      textHeight: (width) => this.measure(width).height,
+      rows: this.menu.items.length,
+      rowHeight: row,
+    });
+    const { text, menu } = this.box;
+    this.parts = this.measure(text.w);
+    Object.assign(this.menu.layout, {
+      x: menu.x,
+      y: menu.y,
+      width: menu.w,
+      rowHeight: row,
+      align: 'center',
+    });
+    this.menu.fit(menu.h);
     this.nameRect = {
-      x: col.x + 8,
-      y: top + headerH - fonts.text.lineHeight - 10,
-      w: col.w - 16,
+      x: text.x + 8,
+      y: text.y + this.parts.nameField,
+      w: text.w - 16,
       h: fonts.text.lineHeight + 6,
     };
     this.nameInput?.reposition(this.nameRect);
   }
 
-  private headerHeight(): number {
+  /**
+   * Wraps the text to `width` and lays it out from the top: the title, the lines, the boss's
+   * quote, a slot for the status line, the name field of a new record.
+   */
+  private measure(width: number): TextParts {
     const { fonts } = this.ctx;
-    const nameRow = this.newRecord ? fonts.text.lineHeight + 14 : 0;
-    return (
-      8 +
-      fonts.display.lineHeight +
-      6 +
-      this.wrapped.length * (fonts.small.lineHeight + 2) +
-      this.quoteHeight() +
-      6 +
-      fonts.small.lineHeight +
-      4 +
-      nameRow
-    );
+    const line = fonts.small.lineHeight + 2;
+    this.wrapped = this.lines.flatMap((text) => fonts.small.wrap(text, width - 8));
+    this.quoteLines = this.quote
+      ? fonts.small.wrap(this.quote.text, width - 8 - QUOTE_INDENT - QUOTE_PAD)
+      : [];
+    let y = fonts.display.lineHeight + 6;
+    const lines = y;
+    y += this.wrapped.length * line;
+    const quote = y - 2;
+    y += this.quoteHeight();
+    const status = y + 6;
+    y = status + fonts.small.lineHeight + 4;
+    const nameLabel = y;
+    const nameField = nameLabel + fonts.small.lineHeight + 2;
+    if (this.newRecord) y = nameField + fonts.text.lineHeight + 6 + 6;
+    return { lines, quote, status, nameLabel, nameField, height: y };
   }
 
   /** The quote's box with the gap above it, or 0 without a quote. */
@@ -631,15 +643,7 @@ export class ResultsScreen implements Screen {
     small.draw(c, `— ${quote.boss}`, x + w - QUOTE_PAD, ly, { align: 'right', color: quote.color });
   }
 
-  update(): void {
-    if (
-      this.completion &&
-      !this.nameInput?.isOpen &&
-      performance.now() - this.shownAt >= LEVEL_BOX_DELAY_MS
-    ) {
-      this.showCompletion();
-    }
-  }
+  update(): void {}
 
   onKey(key: UiKey): void {
     if (this.nameInput?.isOpen) return;
@@ -721,39 +725,36 @@ export class ResultsScreen implements Screen {
     const { viewport, fonts, i18n } = this.ctx;
     c.fillStyle = Theme.overlay;
     c.fillRect(0, 0, viewport.width, viewport.height);
-    const { x, y, width } = this.menu.layout;
-    const headerH = this.headerHeight();
-    const top = y - headerH;
-    panel(c, x - 8, top, width + 16, headerH + this.menu.height + 16);
+    const { panel: box, text, menu, side } = this.box;
+    const parts = this.parts;
+    panel(c, box.x, box.y, box.w, box.h);
+    if (side) {
+      // The text and the actions apart by a line.
+      c.fillStyle = Theme.panelBorder;
+      c.fillRect(menu.x - 6, box.y + 8, 1, box.h - 16);
+    }
     const title = this.title();
-    const cx = x + (width >> 1);
-    fonts.display.draw(c, title.text, cx + 1, top + 9, { align: 'center', color: '#000000' });
-    fonts.display.draw(c, title.text, cx, top + 8, { align: 'center', color: title.color });
-    let ly = top + 8 + fonts.display.lineHeight + 6;
+    const cx = text.x + (text.w >> 1);
+    fonts.display.draw(c, title.text, cx + 1, text.y + 1, { align: 'center', color: '#000000' });
+    fonts.display.draw(c, title.text, cx, text.y, { align: 'center', color: title.color });
+    let ly = text.y + parts.lines;
     for (const line of this.wrapped) {
       fonts.small.draw(c, line, cx, ly, { align: 'center', color: Theme.text, tabular: true });
       ly += fonts.small.lineHeight + 2;
     }
-    if (this.quote) {
-      this.drawQuote(c, x, ly - 2, width);
-      ly += this.quoteHeight();
-    }
-    // Blink the status for the first two seconds like the results icon of the original.
+    if (this.quote) this.drawQuote(c, text.x, text.y + parts.quote, text.w);
     const now = performance.now();
+    // Blink the status for the first two seconds like the results icon of the original.
     const blink = now - this.shownAt < 2000 && ((now >> 8) & 1) === 1;
     if (this.status && now < this.statusUntil && !blink) {
-      fonts.small.draw(c, this.status, cx, ly + 4, { align: 'center', color: Theme.success });
+      fonts.small.draw(c, this.status, cx, text.y + parts.status, {
+        align: 'center',
+        color: Theme.success,
+      });
     }
     if (this.newRecord) {
-      fonts.small.draw(
-        c,
-        i18n.t('results.enterName'),
-        x + 8,
-        this.nameRect.y - fonts.small.lineHeight - 2,
-        {
-          color: Theme.success,
-        },
-      );
+      const label = fonts.small.fit(i18n.t('results.enterName'), text.w - 16);
+      fonts.small.draw(c, label, text.x + 8, text.y + parts.nameLabel, { color: Theme.success });
       if (!this.nameInput?.isOpen) {
         // Drawn like the real field (which only exists while editing), brighter when chosen.
         const r = this.nameRect;

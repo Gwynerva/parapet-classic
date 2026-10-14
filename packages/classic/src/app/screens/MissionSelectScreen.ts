@@ -1,15 +1,20 @@
 /**
  * Mission select of one level (reference/notes/08 §9): the level's missions in the original
  * order with their icons and local records, the two contests with the level's boss (open once
- * every mission of the level is complete), our free run, the rival toggle for the sprint and the
- * switch for racing the ghost of one's own record; the description of the highlighted row
- * scrolls under the list like the original ticker.
+ * every mission of the level is complete), our free run, and under a line the rival toggle for
+ * the sprint and the switch for racing the ghost of one's own record; the description of the
+ * highlighted row scrolls under the list like the original ticker. A contest's row is in the
+ * boss's colours, its tile shows the boss: a hologram until its record there is beaten, then as
+ * it is. A row's tile is part of the row (pressing it starts the run). Coming here after the
+ * level's last mission, the level's news shows over the list (`LevelCompleteScreen`), the
+ * cursor already on the boss it opened.
  */
 import { modeForMissionType, rankingSort, type RunMode } from '@parapet/sim';
 import { formatTime, Theme, type GameContext } from '../Context.ts';
 import type { Screen, UiKey, UiPointer, UiWheel } from '@parapet/runtime/app/Screen.ts';
 import { Menu, type MenuItem } from '@parapet/runtime/ui/Menu.ts';
 import { fitWidth, rowHeight, type Rect } from '@parapet/runtime/ui/layout.ts';
+import type { SceneRenderer, SpriteSwap } from '@parapet/runtime/render/SceneRenderer.ts';
 import { Ticker } from '@parapet/runtime/ui/widgets.ts';
 import {
   completedMissions,
@@ -27,34 +32,58 @@ import { contestSetup, missionSetup } from '../ghosts.ts';
 import {
   bossCharacterFor,
   bossOfLevel,
+  bossTint,
   CONTEST_KINDS,
+  contestCharacter,
   contestRecord,
-  WORKSHOP_COLOR,
+  isDrawn,
+  type Boss,
 } from '../bosses.ts';
 import type { EchoColor } from '@parapet/runtime/render/EchoSkin.ts';
-import { drawMissionIcon, ICON_TILE, icons } from '../ui/icons.ts';
+import {
+  drawCard,
+  drawFreeRunIcon,
+  drawMissionIcon,
+  drawModeGlyph,
+  ICON_TILE,
+  icons,
+  modeGlyphSize,
+} from '../ui/icons.ts';
+import { drawPortrait } from '../ui/portrait.ts';
 import { ScreenFrame } from '../ui/ScreenFrame.ts';
+import { LevelCompleteScreen, takeLevelNews } from './LevelCompleteScreen.ts';
 import { PlayScreen } from './PlayScreen.ts';
 
-const ICON_SIZE = ICON_TILE;
+/** Room a row keeps on its left for its tile. */
+const TILE_INDENT = ICON_TILE + 8;
+/** Inside of a boss's tile. */
+const BOSS_TILE_FILL = '#0c1014';
+
+/** A boss as its contest's tile shows it. */
+interface BossPortrait {
+  scene: SceneRenderer;
+  swap: SpriteSwap;
+  color: EchoColor;
+}
+
+/** What a row's tile shows. */
+type Tile =
+  | { kind: 'mission'; missionType: number }
+  | { kind: 'contest'; contest: ContestKind; portrait: BossPortrait }
+  | { kind: 'free' };
 
 interface Row {
   mode: RunMode | null;
-  /** Mission type of the icon, or -1 for rows without one. */
-  missionType: number;
+  /** The tile left of the label; settings have none. */
+  tile: Tile | null;
   done: boolean;
   /** Dictionary key of the ticker text for rows without a mode. */
   desc?: string;
   /** The description itself, when it needs more than a key. */
   text?: string;
-  /** The row starts a contest with the boss. */
-  contest?: boolean;
   /** A contest not open yet (the level's missions come first). */
   locked?: boolean;
 }
-
-/** Mission type of each contest's icon (the original's sprint and flag hunt icons). */
-const CONTEST_ICON: Record<ContestKind, number> = { flags: 1, sprint: 0 };
 
 export class MissionSelectScreen implements Screen {
   readonly chrome = { fullscreenButton: true };
@@ -67,8 +96,6 @@ export class MissionSelectScreen implements Screen {
   private withRival = true;
   private progress: Progress = { completed: [], prizeSeen: false };
   private contests: ContestProgress = { beaten: { flags: 0, sprint: 0 } };
-  /** The colour of the level's boss (the badge on its contests). */
-  private bossColor: EchoColor = WORKSHOP_COLOR;
   private tickerRect: Rect = { x: 0, y: 0, w: 0, h: 0 };
 
   constructor(ctx: GameContext, levelId: number) {
@@ -83,6 +110,13 @@ export class MissionSelectScreen implements Screen {
     this.contests = loadContestProgress();
     this.rebuild();
     this.ctx.music.menu();
+    const news = takeLevelNews(this.levelId);
+    if (news) {
+      // The boss the level opened is what the news is about.
+      const contest = this.rows.findIndex((row) => row.tile?.kind === 'contest');
+      if (contest >= 0) this.menu.setCursor(contest);
+      this.ctx.screens.push(new LevelCompleteScreen(this.ctx, news));
+    }
   }
 
   /** Every mission of the level is complete: the boss takes challenges here. */
@@ -101,12 +135,13 @@ export class MissionSelectScreen implements Screen {
       if (!mode) return;
       this.rows.push({
         mode,
-        missionType: type,
+        tile: { kind: 'mission', missionType: type },
         done: isMissionCompleted(this.progress, this.levelId, slot),
       });
       items.push({
         label: i18n.t(`mode.${mode}`),
         value: this.recordLabel(mode),
+        indent: TILE_INDENT,
         onSelect: () => this.start(mode),
       });
     });
@@ -123,26 +158,32 @@ export class MissionSelectScreen implements Screen {
       const desc = i18n.t(`boss.${boss.id}.desc`);
       this.rows.push({
         mode: null,
-        missionType: CONTEST_ICON[kind],
+        tile: { kind: 'contest', contest: kind, portrait: this.portrait(boss, kind, beaten) },
         done: beaten,
         text: open
           ? i18n.t(more ? 'contest.descMore' : 'contest.desc', { desc, boss: bossName })
           : locked,
-        contest: true,
         locked: !open,
       });
       items.push({
         label: i18n.t('contest.title', { boss: bossName, mode: i18n.t(`mode.${kind}`) }),
         value: open ? formatTime(record.timeMs) : '',
         muted: !open,
+        indent: TILE_INDENT,
+        tint: bossTint(boss.color),
         onSelect: open ? () => this.startContest(kind) : () => platform.toast.show(locked),
       });
     }
-    this.bossColor = boss?.color ?? WORKSHOP_COLOR;
-    this.rows.push({ mode: 'free', missionType: -1, done: false });
-    items.push({ label: i18n.t('mode.free'), onSelect: () => this.start('free') });
+    this.rows.push({ mode: 'free', tile: { kind: 'free' }, done: false });
+    items.push({
+      label: i18n.t('mode.free'),
+      indent: TILE_INDENT,
+      onSelect: () => this.start('free'),
+    });
+    // The settings, under a line, from the left edge.
+    const settings = items.length;
     if (level.missionTypes.includes(0)) {
-      this.rows.push({ mode: null, missionType: -1, done: false });
+      this.rows.push({ mode: null, tile: null, done: false });
       items.push({
         label: i18n.t('mission.withRival'),
         value: this.withRival ? i18n.t('options.on') : i18n.t('options.off'),
@@ -152,7 +193,7 @@ export class MissionSelectScreen implements Screen {
         },
       });
     }
-    this.rows.push({ mode: null, missionType: -1, done: false, desc: 'mission.bestGhost.desc' });
+    this.rows.push({ mode: null, tile: null, done: false, desc: 'mission.bestGhost.desc' });
     items.push({
       label: i18n.t('mission.bestGhost'),
       value: this.ctx.options.bestGhost ? i18n.t('options.on') : i18n.t('options.off'),
@@ -161,10 +202,30 @@ export class MissionSelectScreen implements Screen {
         this.rebuild();
       },
     });
+    items[settings]!.divider = true;
     const cursor = this.menu.cursor;
     this.menu.setItems(items);
     this.menu.setCursor(Math.min(cursor, items.length - 1));
     this.onResize();
+  }
+
+  /**
+   * The boss on a contest's tile: as it is once that record is beaten, a hologram in its colour
+   * until then (like its glimpses), a silhouette while it is still in the workshop.
+   */
+  private portrait(boss: Boss, kind: ContestKind, beaten: boolean): BossPortrait {
+    const { render } = this.ctx;
+    const character = contestCharacter(this.levelId, kind);
+    const swap = render.skins.swapFor(character);
+    if (!isDrawn(boss)) {
+      return { scene: render.echo.scene(boss.color, false), swap, color: boss.color };
+    }
+    const source = render.skins.sceneFor(character);
+    return {
+      scene: beaten ? source : render.echo.scene(boss.color, true, source),
+      swap,
+      color: boss.color,
+    };
   }
 
   private recordLabel(mode: RunMode): string {
@@ -192,9 +253,9 @@ export class MissionSelectScreen implements Screen {
     const body = this.frame.body;
     const col = fitWidth(body, 420);
     const tickerH = fonts.small.lineHeight + 8;
-    const row = Math.max(rowHeight(24, viewport.isCoarsePointer), ICON_SIZE + 4);
-    this.menu.layout.x = col.x + ICON_SIZE + 8;
-    this.menu.layout.width = col.w - ICON_SIZE - 8;
+    const row = Math.max(rowHeight(24, viewport.isCoarsePointer), ICON_TILE + 4);
+    this.menu.layout.x = col.x;
+    this.menu.layout.width = col.w;
     this.menu.layout.rowHeight = row;
     this.menu.fit(body.h - tickerH);
     // The list and its ticker sit together a little above the middle.
@@ -236,47 +297,50 @@ export class MissionSelectScreen implements Screen {
     const { fonts, i18n, render } = this.ctx;
     this.frame.draw(c, i18n.t(`level.names.${this.levelId}`));
     this.menu.draw(c);
-    const { x, y, rowHeight: row } = this.menu.layout;
-    const first = this.menu.firstVisible;
-    this.rows.forEach((r, i) => {
-      if (r.missionType < 0 || i < first || i >= first + this.menu.maxVisible) return;
-      const iy = y + (i - first) * row + ((row - ICON_SIZE) >> 1);
-      const ix = x - ICON_SIZE - 6;
-      drawMissionIcon(c, render.sheet, r.missionType, r.done, ix, iy);
-      if (r.locked) {
-        c.fillStyle = 'rgba(16, 20, 24, 0.7)';
-        c.fillRect(ix, iy, ICON_SIZE, ICON_SIZE);
-        const s = icons.size('lock');
-        icons.draw(
-          c,
-          'lock',
-          'plain',
-          ix + ((ICON_SIZE - s.width) >> 1),
-          iy + ((ICON_SIZE - s.height) >> 1),
-        );
-      } else if (r.contest) {
-        drawContestBadge(c, ix + ICON_SIZE - 7, iy + 1, this.bossColor);
+    this.rows.forEach((row, i) => {
+      const r = this.menu.rowRect(i);
+      if (!row.tile || !r) return;
+      const x = r.x + 2;
+      const y = r.y + ((r.h - ICON_TILE) >> 1);
+      switch (row.tile.kind) {
+        case 'mission':
+          drawMissionIcon(c, render.sheet, row.tile.missionType, row.done, x, y);
+          break;
+        case 'free':
+          drawFreeRunIcon(c, x, y);
+          break;
+        case 'contest':
+          this.drawBossTile(c, row.tile.contest, row.tile.portrait, row.locked ?? false, x, y);
+          break;
       }
     });
     this.ticker.draw(c, fonts.small, this.tickerRect, Theme.muted);
   }
-}
 
-/** A small diamond in the boss's colour on the icon of its contests. */
-function drawContestBadge(
-  c: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  color: EchoColor,
-): void {
-  c.fillStyle = '#000000';
-  c.fillRect(x + 1, y - 1, 3, 1);
-  c.fillRect(x, y, 5, 3);
-  c.fillRect(x + 1, y + 3, 3, 1);
-  c.fillRect(x + 2, y + 4, 1, 1);
-  c.fillStyle = color.css;
-  c.fillRect(x + 2, y, 1, 3);
-  c.fillRect(x + 1, y + 1, 3, 1);
-  c.fillStyle = color.light;
-  c.fillRect(x + 2, y, 1, 1);
+  /** A contest's tile: the boss on a dark card in its colour, the mode in a corner. */
+  private drawBossTile(
+    c: CanvasRenderingContext2D,
+    contest: ContestKind,
+    portrait: BossPortrait,
+    locked: boolean,
+    x: number,
+    y: number,
+  ): void {
+    drawCard(c, x, y, ICON_TILE, ICON_TILE, portrait.color.css, BOSS_TILE_FILL);
+    drawPortrait(c, this.ctx, portrait.scene, { x, y, w: ICON_TILE, h: ICON_TILE }, portrait.swap);
+    const glyph = modeGlyphSize(contest);
+    const gx = x + ICON_TILE - glyph.width - 2;
+    drawModeGlyph(c, contest, gx, y + ICON_TILE - glyph.height - 2, portrait.color.light);
+    if (!locked) return;
+    c.fillStyle = 'rgba(16, 20, 24, 0.7)';
+    c.fillRect(x, y, ICON_TILE, ICON_TILE);
+    const s = icons.size('lock');
+    icons.draw(
+      c,
+      'lock',
+      'plain',
+      x + ((ICON_TILE - s.width) >> 1),
+      y + ((ICON_TILE - s.height) >> 1),
+    );
+  }
 }

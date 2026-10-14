@@ -14,7 +14,7 @@ import { CharacterStage } from '../ui/CharacterStage.ts';
 import { Theme, type GameContext } from '../Context.ts';
 import type { Screen, UiKey, UiPointer, UiWheel } from '@parapet/runtime/app/Screen.ts';
 import { makeEchoColor, type EchoColor } from '@parapet/runtime/render/EchoSkin.ts';
-import { CHARACTER_OBJECT, type SceneRenderer } from '@parapet/runtime/render/SceneRenderer.ts';
+import type { SceneRenderer } from '@parapet/runtime/render/SceneRenderer.ts';
 import {
   isContestBeaten,
   loadContestProgress,
@@ -36,13 +36,11 @@ import {
   isDrawn,
   WORKSHOP_COLOR,
 } from '../bosses.ts';
-import { HEAD_SPRITE } from '@parapet/runtime/anim/Animator.ts';
 import { LevelSelectScreen } from './LevelSelectScreen.ts';
+import { drawPortrait } from '../ui/portrait.ts';
 import { ScreenFrame } from '../ui/ScreenFrame.ts';
 import { showcaseLayout } from '../layouts.ts';
 
-/** The run demo of the Moves menu (demo 0): its first frame shows the tiles' heads. */
-const RUN_DEMO = 0;
 const TILE = 30;
 const TILE_GAP = 4;
 /** Silhouette of a character not won yet. */
@@ -315,47 +313,12 @@ export class CharacterSelectScreen implements Screen {
     this.stage.draw(c, d, demoZoom(d.h));
   }
 
-  /**
-   * Where to put the feet of a keyframe so its head lands on (x, y): the head sprite's point in
-   * the keyframe (it is drawn centred there), measured from the pivot.
-   */
-  private headAt(frame: number, x: number, y: number): { x: number; y: number } {
-    const obj = this.ctx.render.scene.getObject(CHARACTER_OBJECT);
-    if (obj) {
-      for (const p of obj.primitives) {
-        const id = (p.value[frame] ?? -1) >> 3;
-        if (id >= HEAD_SPRITE && id < HEAD_SPRITE + 5) {
-          return { x: x + obj.pivotX - (p.x[frame] ?? 0), y: y + obj.pivotY - (p.y[frame] ?? 0) };
-        }
-      }
-    }
-    return { x, y: y + 60 };
-  }
-
   private drawGrid(c: CanvasRenderingContext2D): void {
     const { render } = this.ctx;
-    const idle = render.clips[(this.ctx.content.anims.demos[RUN_DEMO]?.clipOffset ?? 0) + 1] ?? 0;
     this.grid.drawFrames(c);
     this.grid.forEachVisible((i, r) => {
       const e = this.entries[i]!;
-      // Head and shoulders: the head a little above the middle of the tile.
-      const { scene } = this.looks(e);
-      const feet = this.headAt(idle, r.x + (r.w >> 1), r.y + (r.h >> 1) - 2);
-      c.save();
-      c.beginPath();
-      c.rect(r.x + 1, r.y + 1, r.w - 2, r.h - 2);
-      c.clip();
-      scene.drawFrame(
-        c,
-        CHARACTER_OBJECT,
-        idle,
-        feet.x,
-        feet.y,
-        undefined,
-        false,
-        render.skins.swapFor(e.character),
-      );
-      c.restore();
+      drawPortrait(c, this.ctx, this.looks(e).scene, r, render.skins.swapFor(e.character));
       if (e.levelId !== undefined && this.status(e) === 'open') {
         if (bossOfCharacter(e.character)?.effects) {
           // Its effect is won: a spark in the boss's colour.
