@@ -45,7 +45,9 @@ The canvas is 3840 × 2160 and fits the window, letterboxed. Some useful address
 | Address                                     | What it does                                       |
 | ------------------------------------------- | -------------------------------------------------- |
 | `/dev/reel.html?level=0`                    | Mill Brook only                                    |
-| `/dev/reel.html?level=all&record=1`         | records every level, one video each                |
+| `/dev/reel.html?level=all&render=1`         | renders every level into a video, frame by frame   |
+| `/dev/reel.html?run=style-15&render=1`      | the same with the stylish runs (`run --style 15`)  |
+| `/dev/reel.html?level=all&record=1`         | records every level in real time, one video each   |
 | `/dev/reel.html?level=4&hud=1`              | with the attempt count and the clock               |
 | `/dev/reel.html?level=2&size=1920x1080`     | a Full HD canvas (scale 3)                         |
 | `/dev/reel.html?level=7&mode=flags&plain=1` | Sand Cape's Flag hunt, the boss without its effect |
@@ -56,12 +58,14 @@ The canvas is 3840 × 2160 and fits the window, letterboxed. Some useful address
 | --------- | ----------- | ------------------------------------------------------------------------- |
 | `level`   | `all`       | levels, 0-based as in the file names: `3`, `0,4,7` or `all`               |
 | `mode`    | `sprint`    | `sprint` or `flags`                                                       |
+| `run`     | `optimal`   | which stored run: the optimal one, or a stylish one (`style-05`, …)       |
 | `size`    | `3840x2160` | the canvas in screen pixels, and of the videos                            |
 | `scale`   | height/360  | screen pixels per game pixel (6 in 4K: the view is 640 × 360 game pixels) |
 | `n`       | `80`        | attempts in a flag's wave (half as many between flags)                    |
 | `hud`     | off         | `1` shows the attempt count and the record's clock                        |
-| `record`  | off         | `1` records every level from its start and saves it when it ends          |
-| `mbps`    | `60`        | bit rate of the recording, in Mbit/s                                      |
+| `render`  | off         | `1` renders every level into a video, frame by frame (below)              |
+| `record`  | off         | `1` records every level in real time and saves it when it ends            |
+| `mbps`    | 100 / 60    | bit rate of a render / of a real-time recording, in Mbit/s                |
 | `outfit`  | `0`         | the boss's outfit                                                         |
 | `plain`   | off         | `1` shows the boss without its effect                                     |
 
@@ -81,7 +85,19 @@ were found, recording, saving); it is not part of the canvas and fades after a f
 
 ## Recording
 
-**Built in.** `R`, or `record=1` for every level, records the canvas itself with the browser's
+**Frame by frame (the best).** `render=1` does not play in real time: it moves the reel on by
+exactly 1/60 s a frame and hands every frame to the browser's video encoder (WebCodecs), so no
+frame is ever dropped, whatever else the computer does and whether the page is shown or not.
+The encoder is the GPU's H.264 or HEVC where the browser offers it in that size, else the
+browser's own H.264 (the desktop app's browser offers its GPU encoder up to 1080p only; its own
+does 4K at about 30 frames a second, so a level renders in about twice its length). The stream
+goes to the dev server in parts and ffmpeg muxes it into
+`packages/tools/tas-out/reel/L01-sprint.mp4` (`L01-sprint-style-15.mp4` for a stylish run):
+H.264 High, 60 frames a second, from the fade-in to the end of the fade-out. ffmpeg must be on
+the dev server's `PATH`, or named by the `FFMPEG` environment variable. With `level=all` the
+page renders the levels one after another and says when it is done.
+
+**Built in, in real time.** `R`, or `record=1` for every level, records the canvas itself with the browser's
 MediaRecorder: exactly the canvas size whatever the screen, 60 frames a second, H.264 in MP4
 where the browser can (Chrome can), otherwise VP9 in WebM. A video ends with its level, after
 the fade to black, and goes to the dev server, which writes it to
@@ -101,6 +117,7 @@ it.
 
 | Recording                         | Twelve levels | One level     |
 | --------------------------------- | ------------- | ------------- |
+| rendered, 4K60 at 100 Mbit/s      | up to 6 GB    | up to 870 MB  |
 | built in, 4K60 at 60 Mbit/s       | about 3.6 GB  | 190 to 520 MB |
 | built in, 4K60 at 30 Mbit/s       | about 1.8 GB  | 100 to 260 MB |
 | OBS, 4K60, high quality (CQP ~18) | 5 to 9 GB     | —             |

@@ -10,8 +10,11 @@
  *
  * The page is a canvas of a fixed size (4K by default) shown fitted to the window; `F` makes it
  * full screen for a screen recorder, `R` records the canvas itself (MediaRecorder) and the dev
- * server saves the video next to the runs (`packages/tools/tas-out/reel/`, git-ignored). The
- * same parameters always give the same attempts.
+ * server saves the video next to the runs (`packages/tools/tas-out/reel/`, git-ignored). With
+ * `render=1` it renders frame by frame instead, at an exact 60 frames a second whatever the
+ * machine's load: every frame goes to the browser's video encoder (WebCodecs, the GPU's where
+ * there is one) and the dev server muxes the stream into an MP4 with ffmpeg. The same
+ * parameters always give the same attempts.
  */
 import { buildSineTable, createRun, MoveTable, STEP, type World, type WorldState } from '@parapet/sim';
 import { buildClipTable } from '@parapet/runtime/anim/Animator.ts';
@@ -49,6 +52,8 @@ const LEVELS = 12;
 /** The leader stands at the start this long before it runs, and at the end after it. */
 const INTRO_MS = 1200;
 const OUTRO_MS = 2500;
+/** Frames a second of the rendered videos. */
+const FPS = 60;
 /** Fade from and to black around a level. */
 const BLACK_MS = 400;
 /** How long an attempt is followed past the moment the record takes the next flag. */
@@ -83,7 +88,11 @@ interface Options {
   batch: number;
   hud: boolean;
   record: boolean;
+  /** Render frame by frame into a video instead of playing in real time. */
+  render: boolean;
   mbps: number;
+  /** The stored run played: '' for the optimal one, else a stylish variant's folder. */
+  run: string;
   outfit: number;
   plain: boolean;
 }
@@ -111,7 +120,9 @@ function readOptions(): Options {
     batch: Number(q.get('n')) || 80,
     hud: q.get('hud') === '1',
     record: q.get('record') === '1',
-    mbps: Number(q.get('mbps')) || 60,
+    render: q.get('render') === '1',
+    mbps: Number(q.get('mbps')) || (q.get('render') === '1' ? 100 : 60),
+    run: /^[\w-]+$/.test(q.get('run') ?? '') && q.get('run') !== 'optimal' ? q.get('run')! : '',
     outfit: Number(q.get('outfit')) || 0,
     plain: q.get('plain') === '1',
   };
@@ -455,8 +466,9 @@ async function main(): Promise<void> {
   const loadLevel = async (levelId: number): Promise<void> => {
     busy = true;
     status(`level ${levelId}: loading the record…`, true);
-    const res = await fetch(`/@fs/${TAS_OUT}/${levelId}-${options.mode}.json`);
-    if (!res.ok) throw new Error(`no local TAS run ${levelId}-${options.mode} (npm run tas)`);
+    const file = `${options.run ? `${options.run}/` : ''}${levelId}-${options.mode}.json`;
+    const res = await fetch(`/@fs/${TAS_OUT}/${file}`);
+    if (!res.ok) throw new Error(`no local TAS run ${file} (npm run tas)`);
     const run = (await res.json()) as { presses: string };
     const make = worldOf(levelId);
     const local: Content = { world: make, moves };
@@ -646,6 +658,110 @@ async function main(): Promise<void> {
     status(res.ok ? `saved ${await res.text()}` : `not saved: ${await res.text()}`);
   };
 
+  // ------------------------------------------------------------------ frame-exact rendering
+  /** A level's video name: `L01-sprint` (with the stylish variant: `L01-sprint-style-15`). */
+  const videoName = (levelId: number): string =>
+    `L${String(levelId + 1).padStart(2, '0')}-${options.mode}${options.run ? `-${options.run}` : ''}`;
+
+  /** The first encoder setting the browser takes: H.264 High, else HEVC, the GPU's if any. */
+  const encoderSetting = async (): Promise<{ config: VideoEncoderConfig; ext: string } | null> => {
+    const base = {
+      width: canvas.width,
+      height: canvas.height,
+      bitrate: options.mbps * 1e6,
+      bitrateMode: 'variable' as const,
+      framerate: FPS,
+      hardwareAcceleration: 'prefer-hardware' as const,
+      latencyMode: 'quality' as const,
+    };
+    // The GPU's H.264, then its HEVC, then the browser's own H.264 (a browser may offer its GPU
+    // encoder only up to 1080p; the software one does 4K at some 30 frames a second).
+    const tries: { config: VideoEncoderConfig; ext: string }[] = [
+      { config: { ...base, codec: 'avc1.640033', avc: { format: 'annexb' } }, ext: 'h264' },
+      {
+        config: { ...base, codec: 'hvc1.1.6.L153.B0', hevc: { format: 'annexb' } } as VideoEncoderConfig,
+        ext: 'hevc',
+      },
+      {
+        config: {
+          ...base,
+          codec: 'avc1.640033',
+          hardwareAcceleration: 'no-preference',
+          avc: { format: 'annexb' },
+        },
+        ext: 'h264',
+      },
+    ];
+    for (const t of tries) {
+      const support = await VideoEncoder.isConfigSupported(t.config).catch(() => null);
+      if (!support?.supported) continue;
+      const how = t.config.hardwareAcceleration === 'prefer-hardware' ? 'GPU' : 'browser';
+      status(`encoding ${t.config.codec} on the ${how} at ${options.mbps} Mbit/s`, true);
+      return t;
+    }
+    return null;
+  };
+
+  /**
+   * Renders the level loaded now into `tas-out/reel/<name>.mp4`: a fixed 1/60 s a frame from
+   * the fade-in to the end of the fade-out, each frame encoded, the stream sent to the dev
+   * server in parts and muxed there. Waits on the encoder, not on timers, so a hidden page
+   * renders as fast as a shown one.
+   */
+  const renderLevel = async (): Promise<void> => {
+    const p = plan!;
+    const setting = await encoderSetting();
+    if (!setting) throw new Error('the browser encodes neither H.264 nor HEVC in this size');
+    const name = `${videoName(p.levelId)}.${setting.ext}`;
+    let failure: unknown = null;
+    let parts: Uint8Array[] = [];
+    let bytes = 0;
+    let part = 0;
+    const encoder = new VideoEncoder({
+      output: (chunk) => {
+        const data = new Uint8Array(chunk.byteLength);
+        chunk.copyTo(data);
+        parts.push(data);
+        bytes += data.byteLength;
+      },
+      error: (e) => (failure = e),
+    });
+    encoder.configure(setting.config);
+    const send = async (): Promise<void> => {
+      if (parts.length === 0) return;
+      const body = new Blob(parts as BlobPart[]);
+      parts = [];
+      bytes = 0;
+      const res = await fetch(`/dev/reel-stream?name=${name}&part=${part++}`, {
+        method: 'POST',
+        body,
+      });
+      if (!res.ok) throw new Error(`the dev server took no video: ${await res.text()}`);
+    };
+    const frameUs = 1e6 / FPS;
+    for (let frame = 0; ; frame++) {
+      if (failure) throw failure;
+      advance(1000 / FPS);
+      draw();
+      const image = new VideoFrame(canvas, { timestamp: frame * frameUs, duration: frameUs });
+      encoder.encode(image, { keyFrame: frame % (FPS * 2) === 0 });
+      image.close();
+      if (encoder.encodeQueueSize > 4) {
+        await new Promise((done) => encoder.addEventListener('dequeue', done, { once: true }));
+      }
+      if (bytes > 8e6) await send();
+      if (frame % FPS === 0) status(`rendering ${name}: ${frame / FPS} s`, true);
+      if (endedAt >= 0 && pageMs - endedAt >= OUTRO_MS) break;
+    }
+    await encoder.flush();
+    encoder.close();
+    await send();
+    status(`muxing ${name}…`, true);
+    const res = await fetch(`/dev/reel-finish?name=${name}&fps=${FPS}`, { method: 'POST' });
+    status(res.ok ? `saved ${await res.text()}` : `not saved: ${await res.text()}`, true);
+    if (!res.ok) throw new Error(`not muxed: ${name}`);
+  };
+
   // ------------------------------------------------------------------ the loop
   const playLevel = async (index: number): Promise<void> => {
     levelIndex = index;
@@ -695,20 +811,33 @@ async function main(): Promise<void> {
     e.preventDefault();
   });
 
+  /** Moves the reel on by `dt` ms of page time: the wait at the start, then the steps. */
+  function advance(dt: number): void {
+    pageMs += dt;
+    if (pageMs < INTRO_MS) return;
+    acc += dt;
+    while (acc >= STEP) {
+      acc -= STEP;
+      step();
+    }
+  }
+
+  if (options.render) {
+    // Every level of the list, one video each, then nothing else.
+    for (let i = 0; i < options.levels.length; i++) {
+      levelIndex = i;
+      await loadLevel(options.levels[i]!);
+      await renderLevel();
+    }
+    status(`rendered ${options.levels.length} videos into packages/tools/tas-out/reel`, true);
+    return;
+  }
+
   await playLevel(0);
   let finishing = false;
   new GameLoop((dt) => {
     if (busy || !plan) return;
-    if (!paused) {
-      pageMs += dt;
-      if (pageMs >= INTRO_MS) {
-        acc += dt;
-        while (acc >= STEP) {
-          acc -= STEP;
-          step();
-        }
-      }
-    }
+    if (!paused) advance(dt);
     draw();
     if (!finishing && !over && endedAt >= 0 && pageMs - endedAt >= OUTRO_MS) {
       finishing = true;

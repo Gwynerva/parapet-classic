@@ -65,9 +65,10 @@ sheet | poses | lineup | rotate` draws and checks the bosses' looks (see
 
 Shortcuts of the client (dev server only): `?level=N&mode=M` jumps into a run,
 `?replay=/dev/l0-flags.json` plays a recorded input log, `?touch=1` shows the touch buttons,
-`?tas=<level>-<mode>` plays the boss's local run (`&autopilot=1` races it with it),
-`?contestTime=<ms>` makes its time beatable, `?vp=292x633` lays the game out for a phone's
-screen and `?coarse=1` treats the mouse as a finger.
+`?tas=<level>-<mode>` plays a local TAS run (`?tas=style-15/<level>-<mode>` the stylish one
+the boss races; `&autopilot=1` races the boss with it), `?contestTime=<ms>` makes the boss's
+time beatable, `?vp=292x633` lays the game out for a phone's screen and `?coarse=1` treats
+the mouse as a finger.
 
 Pages of the dev server, never published:
 

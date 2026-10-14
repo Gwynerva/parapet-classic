@@ -1,7 +1,9 @@
 import { defineConfig, loadEnv, type Plugin, type UserConfig } from 'vite';
+import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { createWriteStream } from 'node:fs';
-import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
+import type { IncomingMessage, ServerResponse } from 'node:http';
 import { dirname, extname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { precacheFiles, serviceWorkerSource } from './src/app/offline.ts';
@@ -55,6 +57,48 @@ async function prettyJson(file: string, data: unknown): Promise<string> {
   const prettier = await import('prettier');
   const options = (await prettier.resolveConfig(file)) ?? {};
   return prettier.format(JSON.stringify(data, null, 2), { ...options, filepath: file });
+}
+
+/** Writes a request's body into `file` (`a` appends), answering with the file's path. */
+function writeBody(
+  req: IncomingMessage,
+  res: ServerResponse,
+  file: string,
+  flags: 'w' | 'a' = 'w',
+): void {
+  const fail = (err: unknown): void => {
+    res.statusCode = 500;
+    res.end(String(err));
+  };
+  mkdir(dirname(file), { recursive: true }).then(() => {
+    const out = createWriteStream(file, { flags });
+    out.on('finish', () => res.end(file));
+    out.on('error', fail);
+    req.pipe(out);
+  }, fail);
+}
+
+/** Muxes an encoded H.264 or HEVC stream into an MP4 beside it with ffmpeg, then removes it. */
+function muxVideo(stream: string, fps: number): Promise<string> {
+  const video = stream.replace(/\.(?:h264|hevc)$/, '.mp4');
+  const format = stream.endsWith('.hevc') ? 'hevc' : 'h264';
+  const args = ['-y', '-v', 'error', '-f', format, '-i', stream, '-c', 'copy'];
+  // Every frame on its own 1/fps tick: an encoder may write timing of its own into the stream
+  // (the browser's software H.264 does, and the video then lasted under a second).
+  args.push('-bsf:v', `setts=ts=N/${fps}/TB:duration=1/${fps}/TB`);
+  args.push('-video_track_timescale', String(fps * 1000));
+  if (format === 'hevc') args.push('-tag:v', 'hvc1');
+  args.push('-movflags', '+faststart', video);
+  return new Promise((done, fail) => {
+    const ffmpeg = spawn(process.env.FFMPEG ?? 'ffmpeg', args);
+    let errors = '';
+    ffmpeg.stderr.on('data', (chunk: Buffer) => (errors += chunk.toString('utf8')));
+    ffmpeg.on('error', fail);
+    ffmpeg.on('close', (code) => {
+      if (code !== 0) fail(new Error(`ffmpeg ${code}: ${errors}`));
+      else rm(stream).then(() => done(video), fail);
+    });
+  });
 }
 
 /** Reads a request's body as text. */
@@ -133,17 +177,33 @@ function devHelpersPlugin(): Plugin {
           res.end('not a video name');
           return;
         }
-        const file = join(reelDir, name);
-        mkdir(reelDir, { recursive: true }).then(
-          () => {
-            const out = createWriteStream(file);
-            out.on('finish', () => res.end(file));
-            out.on('error', (err) => {
-              res.statusCode = 500;
-              res.end(String(err));
-            });
-            req.pipe(out);
-          },
+        writeBody(req, res, join(reelDir, name));
+      });
+      // Its frame-exact renders (`render=1`): the encoded stream comes in parts, then ffmpeg
+      // muxes it into an MP4 beside the recordings.
+      server.middlewares.use('/dev/reel-stream', (req, res, next) => {
+        if (req.method !== 'POST') return next();
+        const q = new URL(req.url ?? '/', 'http://dev').searchParams;
+        const name = q.get('name') ?? '';
+        const part = Number(q.get('part'));
+        if (!/^[\w.-]+\.(?:h264|hevc)$/.test(name) || !Number.isInteger(part) || part < 0) {
+          res.statusCode = 400;
+          res.end('not a video stream');
+          return;
+        }
+        writeBody(req, res, join(reelDir, name), part === 0 ? 'w' : 'a');
+      });
+      server.middlewares.use('/dev/reel-finish', (req, res, next) => {
+        if (req.method !== 'POST') return next();
+        const q = new URL(req.url ?? '/', 'http://dev').searchParams;
+        const name = q.get('name') ?? '';
+        if (!/^[\w.-]+\.(?:h264|hevc)$/.test(name)) {
+          res.statusCode = 400;
+          res.end('not a video stream');
+          return;
+        }
+        muxVideo(join(reelDir, name), Number(q.get('fps')) || 60).then(
+          (video) => res.end(video),
           (err: unknown) => {
             res.statusCode = 500;
             res.end(String(err));
