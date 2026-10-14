@@ -11,6 +11,7 @@ import type { Fonts, GameContext, Skin } from './app/Context.ts';
 import { TitleScreen } from './app/screens/TitleScreen.ts';
 import { createPlatform, FullscreenCorner } from './app/platform.ts';
 import { countVisit } from './app/analytics.ts';
+import { registerOffline } from './app/offline.ts';
 import { MenuBackdrop } from './app/ui/MenuBackdrop.ts';
 import { PlayScreen } from './app/screens/PlayScreen.ts';
 import type { RunMode, InputRun } from '@parapet/sim';
@@ -200,6 +201,7 @@ async function main(): Promise<void> {
   screens.clear(new TitleScreen(ctx));
   // Counted with the page's own title, before a race page takes the race's (names stay out).
   countVisit();
+  registerOffline();
   installReplayInputs(ctx);
   // A challenge link (`r/?<code>`) goes straight into the race, over the title screen.
   const shared = takeReplayFromLocation();

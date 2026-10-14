@@ -112,3 +112,12 @@ description and canonical address from the replay, `src/app/racePage.ts`), and a
 without a race asks to stay out of the index. Links are offered up to 4000 characters (a
 server takes about 8 KB of address, a Telegram message 4096 characters); a longer run is sent
 as a file.
+
+Last, the build writes `sw.js`, a service worker that keeps every file the game needs (both
+pages, the scripts, the pictures, every music track and the name field's font; not the debug
+page, the link previews or the search engines' files), so the site, once opened, plays with no
+connection (`src/app/offline.ts`). Its cache is named by a hash of those files: a new build
+comes on the next launch, while a page already open plays on with its own files (the build
+before is kept for it). The dev server registers no worker. To try it, `npm run build`, `npm
+run preview:pages`, open the site, stop the server and reload: the game, a challenge link
+(`r/?<code>`) and `?app=1` still open.

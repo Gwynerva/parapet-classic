@@ -1,8 +1,10 @@
 import { defineConfig, loadEnv, type Plugin, type UserConfig } from 'vite';
+import { createHash } from 'node:crypto';
 import { createWriteStream } from 'node:fs';
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
-import { dirname, extname, join } from 'node:path';
+import { dirname, extname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { precacheFiles, serviceWorkerSource } from './src/app/offline.ts';
 
 /** What `npm run extract` decodes from the original jar. */
 const playman = fileURLToPath(new URL('../content/playman/extracted', import.meta.url));
@@ -324,6 +326,41 @@ function racePage(html: string, site: string): string {
   return steps.reduce((text, step) => step(text), html);
 }
 
+/** Every file under `dir`, as paths relative to it. */
+async function filesUnder(dir: string): Promise<string[]> {
+  const out: string[] = [];
+  for (const entry of await readdir(dir, { withFileTypes: true, recursive: true })) {
+    if (entry.isFile()) out.push(relative(dir, join(entry.parentPath, entry.name)));
+  }
+  return out;
+}
+
+/**
+ * Offline play: once the build is written (the challenge page too, so this waits for the end),
+ * writes `sw.js`, the service worker that keeps the build's files (`src/app/offline.ts`). Its
+ * cache is named by a hash of those files, so every change to the build makes a new one.
+ */
+function offlinePlugin(): Plugin {
+  let outDir = '';
+  return {
+    name: 'parapet-offline',
+    apply: 'build',
+    configResolved(config) {
+      outDir = resolve(config.root, config.build.outDir);
+    },
+    async closeBundle() {
+      const files = precacheFiles(await filesUnder(outDir));
+      const hash = createHash('sha256');
+      for (const file of files) {
+        hash.update(`${file}\0`);
+        hash.update(await readFile(join(outDir, file)));
+      }
+      const version = hash.digest('hex').slice(0, 12);
+      await writeFile(join(outDir, 'sw.js'), serviceWorkerSource(version, files));
+    },
+  };
+}
+
 export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_');
   const site = (env.VITE_SITE_URL || DEFAULT_SITE_URL).replace(/\/?$/, '/');
@@ -338,7 +375,7 @@ function config(command: string, site: string, counter: string): UserConfig {
     define: { TAS_OUT: JSON.stringify(command === 'serve' ? tasOut : '') },
     // The original's music ships as MIDI files played by our own synthesiser.
     assetsInclude: ['**/*.mid'],
-    plugins: [devHelpersPlugin(), pagePlugin(site, counter)],
+    plugins: [devHelpersPlugin(), pagePlugin(site, counter), offlinePlugin()],
     resolve: {
       alias: {
         '@playman': playman,
