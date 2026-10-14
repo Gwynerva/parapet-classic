@@ -9,7 +9,7 @@
 import type { BitmapFont } from '../text/BitmapFont.ts';
 import type { UiGesture, UiKey, UiPointer, UiWheel } from '../app/Screen.ts';
 import { drawScrollArrow } from './draw.ts';
-import { PressTracker } from './press.ts';
+import { GestureArm, isFinger, PressTracker, WheelRows } from './press.ts';
 import { Theme } from './theme.ts';
 
 export interface MenuSlider {
@@ -84,7 +84,6 @@ export class Menu {
   cursor = 0;
   readonly layout: MenuLayout = { x: 0, y: 0, width: 200, rowHeight: 20 };
   private readonly font: BitmapFont;
-  private readonly small: BitmapFont;
   /** First visible row when the list is longer than the available height. */
   private scroll = 0;
   maxVisible = 8;
@@ -94,13 +93,12 @@ export class Menu {
   /** Scroll position when a finger went down (drag scrolling). */
   private dragScroll = 0;
   /** Wheel distance not yet turned into whole rows. */
-  private wheelRest = 0;
-  /** Row of a gesture item pressed by touch or pen, selected on release. */
-  private armed = -1;
+  private readonly wheel = new WheelRows();
+  /** A gesture item pressed by touch or pen, selected on release. */
+  private readonly gesture = new GestureArm<number>();
 
-  constructor(font: BitmapFont, small: BitmapFont) {
+  constructor(font: BitmapFont) {
     this.font = font;
-    this.small = small;
   }
 
   /** Index of the first visible item (the list scrolls when it is longer than `maxVisible`). */
@@ -149,6 +147,12 @@ export class Menu {
   fit(height: number): void {
     this.maxVisible = Math.max(1, Math.floor(height / this.layout.rowHeight));
     this.ensureVisible();
+  }
+
+  /** Lays the rows out centred in `area`, `rowHeight` apart, as many as fit its height. */
+  place(area: { x: number; y: number; w: number; h: number }, rowHeight: number): void {
+    Object.assign(this.layout, { x: area.x, y: area.y, width: area.w, rowHeight, align: 'center' });
+    this.fit(area.h);
   }
 
   private skipDisabled(dir: number): void {
@@ -242,7 +246,7 @@ export class Menu {
   /** Returns true when the pointer event belonged to the menu. */
   onPointer(p: UiPointer): boolean {
     const row = this.hitTest(p.x, p.y);
-    const finger = p.pointerType !== undefined && p.pointerType !== 'mouse';
+    const finger = isFinger(p);
     switch (p.type) {
       case 'move': {
         if (this.sliding >= 0) {
@@ -252,8 +256,7 @@ export class Menu {
         if (this.press.down) {
           if (this.press.move(p, finger ? undefined : row) && !finger) return true;
           if (this.press.dragging && finger) {
-            const rows = Math.round((this.press.startY - p.y) / this.layout.rowHeight);
-            this.scrollTo(this.dragScroll + rows);
+            this.scrollTo(this.dragScroll + this.press.dragRows(p, this.layout.rowHeight));
           }
           return true;
         }
@@ -318,12 +321,8 @@ export class Menu {
   onWheel(w: UiWheel): boolean {
     if (!this.contains(w.x, w.y)) return false;
     if (this.items.length <= this.maxVisible) return true;
-    this.wheelRest += w.dy;
-    const rows = Math.trunc(this.wheelRest / this.layout.rowHeight);
-    if (rows !== 0) {
-      this.wheelRest -= rows * this.layout.rowHeight;
-      this.scrollTo(this.scroll + rows);
-    }
+    const rows = this.wheel.take(w.dy, this.layout.rowHeight);
+    if (rows !== 0) this.scrollTo(this.scroll + rows);
     return true;
   }
 
@@ -350,17 +349,15 @@ export class Menu {
     const row = this.hitTest(g.x, g.y);
     const item = row >= 0 ? this.items[row] : undefined;
     if (g.type === 'down') {
-      this.armed = -1;
+      this.gesture.clear();
       if (!item?.gesture || item.disabled) return false;
       this.cursor = row;
-      if (g.pointerType === 'mouse') this.fireGesture(item);
-      else this.armed = row;
+      if (this.gesture.down(row, g.pointerType)) this.fireGesture(item);
       return true;
     }
-    const armed = this.armed;
-    this.armed = -1;
-    if (armed < 0) return false;
-    if (row === armed && item?.gesture && !item.disabled) this.fireGesture(item);
+    const fire = this.gesture.up(row >= 0 ? row : null);
+    if (fire === null) return false;
+    if (fire && item?.gesture && !item.disabled) this.fireGesture(item);
     return true;
   }
 

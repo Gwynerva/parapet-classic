@@ -10,7 +10,7 @@
  * where it ends up. Flags may hang in the air; with no floor near enough, the boss floats
  * beside the flag, on the side away from where its glimpse goes.
  */
-import { tileHasFlag, TileFlag, type Level, type PhysicsTables } from '@parapet/sim';
+import { type Level, type PhysicsTables, tileCentre, TileFlag, tileHasFlag } from '@parapet/sim';
 
 /** Where the boss stands: feet point in world units and facing; `floating` in the air. */
 export interface PresenceSpot {
@@ -35,7 +35,7 @@ export function levelGrid(level: Level, tables: PhysicsTables): SpotGrid {
 
 /** The feet point of a boss standing in cell (`cx`, `cy`), facing `faceX`. */
 function spotIn(cx: number, cy: number, faceX: number, floating = false): PresenceSpot {
-  const x = (cx << 10) + 512;
+  const x = tileCentre(cx);
   const spot: PresenceSpot = { x, y: (cy << 10) + 1024, facingRight: faceX > x };
   if (floating) spot.floating = true;
   return spot;
@@ -61,7 +61,7 @@ export function standingSpot(
       return spotIn(x, cy, facePointX);
     }
   }
-  const px = (cx << 10) + 512 + side * 512;
+  const px = tileCentre(cx) + side * 512;
   return { x: px, y: (cy << 10) + 1024, facingRight: facePointX > px };
 }
 
@@ -96,8 +96,8 @@ export function nearestFlag(
   let bestDistance = Infinity;
   flags.forEach((f, i) => {
     if ((remainingMask & (1 << i)) === 0) return;
-    const dx = (f.x << 10) + 512 - x;
-    const dy = (f.y << 10) + 512 - y;
+    const dx = tileCentre(f.x) - x;
+    const dy = tileCentre(f.y) - y;
     const distance = dx * dx + dy * dy;
     if (distance < bestDistance) {
       bestDistance = distance;

@@ -18,19 +18,10 @@ All the looks wear her face (25, 25:left, 29, 29:left; the kimono's with the mas
 doll on Blaise's body: thin legs on stiletto heels, puffed upper sleeves, the narrow waist and the
 bell of the skirt. The upright pictures are drawn; the look tool turns them."""
 from lookgen import *
-from heads import Pic, Palette
+from heads import Palette
 from gridpng import sheet
 import b2_heads as BH
 import b2_parts as BP
-
-
-def enc(rows, legend, pal):
-    """Text rows in a picture legend → rows in the look's palette."""
-    return [''.join(c if c in '.+' else pal.char(legend[c]) for c in r) for r in rows]
-
-
-def shift(rows, mapping):
-    return [''.join(mapping.get(c, c) for c in r) for r in rows]
 
 
 # A tone darker for the far arm and leg.

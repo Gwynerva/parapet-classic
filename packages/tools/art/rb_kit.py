@@ -36,22 +36,6 @@ def hexc(r, g, b):
     return '#%02x%02x%02x' % tuple(max(0, min(255, round(v))) for v in (r, g, b))
 
 
-def hls_shift(c, dh=0.0, dl=0.0, ds=0.0):
-    r, g, b = (v / 255 for v in rgb(c))
-    h, l, s = colorsys.rgb_to_hls(r, g, b)
-    h = (h + dh) % 1.0
-    l = max(0.0, min(1.0, l + dl))
-    s = max(0.0, min(1.0, s + ds))
-    r, g, b = colorsys.hls_to_rgb(h, l, s)
-    return hexc(r * 255, g * 255, b * 255)
-
-
-def mix(a, b, t):
-    ra, ga, ba = rgb(a)
-    rb, gb, bb = rgb(b)
-    return hexc(ra + (rb - ra) * t, ga + (gb - ga) * t, ba + (bb - ba) * t)
-
-
 def _tone(c, dh, lk, sd):
     """`c` with its hue turned by dh, its lightness l → l + (1 - l) * lk (lk > 0) or l * (1 + lk)
     (lk < 0), its saturation moved by sd."""
@@ -216,12 +200,6 @@ def render(mats_grid, mats, light_dir=LIGHT, over=(), shape=None, steps=STEPS, r
             else:
                 out[y][x] = mat.ramp[i]
     return Pic(out)
-
-
-def grid_of(rows, legend):
-    """A material grid from text rows: legend maps characters to material names ('.' empty)."""
-    w = max(len(r) for r in rows)
-    return [[legend.get(ch) if ch != '.' else None for ch in r.ljust(w, '.')] for r in rows]
 
 
 def draft(rows, light_dir=LIGHT, chars='ABCEF', edge_dark='k', edge_lit='K', steps=STEPS, roundness=1.0, smooth=1):

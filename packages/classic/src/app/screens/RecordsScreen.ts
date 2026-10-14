@@ -4,14 +4,8 @@
  * ghost, share it as a challenge link or a file). "Open replay" races a replay file; files
  * can also be dropped onto the window and links pasted with Ctrl+V.
  */
-import {
-  isRankedMode,
-  LEVEL_COUNT,
-  modeForMissionType,
-  rankingSort,
-  type RunMode,
-} from '@parapet/sim';
-import { formatTime, Theme, type GameContext } from '../Context.ts';
+import { isRankedMode, LEVEL_COUNT, modeForMissionType, type RunMode } from '@parapet/sim';
+import { formatResult, Theme, type GameContext } from '../Context.ts';
 import type { Screen, UiGesture, UiKey, UiPointer, UiWheel } from '@parapet/runtime/app/Screen.ts';
 import { Menu, type MenuItem } from '@parapet/runtime/ui/Menu.ts';
 import { Button } from '@parapet/runtime/ui/Button.ts';
@@ -36,7 +30,7 @@ export class RecordsScreen implements Screen {
   constructor(ctx: GameContext) {
     this.ctx = ctx;
     this.frame = new ScreenFrame(ctx);
-    this.menu = new Menu(ctx.fonts.text, ctx.fonts.small);
+    this.menu = new Menu(ctx.fonts.text);
   }
 
   enter(): void {
@@ -80,8 +74,7 @@ export class RecordsScreen implements Screen {
   }
 
   private valueOf(record: RecordEntry, mode: RunMode): string {
-    if (rankingSort(mode, this.levelId) === 'score') return String(record.score);
-    return record.finished ? formatTime(record.time) : '-';
+    return formatResult(mode, this.levelId, record);
   }
 
   private changeLevel(delta: number): void {

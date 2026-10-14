@@ -4,7 +4,7 @@
  * and the little world shown behind it on the character screen. Pure shapes and checks; the app
  * loads the files.
  */
-import { parseColor } from '../render/Look.ts';
+import { parseColor } from '../render/color.ts';
 import { fxProblems, type FxFile } from '../render/fx/FxData.ts';
 
 export type BossGender = 'female' | 'male' | 'neutral';

@@ -53,21 +53,13 @@ import { CopyLinkScreen } from './screens/CopyLinkScreen.ts';
 import { PlayScreen } from './screens/PlayScreen.ts';
 import { countEvent } from './analytics.ts';
 import { describeRace, keepOutOfSearch } from './racePage.ts';
+import { runContentOf } from '@parapet/runtime/content/types.ts';
 
 export type GhostProblem = 'invalid' | 'version' | 'content';
 
 /** The content a run of `levelId` is built from, or null for a level that does not exist. */
 export function runContent(ctx: GameContext, levelId: number): RunContent | null {
-  const level = ctx.content.levels[levelId];
-  const mission = ctx.content.missions.levels[levelId];
-  if (!level || !mission) return null;
-  return {
-    level,
-    mission,
-    moves: ctx.content.moves,
-    tables: ctx.content.tables,
-    rival: ctx.content.rivals.get(levelId) ?? null,
-  };
+  return runContentOf(ctx.content, levelId);
 }
 
 const hashes = new Map<number, ContentHash>();
@@ -104,7 +96,7 @@ export function recordReplay(
 ): Replay | null {
   const content = runContent(ctx, levelId);
   if (!content || !isRankedMode(mode) || entry.input.length === 0) return null;
-  if (entry.simVersion && entry.simVersion !== SIM_VERSION) return null;
+  if (entry.simVersion !== SIM_VERSION) return null;
   return {
     simVersion: SIM_VERSION,
     rulesetId: RULESET_ID,

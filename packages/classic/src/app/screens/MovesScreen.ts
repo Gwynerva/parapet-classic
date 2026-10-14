@@ -11,18 +11,14 @@ import { contains } from '@parapet/runtime/ui/layout.ts';
 import { ShowcaseBox } from '@parapet/runtime/ui/ShowcaseBox.ts';
 import { TileGrid } from '@parapet/runtime/ui/TileGrid.ts';
 import { MOVE_KEYS } from '@parapet/runtime/moves/moveKeys.ts';
-import type { MoveDemoData } from '@parapet/runtime/moves/MoveDemo.ts';
 import { makeEchoColor } from '@parapet/runtime/render/EchoSkin.ts';
 import { CHARACTER_OBJECT } from '@parapet/runtime/render/SceneRenderer.ts';
 import { ANCHOR_TOP_LEFT } from '@parapet/runtime/render/SpriteSheet.ts';
-import demosJson from '@content/moves/demos.json';
 import { ScreenFrame } from '../ui/ScreenFrame.ts';
 import { MoveStage } from '../ui/MoveStage.ts';
 import { showcaseLayout } from '../layouts.ts';
+import { MOVE_DEMOS } from '../../assets/demos.ts';
 
-export { MOVE_KEYS };
-
-const DEMOS = (demosJson as unknown as { demos: MoveDemoData[] }).demos;
 const TILE = 34;
 const TILE_GAP = 4;
 /** Silhouettes on the tiles: the pose that stands for each move. */
@@ -53,7 +49,7 @@ export class MovesScreen implements Screen {
 
   private showMove(): void {
     const key = MOVE_KEYS[this.grid.index] ?? 'run';
-    const demo = DEMOS.find((d) => d.move === key);
+    const demo = MOVE_DEMOS.find((d) => d.move === key);
     if (demo) this.stage.show(demo);
     this.refreshText();
   }
@@ -139,7 +135,7 @@ export class MovesScreen implements Screen {
       const icon = this.icon(i, s.selected || s.pressed);
       if (icon) c.drawImage(icon, r.x + 1, r.y + 1);
     });
-    this.grid.drawScrollMarkers(c, this.ctx.fonts.small);
+    this.grid.drawScrollMarkers(c);
   }
 
   /**

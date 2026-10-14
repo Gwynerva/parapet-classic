@@ -5,27 +5,17 @@
  * together. Keyboard, gamepad (polled, edge-detected) and the on-screen touch buttons all feed
  * the same accumulator. Menus read a separate UI stream (`consumeUi`).
  */
+import { pressBits, type ArrowKey } from '@parapet/sim';
 import type { UiGesture, UiKey, UiPointer, UiSource, UiWheel } from '../app/Screen.ts';
 import type { Viewport } from '../render/Viewport.ts';
 import type { TouchControls, TouchHit } from './TouchControls.ts';
 
-/** Press bits as the simulation reads them (`Input` in @parapet/sim). */
-export const Press = {
-  UP: 1,
-  DOWN: 2,
-  RIGHT: 4,
-  LEFT: 8,
-  FORWARD: 16,
-  BACK: 32,
-} as const;
-
-export type Direction = 'up' | 'down' | 'left' | 'right';
 export type UiAction = UiKey['action'];
 export type InputSource = UiSource;
 
 export type UiEvent =
-  | { type: 'key'; key: UiKey; source: InputSource }
-  | { type: 'pointer'; pointer: UiPointer; pointerType: string; pointerId: number }
+  | { type: 'key'; key: UiKey }
+  | { type: 'pointer'; pointer: UiPointer }
   | { type: 'wheel'; wheel: UiWheel };
 
 export interface InputManagerOptions {
@@ -37,7 +27,7 @@ export interface InputManagerOptions {
   keyTarget?: EventTarget;
 }
 
-const KEY_DIRECTIONS: Readonly<Record<string, Direction>> = {
+const KEY_DIRECTIONS: Readonly<Record<string, ArrowKey>> = {
   ArrowUp: 'up',
   KeyW: 'up',
   ArrowDown: 'down',
@@ -67,7 +57,7 @@ const KEY_GESTURES: Readonly<Record<string, UiAction>> = {
 const WHEEL_LINE_PX = 16;
 
 /** Standard gamepad mapping: d-pad 12–15, A/B 0/1, Y 3, Select/Start 8/9. */
-const GAMEPAD_DIRECTIONS: Readonly<Record<number, Direction>> = {
+const GAMEPAD_DIRECTIONS: Readonly<Record<number, ArrowKey>> = {
   12: 'up',
   13: 'down',
   14: 'left',
@@ -83,20 +73,6 @@ const GAMEPAD_ACTIONS: Readonly<Record<number, UiAction>> = {
 };
 
 const STICK_DEADZONE = 0.5;
-
-/** Press bits for a direction, resolving FORWARD/BACK from the facing like the original. */
-export function pressBits(direction: Direction, facingRight: boolean): number {
-  switch (direction) {
-    case 'up':
-      return Press.UP;
-    case 'down':
-      return Press.DOWN;
-    case 'right':
-      return Press.RIGHT | (facingRight ? Press.FORWARD : Press.BACK);
-    case 'left':
-      return Press.LEFT | (facingRight ? Press.BACK : Press.FORWARD);
-  }
-}
 
 interface GamepadState {
   buttons: boolean[];
@@ -154,21 +130,15 @@ export class InputManager {
     return this.touch;
   }
 
-  setTouchControls(touch: TouchControls | null): void {
-    this.touch?.releaseAll();
-    this.capturedPointers.clear();
-    this.touch = touch;
-  }
-
   /** Registers a direction press from any source (also a UI navigation key). */
-  press(direction: Direction, source: InputSource = 'keyboard'): void {
+  press(direction: ArrowKey, source: InputSource = 'keyboard'): void {
     this.bits |= pressBits(direction, this.facingRight());
-    this.ui.push({ type: 'key', key: { action: direction, source }, source });
+    this.ui.push({ type: 'key', key: { action: direction, source } });
   }
 
   /** Registers a UI action (confirm/back/pause/next/prev). */
   action(action: UiAction, source: InputSource = 'keyboard'): void {
-    this.ui.push({ type: 'key', key: { action, source }, source });
+    this.ui.push({ type: 'key', key: { action, source } });
   }
 
   /** Press bits accumulated since the last call; clears them. */
@@ -176,11 +146,6 @@ export class InputManager {
     const bits = this.bits;
     this.bits = 0;
     return bits;
-  }
-
-  /** Press bits accumulated so far, without clearing them. */
-  peek(): number {
-    return this.bits;
   }
 
   /** UI events (keys and pointer) since the last call; clears them. */
@@ -316,7 +281,7 @@ export class InputManager {
     if (
       last?.type === 'pointer' &&
       last.pointer.type === 'move' &&
-      last.pointerId === event.pointerId
+      last.pointer.id === event.pointerId
     ) {
       this.ui.pop();
     }
@@ -382,8 +347,6 @@ export class InputManager {
     this.ui.push({
       type: 'pointer',
       pointer: { x, y, type, pointerType: event.pointerType, id: event.pointerId },
-      pointerType: event.pointerType,
-      pointerId: event.pointerId,
     });
   }
 }

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; connect-src 'self'; worker-src 'self' blob:"
+    />
+    <meta name="theme-color" content="#0d1117" />
+    <title>The Lab: Playman Extreme Running taken apart · Parapet Classic</title>
+    <meta
+      name="description"
+      content="How the 2007 mobile parkour game Playman Extreme Running works, as experiments to play with: buffered presses, the wall run, landings, the frame clock, the vector runner and the camera, run on the original's own rules and data."
+    />
+    <link rel="canonical" href="%SITE_URL%lab/" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Parapet Classic" />
+    <meta property="og:title" content="The Lab: Playman Extreme Running taken apart" />
+    <meta
+      property="og:description"
+      content="How the 2007 mobile parkour classic works, as experiments to play with in the browser."
+    />
+    <meta property="og:url" content="%SITE_URL%lab/" />
+    <meta property="og:image" content="%SITE_URL%og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="manifest" href="../manifest.webmanifest" />
+    <link rel="icon" href="../favicon.ico" sizes="32x32" />
+    <link rel="icon" type="image/svg+xml" href="../icons/icon.svg" />
+    <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png" />
+  </head>
+  <body>
+    <div id="lab">
+      <noscript
+        >The Lab runs the original game's rules in your browser: it needs JavaScript.</noscript
+      >
+    </div>
+    <script type="module" src="../src/lab/main.ts"></script>
+  </body>
+</html>

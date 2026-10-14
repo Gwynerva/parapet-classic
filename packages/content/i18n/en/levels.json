@@ -1,6 +1,5 @@
 {
   "level.select": "Select level",
-  "level.mission": "Select mission",
   "level.names.0": "Mill Brook",
   "level.names.1": "North Hill",
   "level.names.2": "Main St.",
@@ -33,16 +32,5 @@
   "level.complete.boss": "{boss} takes your challenge now.",
   "level.complete.fight": "Challenge {boss}",
   "level.complete.next": "On to {name}",
-  "level.record": "Record:",
-  "level.prize": "Prize",
-  "level.prizeLocked": "Locked. Complete every mission on every level to see the prize.",
-  "level.rival": "Rival: {name}",
-  "rivals.0": "Spike",
-  "rivals.1": "Trix",
-  "rivals.2": "Dart",
-  "rivals.3": "Viper",
-  "rivals.4": "Ninja",
-  "rivals.5": "Big D",
-  "rivals.6": "Chili",
-  "rivals.7": "Tung"
+  "level.prize": "Prize"
 }

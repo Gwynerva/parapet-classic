@@ -3,7 +3,6 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { basename, dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import type { AtlasData, AtlasFrame, SceneFile } from '@parapet/runtime/content/types.ts';
 import {
   lookDataProblems,
@@ -30,18 +29,19 @@ import {
   fillRect,
   newImage,
   rasterCommands,
+  tintSheet,
   sheetFrame,
   type RgbaImage,
   type RgbaSheet,
 } from '@parapet/runtime/render/Raster.ts';
 import { familyOf } from '@parapet/runtime/render/Rig.ts';
-import { skinSwap } from '@parapet/runtime/render/CharacterRenderer.ts';
-import { drawText, loadFont, textWidth } from './bitmapText.ts';
+import { skinSwap } from '@parapet/runtime/render/Rig.ts';
+import { drawRasterText } from '@parapet/runtime/text/RasterText.ts';
 import { decodePng, encodePng } from './png.ts';
+import { CONTENT_DIR, EXTRACTED_DIR, loadRasterFont, readJson } from './files.ts';
+import { DEFAULT_ACCENT } from '@parapet/runtime/render/color.ts';
 
-const CONTENT_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', 'content');
-const GENERATED = join(CONTENT_ROOT, 'playman', 'extracted');
-const BOSSES = join(CONTENT_ROOT, 'bosses');
+const BOSSES = join(CONTENT_DIR, 'bosses');
 
 const USAGE = `usage: npm run look -- <command>     (a look is a file or its id: kate)
 
@@ -69,7 +69,7 @@ const USAGE = `usage: npm run look -- <command>     (a look is a file or its id:
   lineup <look> <look>... --out <png>  several looks side by side, running right then left
          [--frames <k,k>] [--scale <n>]    (--frames: keyframes, every second one facing left;
          [--columns <n>]                    --columns: looks per row)
-  migrate <look.json>              moves old "near" pictures to parts["<id>:near"]`;
+`;
 
 /** Where the command was typed (npm runs workspace scripts in the package's folder). */
 const CWD = process.env.INIT_CWD ?? process.cwd();
@@ -84,13 +84,9 @@ function outPath(arg: string): string {
   return resolve(CWD, arg);
 }
 
-function readJson<T>(file: string): T {
-  return JSON.parse(readFileSync(file, 'utf8')) as T;
-}
-
 function loadBase(): RgbaSheet {
-  const png = decodePng(new Uint8Array(readFileSync(join(GENERATED, 'atlas.png'))));
-  const json = readJson<AtlasData>(join(GENERATED, 'atlas.json'));
+  const png = decodePng(new Uint8Array(readFileSync(join(EXTRACTED_DIR, 'atlas.png'))));
+  const json = readJson<AtlasData>(join(EXTRACTED_DIR, 'atlas.json'));
   const frames: (AtlasFrame | undefined)[] = [];
   for (const [id, f] of Object.entries(json.frames)) frames[Number(id)] = f;
   return { image: { width: png.width, height: png.height, data: png.rgba }, frames };
@@ -263,11 +259,11 @@ function sheet(file: string, out: string, rest: readonly string[]): number {
     changedOnly: rest.includes('--changed'),
   });
   const atlasImg = exportAtlas(base, loaded.look, layout);
-  const font = loadFont(join(CONTENT_ROOT, 'fonts'));
-  const labelH = font.lineHeight + 2;
+  const font = loadRasterFont();
+  const labelH = font.font.lineHeight + 2;
   const items = layout.cells.map((c, i) => ({
     key: String(i),
-    w: Math.max(c.w * scale, textWidth(font, c.label) + 2),
+    w: Math.max(c.w * scale, font.font.lineWidth(c.label) + 2),
     h: c.h * scale + labelH,
     breakBefore: i > 0 && layout.cells[i - 1]!.family !== c.family,
   }));
@@ -276,7 +272,14 @@ function sheet(file: string, out: string, rest: readonly string[]): number {
   fillRect(img, 0, 0, img.width, img.height, [24, 27, 33, 255]);
   layout.cells.forEach((c, i) => {
     const r = packing.cells.get(String(i))!;
-    drawText(img, font, c.label, r.x + 1, r.y, c.mirrored ? [255, 196, 120] : [200, 208, 220]);
+    drawRasterText(
+      img,
+      font,
+      c.label,
+      r.x + 1,
+      r.y,
+      c.mirrored ? [255, 196, 120] : [200, 208, 220],
+    );
     const cx = r.x;
     const cy = r.y + labelH;
     for (let y = 0; y < c.h; y++) {
@@ -316,21 +319,7 @@ function partColour(id: number): [number, number, number] {
 
 /** The base atlas with every character sprite painted flat in its part's colour. */
 function tintedBase(base: RgbaSheet): RgbaSheet {
-  const data = new Uint8ClampedArray(base.image.data);
-  for (const [id, f] of base.frames.entries()) {
-    if (!f || familyOf(id) < 0) continue;
-    const [r, g, b] = partColour(id);
-    for (let y = f.y; y < f.y + f.h; y++) {
-      for (let x = f.x; x < f.x + f.w; x++) {
-        const o = (y * base.image.width + x) * 4;
-        if (data[o + 3]! < 128) continue;
-        data[o] = r;
-        data[o + 1] = g;
-        data[o + 2] = b;
-      }
-    }
-  }
-  return { image: { ...base.image, data }, frames: base.frames };
+  return tintSheet(base, (id) => (familyOf(id) < 0 ? null : partColour(id)));
 }
 
 function poses(file: string, out: string, rest: readonly string[]): number {
@@ -347,12 +336,12 @@ function poses(file: string, out: string, rest: readonly string[]): number {
     sheetOf = { image: layer, frames: layer.frames, fallback: base };
     swap = lookSwap(layer);
   }
-  const k0 = readJson<SceneFile>(join(GENERATED, 'scenes', 'k0.json'));
+  const k0 = readJson<SceneFile>(join(EXTRACTED_DIR, 'scenes', 'k0.json'));
   const obj = k0.objects[0]!;
   const anims = readJson<{
     clips: Record<string, number[]>;
     demos: { clipOffset: number }[];
-  }>(join(GENERATED, 'anims.json'));
+  }>(join(EXTRACTED_DIR, 'anims.json'));
   const clip = (offset: number): number[] => anims.clips[String(offset)] ?? [];
   const pick = option(rest, '--frames');
   const keyframes = pick
@@ -430,7 +419,7 @@ function base(out: string | undefined, only: Set<number> | null): number {
   const look: LookData = {
     id: 'blaise',
     base: 0,
-    accent: '#ff3ea5',
+    accent: DEFAULT_ACCENT,
     palette: Object.fromEntries([...palette].map(([colour, ch]) => [ch, colour])),
     parts,
   };
@@ -443,16 +432,16 @@ function base(out: string | undefined, only: Set<number> | null): number {
 /** Several looks side by side in the same poses, each labelled. */
 function lineup(files: readonly string[], out: string, rest: readonly string[]): number {
   const base = loadBase();
-  const k0 = readJson<SceneFile>(join(GENERATED, 'scenes', 'k0.json'));
+  const k0 = readJson<SceneFile>(join(EXTRACTED_DIR, 'scenes', 'k0.json'));
   const obj = k0.objects[0]!;
   const anims = readJson<{ clips: Record<string, number[]>; demos: { clipOffset: number }[] }>(
-    join(GENERATED, 'anims.json'),
+    join(EXTRACTED_DIR, 'anims.json'),
   );
   const run = anims.clips[String(anims.demos[0]?.clipOffset ?? 0)] ?? [0];
   const pick = option(rest, '--frames');
   const frames = pick ? pick.split(',').map(Number) : [run[0] ?? 0, run[3] ?? 0];
   const scale = Math.max(1, Number(option(rest, '--scale') ?? 3));
-  const font = loadFont(join(CONTENT_ROOT, 'fonts'));
+  const font = loadRasterFont();
   const cellW = 44;
   const cellH = 74;
   const perRow = Math.max(1, Number(option(rest, '--columns') ?? files.length));
@@ -482,7 +471,7 @@ function lineup(files: readonly string[], out: string, rest: readonly string[]):
       rasterCommands(small, sheet, cmds, n, ox, oy);
     });
   });
-  const band = font.lineHeight + 4;
+  const band = font.font.lineHeight + 4;
   const img = newImage(small.width * scale, rows * (cellH * scale + band));
   fillRect(img, 0, 0, img.width, img.height, [24, 27, 33, 255]);
   for (let r = 0; r < rows; r++) {
@@ -494,7 +483,7 @@ function lineup(files: readonly string[], out: string, rest: readonly string[]):
     drawImageScaled(img, strip, 0, r * (cellH * scale + band) + band, scale);
   }
   names.forEach((name, i) =>
-    drawText(
+    drawRasterText(
       img,
       font,
       name,
@@ -541,21 +530,6 @@ function rotate(file: string, rest: readonly string[]): number {
   return result.problems.length > 0 ? 1 : 0;
 }
 
-function migrate(file: string): number {
-  const data = readJson<LookData>(file);
-  if (!data.near) {
-    console.log(`${file}: nothing to migrate`);
-    return 0;
-  }
-  const parts = { ...(data.parts ?? {}) };
-  for (const [k, rows] of Object.entries(data.near)) parts[`${k}:near`] = rows;
-  const next: LookData = { ...data, parts };
-  delete next.near;
-  writeLook(file, next);
-  console.log(`${file}: near pictures moved to parts`);
-  return 0;
-}
-
 function main(argv: readonly string[]): number {
   const [command, ...rest] = argv;
   const args = positional(rest);
@@ -582,9 +556,6 @@ function main(argv: readonly string[]): number {
       const only = option(rest, '--parts');
       return base(out && outPath(out), only ? new Set(only.split(',').map(Number)) : null);
     }
-    case 'migrate':
-      if (args[0]) return migrate(lookFile(args[0]));
-      break;
     case 'rotate':
       if (args[0]) return rotate(lookFile(args[0]), rest);
       break;

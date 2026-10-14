@@ -57,3 +57,5 @@ export const WALL_AHEAD_LEFT = 4608;
 export const ANY_SLOPE = 252;
 /** Air or pole (bits 0, 15, 16). */
 export const AIR_OR_POLE = 98305;
+/** A wall or a ledge either way (bits 8, 9, 11, 12): what the wall lookahead looks for. */
+export const WALL_OR_LEDGE = 6912;

@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="650" height="394" viewBox="0 0 650 394" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" style="font-variant-numeric: tabular-nums">
+<title id="t">What the levels are drawn with</title>
+<desc id="d">Primitives of each level’s art, by kind (its usual frame)</desc>
+<rect x="0.5" y="0.5" width="649" height="393" rx="10" fill="#161b22" stroke="#30363d"/>
+<text x="20" y="30" font-size="16" font-weight="600" fill="#e6edf3">What the levels are drawn with</text>
+<text x="20" y="48" font-size="12" fill="#8b949e">Primitives of each level’s art, by kind (its usual frame)</text>
+<text x="122" y="84" font-size="12" fill="#e6edf3" text-anchor="end">Mill Brook</text>
+<rect x="130" y="73" width="133" height="16" fill="#3987e5" rx="2"><title>Mill Brook: 209 rectangles</title></rect>
+<rect x="265" y="73" width="16.1" height="16" fill="#d95926" rx="2"><title>Mill Brook: 28 sprites</title></rect>
+<rect x="283.1" y="73" width="3.2" height="16" fill="#c98500" rx="2"><title>Mill Brook: 8 tiled sprites</title></rect>
+<rect x="288.3" y="73" width="11.6" height="16" fill="#199e70" rx="2"><title>Mill Brook: 21 nested objects</title></rect>
+<text x="307.9" y="84" font-size="11" fill="#8b949e">266</text>
+<text x="122" y="106" font-size="12" fill="#e6edf3" text-anchor="end">North Hill</text>
+<rect x="130" y="95" width="317.8" height="16" fill="#3987e5" rx="2"><title>North Hill: 495 rectangles</title></rect>
+<rect x="449.8" y="95" width="30.9" height="16" fill="#d95926" rx="2"><title>North Hill: 51 sprites</title></rect>
+<rect x="482.8" y="95" width="30.3" height="16" fill="#c98500" rx="2"><title>North Hill: 50 tiled sprites</title></rect>
+<rect x="515.1" y="95" width="58.7" height="16" fill="#199e70" rx="2"><title>North Hill: 94 nested objects</title></rect>
+<text x="581.8" y="106" font-size="11" fill="#8b949e">690</text>
+<text x="122" y="128" font-size="12" fill="#e6edf3" text-anchor="end">Main St.</text>
+<rect x="130" y="117" width="353.3" height="16" fill="#3987e5" rx="2"><title>Main St.: 550 rectangles</title></rect>
+<rect x="485.3" y="117" width="25.1" height="16" fill="#d95926" rx="2"><title>Main St.: 42 sprites</title></rect>
+<rect x="512.5" y="117" width="26.4" height="16" fill="#c98500" rx="2"><title>Main St.: 44 tiled sprites</title></rect>
+<rect x="540.9" y="117" width="30.9" height="16" fill="#199e70" rx="2"><title>Main St.: 51 nested objects</title></rect>
+<text x="579.8" y="128" font-size="11" fill="#8b949e">687</text>
+<text x="122" y="150" font-size="12" fill="#e6edf3" text-anchor="end">East End</text>
+<rect x="130" y="139" width="159.5" height="16" fill="#3987e5" rx="2"><title>East End: 250 rectangles</title></rect>
+<rect x="291.5" y="139" width="34.2" height="16" fill="#d95926" rx="2"><title>East End: 56 sprites</title></rect>
+<rect x="327.7" y="139" width="6.4" height="16" fill="#c98500" rx="2"><title>East End: 13 tiled sprites</title></rect>
+<rect x="336.1" y="139" width="22.6" height="16" fill="#199e70" rx="2"><title>East End: 38 nested objects</title></rect>
+<text x="366.6" y="150" font-size="11" fill="#8b949e">357</text>
+<text x="122" y="172" font-size="12" fill="#e6edf3" text-anchor="end">Juniper Point</text>
+<rect x="130" y="161" width="169.9" height="16" fill="#3987e5" rx="2"><title>Juniper Point: 266 rectangles</title></rect>
+<rect x="301.9" y="161" width="1.2" height="16" fill="#d95926" rx="2"><title>Juniper Point: 5 sprites</title></rect>
+<rect x="305.1" y="161" width="7" height="16" fill="#c98500" rx="2"><title>Juniper Point: 14 tiled sprites</title></rect>
+<rect x="314.1" y="161" width="2.5" height="16" fill="#199e70" rx="2"><title>Juniper Point: 7 nested objects</title></rect>
+<text x="324.7" y="172" font-size="11" fill="#8b949e">292</text>
+<text x="122" y="194" font-size="12" fill="#e6edf3" text-anchor="end">Oak Valley</text>
+<rect x="130" y="183" width="212.5" height="16" fill="#3987e5" rx="2"><title>Oak Valley: 332 rectangles</title></rect>
+<rect x="344.5" y="183" width="36.1" height="16" fill="#d95926" rx="2"><title>Oak Valley: 59 sprites</title></rect>
+<rect x="382.6" y="183" width="1" height="16" fill="#c98500" rx="2"><title>Oak Valley: 4 tiled sprites</title></rect>
+<rect x="385.2" y="183" width="14.8" height="16" fill="#199e70" rx="2"><title>Oak Valley: 26 nested objects</title></rect>
+<text x="408" y="194" font-size="11" fill="#8b949e">421</text>
+<text x="122" y="216" font-size="12" fill="#e6edf3" text-anchor="end">Grass Bay</text>
+<rect x="130" y="205" width="292" height="16" fill="#3987e5" rx="2"><title>Grass Bay: 455 rectangles</title></rect>
+<rect x="424" y="205" width="10.3" height="16" fill="#d95926" rx="2"><title>Grass Bay: 19 sprites</title></rect>
+<rect x="436.2" y="205" width="14.8" height="16" fill="#c98500" rx="2"><title>Grass Bay: 26 tiled sprites</title></rect>
+<rect x="453" y="205" width="36.1" height="16" fill="#199e70" rx="2"><title>Grass Bay: 59 nested objects</title></rect>
+<text x="497.2" y="216" font-size="11" fill="#8b949e">559</text>
+<text x="122" y="238" font-size="12" fill="#e6edf3" text-anchor="end">Sand Cape</text>
+<rect x="130" y="227" width="270" height="16" fill="#3987e5" rx="2"><title>Sand Cape: 421 rectangles</title></rect>
+<rect x="402" y="227" width="34.8" height="16" fill="#d95926" rx="2"><title>Sand Cape: 57 sprites</title></rect>
+<rect x="438.8" y="227" width="26.4" height="16" fill="#c98500" rx="2"><title>Sand Cape: 44 tiled sprites</title></rect>
+<rect x="467.2" y="227" width="27.7" height="16" fill="#199e70" rx="2"><title>Sand Cape: 46 nested objects</title></rect>
+<text x="503" y="238" font-size="11" fill="#8b949e">568</text>
+<text x="122" y="260" font-size="12" fill="#e6edf3" text-anchor="end">Central Park</text>
+<rect x="130" y="249" width="202.8" height="16" fill="#3987e5" rx="2"><title>Central Park: 317 rectangles</title></rect>
+<rect x="334.8" y="249" width="41.3" height="16" fill="#d95926" rx="2"><title>Central Park: 67 sprites</title></rect>
+<rect x="378.1" y="249" width="10.9" height="16" fill="#c98500" rx="2"><title>Central Park: 20 tiled sprites</title></rect>
+<rect x="391" y="249" width="16.1" height="16" fill="#199e70" rx="2"><title>Central Park: 28 nested objects</title></rect>
+<text x="415.1" y="260" font-size="11" fill="#8b949e">432</text>
+<text x="122" y="282" font-size="12" fill="#e6edf3" text-anchor="end">Bird Bay</text>
+<rect x="130" y="271" width="307.5" height="16" fill="#3987e5" rx="2"><title>Bird Bay: 479 rectangles</title></rect>
+<rect x="439.5" y="271" width="40" height="16" fill="#d95926" rx="2"><title>Bird Bay: 65 sprites</title></rect>
+<rect x="481.5" y="271" width="25.1" height="16" fill="#c98500" rx="2"><title>Bird Bay: 42 tiled sprites</title></rect>
+<rect x="508.6" y="271" width="4.5" height="16" fill="#199e70" rx="2"><title>Bird Bay: 10 nested objects</title></rect>
+<text x="521.1" y="282" font-size="11" fill="#8b949e">596</text>
+<text x="122" y="304" font-size="12" fill="#e6edf3" text-anchor="end">West Harbour</text>
+<rect x="130" y="293" width="341.1" height="16" fill="#3987e5" rx="2"><title>West Harbour: 531 rectangles</title></rect>
+<rect x="473.1" y="293" width="72.3" height="16" fill="#d95926" rx="2"><title>West Harbour: 115 sprites</title></rect>
+<rect x="547.4" y="293" width="39.3" height="16" fill="#c98500" rx="2"><title>West Harbour: 64 tiled sprites</title></rect>
+<rect x="588.7" y="293" width="1" height="16" fill="#199e70" rx="2"><title>West Harbour: 2 nested objects</title></rect>
+<text x="596" y="304" font-size="11" fill="#8b949e">712</text>
+<text x="122" y="326" font-size="12" fill="#e6edf3" text-anchor="end">Pine Island</text>
+<rect x="130" y="315" width="133.7" height="16" fill="#3987e5" rx="2"><title>Pine Island: 210 rectangles</title></rect>
+<rect x="265.7" y="315" width="23.2" height="16" fill="#d95926" rx="2"><title>Pine Island: 39 sprites</title></rect>
+<rect x="290.9" y="315" width="12.9" height="16" fill="#c98500" rx="2"><title>Pine Island: 23 tiled sprites</title></rect>
+<rect x="305.7" y="315" width="1" height="16" fill="#199e70" rx="2"><title>Pine Island: 3 nested objects</title></rect>
+<text x="313.7" y="326" font-size="11" fill="#8b949e">275</text>
+<rect x="130" y="365" width="10" height="10" fill="#3987e5" rx="2"></rect>
+<text x="145" y="374" font-size="12" fill="#e6edf3">rectangles</text>
+<rect x="250" y="365" width="10" height="10" fill="#d95926" rx="2"></rect>
+<text x="265" y="374" font-size="12" fill="#e6edf3">sprites</text>
+<rect x="370" y="365" width="10" height="10" fill="#c98500" rx="2"></rect>
+<text x="385" y="374" font-size="12" fill="#e6edf3">tiled sprites</text>
+<rect x="490" y="365" width="10" height="10" fill="#199e70" rx="2"></rect>
+<text x="505" y="374" font-size="12" fill="#e6edf3">nested objects</text>
+</svg>

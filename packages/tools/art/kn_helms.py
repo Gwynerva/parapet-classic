@@ -166,23 +166,9 @@ def outline(pic, hits, dark, lit, rim=None, rim_ramp=None, keep=()):
     return out
 
 
-def patch(pic, rows, legend, x0=0, y0=0):
-    """Hand touch-ups: '.' keeps a pixel, ' ' clears it, others paint a legend colour."""
-    for dy, row in enumerate(rows):
-        for dx, ch in enumerate(row):
-            if ch == '.':
-                continue
-            pic.set(x0 + dx, y0 + dy, None if ch == ' ' else legend[ch])
-    return pic
-
-
 def smax(a, b, k=0.6):
     h = max(0.0, min(1.0, 0.5 + 0.5 * (b - a) / k))
     return a * (1 - h) + b * h + k * h * (1 - h)
-
-
-def smin(a, b, k=0.6):
-    return -smax(-a, -b, k)
 
 
 # ------------------------------------------------------------------------------------- Sunlight

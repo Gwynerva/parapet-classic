@@ -52,7 +52,7 @@ def legs(ramp5):
 
 def grid_rows(rows, pal, legend=P.PROPS):
     """An attachment's rows (characters of `legend`, '+' the pivot) in the look's palette."""
-    return [''.join(ch if ch in '.+' else pal.char(legend[ch]) for ch in r) for r in rows]
+    return enc(rows, legend, pal)
 
 
 def make(id_, rules, plan, parts, hair, accent, attachments=None, ribbons=None, turn=(), post=None,

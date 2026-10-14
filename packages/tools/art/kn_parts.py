@@ -13,7 +13,7 @@ chainmail (dark rings), cloth (soft), fur (clumps), leather. Shoes are drawn as 
 import math
 
 from heads import Pic, shaded
-from body import body_parts, inflate
+from body import body_parts
 
 L3 = (0.45, -0.6, 0.65)
 _n = math.sqrt(sum(c * c for c in L3))
@@ -39,11 +39,6 @@ _FIRST[47] = ('shoe', 0)
 
 def family(sid):
     return _FIRST[sid][0]
-
-
-def is_front(sid):
-    """The pictures of the body turned to us (torso, chest, shoe)."""
-    return sid in (38, 61, 48)
 
 
 class Frame:

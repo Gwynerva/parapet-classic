@@ -67,9 +67,9 @@ const DUST_MOVES = new Set([24, 25, 29, 41, 54, 76, 82, 89]);
 const MOVE_BIT: Record<number, number> = {
   [MoveId.TIC_TAC_JUMP]: ChallengeBit.TIC_TAC_JUMP,
   [MoveId.WALL_FLIP]: ChallengeBit.WALL_FLIP,
-  67: ChallengeBit.SPIDER_JUMP,
+  [MoveId.SPIDER_JUMP]: ChallengeBit.SPIDER_JUMP,
   [MoveId.MONKEY_VAULT]: ChallengeBit.MONKEY_VAULT,
-  69: ChallengeBit.MONKEY_FLIP,
+  [MoveId.MONKEY_FLIP]: ChallengeBit.MONKEY_FLIP,
   [MoveId.POLE_JUMP]: ChallengeBit.POLE_JUMP,
   [MoveId.POLE_SPIN]: ChallengeBit.POLE_SPIN,
 };
@@ -123,7 +123,7 @@ export function enterMove(r: RunnerState, ctx: StepContext, id: number): void {
     switch (m.scoreType) {
       case 0:
         ctx.events.push({ type: 'fail', runner: r });
-        r.score.fail();
+        r.score.fail(ctx.clock);
         return;
       case 2:
       case 5:

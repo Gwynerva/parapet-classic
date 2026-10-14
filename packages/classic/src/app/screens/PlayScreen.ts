@@ -4,26 +4,25 @@
  * coach (warm-ups), the briefing box, the Sprint flyover, "get ready", play with the in-play
  * hints of the warm-ups, then the warm-up's closing message or the results screen.
  *
- * In a contest the level's boss stands next to the start, introduces itself in the briefing,
- * vanishes when the run starts and appears again when its time is up, where the player's run
- * will end (`BossPresence`, `bossSpots.ts`); a hologram of it loops what it did around the
- * player's next flag (`BossGlimpse`), and the HUD counts its flags as its split times pass. A runner playing a boss character wears one of its
- * outfits, picked at random for the run, and leaves its effects (`CharacterFx`).
+ * A contest with a boss (`play/BossContest.ts`) and a race with a ghost (`play/GhostRace.ts`)
+ * ride along. A runner playing a boss character wears one of its outfits, picked at random for
+ * the run, and leaves its effects (`CharacterFx`).
  */
 import {
   evaluateMission,
   isSplitEvent,
+  type Level,
   missionSlot,
+  type MissionTarget,
   MissionType,
   MoveId,
-  rankingSort,
   STEP,
-  type Level,
-  type MissionTarget,
+  tileCentre,
   type World,
   type WorldEvent,
 } from '@parapet/sim';
-import { formatTime, Theme, type GameContext } from '../Context.ts';
+import { Theme, type GameContext } from '../Context.ts';
+import { runContent } from '../ghosts.ts';
 import { RunSession, type RunSetup } from '@parapet/runtime/app/RunSession.ts';
 import { MissionFlow } from '@parapet/runtime/app/MissionFlow.ts';
 import type { Screen, UiKey, UiPointer } from '@parapet/runtime/app/Screen.ts';
@@ -34,10 +33,7 @@ import { countEvent } from '../analytics.ts';
 import { CameraTour } from '@parapet/runtime/render/CameraTour.ts';
 import { CharacterRenderer, type NpcVisual } from '@parapet/runtime/render/CharacterRenderer.ts';
 import { EchoRenderer } from '@parapet/runtime/render/EchoRenderer.ts';
-import type { SceneRenderer, SpriteSwap } from '@parapet/runtime/render/SceneRenderer.ts';
 import { CharacterFx } from '@parapet/runtime/render/fx/CharacterFx.ts';
-import { compileFx } from '@parapet/runtime/render/fx/FxSheet.ts';
-import { echoColor, type EchoColor } from '@parapet/runtime/render/EchoSkin.ts';
 import {
   defaultLevelArtFrame,
   MarkerBounce,
@@ -51,53 +47,18 @@ import { MessageBox, type MessageBoxOptions } from '@parapet/runtime/ui/MessageB
 import { outlined } from '@parapet/runtime/ui/draw.ts';
 import { prefersReducedMotion } from '@parapet/runtime/ui/motion.ts';
 import { safeRect } from '@parapet/runtime/ui/layout.ts';
-import {
-  MAX_FRAME_UNITS,
-  TIME_SCALE_NUM,
-  TIME_SCALE_SHIFT,
-} from '@parapet/runtime/app/GameLoop.ts';
-import {
-  completeMission,
-  isContestBeaten,
-  loadContestProgress,
-  loadProgress,
-} from '@parapet/runtime/storage/profile.ts';
+import { FrameUnits } from '@parapet/runtime/app/GameLoop.ts';
+import { completeMission, loadProgress } from '@parapet/runtime/storage/profile.ts';
 import { COACH_IDLE_KEYFRAME, COACH_TALK_CLIP } from '../ui/sprites.ts';
-import {
-  drawEdgeSign,
-  drawMarkerLabel,
-  drawNameTag,
-  formatGap,
-  type EdgePicture,
-} from '../ui/GhostOverlay.ts';
-import { drawPortrait } from '../ui/portrait.ts';
-import {
-  bossCharacterFor,
-  bossOfCharacter,
-  bossOfLevel,
-  characterColor,
-  characterFx,
-  contestGlimpses,
-  contestOfCharacter,
-  isDrawn,
-  pickOutfit,
-  WORKSHOP_COLOR,
-} from '../bosses.ts';
-import { BossGlimpse } from '../ui/BossGlimpse.ts';
+import { drawEdgeSign, formatGap, type EdgePicture } from '../ui/GhostOverlay.ts';
+import { characterFx, pickOutfit } from '../bosses.ts';
 import { showsFinishPointer } from '../ui/finishPointer.ts';
-import { drawFinishFlag } from '../ui/icons.ts';
-import { BossPresence, HEAD_HEIGHT } from '../ui/BossPresence.ts';
-import {
-  glimpseCells,
-  levelGrid,
-  nearestFlag,
-  standingSpot,
-  waitingSpot,
-  type PresenceSpot,
-} from '../ui/bossSpots.ts';
-import type { GlimpseTrack } from '@parapet/runtime/content/glimpses.ts';
+import { HEAD_HEIGHT } from '../ui/BossPresence.ts';
 import { holdLevelNews, levelCompletion, type LevelCompletion } from './LevelCompleteScreen.ts';
 import { PauseScreen } from './PauseScreen.ts';
+import { BossContest } from './play/BossContest.ts';
+import { GhostRace } from './play/GhostRace.ts';
+import { FINISH_SIGN, headSign } from './play/signs.ts';
 import { ResultsScreen } from './ResultsScreen.ts';
 
 /** Time the "get ready" banner is shown before the first step, in ms. */
@@ -118,15 +79,6 @@ const SPLIT_SHOW_MS = 2500;
  * player runs in the rival's own skin, the rival is see-through so the two never mix up.
  */
 const RIVAL_MIRROR_OPACITY = 0.55;
-/**
- * The signs at the screen's edge: the heads of the ghost (a hologram in its colour, with the
- * gap), the rival and the boss (with its time), and a small finish flag towards the finish (in
- * a score run, and once the flags are taken where the finish comes after them,
- * `showsFinishPointer`).
- */
-const FINISH_SIGN: EdgePicture = { radius: 8, draw: drawFinishFlag };
-/** Side of a head on its sign. */
-const SIGN_HEAD = 20;
 
 export class PlayScreen implements Screen {
   private readonly ctx: GameContext;
@@ -138,29 +90,21 @@ export class PlayScreen implements Screen {
   private fx!: CharacterFx;
   /** The outfit the player wears this run (a boss character's, picked at random). */
   private outfit = 0;
-  /** The boss in a contest, null otherwise. */
-  private presence: BossPresence | null = null;
-  /** The boss's glimpse, what it did around each flag (by index), and the flag shown, or -1. */
-  private glimpse: BossGlimpse | null = null;
-  private glimpseTracks: readonly (GlimpseTrack | null)[] | null = null;
-  private hintFlag = -1;
-  /** In a flag hunt, where the boss waits when each flag is the player's next. */
-  private flagSpots: PresenceSpot[] = [];
-  /** The boss's outfit for the run (the presence and the glimpse wear it). */
-  private bossOutfit = 0;
-  /** Until when (real time) the "boss has finished" line stays under the HUD. */
-  private contestBannerUntil = 0;
+  /** The contest with the level's boss, null outside one. */
+  private contest: BossContest | null = null;
+  /** The race with a ghost, null without one. */
+  private readonly ghost: GhostRace | null;
   private particles!: Particles;
   private bounce!: MarkerBounce;
   private readonly hud: Hud;
+  /** Game time of the frames outside the step loop (briefings, the flyover). */
+  private readonly frameUnits = new FrameUnits();
   private readonly theme: number;
   readonly flow: MissionFlow;
   private tour: CameraTour | null = null;
   private coach: NpcVisual | null = null;
-  /** The heads on the signs at the screen's edge (`drawEdgeSigns`). */
+  /** The rival's head on its sign at the screen's edge (`drawEdgeSigns`). */
   private rivalSign: EdgePicture | null = null;
-  private ghostSign: EdgePicture | null = null;
-  private bossSign: EdgePicture | null = null;
   private artFrames: [number, number];
   private readonly pulsing: boolean;
   private resultsShown = false;
@@ -177,8 +121,6 @@ export class PlayScreen implements Screen {
   private pendingHint: { text: string; at: number } | null = null;
   /** Gap to the ghost at the player's last checkpoint, shown under the timer for a moment. */
   private splitFlash: { text: string; ahead: boolean; until: number } | null = null;
-  private readonly ghostColor: EchoColor | null;
-  private readonly ghostLabel: string;
   private readonly view: ViewSize = { width: 240, height: 320 };
   private readonly missionIndex: number;
   /** The run was started over with the restart button: straight to "get ready". */
@@ -197,13 +139,7 @@ export class PlayScreen implements Screen {
     this.pulsing =
       warmUp || (setup.mode === 'challenge' && PULSING_CHALLENGE_LEVELS.has(setup.levelId));
     this.artFrames = [0, 1];
-    const ghost = setup.ghost;
-    this.ghostColor = ghost ? echoColor(ghost.replay.playerName) : null;
-    this.ghostLabel = !ghost
-      ? ''
-      : ghost.kind === 'best'
-        ? ctx.i18n.t('ghost.best')
-        : ghost.replay.playerName || ctx.i18n.t('player.name');
+    this.ghost = setup.ghost ? new GhostRace(ctx, setup.ghost) : null;
     this.flow = new MissionFlow({
       tutorialPages: warmUp && !setup.script ? 3 : 0,
       briefing: !warmUp && setup.mode !== 'free' && !setup.script,
@@ -224,16 +160,10 @@ export class PlayScreen implements Screen {
    */
   restart(opts: { quick?: boolean } = {}): void {
     const { content, render } = this.ctx;
-    const level = content.levels[this.setup.levelId];
     const mission = content.missions.levels[this.setup.levelId];
-    if (!level || !mission) throw new Error(`level ${this.setup.levelId} is missing`);
-    this.session = new RunSession(this.setup, {
-      level,
-      mission,
-      moves: content.moves,
-      tables: content.tables,
-      rival: content.rivals.get(this.setup.levelId) ?? null,
-    });
+    const data = runContent(this.ctx, this.setup.levelId);
+    if (!mission || !data) throw new Error(`level ${this.setup.levelId} is missing`);
+    this.session = new RunSession(this.setup, data);
     const world = this.session.world;
     this.camera = new Camera(this.view.width, this.view.height);
     this.characters = new CharacterRenderer(render.scene, render.moves, render.clips, render.skins);
@@ -250,32 +180,15 @@ export class PlayScreen implements Screen {
         seed: i + 1,
       });
     });
-    this.rivalSign = this.headSign(
+    this.rivalSign = headSign(
+      this.ctx,
       render.skins.sceneFor(mission.rivalCharacter),
       render.skins.swapFor(mission.rivalCharacter),
     );
     this.addFx(world.player, this.setup.character);
-    const ghostWorld = this.session.ghostWorld;
-    if (ghostWorld && this.setup.ghost && this.ghostColor) {
-      const runner = ghostWorld.player;
-      this.characters.attach(runner, {
-        character: this.setup.ghost.replay.character,
-        echo: true,
-        seed: world.runners.length + 1,
-      });
-      const source = render.skins.sceneFor(this.setup.ghost.replay.character);
-      this.echo.add(runner, {
-        color: this.ghostColor,
-        textured: true,
-        source,
-        swap: (clock) => this.characters.swapFor(runner, clock),
-      });
-      this.ghostSign = this.headSign(
-        render.echo.scene(this.ghostColor, true, source),
-        render.skins.swapFor(this.setup.ghost.replay.character),
-      );
-      this.session.onGhostStep((events, w) => this.onGhostStep(events, w));
-    }
+    this.ghost?.attach(this.session, this.characters, this.echo, (events, w) =>
+      this.onGhostStep(events, w),
+    );
     this.splitFlash = null;
     this.coach = null;
     const npc = world.level.npc;
@@ -283,19 +196,16 @@ export class PlayScreen implements Screen {
     if (npc && warmUp) {
       // The coach stands mid-cell on the floor, always facing right (`ak()`, line 5911).
       this.coach = this.characters.attachNpc('coach', {
-        x: (npc.x << 10) + 512,
+        x: tileCentre(npc.x),
         y: (npc.y << 10) + 1024,
         character: mission.rivalCharacter,
         idleKeyframe: COACH_IDLE_KEYFRAME,
         talkClipOffset: COACH_TALK_CLIP,
       });
     }
-    const contestOf = this.setup.contest ? contestOfCharacter(this.setup.contest.character) : null;
-    this.glimpseTracks = contestOf ? contestGlimpses(contestOf.levelId, contestOf.kind) : null;
-    this.presence = this.setup.contest ? this.createPresence(world.level) : null;
-    this.glimpse = this.presence ? this.createGlimpse(this.presence) : null;
-    this.hintFlag = -1;
-    this.contestBannerUntil = 0;
+    this.contest = this.setup.contest
+      ? new BossContest(this.ctx, this.setup.contest, this.setup.mode, this.setup.levelId, world)
+      : null;
     this.particles = new Particles(render.sheet, render.sine);
     this.particles.setLevel(world.level);
     this.bounce = new MarkerBounce();
@@ -303,7 +213,7 @@ export class PlayScreen implements Screen {
     render.level.setLevel(this.setup.levelId, world.level);
     this.onResize();
     this.camera.reset(world.player, world.level);
-    this.session.onStep((events) => this.onStep(events as Parameters<typeof this.onStep>[0]));
+    this.session.onStep((events) => this.onStep(events));
     this.resultsShown = false;
     this.pendingHint = null;
     this.openBoxes = 0;
@@ -332,139 +242,12 @@ export class PlayScreen implements Screen {
     );
   }
 
-  /**
-   * The boss of a contest: next to the start, facing it, and where it waits once its time is
-   * up (next to the goal in a sprint; by each flag in a flag hunt, `flagSpots`), clear of its
-   * glimpses. In one of its outfits, or as a silhouette while it is still in the workshop.
-   */
-  private createPresence(level: Level): BossPresence {
-    const { render, content } = this.ctx;
-    const contest = this.setup.contest!;
-    const grid = levelGrid(level, content.tables);
-    const startX = level.spawnX();
-    const startCx = startX >> 10;
-    const startCy = (level.spawnY() >> 10) - 1;
-    const facingRight = this.session.world.player.facingRight;
-    // The boss stands behind the runner, to watch it set off.
-    const start = standingSpot(grid, startCx, startCy, !facingRight, startX);
-    const tracks = this.glimpseTracks ?? [];
-    const avoid = (list: readonly (GlimpseTrack | null)[]) => ({
-      clip: glimpseCells(list.flatMap((t) => t?.poses ?? [])),
-      after: glimpseCells(list.flatMap((t) => t?.poses.slice(t.at) ?? [])),
-    });
-    let end = start;
-    this.flagSpots = [];
-    const finish = level.finish;
-    if (this.setup.mode === 'sprint' && finish) {
-      const last = level.checkpoints[level.checkpoints.length - 1];
-      const fromRight = last ? last.x > finish.x : false;
-      // At the goal, on the far side from where the runner comes in, facing it.
-      end = waitingSpot(grid, {
-        cx: finish.x,
-        cy: finish.y,
-        faceX: last ? (last.x << 10) + 512 : startX,
-        preferRight: !fromRight,
-        ...avoid(tracks),
-      });
-    } else {
-      // By each flag, facing it, on the side away from where its glimpse goes.
-      this.flagSpots = level.checkpoints.map((cp, i) => {
-        const track = tracks[i] ?? null;
-        const flagX = (cp.x << 10) + 512;
-        const endX = track?.poses[track.poses.length - 1]?.x ?? flagX;
-        return waitingSpot(grid, {
-          cx: cp.x,
-          cy: cp.y,
-          faceX: flagX,
-          preferRight: endX < flagX,
-          ...avoid([track]),
-        });
-      });
-    }
-    const boss = bossOfLevel(this.setup.levelId);
-    const drawn = isDrawn(boss);
-    this.bossOutfit = pickOutfit(contest.character);
-    const outfit = this.bossOutfit;
-    const look = drawn ? render.skins.lookOf(contest.character, outfit) : undefined;
-    const scene = look
-      ? render.skins.sceneFor(contest.character, outfit)
-      : render.echo.scene(WORKSHOP_COLOR, false);
-    const swap = render.skins.swapFor(contest.character, -1, outfit);
-    this.bossSign = this.headSign(scene, swap);
-    return new BossPresence({
-      scene,
-      swap,
-      color: look ? characterColor(contest.character, outfit) : (boss?.color ?? WORKSHOP_COLOR),
-      start,
-      end,
-      clips: render.clips,
-      idleKeyframe: COACH_IDLE_KEYFRAME,
-      talkClipOffset: COACH_TALK_CLIP,
-      fx: look && boss?.fx ? compileFx(boss.fx, look.accent) : null,
-      echo: render.echo,
-      reducedMotion: prefersReducedMotion(),
-    });
-  }
-
-  /** A runner's head as a sign at the screen's edge. */
-  private headSign(scene: SceneRenderer, swap: SpriteSwap): EdgePicture {
-    const r = SIGN_HEAD >> 1;
-    const rect = (x: number, y: number) => ({ x: x - r, y: y - r, w: SIGN_HEAD, h: SIGN_HEAD });
-    return { radius: r, draw: (c, x, y) => drawPortrait(c, this.ctx, scene, rect(x, y), swap) };
-  }
-
-  /** The boss's glimpse: its outfit of the run as a hologram in its colour. */
-  private createGlimpse(presence: BossPresence): BossGlimpse | null {
-    if (!this.glimpseTracks) return null;
-    const { render } = this.ctx;
-    const character = this.setup.contest!.character;
-    const outfit = this.bossOutfit;
-    const look = isDrawn(bossOfLevel(this.setup.levelId))
-      ? render.skins.lookOf(character, outfit)
-      : undefined;
-    const color = presence.color;
-    const scene = look
-      ? render.echo.scene(color, true, render.skins.sceneFor(character, outfit))
-      : render.echo.scene(color, false);
-    return new BossGlimpse(
-      { scene, swap: render.skins.swapFor(character, -1, outfit), color },
-      prefersReducedMotion(),
-    );
-  }
-
-  /**
-   * The player's next flag: the next checkpoint in a sprint, the nearest flag still up in a
-   * flag hunt; -1 once there is none.
-   */
-  private nextFlag(): number {
-    const { rules, level, player } = this.session.world;
-    if (this.setup.mode === 'sprint') {
-      return rules.nextCheckpoint < level.checkpoints.length ? rules.nextCheckpoint : -1;
-    }
-    return nearestFlag(level.checkpoints, rules.remainingMask, player.x, player.y);
-  }
-
-  /** The glimpse moves to the player's next flag (between loops, and when a flag is taken). */
-  private retargetGlimpse(): void {
-    const flag = this.nextFlag();
-    if (flag === this.hintFlag) return;
-    this.hintFlag = flag;
-    this.glimpse?.show(flag >= 0 ? (this.glimpseTracks?.[flag] ?? null) : null);
-  }
-
-  /** Where the boss waits now: the goal, or by the player's next flag (the last one taken). */
-  private bossSpot(): PresenceSpot | undefined {
-    if (this.setup.mode === 'sprint') return undefined;
-    const flag = this.nextFlag();
-    return this.flagSpots[flag >= 0 ? flag : this.session.world.rules.lastCollected];
-  }
-
   private beginPhase(): void {
     this.phaseEntered = true;
     this.enterPhase();
   }
 
-  private onStep(events: readonly import('@parapet/sim').WorldEvent[]): void {
+  private onStep(events: readonly WorldEvent[]): void {
     const world = this.session.world;
     this.characters.onEvents(events);
     this.particles.onEvents(events);
@@ -483,21 +266,7 @@ export class PlayScreen implements Screen {
     this.characters.step(world.clock, STEP);
     this.echo.step();
     this.fx.step({ clock: world.clock });
-    this.presence?.step();
-    const contest = this.setup.contest;
-    if (contest && this.presence) {
-      const now = performance.now();
-      const took = events.some(isSplitEvent);
-      if (this.glimpse?.step() || took) this.retargetGlimpse();
-      if (this.presence.state === 'away' && world.clock >= contest.timeMs) {
-        this.presence.appear(now, this.bossSpot());
-        this.contestBannerUntil = now + 3500;
-      } else if (took && this.presence.state === 'end') {
-        // On to the flag the player is to take next: the last one is where the run ends.
-        const spot = this.bossSpot();
-        if (spot) this.presence.moveTo(spot, now);
-      }
-    }
+    this.contest?.step(world, events);
     const ghostWorld = this.session.ghostWorld;
     if (ghostWorld && this.session.ghostDone) this.echo.dissolve(ghostWorld.player);
     this.particles.update(STEP, world.player);
@@ -524,35 +293,6 @@ export class PlayScreen implements Screen {
       ahead: mine <= theirs,
       until: performance.now() + SPLIT_SHOW_MS,
     };
-  }
-
-  /**
-   * The current gap to the ghost in ms (positive: the player is behind): the difference at
-   * the last checkpoint both reached, or, once the ghost has reached the next one, at least
-   * the time since it did. Null before the first checkpoint.
-   */
-  private ghostGap(): number | null {
-    const ghost = this.setup.ghost;
-    if (!ghost) return null;
-    const mine = this.session.splits;
-    const theirs = ghost.outcome.splits;
-    const k = mine.length;
-    const clock = this.session.world.clock;
-    const next = theirs[k];
-    if (next !== undefined && next < clock) return clock - next;
-    const last = theirs[k - 1];
-    if (k > 0 && last !== undefined) return mine[k - 1]! - last;
-    return null;
-  }
-
-  /** What the ghost achieved, as the mode is ranked (time or score). */
-  ghostResultText(): string {
-    const ghost = this.setup.ghost;
-    if (!ghost) return '';
-    const { outcome } = ghost;
-    return rankingSort(this.setup.mode, this.setup.levelId) === 'score'
-      ? String(outcome.score)
-      : formatTime(outcome.time);
   }
 
   /** Warm-up hints: a slow wall bounce, or a stumble / crash, each once per attempt. */
@@ -590,7 +330,7 @@ export class PlayScreen implements Screen {
         const flag = level.checkpoints[0];
         if (page === 1 && flag) {
           // The second page is shown over the flag, after a two-second pan (line 5221).
-          this.camera.aimAtPoint((flag.x << 10) + 512, (flag.y << 10) + 512, 0.5, 0.5, level);
+          this.camera.aimAtPoint(tileCentre(flag.x), tileCentre(flag.y), 0.5, 0.5, level);
         } else {
           this.aimAtCoach();
         }
@@ -603,14 +343,14 @@ export class PlayScreen implements Screen {
         return;
       }
       case 'briefing': {
-        if (this.presence) {
+        if (this.contest) {
           // The boss in the middle, above the box.
-          const spot = this.presence.start;
+          const spot = this.contest.presence.start;
           this.speaker = { x: spot.x, y: spot.y, fx: 0.5 };
           this.aimAtSpeaker();
           this.pushBox({
-            pages: this.contestBriefing(),
-            title: this.bossName(),
+            pages: this.contest.briefing(),
+            title: this.contest.name,
             tail: true,
             placement: 'auto',
             onClose: () => this.advancePhase(),
@@ -621,7 +361,7 @@ export class PlayScreen implements Screen {
           // The camera shows the rival's start cell during a sprint briefing.
           this.aimAtCell(level.npc.x, level.npc.y);
         }
-        const ghostLine = this.ghostBriefing();
+        const ghostLine = this.ghost?.briefing();
         this.pushBox({
           pages: ghostLine ? [this.briefingText(), ghostLine] : [this.briefingText()],
           tail: false,
@@ -631,9 +371,9 @@ export class PlayScreen implements Screen {
       }
       case 'flyover': {
         const points = [
-          ...level.checkpoints.map((cp) => ({ x: (cp.x << 10) + 512, y: (cp.y << 10) + 512 })),
+          ...level.checkpoints.map((cp) => ({ x: tileCentre(cp.x), y: tileCentre(cp.y) })),
           ...(level.finish
-            ? [{ x: (level.finish.x << 10) + 512, y: (level.finish.y << 10) + 512 }]
+            ? [{ x: tileCentre(level.finish.x), y: tileCentre(level.finish.y) }]
             : []),
           { x: level.spawnX(), y: level.spawnY() - 512 },
         ];
@@ -656,10 +396,9 @@ export class PlayScreen implements Screen {
       case 'play':
         this.ctx.input.clear();
         this.echo.reveal(performance.now());
-        this.presence?.vanish(performance.now());
-        this.retargetGlimpse();
+        this.contest?.start(world);
         // `a(true)` at the start of play: the menu track in the warm-ups, else the theme's.
-        if (world.rules.missionType >= MissionType.WARM_UP_1) this.ctx.music.warmUp();
+        if (world.rules.missionType >= MissionType.WARM_UP_1) this.ctx.music.menu();
         else if (this.setup.contest) this.ctx.music.contest();
         else if (!this.quickStart) this.ctx.music.game(this.theme);
         return;
@@ -699,41 +438,6 @@ export class PlayScreen implements Screen {
     }
   }
 
-  /** The name of the level's boss. */
-  private bossName(): string {
-    const boss = bossOfLevel(this.setup.levelId);
-    return boss ? this.ctx.i18n.t(`boss.${boss.id}.name`) : '';
-  }
-
-  /**
-   * The boss's words before a contest: the challenge, then the prize (none once won; a hint
-   * when the player already has the boss and this win would give it more).
-   */
-  private contestBriefing(): string[] {
-    const { i18n } = this.ctx;
-    const contest = this.setup.contest!;
-    const found = bossOfCharacter(contest.character);
-    if (!found) return [];
-    const id = found.boss.id;
-    const time = formatTime(contest.timeMs);
-    const challenge = i18n.t(`boss.${id}.briefing.${this.setup.mode}`, { time });
-    if (!isDrawn(found.boss)) return [challenge, i18n.t('contest.briefing.workshop')];
-    const progress = loadContestProgress();
-    if (isContestBeaten(progress, found.levelId, found.kind)) return [challenge];
-    const owned = bossCharacterFor(found.levelId, progress) !== null;
-    return [challenge, i18n.t(owned ? 'contest.briefing.more' : 'contest.briefing.reward')];
-  }
-
-  /** The second briefing page of a ghost race: whom the player races and what to beat. */
-  private ghostBriefing(): string | null {
-    const ghost = this.setup.ghost;
-    if (!ghost) return null;
-    const value = this.ghostResultText();
-    return ghost.kind === 'best'
-      ? this.ctx.i18n.t('ghost.briefing.best', { value })
-      : this.ctx.i18n.t('ghost.briefing.challenger', { name: this.ghostLabel, value });
-  }
-
   private target(): MissionTarget | null {
     const mission = this.ctx.content.missions.levels[this.setup.levelId]!;
     return evaluateMission(mission, this.setup.mode, null, 0, 0).target;
@@ -743,7 +447,7 @@ export class PlayScreen implements Screen {
   private aimAtCoach(): void {
     const npc = this.session.world.level.npc;
     if (!npc) return;
-    this.speaker = { x: (npc.x << 10) + 512, y: (npc.y << 10) + 1024, fx: 0.2 };
+    this.speaker = { x: tileCentre(npc.x), y: (npc.y << 10) + 1024, fx: 0.2 };
     this.aimAtSpeaker();
   }
 
@@ -773,7 +477,7 @@ export class PlayScreen implements Screen {
    */
   private aimAtCell(cellX: number, cellY: number): void {
     const level = this.session.world.level;
-    this.camera.aimAtPoint((cellX << 10) + 512, (cellY << 10) + 1024, 0.2, 0.58, level);
+    this.camera.aimAtPoint(tileCentre(cellX), (cellY << 10) + 1024, 0.2, 0.58, level);
   }
 
   private pushBox(opts: {
@@ -788,7 +492,7 @@ export class PlayScreen implements Screen {
     const { i18n, screens } = this.ctx;
     this.openBoxes++;
     if (this.coach) this.coach.talking = true;
-    const presence = this.presence?.state === 'start' ? this.presence : null;
+    const presence = this.contest?.presence.state === 'start' ? this.contest.presence : null;
     if (presence) presence.talking = true;
     const talking = opts.tail && (presence !== null || this.coach !== null);
     const box = new MessageBox(
@@ -829,15 +533,14 @@ export class PlayScreen implements Screen {
 
   private coachHead(): { x: number; y: number } | null {
     if (!this.coach) return null;
-    const alpha = 1;
     return {
-      x: toScreen(this.coach.x, this.camera.renderX(alpha)),
-      y: toScreen(this.coach.y - 1800, this.camera.renderY(alpha)),
+      x: toScreen(this.coach.x, this.camera.renderX(1)),
+      y: toScreen(this.coach.y - 1800, this.camera.renderY(1)),
     };
   }
 
   private presenceHead(): { x: number; y: number } | null {
-    const spot = this.presence?.spot;
+    const spot = this.contest?.presence.spot;
     if (!spot) return null;
     return {
       x: toScreen(spot.x, this.camera.renderX(1)),
@@ -857,8 +560,9 @@ export class PlayScreen implements Screen {
   }
 
   exit(): void {
-    // Menus and dialogs on top get every tap.
+    // Menus and dialogs on top get every tap, and no longer press with this runner's facing.
     this.ctx.touch.shown = false;
+    this.ctx.facingRight = () => true;
   }
 
   onResize(): void {
@@ -883,8 +587,8 @@ export class PlayScreen implements Screen {
     const { input } = this.ctx;
     const world = this.session.world;
     const level = world.level;
-    // Game-time units of this frame, with the original's cap (used outside the step loop).
-    const units = Math.min(MAX_FRAME_UNITS, (dt * TIME_SCALE_NUM) >> TIME_SCALE_SHIFT);
+    // Game-time units of this frame (used outside the step loop).
+    const units = this.frameUnits.take(dt);
     this.ctx.touch.shown =
       !this.covered && (this.flow.phase === 'play' || this.flow.phase === 'ready');
     switch (this.flow.phase) {
@@ -950,13 +654,7 @@ export class PlayScreen implements Screen {
   private onFinished(): void {
     const { i18n, screens } = this.ctx;
     const world = this.session.world;
-    // Faster than the boss: it arrives all the same, where the run ended, to see who beat it.
-    this.glimpse?.show(null);
-    if (this.presence) {
-      const spot = this.bossSpot();
-      if (this.presence.state === 'away') this.presence.appear(performance.now(), spot);
-      else if (spot) this.presence.moveTo(spot, performance.now());
-    }
+    this.contest?.finish(world);
     if (world.rules.missionType >= MissionType.WARM_UP_1) {
       // The coach congratulates and the warm-up counts as completed (state 6).
       const set = this.setup.mode === 'warmup2' ? 2 : 1;
@@ -1015,26 +713,8 @@ export class PlayScreen implements Screen {
     const flash = this.splitFlash;
     const now = performance.now();
     const split = flash && now < flash.until ? flash : null;
-    return { ...this.timerOptions(), split, contest: this.contestLine(now) };
-  }
-
-  /** Under the HUD in a contest: the boss's flags so far, then that it has finished. */
-  private contestLine(now: number): HudOptions['contest'] {
-    const contest = this.setup.contest;
-    if (!contest) return null;
-    const { i18n } = this.ctx;
-    const clock = this.session.world.clock;
-    const color = this.presence?.color.light ?? WORKSHOP_COLOR.light;
-    const boss = this.bossName();
-    if (clock >= contest.timeMs) {
-      const text =
-        now < this.contestBannerUntil || this.session.finished
-          ? i18n.t('contest.finished', { boss, time: formatTime(contest.timeMs) })
-          : i18n.t('contest.result', { boss, value: formatTime(contest.timeMs) });
-      return { text, color };
-    }
-    const n = contest.splitsMs.filter((t) => t <= clock).length;
-    return { text: i18n.t('contest.hud', { boss, n, total: contest.splitsMs.length }), color };
+    const contest = this.contest?.hudLine(this.session.world, this.session.finished, now) ?? null;
+    return { ...this.timerOptions(), split, contest };
   }
 
   private timerOptions(): HudOptions {
@@ -1063,43 +743,6 @@ export class PlayScreen implements Screen {
     }
   }
 
-  /** The ghost's name over its head and the label of its finish flag. */
-  private drawGhostLabels(c: CanvasRenderingContext2D, cam: CameraPos, alpha: number): void {
-    const ghostWorld = this.session.ghostWorld;
-    const color = this.ghostColor;
-    if (!ghostWorld || !color) return;
-    const small = this.ctx.fonts.small;
-    const pos = this.echo.screenPosition(ghostWorld.player, cam, alpha);
-    if (pos) drawNameTag(c, small, this.ghostLabel, color, pos.x, pos.y, pos.anchored);
-    for (const marker of this.echo.markers) {
-      if (marker.runner !== ghostWorld.player) continue;
-      const label = `${this.ghostLabel} ${this.ghostResultText()}`;
-      drawMarkerLabel(c, small, label, color, toScreen(marker.x, cam.x), toScreen(marker.y, cam.y));
-    }
-  }
-
-  /** The boss's name over its head while it stands somewhere. */
-  private drawPresenceLabel(c: CanvasRenderingContext2D, cam: CameraPos): void {
-    const presence = this.presence;
-    const spot = presence?.spot;
-    if (!presence || !spot) return;
-    const { fonts } = this.ctx;
-    const name = this.bossName();
-    const label =
-      presence.state === 'end' && this.setup.contest
-        ? `${name} ${formatTime(this.setup.contest.timeMs)}`
-        : name;
-    drawNameTag(
-      c,
-      fonts.small,
-      label,
-      presence.color,
-      toScreen(spot.x, cam.x),
-      toScreen(spot.y, cam.y),
-      false,
-    );
-  }
-
   /**
    * Signs at the screen's edge towards the boss (waiting, with its time), the rival, the finish
    * (of a score run, or once the flags are taken) and the ghost (with the gap), while they are
@@ -1109,18 +752,7 @@ export class PlayScreen implements Screen {
     const area = safeRect(this.ctx.viewport);
     const small = this.ctx.fonts.small;
     const world = this.session.world;
-    const presence = this.presence;
-    if (presence?.state === 'end' && this.setup.contest && this.bossSign) {
-      const spot = presence.end;
-      const sx = toScreen(spot.x, cam.x);
-      const sy = toScreen(spot.y, cam.y) - 30;
-      const text = formatTime(this.setup.contest.timeMs);
-      drawEdgeSign(c, area, sx, sy, this.bossSign, {
-        font: small,
-        text,
-        color: presence.color.light,
-      });
-    }
+    this.contest?.drawSign(c, area, cam, small);
     for (const runner of world.runners) {
       if (runner === world.player || !this.rivalSign) continue;
       const pose = this.characters.pose(runner, alpha);
@@ -1131,24 +763,17 @@ export class PlayScreen implements Screen {
     }
     // The finish is easy to lose on a big level; a boss waiting there has its own sign.
     const finish = world.level.finish;
-    const bossAtFinish = presence?.state === 'end' && this.setup.mode === 'sprint';
+    const bossAtFinish = this.contest?.presence.state === 'end' && this.setup.mode === 'sprint';
     if (
       finish &&
       !bossAtFinish &&
       showsFinishPointer(this.setup.mode, world.level, world.rules.remainingMask)
     ) {
-      const fx = toScreen((finish.x << 10) + 512, cam.x);
+      const fx = toScreen(tileCentre(finish.x), cam.x);
       const fy = toScreen(finish.y << 10, cam.y);
       drawEdgeSign(c, area, fx, fy, FINISH_SIGN);
     }
-    const ghostWorld = this.session.ghostWorld;
-    if (!ghostWorld || !this.ghostColor || !this.ghostSign) return;
-    const pos = this.echo.screenPosition(ghostWorld.player, cam, alpha);
-    if (!pos) return;
-    const gap = this.ghostGap();
-    const label =
-      gap === null ? null : { font: small, text: formatGap(gap), color: this.ghostColor.light };
-    drawEdgeSign(c, area, pos.x, pos.y - 30, this.ghostSign, label);
+    this.ghost?.drawSign(c, area, this.session, this.echo, cam, alpha, small);
   }
 
   render(c: CanvasRenderingContext2D): void {
@@ -1179,17 +804,16 @@ export class PlayScreen implements Screen {
       render.level.drawLevelArt(c, cam, this.view, defaultLevelArtFrame(this.setup.levelId));
     }
     render.level.drawMarkers(c, cam, this.view, world.level, world.rules, now, this.bounce);
-    this.particles.draw(c, cam, this.view, world.clock, false);
+    this.particles.draw(c, cam, world.clock, false);
     this.characters.drawNpcs(c, cam, now);
-    this.presence?.draw(c, cam, now, this.view);
-    this.glimpse?.draw(c, cam, alpha, now, this.view);
+    this.contest?.draw(c, cam, alpha, now, this.view);
     this.echo.draw(c, cam, alpha, world.clock, now, this.view);
     this.fx.drawBehind(c, cam, world.clock, now, this.view);
     this.characters.drawAll(c, cam, alpha, world.clock, world.player);
     this.fx.drawFront(c, cam);
-    this.particles.draw(c, cam, this.view, world.clock, true);
-    this.drawGhostLabels(c, cam, alpha);
-    this.drawPresenceLabel(c, cam);
+    this.particles.draw(c, cam, world.clock, true);
+    this.ghost?.drawLabels(c, this.session, this.echo, cam, alpha);
+    this.contest?.drawLabel(c, cam);
     c.restore();
     if (touch.shown) touch.draw(c);
     // The HUD is not drawn while a message box is up (`bj()`, line 10610).

@@ -11,7 +11,7 @@
  *   input.
  */
 import { createHash } from 'node:crypto';
-import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { appendFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   RULESET_ID,
@@ -23,12 +23,12 @@ import {
 } from '@parapet/sim';
 import type { GlimpsesFile } from '@parapet/runtime/content/glimpses.ts';
 import type { Constraints } from './constraints.ts';
-import { REPO_ROOT } from './content.ts';
+import { CONTENT_DIR, PACKAGES_DIR, readJson, writeJson } from '../files.ts';
 import { contestCharacter, type ContestMode } from './model.ts';
 
-export const TAS_OUT_DIR = join(REPO_ROOT, 'packages', 'tools', 'tas-out');
-export const CONTESTS_FILE = join(REPO_ROOT, 'packages', 'content', 'bosses', 'contests.json');
-export const GLIMPSES_FILE = join(REPO_ROOT, 'packages', 'content', 'bosses', 'glimpses.json');
+export const TAS_OUT_DIR = join(PACKAGES_DIR, 'tools', 'tas-out');
+export const CONTESTS_FILE = join(CONTENT_DIR, 'bosses', 'contests.json');
+export const GLIMPSES_FILE = join(CONTENT_DIR, 'bosses', 'glimpses.json');
 
 /** Name the runs carry (Gwynerva searched them all; the bosses hold them in the game). */
 export const GWYNERVA = 'Gwynerva';
@@ -96,13 +96,12 @@ export function runPath(levelId: number, mode: ContestMode, variant = ''): strin
 export function readRun(levelId: number, mode: ContestMode, variant = ''): TasRunFile | null {
   const path = runPath(levelId, mode, variant);
   if (!existsSync(path)) return null;
-  return JSON.parse(readFileSync(path, 'utf8')) as TasRunFile;
+  return readJson<TasRunFile>(path);
 }
 
 export function writeRun(run: TasRunFile): void {
   const path = runPath(run.levelId, run.mode, run.variant);
-  mkdirSync(join(path, '..'), { recursive: true });
-  writeFileSync(path, JSON.stringify(run, null, 2) + '\n');
+  writeJson(path, run);
 }
 
 /** The finished jobs of `run` (`tas-out/jobs.jsonl`), so a campaign can go on where it stopped. */
@@ -145,22 +144,20 @@ export function logJob(record: JobRecord): void {
 
 export function readContests(): ContestsFile | null {
   if (!existsSync(CONTESTS_FILE)) return null;
-  return JSON.parse(readFileSync(CONTESTS_FILE, 'utf8')) as ContestsFile;
+  return readJson<ContestsFile>(CONTESTS_FILE);
 }
 
 export function writeContests(file: ContestsFile): void {
-  mkdirSync(join(CONTESTS_FILE, '..'), { recursive: true });
-  writeFileSync(CONTESTS_FILE, JSON.stringify(file, null, 2) + '\n');
+  writeJson(CONTESTS_FILE, file);
 }
 
 export function readGlimpses(): GlimpsesFile | null {
   if (!existsSync(GLIMPSES_FILE)) return null;
-  return JSON.parse(readFileSync(GLIMPSES_FILE, 'utf8')) as GlimpsesFile;
+  return readJson<GlimpsesFile>(GLIMPSES_FILE);
 }
 
 export function writeGlimpses(file: GlimpsesFile): void {
-  mkdirSync(join(GLIMPSES_FILE, '..'), { recursive: true });
-  writeFileSync(GLIMPSES_FILE, JSON.stringify(file, null, 2) + '\n');
+  writeJson(GLIMPSES_FILE, file);
 }
 
 /** The replay of a TAS run, as Gwynerva's. */

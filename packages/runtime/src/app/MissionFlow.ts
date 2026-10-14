@@ -2,8 +2,7 @@
  * Phases of a mission around the simulation, after the original's screen states 1-5
  * (d.java `x()`, line 5246): the tutorial pages of a warm-up, the briefing box, the Sprint
  * flyover, "get ready", play. The flow only sequences; the host (a play screen) shows the
- * boxes, moves the camera and lets the session step once `phase` is `play`. Any app that runs
- * a mission (the classic game, a gate run in the open world) drives it the same way.
+ * boxes, moves the camera and lets the session step once `phase` is `play`.
  */
 
 export type FlowPhase = 'tutorial' | 'briefing' | 'flyover' | 'ready' | 'play' | 'done';

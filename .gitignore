@@ -9,8 +9,6 @@ reference/cfr.jar
 reference/oracle/build/
 # intermediate extraction (unpacked jar)
 packages/tools/.work/
-# leaderboard runs written by the server
-packages/server/data/
 # TAS runs: the input of Gwynerva's records stays local (only times are published)
 packages/tools/tas-out/
 # previews drawn by the boss art scripts

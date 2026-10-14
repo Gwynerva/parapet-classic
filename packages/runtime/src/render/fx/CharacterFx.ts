@@ -15,7 +15,7 @@
  */
 import { CHARACTER_OBJECT, type SceneRenderer, type SpriteSwap } from '../SceneRenderer.ts';
 import { drawPose, type CharacterPose } from '../CharacterRenderer.ts';
-import { applyScanlines } from '../EchoRenderer.ts';
+import { HOLOGRAM_ALPHA, HologramLayer } from '../Hologram.ts';
 import { ECHO_PALETTE, makeEchoColor, type EchoColor, type EchoSheets } from '../EchoSkin.ts';
 import type { LookRibbon } from '../Look.ts';
 import { PoseHistory, RUNNING_UNITS } from '../PoseHistory.ts';
@@ -24,9 +24,13 @@ import { emptyAnchors, type PoseAnchors } from '../Rig.ts';
 import type { CameraPos, ViewSize } from '../View.ts';
 import type { FxAfterimage, FxAnchor } from './FxData.ts';
 import { pick, resolveToken, type CompiledEmitter, type CompiledFx } from './FxSheet.ts';
-import { FxSystem, UNITS } from './FxSystem.ts';
+import { FxSystem } from './FxSystem.ts';
 import { MotionTracker, triggerBit, type MotionStep } from './Motion.ts';
 import { Ribbon } from './Ribbon.ts';
+import { FrameTimer, Xorshift32 } from '../../math.ts';
+import { cssColor } from '../color.ts';
+import { UNITS_PER_PX } from '../View.ts';
+import { STEP } from '@parapet/sim';
 
 /** A thing with effects: its pose this step and its move. */
 export interface FxBody {
@@ -60,7 +64,6 @@ const ECHO_STEPS = [
   { back: 4, alpha: 0.32 },
   { back: 2, alpha: 0.5 },
 ] as const;
-const ECHO_LAYER_ALPHA = 0.85;
 const RUSH_STEPS = [
   { back: 6, alpha: 0.08 },
   { back: 5, alpha: 0.14 },
@@ -70,12 +73,10 @@ const RUSH_STEPS = [
   { back: 1, alpha: 0.45 },
 ] as const;
 const MAX_SNAPSHOTS = 8;
-/** Milliseconds of game clock per simulation step. */
-const STEP_MS = 30;
 /** Delayed particles waiting for their time, per body, at most. */
 const MAX_PENDING = 64;
 /** Below this speed across (world units a second) a body is not going either way. */
-const ACROSS = 10 * UNITS;
+const ACROSS = 10 * UNITS_PER_PX;
 
 interface Snapshot {
   pose: CharacterPose;
@@ -107,14 +108,10 @@ interface Entry {
   motion: MotionStep | null;
 }
 
-function xorshift(seed: number): () => number {
-  let s = seed | 0 || 0x9e3779b9;
-  return () => {
-    s ^= s << 13;
-    s ^= s >>> 17;
-    s ^= s << 5;
-    return ((s >>> 0) % 1_000_000) / 1_000_000;
-  };
+/** An effect's random numbers: fractions of six digits, as the effects were tuned with. */
+function effectRandom(seed: number): () => number {
+  const rng = new Xorshift32(seed);
+  return () => (rng.next() % 1_000_000) / 1_000_000;
 }
 
 export interface CharacterFxOptions {
@@ -127,8 +124,8 @@ export class CharacterFx {
   private readonly entries = new Map<object, Entry>();
   readonly particles: FxSystem;
   private readonly reduced: boolean;
-  private layer: HTMLCanvasElement | null = null;
-  private lastDrawAt = -1;
+  private readonly hologram = new HologramLayer();
+  private readonly frames = new FrameTimer();
   private readonly colours = new Map<string, EchoColor>();
 
   constructor(echo: EchoSheets, options: CharacterFxOptions = {}) {
@@ -172,7 +169,7 @@ export class CharacterFx {
         anchor: spec.anchor,
         front: spec.layer === 'front',
       })),
-      rand: xorshift(style.seed ?? this.entries.size * 7919 + 17),
+      rand: effectRandom(style.seed ?? this.entries.size * 7919 + 17),
       clock: 0,
       motion: null,
     });
@@ -199,7 +196,7 @@ export class CharacterFx {
     for (const e of this.entries.values()) {
       const pose = e.body.pose();
       e.history.push(pose);
-      e.clock = options.clock ?? e.clock + STEP_MS;
+      e.clock = options.clock ?? e.clock + STEP;
       if (!pose) continue;
       e.facingRight = !pose.flipX;
       this.measure(e, pose);
@@ -253,8 +250,8 @@ export class CharacterFx {
   private spawnNow(e: Entry, pose: CharacterPose, m: MotionStep, em: CompiledEmitter): void {
     const fx = e.style.fx;
     if (!fx) return;
-    const vx = m.vx * (1000 / STEP_MS);
-    const vy = m.vy * (1000 / STEP_MS);
+    const vx = m.vx * (1000 / STEP);
+    const vy = m.vy * (1000 / STEP);
     const right = em.spec.toward === 'motion' && Math.abs(vx) > ACROSS ? vx > 0 : e.facingRight;
     const p = this.anchorPoint(e, pose, em.spec.anchor);
     this.particles.spawn(fx, em, { x: p.x, y: p.y, facingRight: right, vx, vy }, e.rand);
@@ -311,13 +308,13 @@ export class CharacterFx {
       a.footNear,
       a.footFar,
     ]) {
-      p.x = (p.x - pivotX) * UNITS;
-      p.y = (p.y - pivotY) * UNITS;
+      p.x = (p.x - pivotX) * UNITS_PER_PX;
+      p.y = (p.y - pivotY) * UNITS_PER_PX;
     }
-    a.box.x = (a.box.x - pivotX) * UNITS;
-    a.box.y = (a.box.y - pivotY) * UNITS;
-    a.box.w *= UNITS;
-    a.box.h *= UNITS;
+    a.box.x = (a.box.x - pivotX) * UNITS_PER_PX;
+    a.box.y = (a.box.y - pivotY) * UNITS_PER_PX;
+    a.box.w *= UNITS_PER_PX;
+    a.box.h *= UNITS_PER_PX;
   }
 
   private anchorPoint(
@@ -364,7 +361,7 @@ export class CharacterFx {
         // The feet: between the shoes, on the ground.
         return {
           x: pose.x + (a.footNear.x + a.footFar.x) / 2,
-          y: pose.y + Math.max(a.footNear.y, a.footFar.y) + 2 * UNITS,
+          y: pose.y + Math.max(a.footNear.y, a.footFar.y) + 2 * UNITS_PER_PX,
         };
     }
   }
@@ -382,7 +379,7 @@ export class CharacterFx {
         // keep a rare emitter (a butterfly every few seconds) from ever reaching one particle.
         let owed = e.owed.get(em) ?? 0;
         if (spec.every) owed += (m.distance / spec.every) * amount;
-        if (spec.perSecond) owed += ((spec.perSecond * STEP_MS) / 1000) * amount;
+        if (spec.perSecond) owed += ((spec.perSecond * STEP) / 1000) * amount;
         count += Math.floor(owed);
         e.owed.set(em, owed - Math.floor(owed));
       }
@@ -427,8 +424,8 @@ export class CharacterFx {
     facingRight: boolean,
     seed = 1,
   ): void {
-    const rand = xorshift(seed);
-    const box = { top: y - 46 * UNITS, height: 46 * UNITS };
+    const rand = effectRandom(seed);
+    const box = { top: y - 46 * UNITS_PER_PX, height: 46 * UNITS_PER_PX };
     for (const n of names) {
       const em = fx.emitters.get(n);
       if (!em) continue;
@@ -436,9 +433,9 @@ export class CharacterFx {
       const count = Math.round(pick(em.spec.burst, rand, 20) * amount);
       for (let i = 0; i < count; i++) {
         const anchor = em.spec.anchor;
-        let py = y - 26 * UNITS;
+        let py = y - 26 * UNITS_PER_PX;
         if (anchor === 'feet' || anchor === 'foot.near' || anchor === 'foot.far') py = y;
-        else if (anchor === 'head') py = y - 44 * UNITS;
+        else if (anchor === 'head') py = y - 44 * UNITS_PER_PX;
         else if (anchor === 'body') py = box.top + rand() * box.height;
         this.particles.spawn(fx, em, { x, y: py, facingRight, vx: 0, vy: 0 }, rand);
       }
@@ -458,9 +455,9 @@ export class CharacterFx {
     for (const n of names) {
       const em = fx.emitters.get(n);
       if (!em) continue;
-      const chance = ((em.spec.perSecond ?? 4) * STEP_MS) / 1000;
+      const chance = ((em.spec.perSecond ?? 4) * STEP) / 1000;
       if (rand() >= chance) continue;
-      const py = em.spec.anchor === 'feet' ? y : y - (8 + rand() * 38) * UNITS;
+      const py = em.spec.anchor === 'feet' ? y : y - (8 + rand() * 38) * UNITS_PER_PX;
       this.particles.spawn(fx, em, { x, y: py, facingRight, vx: 0, vy: 0 }, rand);
     }
   }
@@ -482,8 +479,7 @@ export class CharacterFx {
     nowMs: number,
     view: ViewSize,
   ): void {
-    const dt = this.lastDrawAt < 0 ? 0 : Math.min(100, Math.max(0, nowMs - this.lastDrawAt));
-    this.lastDrawAt = nowMs;
+    const dt = this.frames.tick(nowMs);
     this.particles.update(dt);
     for (const e of this.entries.values()) {
       for (const r of e.ribbons) r.ribbon.update(dt);
@@ -517,33 +513,27 @@ export class CharacterFx {
       if (e.snapshots.length === 0) return;
       const life = a.life ?? 450;
       const [dx, dy] = a.drift ?? [0, -10];
-      // With scanlines the copies are drawn on a layer of their own, then dimmed row by row.
-      const layer = a.scanlines ? this.ensureLayer(view) : null;
-      const lctx = layer?.getContext('2d') ?? null;
-      let target = ctx;
-      if (layer && lctx) {
-        lctx.clearRect(0, 0, layer.width, layer.height);
-        target = lctx;
-      }
-      target.save();
-      for (const s of e.snapshots) {
-        const k = 1 - s.age / life;
-        const color = this.pickColour(a, e, s.index, nowMs);
-        const scene = this.echo.scene(color, a.textured ?? false, e.style.source);
-        target.globalAlpha = (a.alpha ?? 0.55) * k;
-        const behind = s.pose.flipX ? 1 : -1;
-        const pose = {
-          ...s.pose,
-          x: s.pose.x + dx * behind * UNITS * (s.age / 1000),
-          y: s.pose.y + dy * UNITS * (s.age / 1000),
-        };
-        drawCulled(target, scene, view, pose, cam, e.style.swap(s.clock));
-      }
-      target.restore();
-      if (layer && lctx) {
-        applyScanlines(lctx, layer.width, layer.height, nowMs);
-        ctx.drawImage(layer, 0, 0);
-      }
+      const paint = (target: CanvasRenderingContext2D): boolean => {
+        target.save();
+        for (const s of e.snapshots) {
+          const k = 1 - s.age / life;
+          const color = this.pickColour(a, e, s.index, nowMs);
+          const scene = this.echo.scene(color, a.textured ?? false, e.style.source);
+          target.globalAlpha = (a.alpha ?? 0.55) * k;
+          const behind = s.pose.flipX ? 1 : -1;
+          const pose = {
+            ...s.pose,
+            x: s.pose.x + dx * behind * UNITS_PER_PX * (s.age / 1000),
+            y: s.pose.y + dy * UNITS_PER_PX * (s.age / 1000),
+          };
+          drawCulled(target, scene, view, pose, cam, e.style.swap(s.clock));
+        }
+        target.restore();
+        return true;
+      };
+      // With scanlines the copies are a hologram of their own.
+      if (a.scanlines) this.hologram.draw(ctx, view, nowMs, 1, paint);
+      else paint(ctx);
       return;
     }
     const when = a.while ?? 'running';
@@ -553,32 +543,20 @@ export class CharacterFx {
     const steps = a.steps ?? (preset === 'echo' ? ECHO_STEPS : RUSH_STEPS);
     const textured = a.textured ?? preset === 'echo';
     const scanlines = a.scanlines ?? preset === 'echo';
-    let target = ctx;
-    let layer: HTMLCanvasElement | null = null;
-    if (scanlines) {
-      layer = this.ensureLayer(view);
-      const lctx = layer?.getContext('2d');
-      if (!layer || !lctx) return;
-      lctx.clearRect(0, 0, layer.width, layer.height);
-      target = lctx;
-    }
-    target.save();
-    steps.forEach(({ back, alpha }, i) => {
-      const past = e.history.back(back);
-      if (!past) return;
-      const scene = this.echo.scene(this.pickColour(a, e, i, nowMs), textured, e.style.source);
-      target.globalAlpha = alpha;
-      drawCulled(target, scene, view, past, cam, swap);
-    });
-    target.restore();
-    if (layer) {
-      const lctx = layer.getContext('2d')!;
-      applyScanlines(lctx, layer.width, layer.height, nowMs);
-      ctx.save();
-      ctx.globalAlpha = ECHO_LAYER_ALPHA;
-      ctx.drawImage(layer, 0, 0);
-      ctx.restore();
-    }
+    const paint = (target: CanvasRenderingContext2D): boolean => {
+      target.save();
+      steps.forEach(({ back, alpha }, i) => {
+        const past = e.history.back(back);
+        if (!past) return;
+        const scene = this.echo.scene(this.pickColour(a, e, i, nowMs), textured, e.style.source);
+        target.globalAlpha = alpha;
+        drawCulled(target, scene, view, past, cam, swap);
+      });
+      target.restore();
+      return true;
+    };
+    if (scanlines) this.hologram.draw(ctx, view, nowMs, HOLOGRAM_ALPHA, paint);
+    else paint(ctx);
   }
 
   private pickColour(a: FxAfterimage, e: Entry, i: number, nowMs: number): EchoColor {
@@ -589,19 +567,7 @@ export class CharacterFx {
     }
     const token = c[i % c.length]!;
     const rgba = resolveToken(token, e.style.fx?.file.palette ?? {}, e.style.color.css);
-    const hex =
-      '#' + [rgba[0], rgba[1], rgba[2]].map((v) => v.toString(16).padStart(2, '0')).join('');
-    return this.colour(hex);
-  }
-
-  private ensureLayer(view: ViewSize): HTMLCanvasElement | null {
-    if (typeof document === 'undefined') return null;
-    if (!this.layer) this.layer = document.createElement('canvas');
-    if (this.layer.width !== view.width) this.layer.width = view.width;
-    if (this.layer.height !== view.height) this.layer.height = view.height;
-    const lctx = this.layer.getContext('2d');
-    if (lctx) lctx.imageSmoothingEnabled = false;
-    return this.layer;
+    return this.colour(cssColor(rgba));
   }
 }
 
@@ -617,9 +583,5 @@ function drawCulled(
   cam: CameraPos,
   swap: SpriteSwap,
 ): void {
-  const w = scene.viewWidth;
-  const h = scene.viewHeight;
-  scene.setViewport(view.width, view.height);
-  drawPose(ctx, scene, pose, cam, swap);
-  scene.setViewport(w, h);
+  scene.withViewport(view.width, view.height, () => drawPose(ctx, scene, pose, cam, swap));
 }

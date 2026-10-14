@@ -5,16 +5,13 @@
  * full screen), so the viewport re-measures a few times after every hint of a change.
  */
 
-export interface Size {
-  width: number;
-  height: number;
-}
+import type { ViewSize } from './View.ts';
 
 export interface SizeSample {
   /** Exact device pixels of the container (ResizeObserver's device-pixel-content-box). */
-  devicePixels?: Size | null;
+  devicePixels?: ViewSize | null;
   /** The container's CSS size. */
-  css: Size;
+  css: ViewSize;
   dpr: number;
 }
 
@@ -22,7 +19,7 @@ export interface SizeSample {
  * The container's size in device pixels. The exact device-pixel size wins while it agrees with
  * the CSS size (it may be a frame old: ResizeObserver reports after the frame that changed it).
  */
-export function physicalSize(sample: SizeSample): Size {
+export function physicalSize(sample: SizeSample): ViewSize {
   const fromCss = {
     width: Math.max(1, Math.round(sample.css.width * sample.dpr)),
     height: Math.max(1, Math.round(sample.css.height * sample.dpr)),

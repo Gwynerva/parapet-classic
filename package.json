@@ -1,6 +1,6 @@
 {
   "name": "parapet",
-  "version": "0.5.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Parapet Classic - browser remake of the 2007 J2ME parkour game Playman Extreme Running",
   "type": "module",
@@ -25,7 +25,8 @@
     "i18n": "npm run i18n -w @parapet/tools --",
     "look": "npm run look -w @parapet/tools --",
     "icons": "npm run icons -w @parapet/tools",
-    "demo": "npm run demo -w @parapet/tools --"
+    "demo": "npm run demo -w @parapet/tools --",
+    "findings": "npm run findings -w @parapet/tools --"
   },
   "devDependencies": {
     "@types/node": "^26.6.4",

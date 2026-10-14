@@ -1,21 +1,11 @@
 // Regenerates reference/decompiled/*.java from the original jar with the CFR decompiler.
-// Uses a local java if available, otherwise Docker (eclipse-temurin:17-jdk).
+// Uses a local JDK if there is one, otherwise Docker (scripts/java.mjs).
 import { existsSync, mkdirSync, rmSync, readFileSync, writeFileSync } from 'node:fs';
-import { spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { join } from 'node:path';
+import { ORIGINAL_JAR, ROOT, dockerArgs, findJdk, run, toDocker } from './java.mjs';
 
-const root = dirname(dirname(fileURLToPath(import.meta.url)));
-const jar = join(
-  root,
-  'packages',
-  'content',
-  'playman',
-  'original',
-  'Playman_Extreme_Running_240x320.jar',
-);
-const cfr = join(root, 'reference', 'cfr.jar');
-const out = join(root, 'reference', 'decompiled');
+const cfr = join(ROOT, 'reference', 'cfr.jar');
+const out = join(ROOT, 'reference', 'decompiled');
 const CFR_URL = 'https://github.com/leibnitz27/cfr/releases/download/0.152/cfr-0.152.jar';
 
 if (!existsSync(cfr)) {
@@ -28,32 +18,21 @@ rmSync(out, { recursive: true, force: true });
 mkdirSync(out, { recursive: true });
 
 const cfrOpts = ['--renamedupmembers', 'true', '--renameillegalidents', 'true', '--silent', 'true'];
-const haveJava = spawnSync('java', ['-version'], { shell: true }).status === 0;
-let r;
-if (haveJava) {
-  r = spawnSync('java', ['-jar', cfr, jar, '--outputdir', out, ...cfrOpts], {
-    stdio: 'inherit',
-    shell: true,
-  });
+const jdk = findJdk();
+if (jdk !== null) {
+  run(join(jdk, 'java'), ['-jar', cfr, ORIGINAL_JAR, '--outputdir', out, ...cfrOpts]);
 } else {
-  console.log('no local java, using docker eclipse-temurin:17-jdk');
+  console.log('no local JDK, using docker');
   const args = [
-    'run',
-    '--rm',
-    '-v',
-    `${root}:/w`,
-    'eclipse-temurin:17-jdk',
     'java',
     '-jar',
-    '/w/reference/cfr.jar',
-    '/w/packages/content/playman/original/Playman_Extreme_Running_240x320.jar',
+    toDocker(cfr),
+    toDocker(ORIGINAL_JAR),
     '--outputdir',
-    '/w/reference/decompiled',
-    ...cfrOpts,
+    toDocker(out),
   ];
-  r = spawnSync('docker', args, { stdio: 'inherit', shell: true });
+  run('docker', dockerArgs([...args, ...cfrOpts]));
 }
-if (r.status !== 0) process.exit(r.status ?? 1);
 for (const f of ['S', 'a', 'b', 'c', 'd', 'e', 'f', 'g']) {
   const p = join(out, `${f}.java`);
   if (existsSync(p)) writeFileSync(p, readFileSync(p, 'utf8').replace(/\r\n/g, '\n'));

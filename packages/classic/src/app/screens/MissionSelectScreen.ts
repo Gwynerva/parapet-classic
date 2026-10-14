@@ -9,8 +9,8 @@
  * level's last mission, the level's news shows over the list (`LevelCompleteScreen`), the
  * cursor already on the boss it opened.
  */
-import { modeForMissionType, rankingSort, type RunMode } from '@parapet/sim';
-import { formatTime, Theme, type GameContext } from '../Context.ts';
+import { modeForMissionType, type RunMode } from '@parapet/sim';
+import { formatResult, formatTime, Theme, type GameContext } from '../Context.ts';
 import type { Screen, UiKey, UiPointer, UiWheel } from '@parapet/runtime/app/Screen.ts';
 import { Menu, type MenuItem } from '@parapet/runtime/ui/Menu.ts';
 import { fitWidth, rowHeight, type Rect } from '@parapet/runtime/ui/layout.ts';
@@ -30,14 +30,15 @@ import {
 } from '@parapet/runtime/storage/profile.ts';
 import { contestSetup, missionSetup } from '../ghosts.ts';
 import {
+  type Boss,
   bossCharacterFor,
+  bossName,
   bossOfLevel,
   bossTint,
   CONTEST_KINDS,
   contestCharacter,
   contestRecord,
   isDrawn,
-  type Boss,
 } from '../bosses.ts';
 import type { EchoColor } from '@parapet/runtime/render/EchoSkin.ts';
 import {
@@ -102,7 +103,7 @@ export class MissionSelectScreen implements Screen {
     this.ctx = ctx;
     this.levelId = levelId;
     this.frame = new ScreenFrame(ctx);
-    this.menu = new Menu(ctx.fonts.text, ctx.fonts.small);
+    this.menu = new Menu(ctx.fonts.text);
   }
 
   enter(): void {
@@ -147,8 +148,8 @@ export class MissionSelectScreen implements Screen {
     });
     const open = this.contestsOpen;
     const boss = bossOfLevel(this.levelId);
-    const bossName = boss ? i18n.t(`boss.${boss.id}.name`) : '';
-    const locked = i18n.t('contest.locked', { boss: bossName });
+    const name = bossName(i18n, boss);
+    const locked = i18n.t('contest.locked', { boss: name });
     for (const kind of CONTEST_KINDS) {
       const record = contestRecord(this.levelId, kind);
       if (!record || !boss) continue;
@@ -161,12 +162,12 @@ export class MissionSelectScreen implements Screen {
         tile: { kind: 'contest', contest: kind, portrait: this.portrait(boss, kind, beaten) },
         done: beaten,
         text: open
-          ? i18n.t(more ? 'contest.descMore' : 'contest.desc', { desc, boss: bossName })
+          ? i18n.t(more ? 'contest.descMore' : 'contest.desc', { desc, boss: name })
           : locked,
         locked: !open,
       });
       items.push({
-        label: i18n.t('contest.title', { boss: bossName, mode: i18n.t(`mode.${kind}`) }),
+        label: i18n.t('contest.title', { boss: name, mode: i18n.t(`mode.${kind}`) }),
         value: open ? formatTime(record.timeMs) : '',
         muted: !open,
         indent: TILE_INDENT,
@@ -198,7 +199,7 @@ export class MissionSelectScreen implements Screen {
       label: i18n.t('mission.bestGhost'),
       value: this.ctx.options.bestGhost ? i18n.t('options.on') : i18n.t('options.off'),
       onAdjust: () => {
-        this.ctx.options = saveOptions({ bestGhost: !this.ctx.options.bestGhost });
+        Object.assign(this.ctx.options, saveOptions({ bestGhost: !this.ctx.options.bestGhost }));
         this.rebuild();
       },
     });
@@ -230,10 +231,7 @@ export class MissionSelectScreen implements Screen {
 
   private recordLabel(mode: RunMode): string {
     const record = loadRecord(this.levelId, mode);
-    if (!record || !record.finished) return '-';
-    return rankingSort(mode, this.levelId) === 'score'
-      ? String(record.score)
-      : formatTime(record.time);
+    return record ? formatResult(mode, this.levelId, record) : '-';
   }
 
   private startContest(kind: ContestKind): void {

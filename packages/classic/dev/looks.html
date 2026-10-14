@@ -56,9 +56,18 @@
   </head>
   <body>
     <header>
-      <label>Look <select id="look"></select></label>
-      <label>Zoom <select id="zoom"></select></label>
-      <label>World <select id="bg"></select></label>
+      <label
+        >Look
+        <select id="look"></select
+      ></label>
+      <label
+        >Zoom
+        <select id="zoom"></select
+      ></label>
+      <label
+        >World
+        <select id="bg"></select
+      ></label>
       <label><input id="fx" type="checkbox" checked /> effect (Flag hunt)</label>
       <label>Margin <input id="margin" type="number" value="4" min="0" max="32" /></label>
       <button id="download">Atlas PNG</button>
@@ -69,8 +78,8 @@
     <p id="drop">
       Development helper: an outfit as it runs in the game. <b>Atlas PNG</b> gives its parts to
       paint in any editor; drop the painted picture anywhere on this page (with its
-      <code>.layout.json</code> if it came from <code>npm run look -- atlas</code>) and the
-      outfit runs with it at once. <b>Save</b> writes it into the look's file
+      <code>.layout.json</code> if it came from <code>npm run look -- atlas</code>) and the outfit
+      runs with it at once. <b>Save</b> writes it into the look's file
       (<code>packages/content/bosses/&lt;boss&gt;/looks/&lt;look&gt;.json</code>).
     </p>
     <p id="status"></p>

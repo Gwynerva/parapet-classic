@@ -24,8 +24,9 @@
  * Drawing always tweens from the previous keyframe to the current one by `tween / 256`
  * unless the move has flag 0x20 or no previous keyframe is known (`prevFrame === -1`).
  */
-import type { MoveDef } from '@parapet/sim';
-import { iabs, idiv } from '@parapet/sim';
+import { iabs, idiv, MoveFlag, type MoveDef, type MoveEntrySnapshot } from '@parapet/sim';
+import { FACE_BLINK_A, FACE_BLINK_B, FACE_PAIN } from '../render/Rig.ts';
+import { Xorshift32 } from '../math.ts';
 
 /** Playback modes (`g.d`). */
 export const AnimMode = {
@@ -42,40 +43,8 @@ export const AnimMode = {
   HOLD_LAST_KEEP_TWEEN: 10,
 } as const;
 
-/** Move flags read by the animation (field [8] of the move table). */
-export const AnimFlag = {
-  /** The anchor is the hands point (also a physics flag). */
-  HANDS: 0x1,
-  /** Never tween from the previous keyframe. */
-  NO_BLEND: 0x20,
-  /** Loop at 15 fps. */
-  FPS_15: 0x200,
-  /** Loop at 10 fps. */
-  FPS_10: 0x400,
-  /** Draw mirrored while the facing is still the one the clip was set with (line 5891). */
-  MIRROR_UNTIL_TURN: 0x1000,
-  /** Forget the previous keyframe on entry. */
-  FORGET_PREVIOUS: 0x2000,
-  /** Forget the previous keyframe on entry when the anchor mode changed. */
-  FORGET_PREVIOUS_ON_ANCHOR_CHANGE: 0x4000,
-} as const;
-
 /** The idle clip set at run start (`y(int)`, line 5692): offset 228, mode 3, 4 fps. */
 export const IDLE_CLIP_OFFSET = 228;
-
-/** The runner fields the animator reads (a subset of `RunnerState`). */
-export interface AnimRunner {
-  facingRight: boolean;
-  handsAnchored: boolean;
-  renderX: number;
-  renderY: number;
-  renderHandsDx: number;
-  renderHandsDy: number;
-  vx: number;
-  vy: number;
-  prevVx: number;
-  prevVy: number;
-}
 
 export interface KeyframePair {
   /** Previous keyframe id (equal to `b` when not blending). */
@@ -93,13 +62,6 @@ export interface DrawParams {
   /** Draw mirrored (facing left). */
   flipX: boolean;
 }
-
-/** Face sprites (`ag`, line 5755). */
-export const FACE_BLINK_A = 76;
-export const FACE_BLINK_B = 77;
-export const FACE_PAIN = 78;
-/** Head sprite the face replaces (`a(int,int[])`, line 5935). */
-export const HEAD_SPRITE = 25;
 
 /**
  * Build the flat clip table (`short_h`) from `anims.json`: `table[offset] = count`,
@@ -121,25 +83,6 @@ export function buildClipTable(clips: Record<string, number[]>): Int16Array {
   return table;
 }
 
-/** Small deterministic PRNG (xorshift32) standing in for `java.util.Random` (line 3438). */
-export class Prng {
-  private state: number;
-
-  constructor(seed: number) {
-    this.state = seed | 0 || 0x9e3779b9;
-  }
-
-  /** Non-negative 31-bit value like `abs(Random.nextInt())`. */
-  next(): number {
-    let x = this.state;
-    x ^= x << 13;
-    x ^= x >>> 17;
-    x ^= x << 5;
-    this.state = x | 0;
-    return this.state & 0x7fffffff;
-  }
-}
-
 /**
  * Clip-start remaps applied when the facing flips mid-animation (line 5866): the previous
  * keyframe is taken from the first frame of a turning clip so the tween shows a turn.
@@ -158,7 +101,8 @@ const TURN_KEEP_CLIP = 310;
 
 export class Animator {
   private readonly clips: Int16Array;
-  private readonly rng: Prng;
+  /** Stands in for the original's `java.util.Random` (line 3438). */
+  private readonly rng: Xorshift32;
 
   /** Frame count of the current clip (`var_int_a`). */
   clipLength = 0;
@@ -196,7 +140,7 @@ export class Animator {
 
   constructor(clips: Int16Array, seed = 1) {
     this.clips = clips;
-    this.rng = new Prng(seed);
+    this.rng = new Xorshift32(seed);
   }
 
   /** Takes over another animator's playback as it stands (not its blink PRNG). */
@@ -222,7 +166,7 @@ export class Animator {
   }
 
   /** `y(int)`: the idle loop shown before the first move change (clip 228 at 4 fps). */
-  setIdle(runner: AnimRunner): void {
+  setIdle(runner: MoveEntrySnapshot): void {
     this.setClip(IDLE_CLIP_OFFSET, 0, AnimMode.LOOP, 0, runner);
     this.prevFrame = -1;
     this.prevHandsAnchored = false;
@@ -236,7 +180,7 @@ export class Animator {
    * What `O(int)` does for the animation on entering a move: `c(clipOffset, duration, mode)`
    * when the move has a clip. `moveTimer` is the move duration at entry (`int_p`).
    */
-  setMove(move: MoveDef, moveTimer: number, runner: AnimRunner): void {
+  setMove(move: MoveDef, moveTimer: number, runner: MoveEntrySnapshot): void {
     if (move.clipOffset === -1) {
       this.flags = move.flags;
       return;
@@ -250,7 +194,7 @@ export class Animator {
     duration: number,
     mode: number,
     flags: number,
-    runner: AnimRunner,
+    runner: MoveEntrySnapshot,
   ): void {
     this.mode = mode;
     this.duration = duration;
@@ -274,12 +218,12 @@ export class Animator {
     // CFR renders this as "set to true when the flag is on", but the bytecode assigns the
     // boolean unconditionally (`c(III)V` offsets 396–421): a move without the hands flag
     // clears the animator's anchor immediately, which drives the anchor tween of `aj()`.
-    this.handsAnchored = (flags & AnimFlag.HANDS) !== 0;
-    if ((flags & AnimFlag.FORGET_PREVIOUS) !== 0) {
+    this.handsAnchored = (flags & MoveFlag.HANDS) !== 0;
+    if ((flags & MoveFlag.ANIM_FORGET_PREVIOUS) !== 0) {
       this.prevFrame = -1;
     }
     if (
-      (flags & AnimFlag.FORGET_PREVIOUS_ON_ANCHOR_CHANGE) !== 0 &&
+      (flags & MoveFlag.ANIM_FORGET_ON_ANCHOR_CHANGE) !== 0 &&
       this.handsAnchored !== this.prevHandsAnchored
     ) {
       this.prevFrame = -1;
@@ -290,7 +234,7 @@ export class Animator {
    * `z(int)`: advance by `dtUnits` time units (30 per simulation step, the original calls
    * `z(30720)` = 30 << 10). `clock` is the game clock in ms (for the face timers).
    */
-  update(dtUnits: number, runner: AnimRunner, clock: number): void {
+  update(dtUnits: number, runner: MoveEntrySnapshot, clock: number): void {
     const n = dtUnits << 10;
     const before = this.frame;
     const mode = this.mode;
@@ -317,9 +261,9 @@ export class Animator {
       let fps = 13;
       if (this.clipStart === IDLE_CLIP_OFFSET + 1) {
         fps = 4;
-      } else if ((this.flags & AnimFlag.FPS_15) !== 0) {
+      } else if ((this.flags & MoveFlag.ANIM_15FPS) !== 0) {
         fps = 15;
-      } else if ((this.flags & AnimFlag.FPS_10) !== 0) {
+      } else if ((this.flags & MoveFlag.ANIM_10FPS) !== 0) {
         fps = 10;
       }
       const q = idiv(this.time * fps, 1000);
@@ -384,7 +328,9 @@ export class Animator {
   /** Whether the draw tweens from the previous keyframe (`aj`, line 5894). */
   get blending(): boolean {
     return (
-      this.prevFrame !== -1 && (this.flags & AnimFlag.NO_BLEND) === 0 && this.prevClipLength > 0
+      this.prevFrame !== -1 &&
+      (this.flags & MoveFlag.ANIM_NO_BLEND) === 0 &&
+      this.prevClipLength > 0
     );
   }
 
@@ -409,7 +355,7 @@ export class Animator {
   }
 
   /** Draw position and mirroring (the first part of `aj`, line 5886). */
-  drawParams(runner: AnimRunner): DrawParams {
+  drawParams(runner: MoveEntrySnapshot): DrawParams {
     let x = runner.renderX;
     let y = runner.renderY;
     if (runner.handsAnchored) {
@@ -418,7 +364,7 @@ export class Animator {
     }
     let facingRight = runner.facingRight;
     if (
-      (this.flags & AnimFlag.MIRROR_UNTIL_TURN) !== 0 &&
+      (this.flags & MoveFlag.ANIM_MIRROR_UNTIL_TURN) !== 0 &&
       runner.facingRight !== this.notFacingAtSet
     ) {
       facingRight = !facingRight;
@@ -445,7 +391,7 @@ export class Animator {
   }
 
   /** `ag()`: blinks with a 1/64 chance per step, pain face on a sharp velocity change. */
-  private updateFace(runner: AnimRunner, clock: number): void {
+  private updateFace(runner: MoveEntrySnapshot, clock: number): void {
     if ((this.rng.next() & 0x3f) === 0) {
       this.setFace(FACE_BLINK_A, 250, false, clock);
     }
@@ -459,7 +405,7 @@ export class Animator {
     }
   }
 
-  private captureAnchor(runner: AnimRunner): void {
+  private captureAnchor(runner: MoveEntrySnapshot): void {
     this.anchorX = runner.renderX + (this.handsAnchored ? runner.renderHandsDx : 0);
     this.anchorY = runner.renderY + (this.handsAnchored ? runner.renderHandsDy : 0);
   }

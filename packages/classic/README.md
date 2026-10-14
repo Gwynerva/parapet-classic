@@ -11,8 +11,8 @@ own Free run and races against ghosts: your record, or anyone's run shared as a 
 - `src/app/screens/` are the screens of the original's flow: title, character, level and
   mission select, play (`PlayScreen` drives `MissionFlow`), results, records and their
   actions, options, moves, about, prize, and the manual-copy box for challenge links.
-- `src/app/ui/` holds the HUD, the ghost labels and edge arrows (`GhostOverlay`) and the
-  sprite ids of the menu graphics.
+- `src/app/ui/` holds the HUD, the ghost labels and the signs at the screen's edge
+  (`GhostOverlay`) and the sprite ids of the menu graphics.
 - `src/app/ghosts.ts` checks incoming replays, re-runs them and starts ghost races and the
   boss contests; it also sends runs out as challenge links and replay files.
   `screens/OpenReplayScreen.ts` takes a link or code pasted into a real text field (phones have
@@ -29,8 +29,7 @@ own Free run and races against ghosts: your record, or anyone's run shared as a 
 
 Development shortcuts (dev server only): `?level=N&mode=M` jumps into a run (`M` is one of
 `free`, `sprint`, `flags`, `score`, `challenge`, `warmup1`, `warmup2`; add `&rival=1` for the
-ghost), `?replay=/dev/l0-flags.json` plays a recorded input log, `?touch=1` shows the touch
-buttons on a desktop, `?tas=<level>-<mode>` plays the boss's local run from
+ghost), `?touch=1` shows the touch buttons on a desktop, `?tas=<level>-<mode>` plays the boss's local run from
 `packages/tools/tas-out` (`&autopilot=1` races it with it, counting as the player's run) and
 `?contestTime=<ms>` replaces its time; `?vp=WxH` fixes the logical size (a phone's layout on a
 desktop) and `?coarse=1` treats the mouse as a finger. `debug.html` is a bare-bones level
@@ -41,7 +40,10 @@ poses and its atlas, takes a painted atlas dropped on it and saves the look;
 preview); `/dev/sprites.html?ids=141-150&scale=4` shows extracted sprites magnified and
 `/dev/loudness.html` measures the music tracks on the synthesiser (its Save writes
 `packages/content/audio/loudness.json`). The helpers in `dev/` are served by a dev-server
-middleware (`vite.config.ts`), which also takes their saves, and never reach the build.
+middleware (`build/devEndpoints.ts`), which also takes their saves, and never reach the build.
+
+- `lab/index.html` and `src/lab/` are the Lab: the experiments of `packages/lab` on the game's
+  own content, as cards to play with (`cards.ts`), in English and Russian (`text.ts`).
 
 - `src/app/platform.ts`: full screen (the first tap on touch screens, the corner button, F,
   the options), the Back guard (`runtime/platform/HistoryGuard.ts`), the installed app's

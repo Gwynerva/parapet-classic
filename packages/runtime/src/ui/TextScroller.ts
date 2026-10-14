@@ -11,6 +11,7 @@ import type { BitmapFont } from '../text/BitmapFont.ts';
 import { contains, type Rect } from './layout.ts';
 import { prefersReducedMotion } from './motion.ts';
 import { Theme } from './theme.ts';
+import { DRAG_THRESHOLD } from './press.ts';
 
 export interface TextBlock {
   text: string;
@@ -189,7 +190,7 @@ export class TextScroller {
         return false;
       case 'move':
         if (this.dragStart < 0) return false;
-        if (!this.dragged && Math.abs(p.y - this.dragStart) < 4) return false;
+        if (!this.dragged && Math.abs(p.y - this.dragStart) <= DRAG_THRESHOLD) return false;
         this.dragged = true;
         this.offset = Math.max(
           0,

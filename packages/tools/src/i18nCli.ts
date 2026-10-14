@@ -1,58 +1,28 @@
 // Entry point: `npm run i18n -- [check | new <code>]` — helps translators (see i18n/README.md).
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { checkLocales, hasErrors, type FontCoverage } from '@parapet/runtime/i18n/check.ts';
-import {
-  collectLocales,
-  REFERENCE_LOCALE,
-  type LocaleBundle,
-} from '@parapet/runtime/i18n/locales.ts';
-
-const CONTENT_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', 'content');
-const I18N_DIR = join(CONTENT_ROOT, 'i18n');
-const FONTS_DIR = join(CONTENT_ROOT, 'fonts');
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { REFERENCE_LOCALE } from '@parapet/runtime/i18n/locales.ts';
+import { checkLocales, hasErrors } from './i18nCheck.ts';
+import { fontCoverage, gameSources, I18N_DIR, loadLocales, unusedKeys } from './i18nFiles.ts';
 
 const USAGE = `usage: npm run i18n -- [check | new <code>]
 
   check        check every language against English: unknown or misplaced keys, changed
-               {arguments}, characters the game's fonts cannot draw, untranslated keys
+               {arguments}, characters the game's fonts cannot draw, untranslated keys;
+               and English against the code: keys nothing shows
   new <code>   start a language: i18n/<code>/ with meta.json and empty area files
                (<code> is a BCP 47 language code such as de, uk, pt-BR)`;
-
-function loadLocales(): LocaleBundle[] {
-  const modules: Record<string, unknown> = {};
-  for (const code of readdirSync(I18N_DIR, { withFileTypes: true })) {
-    if (!code.isDirectory()) continue;
-    for (const file of readdirSync(join(I18N_DIR, code.name))) {
-      if (!file.endsWith('.json')) continue;
-      const path = join(I18N_DIR, code.name, file);
-      try {
-        modules[`${code.name}/${file}`] = JSON.parse(readFileSync(path, 'utf8'));
-      } catch (error) {
-        throw new Error(`${path}: ${error instanceof Error ? error.message : String(error)}`);
-      }
-    }
-  }
-  return collectLocales(modules);
-}
-
-function fontCoverage(): FontCoverage {
-  const points = (font: string): Set<number> => {
-    const data = JSON.parse(readFileSync(join(FONTS_DIR, `${font}.json`), 'utf8')) as {
-      glyphs: Record<string, unknown>;
-    };
-    return new Set(Object.keys(data.glyphs).map(Number));
-  };
-  return {
-    text: [points('text-12'), points('text-16')],
-    display: [points('display-16'), points('display-24')],
-  };
-}
 
 function check(): number {
   const locales = loadLocales();
   let errors = 0;
+  const reference = locales.find((l) => l.code === REFERENCE_LOCALE)!;
+  const unused = unusedKeys(Object.keys(reference.messages), gameSources());
+  if (unused.length > 0) {
+    console.log(`${REFERENCE_LOCALE}: keys the game never shows (remove them in every language):`);
+    for (const key of unused) console.log(`    ${key}`);
+    errors++;
+  }
   for (const report of checkLocales(locales, fontCoverage())) {
     const bundle = locales.find((l) => l.code === report.code)!;
     const total = Object.keys(locales[0]!.messages).length;

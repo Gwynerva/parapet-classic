@@ -1,7 +1,14 @@
 export { SIM_VERSION, RULESET_ID } from './version.ts';
 
 export { idiv, iabs, imin, isqrt, approxLength, buildSineTable } from './math/int.ts';
-export { Level, TILE, TILE_SHIFT, CHECKPOINT_TILE_BASE, BIRD_TILE } from './level/level.ts';
+export {
+  Level,
+  TILE,
+  TILE_SHIFT,
+  tileCentre,
+  CHECKPOINT_TILE_BASE,
+  BIRD_TILE,
+} from './level/level.ts';
 export type { LevelData, MissionSection, Point } from './level/level.ts';
 export { Probe, Surface } from './collision/probe.ts';
 export { rayMarch, followSurface, cellIndex } from './collision/raymarch.ts';
@@ -21,12 +28,13 @@ export { MoveTable, MoveFlag, MoveId, ChallengeBit } from './runner/moves.ts';
 export type { MoveDef, MoveTableData, MoveTransition } from './runner/moves.ts';
 export {
   Input,
+  pressBits,
   evalCondition,
   tileRelative,
   lookaheadRay,
   isOnSurface,
 } from './runner/conditions.ts';
-export type { ConditionContext } from './runner/conditions.ts';
+export type { ArrowKey, ConditionContext } from './runner/conditions.ts';
 export { applyImpulse } from './runner/impulses.ts';
 export { snapOnEntry, applyRootMotion, initImpulse, advancePhase } from './runner/rootMotion.ts';
 export {

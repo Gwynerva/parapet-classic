@@ -9,38 +9,29 @@
  * /dev/save-art). `?scout=1` draws every place a shot can stand on (the start and the flags of
  * every mission) and the keyframes.
  */
-import { buildSineTable, Level, MoveTable, STEP, type LevelData } from '@parapet/sim';
-import { buildClipTable } from '@parapet/runtime/anim/Animator.ts';
+import { Level, STEP, type LevelData } from '@parapet/sim';
 import {
   CharacterRenderer,
   drawPose,
   type CharacterPose,
 } from '@parapet/runtime/render/CharacterRenderer.ts';
-import { applyScanlines } from '@parapet/runtime/render/EchoRenderer.ts';
-import { EchoSheets, makeEchoColor } from '@parapet/runtime/render/EchoSkin.ts';
+import { applyScanlines } from '@parapet/runtime/render/Hologram.ts';
+import { makeEchoColor } from '@parapet/runtime/render/EchoSkin.ts';
 import { CharacterFx, type FxStyle } from '@parapet/runtime/render/fx/CharacterFx.ts';
 import type { FxFile } from '@parapet/runtime/render/fx/FxData.ts';
 import { compileFx } from '@parapet/runtime/render/fx/FxSheet.ts';
-import {
-  defaultLevelArtFrame,
-  LevelRenderer,
-  themeOfLevel,
-} from '@parapet/runtime/render/LevelRenderer.ts';
+import { defaultLevelArtFrame, themeOfLevel } from '@parapet/runtime/render/LevelRenderer.ts';
 import type { ResolvedLook } from '@parapet/runtime/render/Look.ts';
 import { SceneRenderer } from '@parapet/runtime/render/SceneRenderer.ts';
-import { SkinLibrary } from '@parapet/runtime/render/SkinLibrary.ts';
-import { SpriteSheet } from '@parapet/runtime/render/SpriteSheet.ts';
 import { StageRenderer } from '@parapet/runtime/render/Stage.ts';
-import { DemoRun, type MoveDemoData } from '@parapet/runtime/moves/MoveDemo.ts';
+import { DemoRun } from '@parapet/runtime/moves/MoveDemo.ts';
 import { BitmapFont, type BitmapFontData } from '@parapet/runtime/text/BitmapFont.ts';
 import { Theme } from '@parapet/runtime/ui/theme.ts';
-import demosJson from '@content/moves/demos.json';
 import {
   allBosses,
   characterFx,
   contestCharacter,
   effectOf,
-  registerBosses,
   type Boss,
 } from '../src/app/bosses.ts';
 import { loadContent } from '../src/assets/content.ts';
@@ -51,11 +42,12 @@ import display16 from '../../content/fonts/display-16.json';
 import display16Png from '../../content/fonts/display-16.png';
 import display24 from '../../content/fonts/display-24.json';
 import display24Png from '../../content/fonts/display-24.png';
+import { UNITS_PER_PX } from '@parapet/runtime/render/View.ts';
+import { createRenderers } from '../src/app/renderers.ts';
+import { $ } from './dom.ts';
+import { MOVE_DEMOS } from '../src/assets/demos.ts';
 
-const DEMOS = (demosJson as unknown as { demos: MoveDemoData[] }).demos;
-const UNITS = 32;
 const TILE = 1024;
-const STEP_MS = 30;
 const FRAME_MS = 110;
 const RUN_PX = 130;
 /** How long a runner runs into its shot, so its effect and cloth trail behind it. */
@@ -111,87 +103,283 @@ interface Trick {
   ground?: 'start' | 'under';
 }
 
-/** The echo a runner races: a boss in an outfit and pose, `ahead` px in front of it. */
+/**
+ * The echo a runner races: a boss as the game's hologram of a recorded run, doing a trick
+ * `ahead` px in front of the runner, with afterimages along the trick's own path.
+ */
 interface Rival {
   boss: string;
   outfit: number;
-  frame: number;
+  trick: Trick;
   ahead: number;
-  /** Up from the floor, in px (in the air). */
+  /** Up from the runner's floor, in px. */
   rise?: number;
+  /** The afterimages: how many ms before the pose shown each one is. */
+  trail: readonly number[];
 }
 
-/** The rival's hologram colour (the game's cyan echo) and its afterimages. */
+/** The rival's hologram colour (the game's cyan echo) and the dark rim around its pose. */
 const RIVAL_COLOR = makeEchoColor('cyan', '#2ee6ff');
-const RIVAL_TRAIL = [
-  { back: 15, alpha: 0.1 },
-  { back: 10, alpha: 0.2 },
-  { back: 5, alpha: 0.35 },
-] as const;
-
-/** Keyframes of tricks in mid-air (the Moves menu's demos). */
-const JUMP = 135;
-const FLIP = 67;
-const VAULT = 91;
+const RIVAL_RIM = '#04141c';
 
 /** The README's banner: the place under the pennant, then the cards left to right. */
 const BANNER_SHOTS: Shot[] = [
   { level: 10, mission: 1, at: 3, boss: '', outfit: 0, frame: -1, feet: [0.5, 0.84] },
-  { level: 2, mission: 0, at: -1, boss: 'grove', outfit: 0, frame: -1, feet: [0.5, 0.84], trick: { move: 'monkeyVault', ms: 2010 } },
-  { level: 3, mission: 0, at: -1, boss: 'vera', outfit: 0, frame: -1, feet: [0.5, 0.84], trick: { move: 'backFlip', ms: 1740 } },
-  { level: 4, mission: 0, at: -1, boss: 'b2', outfit: 0, frame: -1, feet: [0.5, 0.84], trick: { move: 'backFlip', ms: 1410 } },
-  { level: 8, mission: 0, at: -1, boss: 'five', outfit: 0, frame: -1, feet: [0.5, 0.84], trick: { move: 'monkeyVault', ms: 2070 } },
-  { level: 10, mission: 1, at: -1, boss: 'shahzada', outfit: 0, frame: -1, feet: [0.5, 0.84], trick: { move: 'frontFlip', ms: 1380 } },
+  {
+    level: 2,
+    mission: 0,
+    at: -1,
+    boss: 'grove',
+    outfit: 0,
+    frame: -1,
+    feet: [0.5, 0.84],
+    trick: { move: 'monkeyVault', ms: 2010 },
+  },
+  {
+    level: 3,
+    mission: 0,
+    at: -1,
+    boss: 'vera',
+    outfit: 0,
+    frame: -1,
+    feet: [0.5, 0.84],
+    trick: { move: 'backFlip', ms: 1740 },
+  },
+  {
+    level: 4,
+    mission: 0,
+    at: -1,
+    boss: 'b2',
+    outfit: 0,
+    frame: -1,
+    feet: [0.5, 0.84],
+    trick: { move: 'backFlip', ms: 1410 },
+  },
+  {
+    level: 8,
+    mission: 0,
+    at: -1,
+    boss: 'five',
+    outfit: 0,
+    frame: -1,
+    feet: [0.5, 0.84],
+    trick: { move: 'monkeyVault', ms: 2070 },
+  },
+  {
+    level: 10,
+    mission: 1,
+    at: -1,
+    boss: 'shahzada',
+    outfit: 0,
+    frame: -1,
+    feet: [0.5, 0.84],
+    trick: { move: 'frontFlip', ms: 1380 },
+  },
 ];
 /**
- * The challenge links' preview: a runner and the echo it races, side by side on a roof, drawn
- * big enough to read in a chat's small preview.
+ * The challenge links' preview: a runner mid-trick with its effect, and just ahead of it the
+ * echo it races, the hologram of a rival's run caught in its own trick, drawn big enough to
+ * read in a chat's small preview.
  */
 const RACE_SHOTS: Shot[] = [
   { level: 10, mission: 1, at: 3, boss: '', outfit: 0, frame: -1, feet: [0.5, 0.84] },
   {
     level: 9,
     mission: 0,
-    at: -1,
+    at: 1,
     boss: 'vera',
     outfit: 0,
     frame: -1,
-    feet: [0.24, 0.86],
+    feet: [0.22, 0.84],
     zoom: 2,
-    rival: { boss: 'petra', outfit: 0, frame: JUMP, ahead: 58, rise: 16 },
+    trick: { move: 'monkeyVault', ms: 2010 },
+    rival: {
+      boss: 'petra',
+      outfit: 0,
+      trick: { move: 'jump', ms: 1500 },
+      ahead: 58,
+      rise: 6,
+      trail: [240, 120],
+    },
   },
 ];
+const RACE_TAGLINE = 'Race my ghost! Can you beat my time?';
 /** The link preview: the place under the pennant, then the cards. */
 const OG_SHOTS: Shot[] = [
   { level: 10, mission: 1, at: 3, boss: '', outfit: 0, frame: -1, feet: [0.5, 0.84] },
-  { level: 0, mission: 1, at: 1, boss: 'petra', outfit: 5, frame: -1, feet: [0.36, 0.84], trick: { move: 'monkeyFlip', ms: 1350 } },
-  { level: 6, mission: 1, at: 1, boss: 'widow', outfit: 0, frame: -1, feet: [0.35, 0.84], trick: { move: 'monkeyVault', ms: 2310 } },
-  { level: 11, mission: 1, at: -1, boss: 'azure', outfit: 0, frame: -1, feet: [0.55, 0.84], trick: { move: 'frontFlip', ms: 1290 } },
+  {
+    level: 0,
+    mission: 1,
+    at: 1,
+    boss: 'petra',
+    outfit: 5,
+    frame: -1,
+    feet: [0.36, 0.84],
+    trick: { move: 'monkeyFlip', ms: 1350 },
+  },
+  {
+    level: 6,
+    mission: 1,
+    at: 1,
+    boss: 'widow',
+    outfit: 0,
+    frame: -1,
+    feet: [0.35, 0.84],
+    trick: { move: 'monkeyVault', ms: 2310 },
+  },
+  {
+    level: 11,
+    mission: 1,
+    at: -1,
+    boss: 'azure',
+    outfit: 0,
+    frame: -1,
+    feet: [0.55, 0.84],
+    trick: { move: 'frontFlip', ms: 1290 },
+  },
 ];
 
 /** The collage without the logo: every boss in its own world at the height of a trick. */
 const COLLAGE_ROWS: Shot[][] = [
   [
-    { level: 0, mission: 0, at: -1, boss: 'petra', outfit: 5, frame: -1, feet: [0.45, 0.92], world: true, trick: { move: 'monkeyFlip', ms: 1350 } },
-    { level: 1, mission: 0, at: -1, boss: 'rewind', outfit: 0, frame: -1, feet: [0.45, 0.92], world: true, trick: { move: 'backFlip', ms: 1380 } },
-    { level: 2, mission: 0, at: -1, boss: 'grove', outfit: 0, frame: -1, feet: [0.45, 0.92], world: true, trick: { move: 'monkeyVault', ms: 2010 } },
-    { level: 3, mission: 0, at: -1, boss: 'vera', outfit: 0, frame: -1, feet: [0.45, 0.92], world: true, trick: { move: 'backFlip', ms: 1740 } },
+    {
+      level: 0,
+      mission: 0,
+      at: -1,
+      boss: 'petra',
+      outfit: 5,
+      frame: -1,
+      feet: [0.45, 0.92],
+      world: true,
+      trick: { move: 'monkeyFlip', ms: 1350 },
+    },
+    {
+      level: 1,
+      mission: 0,
+      at: -1,
+      boss: 'rewind',
+      outfit: 0,
+      frame: -1,
+      feet: [0.45, 0.92],
+      world: true,
+      trick: { move: 'backFlip', ms: 1380 },
+    },
+    {
+      level: 2,
+      mission: 0,
+      at: -1,
+      boss: 'grove',
+      outfit: 0,
+      frame: -1,
+      feet: [0.45, 0.92],
+      world: true,
+      trick: { move: 'monkeyVault', ms: 2010 },
+    },
+    {
+      level: 3,
+      mission: 0,
+      at: -1,
+      boss: 'vera',
+      outfit: 0,
+      frame: -1,
+      feet: [0.45, 0.92],
+      world: true,
+      trick: { move: 'backFlip', ms: 1740 },
+    },
   ],
   [
-    { level: 4, mission: 0, at: -1, boss: 'b2', outfit: 0, frame: -1, feet: [0.5, 0.92], world: true, trick: { move: 'backFlip', ms: 1410 } },
-    { level: 5, mission: 0, at: -1, boss: 'sir-nobody', outfit: 0, frame: -1, feet: [0.45, 0.92], world: true, trick: { move: 'monkeyVault', ms: 1980 } },
-    { level: 6, mission: 0, at: -1, boss: 'widow', outfit: 0, frame: -1, feet: [0.3, 0.92], world: true, trick: { move: 'monkeyVault', ms: 2310 } },
-    { level: 7, mission: 0, at: -1, boss: 'rush-b', outfit: 0, frame: -1, feet: [0.45, 0.92], world: true, trick: { move: 'tigerJump', ms: 1110 } },
+    {
+      level: 4,
+      mission: 0,
+      at: -1,
+      boss: 'b2',
+      outfit: 0,
+      frame: -1,
+      feet: [0.5, 0.92],
+      world: true,
+      trick: { move: 'backFlip', ms: 1410 },
+    },
+    {
+      level: 5,
+      mission: 0,
+      at: -1,
+      boss: 'sir-nobody',
+      outfit: 0,
+      frame: -1,
+      feet: [0.45, 0.92],
+      world: true,
+      trick: { move: 'monkeyVault', ms: 1980 },
+    },
+    {
+      level: 6,
+      mission: 0,
+      at: -1,
+      boss: 'widow',
+      outfit: 0,
+      frame: -1,
+      feet: [0.3, 0.92],
+      world: true,
+      trick: { move: 'monkeyVault', ms: 2310 },
+    },
+    {
+      level: 7,
+      mission: 0,
+      at: -1,
+      boss: 'rush-b',
+      outfit: 0,
+      frame: -1,
+      feet: [0.45, 0.92],
+      world: true,
+      trick: { move: 'tigerJump', ms: 1110 },
+    },
   ],
   [
-    { level: 8, mission: 0, at: -1, boss: 'five', outfit: 0, frame: -1, feet: [0.5, 0.92], world: true, trick: { move: 'monkeyVault', ms: 2070 } },
-    { level: 9, mission: 0, at: -1, boss: 'flittermouse', outfit: 0, frame: -1, feet: [0.45, 0.92], world: true, trick: { move: 'monkeyFlip', ms: 1350 } },
-    { level: 10, mission: 0, at: -1, boss: 'shahzada', outfit: 0, frame: -1, feet: [0.45, 0.92], world: true, trick: { move: 'frontFlip', ms: 1380 } },
-    { level: 11, mission: 0, at: -1, boss: 'azure', outfit: 0, frame: -1, feet: [0.55, 0.92], world: true, trick: { move: 'frontFlip', ms: 1290 } },
+    {
+      level: 8,
+      mission: 0,
+      at: -1,
+      boss: 'five',
+      outfit: 0,
+      frame: -1,
+      feet: [0.5, 0.92],
+      world: true,
+      trick: { move: 'monkeyVault', ms: 2070 },
+    },
+    {
+      level: 9,
+      mission: 0,
+      at: -1,
+      boss: 'flittermouse',
+      outfit: 0,
+      frame: -1,
+      feet: [0.45, 0.92],
+      world: true,
+      trick: { move: 'monkeyFlip', ms: 1350 },
+    },
+    {
+      level: 10,
+      mission: 0,
+      at: -1,
+      boss: 'shahzada',
+      outfit: 0,
+      frame: -1,
+      feet: [0.45, 0.92],
+      world: true,
+      trick: { move: 'frontFlip', ms: 1380 },
+    },
+    {
+      level: 11,
+      mission: 0,
+      at: -1,
+      boss: 'azure',
+      outfit: 0,
+      frame: -1,
+      feet: [0.55, 0.92],
+      world: true,
+      trick: { move: 'frontFlip', ms: 1290 },
+    },
   ],
 ];
-
-const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
 
 async function main(): Promise<void> {
   const content = await loadContent();
@@ -212,16 +400,9 @@ async function main(): Promise<void> {
     image('/icons/favicon-32.png'),
     image('/icons/race-32.png'),
   ]);
-  const sheet = new SpriteSheet(content.atlas.image, content.atlas.frames);
-  const scene = new SceneRenderer(sheet, content.scenes.values());
-  const levels = new LevelRenderer(content, sheet, scene, buildSineTable(10, true));
-  const skins = new SkinLibrary(scene);
-  registerBosses(skins);
-  const echo = new EchoSheets(scene);
-  const clips = buildClipTable(content.anims.clips);
+  const { scene, level: levels, skins, echo, clips, moves } = createRenderers(content);
   const run = content.anims.demos[0]!;
   const bosses = new Map(allBosses().map((b) => [b.id, b]));
-  const moves = new MoveTable(content.moves);
   const stages = new Map<Boss, StageRenderer>();
   const stageOf = (boss: Boss): StageRenderer | null => {
     if (!boss.stage) return null;
@@ -274,14 +455,14 @@ async function main(): Promise<void> {
   const placeOf = (s: Shot): { x: number; y: number } => {
     if (s.world) {
       const [dx, dy] = s.shift ?? [0, 0];
-      return { x: dx * UNITS, y: -dy * UNITS };
+      return { x: dx * UNITS_PER_PX, y: -dy * UNITS_PER_PX };
     }
     const l = level(s.level, s.mission);
     const p = s.at < 0 ? l.start : (l.checkpoints[s.at] ?? l.start);
     let floor = p.y + 1;
     while (floor < l.height && !FLOOR_TILES.has(l.collisionTileAt(p.x, floor))) floor++;
     const [dx, dy] = s.shift ?? [0, 0];
-    return { x: p.x * TILE + TILE / 2 + dx * UNITS, y: floor * TILE - dy * UNITS };
+    return { x: p.x * TILE + TILE / 2 + dx * UNITS_PER_PX, y: floor * TILE - dy * UNITS_PER_PX };
   };
   const runFrame = (clock: number, k: number): number => {
     const count = Math.max(1, run.frameCount);
@@ -299,8 +480,8 @@ async function main(): Promise<void> {
     levels.setLevel(s.level, l);
     const p = placeOf(s);
     const cam = {
-      x: Math.round(p.x - s.feet[0] * w * UNITS),
-      y: Math.round(p.y - s.feet[1] * h * UNITS),
+      x: Math.round(p.x - s.feet[0] * w * UNITS_PER_PX),
+      y: Math.round(p.y - s.feet[1] * h * UNITS_PER_PX),
     };
     const view = { width: w, height: h };
     levels.drawBackground(c, cam, view, 0, themeOfLevel(s.level));
@@ -330,7 +511,13 @@ async function main(): Promise<void> {
     if (stage.hasSky) stage.drawSky(c, 0, w, groundY, 0);
     else {
       const theme = themeOfLevel(stage.file.level ?? boss.levelId);
-      levels.drawBackground(c, { x: Math.round(scroll * UNITS), y: 0 }, { width: w, height: h }, 0, theme);
+      levels.drawBackground(
+        c,
+        { x: Math.round(scroll * UNITS_PER_PX), y: 0 },
+        { width: w, height: h },
+        0,
+        theme,
+      );
     }
     stage.draw(c, 0, w, groundY, scroll, false);
   };
@@ -340,9 +527,15 @@ async function main(): Promise<void> {
    * drawn step by step (particles and cloth move as they are drawn), the demo's ground on the
    * place's floor.
    */
-  const drawTrick = (c: CanvasRenderingContext2D, s: Shot, trick: Trick, w: number, h: number): void => {
+  const drawTrick = (
+    c: CanvasRenderingContext2D,
+    s: Shot,
+    trick: Trick,
+    w: number,
+    h: number,
+  ): void => {
     const boss = bosses.get(s.boss);
-    const data = DEMOS.find((d) => d.move === trick.move);
+    const data = MOVE_DEMOS.find((d) => d.move === trick.move);
     const look = boss?.looks[s.outfit];
     if (!boss || !data || !look) return;
     const seed = trick.seed ?? 1;
@@ -359,7 +552,8 @@ async function main(): Promise<void> {
       skins.sceneFor(character, s.outfit),
       seed,
     );
-    if (style) fx.add(runner, { pose: () => chars.pose(runner, 1), move: () => runner.moveId }, style);
+    if (style)
+      fx.add(runner, { pose: () => chars.pose(runner, 1), move: () => runner.moveId }, style);
     let ground = runner.y;
     const step = (silent: boolean): void => {
       chars.onEvents(run.step());
@@ -369,8 +563,8 @@ async function main(): Promise<void> {
     while (run.stepCount < data.from) step(true);
     const view = { width: w, height: h };
     const cam = (): { x: number; y: number } => ({
-      x: Math.round(runner.x - s.feet[0] * w * UNITS),
-      y: Math.round(ground - (s.feet[1] * h + (s.shift?.[1] ?? 0)) * UNITS),
+      x: Math.round(runner.x - s.feet[0] * w * UNITS_PER_PX),
+      y: Math.round(ground - (s.feet[1] * h + (s.shift?.[1] ?? 0)) * UNITS_PER_PX),
     });
     const draw = (to: CanvasRenderingContext2D): void => {
       const at = cam();
@@ -419,8 +613,8 @@ async function main(): Promise<void> {
     const p = placeOf(s);
     const dir = s.left ? -1 : 1;
     const cam = {
-      x: Math.round(p.x - s.feet[0] * w * UNITS),
-      y: Math.round(p.y - s.feet[1] * h * UNITS),
+      x: Math.round(p.x - s.feet[0] * w * UNITS_PER_PX),
+      y: Math.round(p.y - s.feet[1] * h * UNITS_PER_PX),
     };
     const view = { width: w, height: h };
     let clock = 0;
@@ -428,7 +622,7 @@ async function main(): Promise<void> {
       const left = LEAD_MS - clock;
       const hold = s.frame >= 0 && left < 160;
       return {
-        x: p.x - (dir * RUN_PX * UNITS * Math.max(0, left)) / 1000,
+        x: p.x - (dir * RUN_PX * UNITS_PER_PX * Math.max(0, left)) / 1000,
         y: p.y,
         a: hold ? s.frame : runFrame(clock, 1),
         b: hold ? s.frame : runFrame(clock, 0),
@@ -439,7 +633,7 @@ async function main(): Promise<void> {
     };
     if (style) fx.add(s, { pose, move: () => 2 }, style);
     const scratch = document.createElement('canvas').getContext('2d')!;
-    for (; clock < LEAD_MS; clock += STEP_MS) {
+    for (; clock < LEAD_MS; clock += STEP) {
       fx.step({ clock });
       fx.drawBehind(scratch, cam, clock, clock, view);
       fx.drawFront(scratch, cam);
@@ -452,9 +646,42 @@ async function main(): Promise<void> {
   };
 
   /**
-   * The rival as the game draws a ghost: its look recoloured into a hologram, a trail of
-   * afterimages behind it, all in a layer that gets scanlines and is laid over slightly
-   * transparent.
+   * The poses of a boss doing a trick of the Moves menu, `times` ms into it (counted from the
+   * end of the demo's run-up, as `drawTrick` counts), with the demo's ground.
+   */
+  const trickPoses = (
+    boss: Boss,
+    outfit: number,
+    move: string,
+    times: readonly number[],
+  ): { poses: CharacterPose[]; ground: number } => {
+    const data = MOVE_DEMOS.find((d) => d.move === move);
+    if (!data) throw new Error(`no demo of ${move}`);
+    const run = new DemoRun({ ...data, from: 0 }, content);
+    const chars = new CharacterRenderer(scene, moves, clips, skins);
+    const runner = run.world.player;
+    chars.attach(runner, { character: contestCharacter(boss.levelId, 'flags'), outfit, seed: 1 });
+    const ground = runner.y;
+    const step = (): void => {
+      chars.onEvents(run.step());
+      chars.step(run.world.clock, STEP);
+    };
+    while (run.stepCount < data.from) step();
+    const found = new Map<number, CharacterPose>();
+    const last = Math.max(...times);
+    for (let t = STEP; !run.done; t += STEP) {
+      step();
+      const pose = chars.pose(runner, 1);
+      for (const want of times) if (pose && !found.has(want) && t >= want) found.set(want, pose);
+      if (t >= last) break;
+    }
+    return { poses: times.map((t) => found.get(t)!).filter(Boolean), ground };
+  };
+
+  /**
+   * The rival as the game draws a ghost, its look recoloured into a hologram, caught in a trick:
+   * fainter afterimages along the path it took there, all in a layer that gets scanlines and is
+   * laid over slightly transparent.
    */
   const drawRival = (
     c: CanvasRenderingContext2D,
@@ -470,35 +697,55 @@ async function main(): Promise<void> {
     const swap = skins.swapFor(character, -1, rival.outfit);
     const p = placeOf(s);
     const cam = {
-      x: Math.round(p.x - s.feet[0] * w * UNITS),
-      y: Math.round(p.y - s.feet[1] * h * UNITS),
+      x: Math.round(p.x - s.feet[0] * w * UNITS_PER_PX),
+      y: Math.round(p.y - s.feet[1] * h * UNITS_PER_PX),
     };
-    const layer = document.createElement('canvas');
-    layer.width = w;
-    layer.height = h;
-    const lc = layer.getContext('2d')!;
-    lc.imageSmoothingEnabled = false;
+    const times = [...rival.trail.map((back) => rival.trick.ms - back), rival.trick.ms];
+    const { poses, ground } = trickPoses(boss, rival.outfit, rival.trick.move, times);
+    const shown = poses.at(-1);
+    if (!shown) return;
+    // The pose shown `ahead` of the runner and `rise` up from its floor; the trail moves with it.
+    const dx = p.x + rival.ahead * UNITS_PER_PX - shown.x;
+    const dy = p.y - (rival.rise ?? 0) * UNITS_PER_PX - ground;
+    const canvas = (): [HTMLCanvasElement, CanvasRenderingContext2D] => {
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const c = canvas.getContext('2d')!;
+      c.imageSmoothingEnabled = false;
+      return [canvas, c];
+    };
+    const [layer, lc] = canvas();
     scene.setViewport(w, h);
-    const x = p.x + rival.ahead * UNITS;
-    const y = p.y - (rival.rise ?? 0) * UNITS;
-    const pose = (back: number): CharacterPose => ({
-      x: x - back * UNITS,
-      y,
-      a: rival.frame,
-      b: rival.frame,
-      t: 0,
-      flipX: false,
-      anchored: false,
+    const at = (pose: CharacterPose): CharacterPose => ({
+      ...pose,
+      x: pose.x + dx,
+      y: pose.y + dy,
     });
-    for (const { back, alpha } of RIVAL_TRAIL) {
-      lc.globalAlpha = alpha;
-      drawPose(lc, scene, pose(back), cam, swap);
-    }
+    poses.slice(0, -1).forEach((pose, i) => {
+      lc.globalAlpha = 0.12 + (0.26 * (i + 1)) / poses.length;
+      drawPose(lc, scene, at(pose), cam, swap);
+    });
     lc.globalAlpha = 1;
-    drawPose(lc, scene, pose(0), cam, swap);
+    // The pose shown gets a dark rim, so it reads against the trail and a busy skyline.
+    const [figure, fc] = canvas();
+    drawPose(fc, scene, at(shown), cam, swap);
+    const [rim, rc] = canvas();
+    rc.drawImage(figure, 0, 0);
+    rc.globalCompositeOperation = 'source-in';
+    rc.fillStyle = RIVAL_RIM;
+    rc.fillRect(0, 0, w, h);
+    for (const [ox, oy] of [
+      [-1, 0],
+      [1, 0],
+      [0, -1],
+      [0, 1],
+    ] as const)
+      lc.drawImage(rim, ox, oy);
+    lc.drawImage(figure, 0, 0);
     applyScanlines(lc, w, h, 0);
     c.save();
-    c.globalAlpha = 0.85;
+    c.globalAlpha = 0.9;
     c.drawImage(layer, 0, 0);
     c.restore();
   };
@@ -658,6 +905,17 @@ async function main(): Promise<void> {
       card(c, s, 0, w, 0, h, 0);
       return canvas.toDataURL('image/png');
     },
+    /** The challenge links' preview with other shots (the first goes under the pennant). */
+    race: (shots: Shot[], scale = 3): string => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 400 * scale;
+      canvas.height = 210 * scale;
+      const c = canvas.getContext('2d')!;
+      c.setTransform(scale, 0, 0, scale, 0, 0);
+      c.imageSmoothingEnabled = false;
+      collage(c, 400, 210, shots, 146, RACE_TAGLINE, raceIcon, Theme.text);
+      return canvas.toDataURL('image/png');
+    },
   };
 
   /**
@@ -676,7 +934,10 @@ async function main(): Promise<void> {
       for (let x = 0; x < 32; x++) {
         const i = (y * 32 + x) * 4;
         const near = (rgb: readonly number[]): boolean =>
-          Math.abs(px[i]! - rgb[0]!) + Math.abs(px[i + 1]! - rgb[1]!) + Math.abs(px[i + 2]! - rgb[2]!) < 24;
+          Math.abs(px[i]! - rgb[0]!) +
+            Math.abs(px[i + 1]! - rgb[1]!) +
+            Math.abs(px[i + 2]! - rgb[2]!) <
+          24;
         if (near(ICON_ORANGE) || near(ICON_ORANGE_DARK)) out.push({ x, y, line: false });
         else if (near(ICON_LINE)) out.push({ x, y, line: true });
       }
@@ -721,6 +982,8 @@ async function main(): Promise<void> {
   const out = $('out');
   const pictures: { name: string; canvas: HTMLCanvasElement }[] = [];
   /** A picture drawn at `w × h` logical pixels, saved `scale` times bigger. */
+  // `?only=og-race`: one picture alone, for trying a shot out.
+  const only = new URLSearchParams(location.search).get('only');
   const picture = (
     name: string,
     caption: string,
@@ -729,6 +992,7 @@ async function main(): Promise<void> {
     scale: number,
     draw: (c: CanvasRenderingContext2D) => void,
   ): void => {
+    if (only && only !== name) return;
     const canvas = document.createElement('canvas');
     canvas.width = w * scale;
     canvas.height = h * scale;
@@ -754,16 +1018,7 @@ async function main(): Promise<void> {
     collage(c, 400, 210, OG_SHOTS, 146, 'The 2007 mobile parkour classic, remade for the browser'),
   );
   picture('og-race', 'Challenge link preview (public/og-race.png)', 400, 210, 3, (c) =>
-    collage(
-      c,
-      400,
-      210,
-      RACE_SHOTS,
-      146,
-      'Race my ghost! Can you beat my time?',
-      raceIcon,
-      Theme.text,
-    ),
+    collage(c, 400, 210, RACE_SHOTS, 146, RACE_TAGLINE, raceIcon, Theme.text),
   );
   picture('play-now', 'Play button (docs/play-now.png)', 148, 30, 2, (c) => button(c, 148, 30));
   picture('collage', 'Collage of tricks, no logo (docs/collage.png)', 480, 270, 4, (c) =>
@@ -835,7 +1090,15 @@ async function main(): Promise<void> {
         drawPose(
           c,
           scene,
-          { x: (i * 50 + 25) * UNITS, y: 66 * UNITS, a: f, b: f, t: 0, flipX: false, anchored: false },
+          {
+            x: (i * 50 + 25) * UNITS_PER_PX,
+            y: 66 * UNITS_PER_PX,
+            a: f,
+            b: f,
+            t: 0,
+            flipX: false,
+            anchored: false,
+          },
           { x: 0, y: 0 },
           (id) => id,
         );

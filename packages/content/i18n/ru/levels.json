@@ -1,6 +1,5 @@
 {
   "level.select": "Выбор уровня",
-  "level.mission": "Выбор миссии",
   "level.names.0": "Mill Brook",
   "level.names.1": "North Hill",
   "level.names.2": "Main St.",
@@ -33,16 +32,5 @@
   "level.complete.boss": "{boss} теперь принимает вызов.",
   "level.complete.fight": "Бой с боссом: {boss}",
   "level.complete.next": "Дальше: {name}",
-  "level.record": "Рекорд:",
-  "level.prize": "Приз",
-  "level.prizeLocked": "Заблокирован. Чтобы увидеть приз, выполни все миссии каждого уровня.",
-  "level.rival": "Соперник: {name}",
-  "rivals.0": "Spike",
-  "rivals.1": "Trix",
-  "rivals.2": "Dart",
-  "rivals.3": "Viper",
-  "rivals.4": "Ninja",
-  "rivals.5": "Big D",
-  "rivals.6": "Chili",
-  "rivals.7": "Tung"
+  "level.prize": "Приз"
 }

@@ -16,9 +16,9 @@ import {
   loadTables,
 } from './helpers/content.ts';
 
-const DEV_REPLAY = fileURLToPath(new URL('../../classic/dev/l0-flags.json', import.meta.url));
+const L0_FLAGS = fileURLToPath(new URL('./fixtures/l0-flags.json', import.meta.url));
 
-interface DevReplay {
+interface InputLog {
   levelId: number;
   mode: RunMode;
   withRival: boolean;
@@ -50,7 +50,7 @@ function replayOf(c: RunContent, levelId: number, mode: RunMode, input: InputRun
 }
 
 describe.skipIf(!hasContent())('simulateReplay', () => {
-  const dev = JSON.parse(readFileSync(DEV_REPLAY, 'utf8')) as DevReplay;
+  const dev = JSON.parse(readFileSync(L0_FLAGS, 'utf8')) as InputLog;
   const c = content(dev.levelId);
   const replay = replayOf(c, dev.levelId, dev.mode, dev.input);
 

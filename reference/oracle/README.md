@@ -30,8 +30,8 @@ minWait + floor(s / 2^32 · (maxWait − minWait + 1)) idle steps" until `steps`
 also uses 6..40 (sparse presses, long chains play out) and 1..4 (button mashing).
 
 `run.mjs` looks for a JDK in `JAVA_HOME`, on `PATH` and (on Windows) under the usual vendor
-directories; without one it runs everything in Docker with `eclipse-temurin:17-jdk`. On Windows
-`build.ps1` does the same with a local JDK only (`.\build.ps1 0 4 script.txt out.jsonl`).
+directories; without one it runs everything in Docker with `eclipse-temurin:17-jdk`
+(`scripts/java.mjs`, shared with `npm run decompile`).
 
 Steps performed: extract the jar into `build/classes`, compile `stubs/` into `build/stubs`,
 compile the driver into `build/oracle`, then

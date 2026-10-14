@@ -2,14 +2,15 @@
  * Everything a screen needs: platform objects, fonts, dictionaries, content, renderers and the
  * player's profile. Created once in `main.ts` and passed to every screen.
  */
-import type { MoveTable } from '@parapet/sim';
+import { rankingSort, type MoveTable, type RankedOutcome, type RunMode } from '@parapet/sim';
+import { formatTime } from '@parapet/runtime/ui/theme.ts';
 import type { Viewport } from '@parapet/runtime/render/Viewport.ts';
 import type { BitmapFont } from '@parapet/runtime/text/BitmapFont.ts';
 import type { I18n } from '@parapet/runtime/i18n/i18n.ts';
 import type { InputManager } from '@parapet/runtime/input/InputManager.ts';
 import type { TouchControls } from '@parapet/runtime/input/TouchControls.ts';
 import type { Options, PlayerInfo } from '@parapet/runtime/storage/profile.ts';
-import type { GameContent } from '../assets/content.ts';
+import type { GameContent } from '@parapet/runtime/content/types.ts';
 import type { SpriteSheet } from '@parapet/runtime/render/SpriteSheet.ts';
 import type { SceneRenderer } from '@parapet/runtime/render/SceneRenderer.ts';
 import type { LevelRenderer } from '@parapet/runtime/render/LevelRenderer.ts';
@@ -63,7 +64,8 @@ export interface GameContext {
   render: Renderers;
   screens: ScreenStack;
   music: MusicDirector;
-  options: Options;
+  /** The player's options; changed in place (`Object.assign(ctx.options, saveOptions(…))`). */
+  readonly options: Options;
   player: PlayerInfo;
   /** Full screen, the Back button, the installed app, toasts. */
   platform: Platform;
@@ -74,3 +76,12 @@ export interface GameContext {
 }
 
 export { Theme, formatTime } from '@parapet/runtime/ui/theme.ts';
+
+/**
+ * A run's result as its board ranks it: the score whatever ended the run, else the time, or
+ * '-' for a race that never finished.
+ */
+export function formatResult(mode: RunMode, levelId: number, outcome: RankedOutcome): string {
+  if (rankingSort(mode, levelId) === 'score') return String(outcome.score);
+  return outcome.finished ? formatTime(outcome.time) : '-';
+}

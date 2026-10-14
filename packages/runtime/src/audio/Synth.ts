@@ -7,6 +7,7 @@
  */
 import { drumFor, songPatch, type DrumPatch, type Patch, type PatchSet } from './Instruments.ts';
 import { DEFAULT_CHANNEL_VOLUME, type MidiControl, type MidiNote } from './MidiFile.ts';
+import { Xorshift32 } from '../math.ts';
 
 export const MAX_VOICES = 32;
 const MIN_GAIN = 0.0005;
@@ -68,12 +69,6 @@ export class Synth {
     for (const gain of this.channels) gain?.gain.setValueAtTime(DEFAULT_CHANNEL_VOLUME, when);
   }
 
-  /** Number of voices still sounding at audio time `at`. */
-  activeVoices(at: number): number {
-    this.prune(at);
-    return this.voices.length;
-  }
-
   /** Schedule a note at audio time `when` (seconds). Drops the note when the polyphony is full. */
   noteAt(note: MidiNote, when: number): void {
     this.prune(when);
@@ -102,13 +97,9 @@ export class Synth {
     }
   }
 
-  private panned(
-    pan: number,
-    level: number,
-    channel: number,
-  ): { input: AudioNode; gain: GainNode } {
+  /** A note's envelope gain, panned, into its channel. */
+  private panned(pan: number, channel: number): GainNode {
     const gain = this.ctx.createGain();
-    gain.gain.value = level;
     let tail: AudioNode = gain;
     if (pan !== 0 && 'createStereoPanner' in this.ctx) {
       const panner = this.ctx.createStereoPanner();
@@ -117,7 +108,7 @@ export class Synth {
       tail = panner;
     }
     tail.connect(this.channel(channel));
-    return { input: gain, gain };
+    return gain;
   }
 
   /** The note's own volume, unless the channel gain already carries it. */
@@ -128,28 +119,27 @@ export class Synth {
   private toneAt(note: MidiNote, when: number, patch: Patch): void {
     const level = (note.velocity / 127) * this.noteVolume(note) * patch.gain;
     if (level <= MIN_GAIN) return;
-    const { input, gain } = this.panned(note.pan, 1, note.channel);
+    const gain = this.panned(note.pan, note.channel);
     const seconds = note.duration / 1000;
     const freq = 440 * Math.pow(2, (note.note - 69) / 12 + (patch.octave ?? 0));
     const env = gain.gain;
     const peak = level;
     const sustain = Math.max(MIN_GAIN, level * patch.sustain);
     const attackEnd = when + patch.attack;
-    const decayEnd = attackEnd + patch.decay;
     const noteEnd = when + Math.max(seconds, patch.attack + 0.01);
     env.setValueAtTime(MIN_GAIN, when);
     env.linearRampToValueAtTime(peak, attackEnd);
     env.setTargetAtTime(sustain, attackEnd, Math.max(0.005, patch.decay / 3));
-    env.setValueAtTime(decayEnd < noteEnd ? sustain : sustain, noteEnd);
+    env.setValueAtTime(sustain, noteEnd);
     env.setTargetAtTime(MIN_GAIN, noteEnd, Math.max(0.01, patch.release / 3));
     const stopAt = noteEnd + patch.release + 0.1;
 
-    let target: AudioNode = input;
+    let target: AudioNode = gain;
     if (patch.lowpass) {
       const filter = this.ctx.createBiquadFilter();
       filter.type = 'lowpass';
       filter.frequency.value = patch.lowpass;
-      filter.connect(input);
+      filter.connect(gain);
       target = filter;
     }
     const sources: AudioScheduledSourceNode[] = [];
@@ -181,14 +171,9 @@ export class Synth {
     const length = Math.floor(this.ctx.sampleRate);
     const buffer = this.ctx.createBuffer(1, length, this.ctx.sampleRate);
     const data = buffer.getChannelData(0);
-    let seed = 0x2545f491;
-    for (let i = 0; i < length; i++) {
-      // xorshift noise: deterministic, no Math.random.
-      seed ^= seed << 13;
-      seed ^= seed >>> 17;
-      seed ^= seed << 5;
-      data[i] = ((seed >>> 0) / 4294967296) * 2 - 1;
-    }
+    // Deterministic noise, no Math.random.
+    const rng = new Xorshift32(0x2545f491);
+    for (let i = 0; i < length; i++) data[i] = rng.unit() * 2 - 1;
     this.noise = buffer;
     return buffer;
   }
@@ -196,7 +181,7 @@ export class Synth {
   private drumAt(note: MidiNote, when: number, drum: DrumPatch): void {
     const level = (note.velocity / 127) * this.noteVolume(note) * drum.gain;
     if (level <= MIN_GAIN) return;
-    const { input, gain } = this.panned(note.pan, 1, note.channel);
+    const gain = this.panned(note.pan, note.channel);
     const env = gain.gain;
     env.setValueAtTime(level, when);
     env.setTargetAtTime(MIN_GAIN, when, Math.max(0.01, drum.decay / 4));
@@ -212,7 +197,7 @@ export class Synth {
         Math.max(30, base * (drum.kind === 'kick' ? 0.3 : 0.6)),
         when + 0.12,
       );
-      osc.connect(input);
+      osc.connect(gain);
       osc.start(when);
       osc.stop(stopAt);
       sources.push(osc);
@@ -221,19 +206,19 @@ export class Synth {
       const src = this.ctx.createBufferSource();
       src.buffer = this.noiseBuffer();
       src.loop = true;
-      let target: AudioNode = input;
+      let target: AudioNode = gain;
       if (drum.kind === 'hat' || drum.kind === 'openHat' || drum.kind === 'cymbal') {
         const hp = this.ctx.createBiquadFilter();
         hp.type = 'highpass';
         hp.frequency.value = drum.kind === 'cymbal' ? 3500 : 6500;
-        hp.connect(input);
+        hp.connect(gain);
         target = hp;
       } else if (drum.kind === 'snare') {
         const bp = this.ctx.createBiquadFilter();
         bp.type = 'bandpass';
         bp.frequency.value = 1800;
         bp.Q.value = 0.7;
-        bp.connect(input);
+        bp.connect(gain);
         target = bp;
       }
       src.connect(target);
@@ -248,7 +233,7 @@ export class Synth {
         const bodyGain = this.ctx.createGain();
         bodyGain.gain.value = 0.5;
         body.connect(bodyGain);
-        bodyGain.connect(input);
+        bodyGain.connect(gain);
         body.start(when);
         body.stop(when + 0.12);
         sources.push(body);

@@ -49,14 +49,15 @@ export class BitmapFont {
   readonly size: number;
   readonly lineHeight: number;
   readonly baseline: number;
-  readonly image: AtlasImage;
+  /** The atlas; null where only the metrics are needed (Node: `RasterText.ts` draws there). */
+  readonly image: AtlasImage | null;
   /** Advance of the widest digit: the cell width of tabular digits. */
   readonly digitAdvance: number;
   private readonly glyphs = new Map<number, BitmapGlyph>();
   private readonly fallback: BitmapGlyph | undefined;
   private readonly tinted = new Map<string, HTMLCanvasElement>();
 
-  constructor(data: BitmapFontData, image: AtlasImage) {
+  constructor(data: BitmapFontData, image: AtlasImage | null) {
     this.name = data.name;
     this.size = data.size;
     this.lineHeight = data.lineHeight;
@@ -72,12 +73,6 @@ export class BitmapFont {
       widest = Math.max(widest, this.glyphs.get(c)?.advance ?? 0);
     }
     this.digitAdvance = widest;
-  }
-
-  /** Fetches the JSON table and the PNG atlas (both must be bundled with the client). */
-  static async load(jsonUrl: string, imageUrl: string): Promise<BitmapFont> {
-    const [data, image] = await Promise.all([fetchFontData(jsonUrl), loadImage(imageUrl)]);
-    return new BitmapFont(data, image);
   }
 
   /** Builds a font from an already imported JSON table and an atlas URL. */
@@ -114,11 +109,6 @@ export class BitmapFont {
     let widest = 0;
     for (const line of text.split('\n')) widest = Math.max(widest, this.lineWidth(line, tabular));
     return widest * scale;
-  }
-
-  /** Height in logical pixels of all the lines of `text`. */
-  measureHeight(text: string, scale: TextScale = 1): number {
-    return text.split('\n').length * this.lineHeight * scale;
   }
 
   /** Width of a single line (no newlines expected). */
@@ -188,10 +178,37 @@ export class BitmapFont {
     y: number,
     opts: DrawTextOptions = {},
   ): void {
+    const atlas = this.atlas(opts.color);
+    if (!atlas) return;
+    this.layout(text, x, y, opts, (glyph, gx, gy, scale) =>
+      ctx.drawImage(
+        atlas,
+        glyph.x,
+        glyph.y,
+        glyph.w,
+        glyph.h,
+        gx,
+        gy,
+        glyph.w * scale,
+        glyph.h * scale,
+      ),
+    );
+  }
+
+  /**
+   * Where every glyph of `text` goes when drawn at (x, y) with `opts` (the rules of `draw`):
+   * `place` gets each visible glyph with its top-left corner and the scale.
+   */
+  layout(
+    text: string,
+    x: number,
+    y: number,
+    opts: DrawTextOptions,
+    place: (glyph: BitmapGlyph, x: number, y: number, scale: number) => void,
+  ): void {
     const scale = opts.scale ?? 1;
     const align = opts.align ?? 'left';
     const tabular = opts.tabular ?? false;
-    const atlas = this.atlas(opts.color);
     const baseX = Math.round(x);
     let lineY = Math.round(y);
     for (const line of text.split('\n')) {
@@ -208,16 +225,11 @@ export class BitmapFont {
         const cell = tabular && isDigit(codePoint) ? this.digitAdvance : glyph.advance;
         const shift = (cell - glyph.advance) >> 1;
         if (glyph.w > 0 && glyph.h > 0) {
-          ctx.drawImage(
-            atlas,
-            glyph.x,
-            glyph.y,
-            glyph.w,
-            glyph.h,
+          place(
+            glyph,
             penX + (glyph.xOffset + shift) * scale,
             lineY + glyph.yOffset * scale,
-            glyph.w * scale,
-            glyph.h * scale,
+            scale,
           );
         }
         penX += cell * scale;
@@ -226,24 +238,8 @@ export class BitmapFont {
     }
   }
 
-  /** Draws pre-wrapped lines (from `wrap`) with the given line spacing. */
-  drawLines(
-    ctx: CanvasRenderingContext2D,
-    lines: readonly string[],
-    x: number,
-    y: number,
-    opts: DrawTextOptions = {},
-  ): void {
-    this.draw(ctx, lines.join('\n'), x, y, opts);
-  }
-
-  /** Drops the cached tinted atlases (for example after a theme change). */
-  clearTintCache(): void {
-    this.tinted.clear();
-  }
-
-  private atlas(color: string | undefined): CanvasImageSource {
-    if (!color) return this.image;
+  private atlas(color: string | undefined): CanvasImageSource | null {
+    if (!color || !this.image) return this.image;
     const key = color.trim().toLowerCase();
     if (WHITE.has(key)) return this.image;
     const cached = this.tinted.get(key);
@@ -265,12 +261,6 @@ export class BitmapFont {
 
 function isDigit(codePoint: number): boolean {
   return codePoint >= 0x30 && codePoint <= 0x39;
-}
-
-async function fetchFontData(url: string): Promise<BitmapFontData> {
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`BitmapFont: failed to load ${url} (${response.status})`);
-  return (await response.json()) as BitmapFontData;
 }
 
 function loadImage(url: string): Promise<HTMLImageElement> {

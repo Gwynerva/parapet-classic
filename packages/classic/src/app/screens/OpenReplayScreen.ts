@@ -15,7 +15,7 @@ import { heading, panel } from '@parapet/runtime/ui/draw.ts';
 import { rowHeight, type Rect } from '@parapet/runtime/ui/layout.ts';
 import { TextInputOverlay } from '@parapet/runtime/ui/TextInputOverlay.ts';
 import { Theme, type GameContext } from '../Context.ts';
-import { bossOfCharacter } from '../bosses.ts';
+import { bossName, bossOfCharacter } from '../bosses.ts';
 import {
   checkReplayText,
   pickReplayFile,
@@ -25,6 +25,8 @@ import {
   type ReplayCheck,
 } from '../ghosts.ts';
 import { dialogLayout } from '../layouts.ts';
+import { UNITS_PER_PX } from '@parapet/runtime/render/View.ts';
+import { skinName } from '../characters.ts';
 
 /** Longer than any link a long run makes (a few hundred characters a minute). */
 const MAX_TEXT = 65536;
@@ -32,7 +34,6 @@ const WIDTH = 300;
 /** The card's figure: a column for the character standing in it. */
 const FIGURE_W = 40;
 const CARD_BACKGROUND = '#12171d';
-const UNITS = 32;
 
 export class OpenReplayScreen implements Screen {
   readonly translucent = true;
@@ -52,7 +53,7 @@ export class OpenReplayScreen implements Screen {
 
   constructor(ctx: GameContext) {
     this.ctx = ctx;
-    this.menu = new Menu(ctx.fonts.text, ctx.fonts.small);
+    this.menu = new Menu(ctx.fonts.text);
     this.buildMenu();
     this.onResize();
   }
@@ -209,14 +210,7 @@ export class OpenReplayScreen implements Screen {
     this.fieldRect = { x: d.menu.x, y: fieldY, w: d.menu.w, h: fieldH };
     this.cardRect = { x: d.menu.x, y: fieldY + fieldH + 6, w: d.menu.w, h: cardH };
     this.field?.reposition(this.fieldRect);
-    Object.assign(this.menu.layout, {
-      x: d.menu.x,
-      y: d.menu.y,
-      width: d.menu.w,
-      rowHeight: row,
-      align: 'center',
-    });
-    this.menu.fit(d.menu.h);
+    this.menu.place(d.menu, row);
   }
 
   update(): void {}
@@ -321,8 +315,7 @@ export class OpenReplayScreen implements Screen {
 
   private characterName(character: number): string {
     const found = bossOfCharacter(character);
-    if (found) return this.ctx.i18n.t(`boss.${found.boss.id}.name`);
-    return this.ctx.skins.find((s) => s.character === character)?.name ?? '';
+    return found ? bossName(this.ctx.i18n, found.boss) : skinName(this.ctx.skins, character);
   }
 
   /** The character standing, its feet at (x, y). */
@@ -332,16 +325,22 @@ export class OpenReplayScreen implements Screen {
     const scene = skins.sceneFor(character, 0);
     const swap = skins.swapFor(character, -1, 0);
     const idle = render.clips[IDLE_CLIP_OFFSET + 1] ?? 0;
-    const savedW = scene.viewWidth;
-    const savedH = scene.viewHeight;
-    scene.setViewport(viewport.width, viewport.height);
-    drawPose(
-      c,
-      scene,
-      { x: x * UNITS, y: y * UNITS, a: idle, b: idle, t: 0, flipX: false, anchored: false },
-      { x: 0, y: 0 },
-      swap,
+    scene.withViewport(viewport.width, viewport.height, () =>
+      drawPose(
+        c,
+        scene,
+        {
+          x: x * UNITS_PER_PX,
+          y: y * UNITS_PER_PX,
+          a: idle,
+          b: idle,
+          t: 0,
+          flipX: false,
+          anchored: false,
+        },
+        { x: 0, y: 0 },
+        swap,
+      ),
     );
-    scene.setViewport(savedW, savedH);
   }
 }

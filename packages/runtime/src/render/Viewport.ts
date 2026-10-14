@@ -13,7 +13,8 @@
  * pixel at a time, and glides instead of jumping a whole big pixel every few frames.
  */
 
-import { physicalSize, SettleSchedule, type Size } from './viewportSize.ts';
+import { physicalSize, SettleSchedule } from './viewportSize.ts';
+import type { ViewSize } from './View.ts';
 
 export type ScaleMode = 'auto' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 export type Orientation = 'landscape' | 'portrait';
@@ -145,9 +146,9 @@ export class Viewport {
   /** A change was hinted since the last measurement. */
   private dirty = true;
   private lastPoll = 0;
-  private lastCss: Size = { width: 0, height: 0 };
+  private lastCss: ViewSize = { width: 0, height: 0 };
   /** Exact device pixels of the container, as ResizeObserver last reported them. */
-  private devicePixels: Size | null = null;
+  private devicePixels: ViewSize | null = null;
   private observer: ResizeObserver | null = null;
   private dprQuery: MediaQueryList | null = null;
   private readonly coarseQuery: MediaQueryList | null;
@@ -308,7 +309,7 @@ export class Viewport {
   }
 
   /** The container's CSS size (it fills the window: `position: fixed; inset: 0`). */
-  private cssSize(): Size {
+  private cssSize(): ViewSize {
     const width = this.container.clientWidth || window.innerWidth;
     const height = this.container.clientHeight || window.innerHeight;
     return { width, height };

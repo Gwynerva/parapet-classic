@@ -6,10 +6,15 @@
 import { STEP } from '@parapet/sim';
 import { FixedStepClock } from '@parapet/runtime/app/GameLoop.ts';
 import { CharacterRenderer } from '@parapet/runtime/render/CharacterRenderer.ts';
-import { drawPlaceholderTiles } from '@parapet/runtime/render/PlaceholderTiles.ts';
+import { canvasPainter, drawPlaceholderTiles } from '@parapet/runtime/render/PlaceholderTiles.ts';
 import { CharacterFx } from '@parapet/runtime/render/fx/CharacterFx.ts';
 import { prefersReducedMotion } from '@parapet/runtime/ui/motion.ts';
-import { screenPixels, worldGrid, type CameraPos } from '@parapet/runtime/render/View.ts';
+import {
+  type CameraPos,
+  screenPixels,
+  UNITS_PER_PX,
+  worldGrid,
+} from '@parapet/runtime/render/View.ts';
 import { DemoRun, type MoveDemoData } from '@parapet/runtime/moves/MoveDemo.ts';
 import type { Rect } from '@parapet/runtime/ui/layout.ts';
 import type { GameContext } from '../Context.ts';
@@ -17,8 +22,6 @@ import { characterFx, pickOutfit } from '../bosses.ts';
 
 /** Fade at the start and the end of every pass, ms. */
 const FADE_MS = 250;
-/** World units per pixel. */
-const UNITS_PER_PX = 32;
 /** Where the runner sits across the stage. */
 const FOLLOW_X = 0.4;
 const FOLLOW_Y = 0.62;
@@ -173,7 +176,7 @@ export class MoveStage {
     const cam = grid.cam;
     c.translate(grid.dx, grid.dy);
     drawPlaceholderTiles(
-      c,
+      canvasPainter(c),
       run.level,
       cam.x / UNITS_PER_PX,
       cam.y / UNITS_PER_PX,

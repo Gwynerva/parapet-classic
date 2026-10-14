@@ -6,25 +6,24 @@
  *
  * Pure: works on RGBA bytes, so the tools build exactly what the game draws.
  */
-import { skinSwap } from './CharacterRenderer.ts';
 import {
   expandPartKey,
   keyChain,
   keyId,
   LOOK_SPRITES,
-  parseColor,
   partKeyText,
   pivotOf,
   type LookAttachment,
   type LookRecolor,
   type ResolvedLook,
-  type Rgba,
 } from './Look.ts';
 import { packRows } from './pack.ts';
 import type { AttachLookup, PartContext, SpriteSwap } from './Pose.ts';
-import { sheetFrame, type RgbaSheet } from './Raster.ts';
-import { familyOf, isLimb, partSide, rotationIndex, Side } from './Rig.ts';
+import { newImage, paintRows, sheetFrame, type RgbaImage, type RgbaSheet } from './Raster.ts';
+import { familyOf, HEAD_SPRITE, isLimb, partSide, rotationIndex, Side, skinSwap } from './Rig.ts';
+import { Transform } from './SpriteSheet.ts';
 import { rotsprite } from './rotsprite.ts';
+import { parseColor, type Rgba } from './color.ts';
 
 /** Sprite ids of a layer start here (the atlas uses 0..313). */
 export const LAYER_ID_BASE = 1024;
@@ -65,18 +64,8 @@ export function slotIndex(id: number, side: number, flip: boolean): number {
   return (id * 3 + side) * 2 + (flip ? 1 : 0);
 }
 
-interface Picture {
-  w: number;
-  h: number;
-  px: Uint8ClampedArray;
-}
-
-function blank(w: number, h: number): Picture {
-  return { w, h, px: new Uint8ClampedArray(w * h * 4) };
-}
-
-function copyPicture(p: Picture): Picture {
-  return { w: p.w, h: p.h, px: p.px.slice() };
+function copyPicture(p: RgbaImage): RgbaImage {
+  return { width: p.width, height: p.height, data: p.data.slice() };
 }
 
 function paletteOf(look: ResolvedLook): Map<string, Rgba> {
@@ -88,26 +77,17 @@ function paletteOf(look: ResolvedLook): Map<string, Rgba> {
   return out;
 }
 
-function gridPicture(rows: readonly string[], palette: ReadonlyMap<string, Rgba>): Picture {
+const CLEAR: Rgba = [0, 0, 0, 0];
+
+function gridPicture(rows: readonly string[], palette: ReadonlyMap<string, Rgba>): RgbaImage {
   const grid = rows.map((r) => Array.from(r));
-  const w = grid[0]?.length ?? 0;
-  const p = blank(w, grid.length);
-  for (let y = 0; y < grid.length; y++) {
-    for (let x = 0; x < w; x++) {
-      const c = palette.get(grid[y]![x] ?? '.');
-      if (!c) continue;
-      const o = (y * w + x) * 4;
-      p.px[o] = c[0];
-      p.px[o + 1] = c[1];
-      p.px[o + 2] = c[2];
-      p.px[o + 3] = c[3];
-    }
-  }
+  const p = newImage(grid[0]?.length ?? 0, grid.length);
+  paintRows(p, grid, (ch) => palette.get(ch));
   return p;
 }
 
 /** The base character's picture for a keyframe sprite: its skin rule over the atlas. */
-function basePicture(base: RgbaSheet, character: number, id: number): Picture | null {
+function basePicture(base: RgbaSheet, character: number, id: number): RgbaImage | null {
   const rule = skinSwap(character);
   const drawn = rule(id, 0, 0);
   if (drawn < 0) return null;
@@ -115,15 +95,15 @@ function basePicture(base: RgbaSheet, character: number, id: number): Picture | 
   if (!found) return null;
   const f = found.frame;
   const src = found.sheet.image;
-  const p = blank(f.w, f.h);
+  const p = newImage(f.w, f.h);
   for (let y = 0; y < f.h; y++) {
     const o = ((f.y + y) * src.width + f.x) * 4;
-    p.px.set(src.data.subarray(o, o + f.w * 4), y * f.w * 4);
+    p.data.set(src.data.subarray(o, o + f.w * 4), y * f.w * 4);
   }
   return p;
 }
 
-function recolor(p: Picture, look: ResolvedLook, id: number): boolean {
+function recolor(p: RgbaImage, look: ResolvedLook, id: number): boolean {
   let changed = false;
   for (const r of look.recolor) {
     if (r.on !== undefined || !r.sprites.includes(id)) continue;
@@ -133,7 +113,7 @@ function recolor(p: Picture, look: ResolvedLook, id: number): boolean {
 }
 
 /** One recolour rule over a picture; whether a pixel changed. */
-function applyRecolor(p: Picture, r: LookRecolor): boolean {
+function applyRecolor(p: RgbaImage, r: LookRecolor): boolean {
   let changed = false;
   const map = new Map<number, Rgba>();
   for (const [from, to] of Object.entries(r.map)) {
@@ -141,34 +121,28 @@ function applyRecolor(p: Picture, r: LookRecolor): boolean {
     const b = parseColor(to);
     if (a && b) map.set((a[0] << 16) | (a[1] << 8) | a[2], b);
   }
-  for (let o = 0; o < p.px.length; o += 4) {
-    if (p.px[o + 3]! < 128) continue;
-    const to = map.get((p.px[o]! << 16) | (p.px[o + 1]! << 8) | p.px[o + 2]!);
+  for (let o = 0; o < p.data.length; o += 4) {
+    if (p.data[o + 3]! < 128) continue;
+    const to = map.get((p.data[o]! << 16) | (p.data[o + 1]! << 8) | p.data[o + 2]!);
     if (!to) continue;
-    p.px[o] = to[0];
-    p.px[o + 1] = to[1];
-    p.px[o + 2] = to[2];
-    p.px[o + 3] = to[3];
+    p.data[o] = to[0];
+    p.data[o + 1] = to[1];
+    p.data[o + 2] = to[2];
+    p.data[o + 3] = to[3];
     changed = true;
   }
   return changed;
 }
 
-function overlay(p: Picture, rows: readonly string[], palette: ReadonlyMap<string, Rgba>): boolean {
+/** Paints `rows` over `p` (same size): `.` keeps a pixel, a space clears it. */
+function overlay(
+  p: RgbaImage,
+  rows: readonly string[],
+  palette: ReadonlyMap<string, Rgba>,
+): boolean {
   const grid = rows.map((r) => Array.from(r));
-  if (grid.length !== p.h || (grid[0]?.length ?? 0) !== p.w) return false;
-  for (let y = 0; y < p.h; y++) {
-    for (let x = 0; x < p.w; x++) {
-      const ch = grid[y]![x] ?? '.';
-      if (ch === '.') continue;
-      const o = (y * p.w + x) * 4;
-      const c = ch === ' ' ? null : palette.get(ch);
-      p.px[o] = c?.[0] ?? 0;
-      p.px[o + 1] = c?.[1] ?? 0;
-      p.px[o + 2] = c?.[2] ?? 0;
-      p.px[o + 3] = c?.[3] ?? 0;
-    }
-  }
+  if (grid.length !== p.height || (grid[0]?.length ?? 0) !== p.width) return false;
+  paintRows(p, grid, (ch) => (ch === '.' ? null : ch === ' ' ? CLEAR : (palette.get(ch) ?? CLEAR)));
   return true;
 }
 
@@ -184,22 +158,25 @@ function sideName(side: number): 'near' | 'far' | undefined {
 function pivotedPicture(
   rows: readonly string[],
   palette: ReadonlyMap<string, Rgba>,
-  part: Picture | null,
-): Picture {
+  part: RgbaImage | null,
+): RgbaImage {
   const pivot = pivotOf(rows);
   if (!pivot) return gridPicture(rows, palette);
   const p = gridPicture(pivot.rows, palette);
-  const pw = (part?.w ?? 1) & 1;
-  const ph = (part?.h ?? 1) & 1;
-  const cx = Math.max(pivot.x, p.w - pivot.x - pw);
-  const cy = Math.max(pivot.y, p.h - pivot.y - ph);
+  const pw = (part?.width ?? 1) & 1;
+  const ph = (part?.height ?? 1) & 1;
+  const cx = Math.max(pivot.x, p.width - pivot.x - pw);
+  const cy = Math.max(pivot.y, p.height - pivot.y - ph);
   const w = 2 * cx + pw;
   const h = 2 * cy + ph;
-  const out: Picture = { w, h, px: new Uint8ClampedArray(w * h * 4) };
+  const out = newImage(w, h);
   const left = cx - pivot.x;
   const top = cy - pivot.y;
-  for (let y = 0; y < p.h; y++) {
-    out.px.set(p.px.subarray(y * p.w * 4, (y + 1) * p.w * 4), ((top + y) * w + left) * 4);
+  for (let y = 0; y < p.height; y++) {
+    out.data.set(
+      p.data.subarray(y * p.width * 4, (y + 1) * p.width * 4),
+      ((top + y) * w + left) * 4,
+    );
   }
   return out;
 }
@@ -208,7 +185,7 @@ function pivotedPicture(
 export function buildLookLayer(base: RgbaSheet, look: ResolvedLook): LookLayer {
   const palette = paletteOf(look);
   const problems: string[] = [];
-  const pictures = new Map<string, Picture | null>();
+  const pictures = new Map<string, RgbaImage | null>();
   const defined = new Set<string>();
   const ids = new Set<number>();
   for (const key of [...Object.keys(look.parts), ...Object.keys(look.overlays)]) {
@@ -260,9 +237,9 @@ export function buildLookLayer(base: RgbaSheet, look: ResolvedLook): LookLayer {
   }
 
   /** The picture of a canonical key (built from the next defined, less specific one). */
-  const pictureOf = (key: string, chain: readonly string[]): Picture | null => {
+  const pictureOf = (key: string, chain: readonly string[]): RgbaImage | null => {
     if (pictures.has(key)) return pictures.get(key) ?? null;
-    let result: Picture | null;
+    let result: RgbaImage | null;
     const rows = look.parts[key];
     const turn = turnedFrom.get(key);
     if (rows) {
@@ -274,7 +251,7 @@ export function buildLookLayer(base: RgbaSheet, look: ResolvedLook): LookLayer {
       const at = chain.indexOf(key);
       const parent = chain.slice(at + 1).find((k) => defined.has(k));
       const id = keyId(key);
-      let start: Picture | null;
+      let start: RgbaImage | null;
       if (parent) {
         const p = pictureOf(parent, chain);
         start = p ? copyPicture(p) : null;
@@ -287,7 +264,7 @@ export function buildLookLayer(base: RgbaSheet, look: ResolvedLook): LookLayer {
       const over = look.overlays[key];
       if (over && start && !overlay(start, over, palette)) {
         problems.push(
-          `overlay ${key} is ${Array.from(over[0] ?? '').length}x${over.length}, the picture ${start.w}x${start.h}`,
+          `overlay ${key} is ${Array.from(over[0] ?? '').length}x${over.length}, the picture ${start.width}x${start.height}`,
         );
       }
     }
@@ -299,11 +276,11 @@ export function buildLookLayer(base: RgbaSheet, look: ResolvedLook): LookLayer {
   const parts = new Int32Array(ID_LIMIT * 6).fill(FALLTHROUGH);
   const attachments: (Int32Array | null)[] = new Array<Int32Array | null>(ID_LIMIT * 6).fill(null);
   const chosen = new Map<number, string>();
-  const order: { key: string; picture: Picture }[] = [];
+  const order: { key: string; picture: RgbaImage }[] = [];
   const byContent = new Map<string, string>();
   const layerKeyOf = new Map<string, string>();
-  const addPicture = (key: string, picture: Picture): void => {
-    const sig = `${picture.w}x${picture.h}:${signature(picture.px)}`;
+  const addPicture = (key: string, picture: RgbaImage): void => {
+    const sig = `${picture.width}x${picture.height}:${signature(picture.data)}`;
     const same = byContent.get(sig);
     if (same) {
       layerKeyOf.set(key, same);
@@ -357,7 +334,7 @@ export function buildLookLayer(base: RgbaSheet, look: ResolvedLook): LookLayer {
   }
 
   const packing = packRows(
-    order.map((o) => ({ key: o.key, w: o.picture.w, h: o.picture.h })),
+    order.map((o) => ({ key: o.key, w: o.picture.width, h: o.picture.height })),
     256,
     1,
   );
@@ -369,11 +346,14 @@ export function buildLookLayer(base: RgbaSheet, look: ResolvedLook): LookLayer {
   order.forEach((o, i) => {
     const cell = packing.cells.get(o.key)!;
     const id = LAYER_ID_BASE + i;
-    frames[id] = { x: cell.x, y: cell.y, w: o.picture.w, h: o.picture.h };
+    frames[id] = { x: cell.x, y: cell.y, w: o.picture.width, h: o.picture.height };
     layerIds.set(o.key, id);
-    for (let y = 0; y < o.picture.h; y++) {
-      const s = y * o.picture.w * 4;
-      data.set(o.picture.px.subarray(s, s + o.picture.w * 4), ((cell.y + y) * width + cell.x) * 4);
+    for (let y = 0; y < o.picture.height; y++) {
+      const s = y * o.picture.width * 4;
+      data.set(
+        o.picture.data.subarray(s, s + o.picture.width * 4),
+        ((cell.y + y) * width + cell.x) * 4,
+      );
     }
   });
   const keys = new Map<string, number>();
@@ -391,7 +371,7 @@ export function buildLookLayer(base: RgbaSheet, look: ResolvedLook): LookLayer {
 }
 
 /** A compact text signature of picture bytes (for sharing identical pictures). */
-function signature(px: Uint8ClampedArray): string {
+function signature(px: RgbaImage['data']): string {
   let h1 = 0x811c9dc5;
   let h2 = 0;
   for (let i = 0; i < px.length; i++) {
@@ -415,7 +395,7 @@ export function lookSwap(layer: LookLayer, face = -1): SpriteSwap {
   // (her face would pop up on it).
   const blinks = face >= 0 && (layer.ids.has(face) || (character === 0 && !layer.ids.has(25)));
   const keyOf = (id: number, t: number): number =>
-    blinks && id === 25 && (t === 0 || t === 4) ? face : id;
+    blinks && id === HEAD_SPRITE && (t === Transform.NONE || t === Transform.MIRROR) ? face : id;
   const slotOf = (key: number, t: number, primitive: number, part: PartContext): number => {
     const limb = isLimb(familyOf(key));
     const side = limb ? partSide(key, primitive) : Side.MID;

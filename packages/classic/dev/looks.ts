@@ -26,26 +26,26 @@ import {
 import { buildLookLayer, lookSwap } from '@parapet/runtime/render/LookSheet.ts';
 import type { RgbaImage, RgbaSheet } from '@parapet/runtime/render/Raster.ts';
 import { SceneRenderer, type SpriteSwap } from '@parapet/runtime/render/SceneRenderer.ts';
-import { readPixels } from '@parapet/runtime/render/SkinLibrary.ts';
+import { readPixels } from '@parapet/runtime/render/canvas.ts';
 import { SpriteSheet } from '@parapet/runtime/render/SpriteSheet.ts';
 import { StageRenderer } from '@parapet/runtime/render/Stage.ts';
 import { allBosses, type Boss } from '../src/app/bosses.ts';
 import { loadContent } from '../src/assets/content.ts';
+import { UNITS_PER_PX } from '@parapet/runtime/render/View.ts';
+import { STEP } from '@parapet/sim';
+import { $ } from './dom.ts';
 
 const lookFiles = import.meta.glob('@content/bosses/*/looks/*.json', {
   eager: true,
   import: 'default',
 });
 
-/** World units per pixel. */
-const UNITS = 32;
 const PANEL_W = 200;
 const PANEL_H = 112;
 const FEET_Y = PANEL_H - 14;
 /** How fast the world goes by (px/s), how long a keyframe lasts, a simulation step. */
 const RUN_PX = 120;
 const FRAME_MS = 110;
-const STEP_MS = 30;
 const CELL_W = 74;
 const CELL_H = 104;
 const POSE_COLUMNS = 10;
@@ -53,8 +53,6 @@ const SKY = '#9fb3c8';
 const GROUND = '#3a3f4b';
 const BACKGROUNDS = ['world', 'light', 'dark', 'checker'] as const;
 type Background = (typeof BACKGROUNDS)[number];
-
-const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
 
 /** A look being shown: as written (and as last saved), resolved and built. */
 interface Shown {
@@ -220,7 +218,8 @@ async function main(): Promise<void> {
       const st = style(next);
       if (st) r.fx.add(r.key, { pose: () => poseOf(r), move: () => 2 }, st);
     }
-    $<HTMLButtonElement>('save').disabled = JSON.stringify(next.data) === JSON.stringify(next.saved);
+    $<HTMLButtonElement>('save').disabled =
+      JSON.stringify(next.data) === JSON.stringify(next.saved);
     $<HTMLButtonElement>('reset').disabled = $<HTMLButtonElement>('save').disabled;
     drawPoses();
     drawAtlas();
@@ -291,7 +290,7 @@ async function main(): Promise<void> {
       c.translate(ox, 0);
       // Facing right the runner stands left of the middle, room for its cloth behind it.
       const feetX = Math.round(PANEL_W * (r.dir > 0 ? 0.42 : 0.58));
-      const scroll = 100_000 + r.x / UNITS;
+      const scroll = 100_000 + r.x / UNITS_PER_PX;
       if (bg === 'checker') checker(c, PANEL_W, PANEL_H);
       else if (stage?.hasSky) stage.drawSky(c, 0, PANEL_W, FEET_Y, clock);
       else {
@@ -303,7 +302,7 @@ async function main(): Promise<void> {
         c.fillStyle = GROUND;
         c.fillRect(0, FEET_Y, PANEL_W, PANEL_H - FEET_Y);
       }
-      const cam = { x: r.x - feetX * UNITS, y: -FEET_Y * UNITS };
+      const cam = { x: r.x - feetX * UNITS_PER_PX, y: -FEET_Y * UNITS_PER_PX };
       const view = { width: PANEL_W, height: PANEL_H };
       r.fx.drawBehind(c, cam, clock, now, view);
       shown.scene.setViewport(PANEL_W, PANEL_H);
@@ -329,8 +328,8 @@ async function main(): Promise<void> {
         const col = n % POSE_COLUMNS;
         const row = (flip ? rows : 0) + Math.floor(n / POSE_COLUMNS);
         const pose: CharacterPose = {
-          x: (col * CELL_W + CELL_W / 2) * UNITS,
-          y: (row * CELL_H + CELL_H - 8) * UNITS,
+          x: (col * CELL_W + CELL_W / 2) * UNITS_PER_PX,
+          y: (row * CELL_H + CELL_H - 8) * UNITS_PER_PX,
           a: frame,
           b: frame,
           t: 0,
@@ -512,10 +511,10 @@ async function main(): Promise<void> {
     const dt = Math.min(100, now - last);
     last = now;
     clock += dt;
-    for (const r of runners) r.x += (r.dir * RUN_PX * UNITS * dt) / 1000;
+    for (const r of runners) r.x += (r.dir * RUN_PX * UNITS_PER_PX * dt) / 1000;
     acc += dt;
-    while (acc >= STEP_MS) {
-      acc -= STEP_MS;
+    while (acc >= STEP) {
+      acc -= STEP;
       for (const r of runners) r.fx.step({ clock });
     }
     drawRunners(now);

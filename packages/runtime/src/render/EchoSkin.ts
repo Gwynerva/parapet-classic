@@ -14,9 +14,8 @@ import { fnv1a } from '@parapet/sim';
 import type { AtlasFrame } from '../content/types.ts';
 import type { SceneRenderer } from './SceneRenderer.ts';
 import { SpriteSheet } from './SpriteSheet.ts';
-import { readPixels } from './SkinLibrary.ts';
-
-export type Rgb = readonly [number, number, number];
+import { readPixels, rgbaToCanvas } from './canvas.ts';
+import { cssColor, mixRgb, rgbOf, type Rgb } from './color.ts';
 
 export interface EchoRamp {
   shadow: Rgb;
@@ -34,37 +33,18 @@ export interface EchoColor {
   ramp: EchoRamp;
 }
 
-function hexRgb(hex: string): Rgb {
-  const n = parseInt(hex.slice(1), 16);
-  return [(n >> 16) & 0xff, (n >> 8) & 0xff, n & 0xff];
-}
-
-function mix(a: Rgb, b: Rgb, t: number): Rgb {
-  return [
-    Math.round(a[0] + (b[0] - a[0]) * t),
-    Math.round(a[1] + (b[1] - a[1]) * t),
-    Math.round(a[2] + (b[2] - a[2]) * t),
-  ];
-}
-
-/** CSS colour of a tone: `#rrggbb`, or `rgba(...)` with an alpha. */
-export function rgbCss(c: Rgb, alpha?: number): string {
-  if (alpha !== undefined) return `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${alpha})`;
-  return '#' + c.map((v) => v.toString(16).padStart(2, '0')).join('');
-}
-
 const BLACK: Rgb = [0, 0, 0];
 const WHITE: Rgb = [255, 255, 255];
 
 /** An echo colour ramp built around one saturated tone (`id` names it in caches). */
 export function makeEchoColor(id: string, hex: string): EchoColor {
-  const body = hexRgb(hex);
-  const rim = mix(body, WHITE, 0.8);
+  const body = rgbOf(hex);
+  const rim = mixRgb(body, WHITE, 0.8);
   return {
     id,
     css: hex,
-    light: rgbCss(rim),
-    ramp: { shadow: mix(body, BLACK, 0.55), body, highlight: mix(body, WHITE, 0.5), rim },
+    light: cssColor(rim),
+    ramp: { shadow: mixRgb(body, BLACK, 0.55), body, highlight: mixRgb(body, WHITE, 0.5), rim },
   };
 }
 
@@ -90,10 +70,10 @@ export const ECHO_GREY: EchoColor = {
   css: '#a7b0ba',
   light: '#eef2f6',
   ramp: {
-    shadow: hexRgb('#5d6670'),
-    body: hexRgb('#a7b0ba'),
-    highlight: hexRgb('#d3d9df'),
-    rim: hexRgb('#eef2f6'),
+    shadow: rgbOf('#5d6670'),
+    body: rgbOf('#a7b0ba'),
+    highlight: rgbOf('#d3d9df'),
+    rim: rgbOf('#eef2f6'),
   },
 };
 
@@ -170,6 +150,8 @@ export class EchoSheets {
   private readonly base: SceneRenderer;
   private readonly scenes = new Map<SceneRenderer, Map<string, SceneRenderer>>();
   private readonly sheets = new Map<SpriteSheet, Map<string, SpriteSheet>>();
+  /** The pixels of every sheet recoloured so far, read once for all its colours. */
+  private readonly pixels = new Map<SpriteSheet, ImageData | null>();
 
   constructor(base: SceneRenderer) {
     this.base = base;
@@ -209,18 +191,14 @@ export class EchoSheets {
 
   private build(color: EchoColor, textured: boolean, sheet: SpriteSheet): SpriteSheet {
     const fallback = sheet.fallback ? this.sheetFor(color, textured, sheet.fallback) : null;
-    const image = sheet.image as CanvasImageSource & { width: number; height: number };
-    const src = readPixels(image);
+    let src = this.pixels.get(sheet);
+    if (src === undefined) {
+      src = readPixels(sheet.image as CanvasImageSource & { width: number; height: number });
+      this.pixels.set(sheet, src);
+    }
     if (!src) return sheet;
     const data = recolorEcho(src.data, src.width, src.height, color.ramp, textured, sheet.frames);
-    const canvas = document.createElement('canvas');
-    canvas.width = src.width;
-    canvas.height = src.height;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return sheet;
-    const out = ctx.createImageData(src.width, src.height);
-    out.data.set(data);
-    ctx.putImageData(out, 0, 0);
-    return new SpriteSheet(canvas, sheet.frames, fallback);
+    const canvas = rgbaToCanvas(src.width, src.height, data);
+    return canvas ? new SpriteSheet(canvas, sheet.frames, fallback) : sheet;
   }
 }

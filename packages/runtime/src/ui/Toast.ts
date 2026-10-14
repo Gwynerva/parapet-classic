@@ -5,6 +5,7 @@
 import type { BitmapFont } from '../text/BitmapFont.ts';
 import type { ViewportLike } from './layout.ts';
 import { Theme } from './theme.ts';
+import { framedBox } from './draw.ts';
 
 export const TOAST_MS = 2500;
 const FADE_MS = 300;
@@ -45,13 +46,7 @@ export class Toast {
     const x = safe.left + ((viewport.width - safe.left - safe.right - w) >> 1);
     const y = viewport.height - safe.bottom - h - 16;
     ctx.globalAlpha = Math.max(0, alpha);
-    ctx.fillStyle = Theme.panel;
-    ctx.fillRect(x, y, w, h);
-    ctx.fillStyle = Theme.accent;
-    ctx.fillRect(x, y, w, 1);
-    ctx.fillRect(x, y + h - 1, w, 1);
-    ctx.fillRect(x, y, 1, h);
-    ctx.fillRect(x + w - 1, y, 1, h);
+    framedBox(ctx, { x, y, w, h }, Theme.panel, Theme.accent);
     font.draw(ctx, lines.join('\n'), x + (w >> 1), y + 5, { align: 'center', color: Theme.text });
     ctx.globalAlpha = 1;
   }

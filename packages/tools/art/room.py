@@ -220,9 +220,8 @@ def shelf():
     c.rect(28, 38, 10, 4, 'b')
     c.rect(4, 47, 8, 4, 'E')
     c.rect(13, 47, 9, 4, 'u')
-    # A grey jumper on top and a black backpack.
+    # A grey jumper on top; the black backpack next to it is a sprite of its own (`backpack`).
     c.rect(2, 0, 16, 3, 'T')
-    c.rect(30, -6 if False else 0, 0, 0, 'k')
     return c.rows()
 
 

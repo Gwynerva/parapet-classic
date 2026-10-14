@@ -9,23 +9,19 @@
  */
 import {
   cleanReplayName,
-  contentHashes,
   createReplayWorld,
   createRun,
   InputPlayer,
   isSplitEvent,
   NO_INPUT,
   RULESET_ID,
+  runContentHash,
   SIM_VERSION,
   type ContentHash,
   type InputRun,
-  type LevelData,
-  type MissionInfo,
-  type MoveTableData,
-  type PhysicsTables,
   type Replay,
   type ReplayOutcome,
-  type RivalRecording,
+  type RunContent,
   type RunMode,
   type World,
   type WorldEvent,
@@ -74,14 +70,6 @@ export interface RunSetup {
   contest?: ContestSetup;
 }
 
-export interface RunData {
-  level: LevelData;
-  mission: MissionInfo;
-  moves: MoveTableData;
-  tables: PhysicsTables;
-  rival: RivalRecording | null;
-}
-
 export type StepListener = (events: readonly WorldEvent[], world: World) => void;
 
 export class RunSession {
@@ -98,13 +86,13 @@ export class RunSession {
   private ghostExhausted = false;
   private readonly listeners: StepListener[] = [];
   private readonly ghostListeners: StepListener[] = [];
-  private readonly data: RunData;
+  private readonly data: RunContent;
   private hashes: ContentHash | null = null;
   /** Wall-clock milliseconds spent in the run (for display only). */
   elapsedMs = 0;
   paused = false;
 
-  constructor(setup: RunSetup, data: RunData) {
+  constructor(setup: RunSetup, data: RunContent) {
     this.setup = setup;
     this.data = data;
     const scripted = setup.script ?? setup.autopilot;
@@ -185,7 +173,7 @@ export class RunSession {
 
   /** Hashes of the content this run was played on (computed once per session). */
   get contentHash(): ContentHash {
-    this.hashes ??= contentHashes(this.data.level, this.data.moves, this.data.tables);
+    this.hashes ??= runContentHash(this.data);
     return this.hashes;
   }
 

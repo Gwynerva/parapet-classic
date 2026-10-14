@@ -10,7 +10,6 @@
  * pass ring out with their own channel volumes while the next pass begins.
  */
 import { songEvents, type MidiControl, type MidiNote, type MidiSong } from './MidiFile.ts';
-import { normalisationGain } from './Loudness.ts';
 import { Synth } from './Synth.ts';
 
 /** Seconds of notes scheduled ahead of the audio clock. */
@@ -191,8 +190,8 @@ export class MusicPlayer {
   /** Starts `song` at `positionMs` with a fade in. */
   private begin(song: MidiSong, loop: boolean, positionMs: number): void {
     const ctx = this.ctx!;
-    // The measured level the loader set, or an estimate from the notes.
-    const level = song.gain ?? normalisationGain(song);
+    // The measured level the loader set (packages/content/audio/loudness.json).
+    const level = song.gain ?? 1;
     const songGain = ctx.createGain();
     songGain.connect(this.master!);
     const now = ctx.currentTime;

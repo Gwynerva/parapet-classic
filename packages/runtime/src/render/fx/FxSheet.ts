@@ -3,10 +3,11 @@
  * in reading order, its colour tokens resolved, its emitters with their trigger bits. Pure; the
  * canvas is made by whoever draws.
  */
-import { parseColor, type Rgba } from '../Look.ts';
+import { cssColor, DEFAULT_ACCENT, mixRgb, parseColor, type Rgb, type Rgba } from '../color.ts';
 import { packRows } from '../pack.ts';
 import type { FxEmitter, FxFile, FxTrigger, Range } from './FxData.ts';
 import { triggerBit } from './Motion.ts';
+import { paintRows } from '../Raster.ts';
 
 export interface FxFrame {
   x: number;
@@ -45,29 +46,25 @@ export interface CompiledFx {
   image?: unknown;
 }
 
-function mix(c: Rgba, to: number, t: number): Rgba {
-  return [
-    Math.round(c[0] + (to - c[0]) * t),
-    Math.round(c[1] + (to - c[1]) * t),
-    Math.round(c[2] + (to - c[2]) * t),
-    c[3],
-  ];
+const WHITE: Rgb = [255, 255, 255];
+const BLACK: Rgb = [0, 0, 0];
+
+/** `c` moved towards `to` by `t`, keeping its alpha. */
+function mix(c: Rgba, to: Rgb, t: number): Rgba {
+  return [...mixRgb(c, to, t), c[3]];
 }
 
 function css(c: Rgba): string {
-  const hex = (v: number): string => v.toString(16).padStart(2, '0');
-  return c[3] === 255
-    ? `#${hex(c[0])}${hex(c[1])}${hex(c[2])}`
-    : `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${(c[3] / 255).toFixed(3)})`;
+  return c[3] === 255 ? cssColor(c) : cssColor(c, Number((c[3] / 255).toFixed(3)));
 }
 
 /** The colour of a token for an accent. */
 export function resolveToken(token: string, palette: Record<string, string>, accent: string): Rgba {
-  const a = parseColor(accent) ?? [255, 62, 165, 255];
+  const a = parseColor(accent) ?? parseColor(DEFAULT_ACCENT)!;
   const value = palette[token] ?? token;
   if (value === 'accent') return a;
-  if (value === 'accent.light') return mix(a, 255, 0.8);
-  if (value === 'accent.dark') return mix(a, 0, 0.45);
+  if (value === 'accent.light') return mix(a, WHITE, 0.8);
+  if (value === 'accent.dark') return mix(a, BLACK, 0.45);
   return parseColor(value) ?? [255, 255, 255, 255];
 }
 
@@ -99,6 +96,7 @@ export function compileFx(fx: FxFile, accent: string): CompiledFx {
   const width = packing.width;
   const height = packing.height;
   const data = new Uint8ClampedArray(width * height * 4);
+  const atlas = { width, height, data };
   const frames: FxFrame[] = [];
   const spriteIds = new Map<string, number>();
   const colours = new Map<string, Rgba>();
@@ -115,14 +113,7 @@ export function compileFx(fx: FxFile, accent: string): CompiledFx {
     const grid = grids[id]!;
     frames[id] = { x: cell.x, y: cell.y, w: cell.w, h: cell.h };
     spriteIds.set(name, id);
-    for (let y = 0; y < grid.length; y++) {
-      for (let x = 0; x < (grid[y]?.length ?? 0); x++) {
-        const ch = grid[y]![x]!;
-        if (ch === '.') continue;
-        const c = colourOf(ch);
-        data.set(c, ((cell.y + y) * width + cell.x + x) * 4);
-      }
-    }
+    paintRows(atlas, grid, (ch) => (ch === '.' ? null : colourOf(ch)), cell.x, cell.y);
   });
   const ids = (names: string[]): number[] =>
     names.map((f) => spriteIds.get(f) ?? -1).filter((i) => i >= 0);

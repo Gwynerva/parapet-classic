@@ -48,7 +48,7 @@ describe('PressTracker', () => {
 
 function menu(items: MenuItem[], rows = 3): Menu {
   const f = testFont();
-  const m = new Menu(f, f);
+  const m = new Menu(f);
   Object.assign(m.layout, { x: 0, y: 0, width: 200, rowHeight: 20 });
   m.maxVisible = rows;
   m.setItems(items);

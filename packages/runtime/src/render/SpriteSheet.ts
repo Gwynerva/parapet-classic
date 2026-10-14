@@ -133,16 +133,6 @@ export class SpriteSheet {
     return this.frame(id)?.h ?? 0;
   }
 
-  /** Width on screen after `transform`. */
-  drawnWidth(id: number, transform: number): number {
-    return isRotated(transform) ? this.height(id) : this.width(id);
-  }
-
-  /** Height on screen after `transform`. */
-  drawnHeight(id: number, transform: number): number {
-    return isRotated(transform) ? this.width(id) : this.height(id);
-  }
-
   /**
    * Draw sprite `id` so that its anchor point lands on (x, y) (`void_a(int,int,int,int,int)`,
    * line 827). Positions are truncated to integers.

@@ -5,10 +5,9 @@
  * a finger dragged over the grid scrolls it, and so does the mouse wheel.
  */
 import type { UiKey, UiPointer, UiWheel } from '../app/Screen.ts';
-import type { BitmapFont } from '../text/BitmapFont.ts';
-import { drawScrollArrow } from './draw.ts';
+import { drawScrollArrow, framedBox } from './draw.ts';
 import { contains, type Rect } from './layout.ts';
-import { PressTracker } from './press.ts';
+import { isFinger, PressTracker, WheelRows } from './press.ts';
 import { Theme } from './theme.ts';
 
 export interface TileGroup {
@@ -42,7 +41,7 @@ export class TileGrid {
   private originX = 0;
   private readonly press = new PressTracker<number>();
   private dragScroll = 0;
-  private wheelRest = 0;
+  private readonly wheel = new WheelRows();
 
   constructor(tile: number, gap: number) {
     this.tile = tile;
@@ -60,11 +59,6 @@ export class TileGrid {
   /** Width the tiles take (at most `rect.w`). */
   get usedWidth(): number {
     return this.cols * this.pitch - this.gap;
-  }
-
-  /** Height of all rows, or of the visible ones when the grid scrolls. */
-  get usedHeight(): number {
-    return Math.min(this.rows, this.visibleRows) * this.pitch - this.gap;
   }
 
   setGroups(groups: readonly TileGroup[]): void {
@@ -209,11 +203,10 @@ export class TileGrid {
       }
       case 'move': {
         if (!this.press.down) return false;
-        const finger = p.pointerType !== undefined && p.pointerType !== 'mouse';
+        const finger = isFinger(p);
         this.press.move(p, finger ? undefined : this.hitTest(p.x, p.y));
         if (this.press.dragging && finger) {
-          const rows = Math.round((this.press.startY - p.y) / this.pitch);
-          this.scrollTo(this.dragScroll + rows);
+          this.scrollTo(this.dragScroll + this.press.dragRows(p, this.pitch));
         }
         return true;
       }
@@ -236,12 +229,8 @@ export class TileGrid {
 
   onWheel(w: UiWheel): boolean {
     if (!contains(this.rect, w.x, w.y)) return false;
-    this.wheelRest += w.dy;
-    const rows = Math.trunc(this.wheelRest / this.pitch);
-    if (rows !== 0) {
-      this.wheelRest -= rows * this.pitch;
-      this.scrollTo(this.scrollRow + rows);
-    }
+    const rows = this.wheel.take(w.dy, this.pitch);
+    if (rows !== 0) this.scrollTo(this.scrollRow + rows);
     return true;
   }
 
@@ -264,7 +253,7 @@ export class TileGrid {
   }
 
   /** Small arrows above and below when rows are scrolled away. */
-  drawScrollMarkers(ctx: CanvasRenderingContext2D, _font?: BitmapFont): void {
+  drawScrollMarkers(ctx: CanvasRenderingContext2D): void {
     const cx = this.originX + (this.usedWidth >> 1);
     if (this.scrollRow > 0) drawScrollArrow(ctx, cx, this.rect.y - 1, true);
     if (this.scrollRow + this.visibleRows < this.rows) {
@@ -275,11 +264,10 @@ export class TileGrid {
 
 /** A tile's square: panel colours, accent when selected, accent fill when pressed. */
 export function drawTileFrame(ctx: CanvasRenderingContext2D, r: Rect, s: TileState): void {
-  ctx.fillStyle = s.pressed ? Theme.accent : s.selected ? Theme.accentDark : Theme.panel;
-  ctx.fillRect(r.x, r.y, r.w, r.h);
-  ctx.fillStyle = s.selected || s.pressed ? Theme.accent : Theme.panelBorder;
-  ctx.fillRect(r.x, r.y, r.w, 1);
-  ctx.fillRect(r.x, r.y + r.h - 1, r.w, 1);
-  ctx.fillRect(r.x, r.y, 1, r.h);
-  ctx.fillRect(r.x + r.w - 1, r.y, 1, r.h);
+  framedBox(
+    ctx,
+    r,
+    s.pressed ? Theme.accent : s.selected ? Theme.accentDark : Theme.panel,
+    s.selected || s.pressed ? Theme.accent : Theme.panelBorder,
+  );
 }

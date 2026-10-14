@@ -8,7 +8,7 @@ import type { UiPointer, UiWheel } from '../app/Screen.ts';
 import type { BitmapFont } from '../text/BitmapFont.ts';
 import { Button } from './Button.ts';
 import { contains, type Rect } from './layout.ts';
-import { panel } from './draw.ts';
+import { panel, border } from './draw.ts';
 import { PressTracker } from './press.ts';
 import { TextScroller } from './TextScroller.ts';
 import { Theme } from './theme.ts';
@@ -159,12 +159,8 @@ export class ShowcaseBox {
   drawOverlay(c: CanvasRenderingContext2D): void {
     const { small } = this.fonts;
     if (this.centre.pressed) {
-      c.fillStyle = Theme.accent;
       const s = this.stage;
-      c.fillRect(s.x, s.y, s.w, 1);
-      c.fillRect(s.x, s.y + s.h - 1, s.w, 1);
-      c.fillRect(s.x, s.y, 1, s.h);
-      c.fillRect(s.x + s.w - 1, s.y, 1, s.h);
+      border(c, s.x, s.y, s.w, s.h, Theme.accent);
     }
     for (const [button, label] of [
       [this.prev, '<'],

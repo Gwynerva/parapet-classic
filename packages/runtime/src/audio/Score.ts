@@ -105,9 +105,12 @@ export function scoreProblems(score: Score): string[] {
     out.push('stepsPerBar must be a positive integer');
   for (const [name, pattern] of Object.entries(score.patterns)) {
     if (Array.isArray(pattern)) {
+      if (pattern.length === 0 || pattern[0]!.length === 0) out.push(`${name}: no steps`);
       for (const [i, lane] of pattern.entries()) {
         if (lane.length % score.stepsPerBar !== 0)
           out.push(`${name} lane ${i}: ${lane.length} steps, not whole bars`);
+        if (lane.length !== pattern[0]!.length)
+          out.push(`${name} lane ${i}: ${lane.length} steps, not as long as lane 0`);
         for (const ch of lane) {
           if (ch !== '.' && score.drumKit[ch] === undefined)
             out.push(`${name} lane ${i}: "${ch}" is not in the drum kit`);
@@ -161,8 +164,8 @@ export function scoreToSong(score: Score): MidiSong {
         let s = 0;
         for (let r = 0; s < steps; r = (r + 1) % refs.length) {
           const lanes = score.patterns[splitRef(refs[r]!).name];
-          if (!Array.isArray(lanes) || lanes.length === 0) break;
-          const len = lanes[0]!.length;
+          const len = Array.isArray(lanes) ? (lanes[0]?.length ?? 0) : 0;
+          if (!Array.isArray(lanes) || len === 0) break;
           for (const lane of lanes) {
             for (let i = 0; i < lane.length && s + i < steps; i++) {
               const key = score.drumKit[lane[i]!];

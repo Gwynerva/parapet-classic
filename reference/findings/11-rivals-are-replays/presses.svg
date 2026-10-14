@@ -1,0 +1,508 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="710" height="382" viewBox="0 0 710 382" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" style="font-variant-numeric: tabular-nums">
+<title id="t">Every press of the twelve rivals</title>
+<desc id="d">The developers’ recorded runs, a row per level; each mark is one press of one tick</desc>
+<rect x="0.5" y="0.5" width="709" height="381" rx="10" fill="#161b22" stroke="#30363d"/>
+<text x="20" y="30" font-size="16" font-weight="600" fill="#e6edf3">Every press of the twelve rivals</text>
+<text x="20" y="48" font-size="12" fill="#8b949e">The developers’ recorded runs, a row per level; each mark is one press of one tick</text>
+<text x="72" y="85" font-size="12" fill="#e6edf3" text-anchor="end">Mill Brook</text>
+<line x1="80" y1="81" x2="493.7" y2="81" stroke="#30363d" stroke-width="1"/>
+<rect x="85.1" y="74" width="3" height="14" fill="#3987e5"><title>Mill Brook, 1.0 s: UP</title></rect>
+<rect x="85.8" y="74" width="3" height="14" fill="#199e70"><title>Mill Brook, 1.1 s: FORWARD</title></rect>
+<rect x="97" y="74" width="3" height="14" fill="#3987e5"><title>Mill Brook, 3.0 s: UP</title></rect>
+<rect x="97.8" y="74" width="3" height="14" fill="#199e70"><title>Mill Brook, 3.1 s: FORWARD</title></rect>
+<rect x="137.8" y="74" width="3" height="14" fill="#c98500"><title>Mill Brook, 9.8 s: BACK</title></rect>
+<rect x="145.8" y="74" width="3" height="14" fill="#3987e5"><title>Mill Brook, 11.1 s: UP</title></rect>
+<rect x="161.3" y="74" width="3" height="14" fill="#d95926"><title>Mill Brook, 13.7 s: DOWN</title></rect>
+<rect x="191.2" y="74" width="3" height="14" fill="#c98500"><title>Mill Brook, 18.7 s: BACK</title></rect>
+<rect x="198.8" y="74" width="3" height="14" fill="#3987e5"><title>Mill Brook, 20.0 s: UP</title></rect>
+<rect x="203.9" y="74" width="3" height="14" fill="#3987e5"><title>Mill Brook, 20.8 s: UP</title></rect>
+<rect x="217.4" y="74" width="3" height="14" fill="#c98500"><title>Mill Brook, 23.1 s: BACK</title></rect>
+<rect x="223" y="74" width="3" height="14" fill="#3987e5"><title>Mill Brook, 24.0 s: UP</title></rect>
+<rect x="226" y="74" width="3" height="14" fill="#3987e5"><title>Mill Brook, 24.5 s: UP</title></rect>
+<rect x="230.1" y="74" width="3" height="14" fill="#3987e5"><title>Mill Brook, 25.2 s: UP</title></rect>
+<rect x="242.6" y="74" width="3" height="14" fill="#3987e5"><title>Mill Brook, 27.3 s: UP</title></rect>
+<rect x="269.7" y="74" width="3" height="14" fill="#3987e5"><title>Mill Brook, 31.8 s: UP</title></rect>
+<rect x="272.7" y="74" width="3" height="14" fill="#c98500"><title>Mill Brook, 32.3 s: BACK</title></rect>
+<rect x="277.2" y="74" width="3" height="14" fill="#c98500"><title>Mill Brook, 33.0 s: BACK</title></rect>
+<rect x="281.3" y="74" width="3" height="14" fill="#c98500"><title>Mill Brook, 33.7 s: BACK</title></rect>
+<rect x="302.6" y="74" width="3" height="14" fill="#d95926"><title>Mill Brook, 37.3 s: DOWN</title></rect>
+<rect x="309.2" y="74" width="3" height="14" fill="#3987e5"><title>Mill Brook, 38.4 s: UP</title></rect>
+<rect x="322.3" y="74" width="3" height="14" fill="#c98500"><title>Mill Brook, 40.6 s: BACK</title></rect>
+<rect x="328" y="74" width="3" height="14" fill="#3987e5"><title>Mill Brook, 41.5 s: UP</title></rect>
+<rect x="344.8" y="74" width="3" height="14" fill="#d95926"><title>Mill Brook, 44.3 s: DOWN</title></rect>
+<rect x="357.7" y="74" width="3" height="14" fill="#3987e5"><title>Mill Brook, 46.5 s: UP</title></rect>
+<rect x="363.5" y="74" width="3" height="14" fill="#199e70"><title>Mill Brook, 47.4 s: FORWARD</title></rect>
+<rect x="364.9" y="74" width="3" height="14" fill="#c98500"><title>Mill Brook, 47.7 s: BACK</title></rect>
+<rect x="366.5" y="74" width="3" height="14" fill="#c98500"><title>Mill Brook, 47.9 s: BACK</title></rect>
+<rect x="369.4" y="74" width="3" height="14" fill="#3987e5"><title>Mill Brook, 48.4 s: UP</title></rect>
+<rect x="381.1" y="74" width="3" height="14" fill="#3987e5"><title>Mill Brook, 50.3 s: UP</title></rect>
+<rect x="388" y="74" width="3" height="14" fill="#3987e5"><title>Mill Brook, 51.5 s: UP</title></rect>
+<rect x="399.7" y="74" width="3" height="14" fill="#d95926"><title>Mill Brook, 53.5 s: DOWN</title></rect>
+<rect x="416.5" y="74" width="3" height="14" fill="#3987e5"><title>Mill Brook, 56.3 s: UP</title></rect>
+<rect x="423.7" y="74" width="3" height="14" fill="#3987e5"><title>Mill Brook, 57.4 s: UP</title></rect>
+<rect x="427" y="74" width="3" height="14" fill="#3987e5"><title>Mill Brook, 58.0 s: UP</title></rect>
+<rect x="440.9" y="74" width="3" height="14" fill="#c98500"><title>Mill Brook, 60.3 s: BACK</title></rect>
+<rect x="445.4" y="74" width="3" height="14" fill="#3987e5"><title>Mill Brook, 61.1 s: UP</title></rect>
+<rect x="448" y="74" width="3" height="14" fill="#3987e5"><title>Mill Brook, 61.5 s: UP</title></rect>
+<rect x="449.9" y="74" width="3" height="14" fill="#3987e5"><title>Mill Brook, 61.8 s: UP</title></rect>
+<rect x="463.8" y="74" width="3" height="14" fill="#199e70"><title>Mill Brook, 64.1 s: FORWARD</title></rect>
+<text x="499.7" y="85" font-size="11" fill="#8b949e">40</text>
+<text x="72" y="105" font-size="12" fill="#e6edf3" text-anchor="end">North Hill</text>
+<line x1="80" y1="101" x2="428" y2="101" stroke="#30363d" stroke-width="1"/>
+<rect x="101.5" y="94" width="3" height="14" fill="#c98500"><title>North Hill, 3.8 s: BACK</title></rect>
+<rect x="107.3" y="94" width="3" height="14" fill="#3987e5"><title>North Hill, 4.7 s: UP</title></rect>
+<rect x="114" y="94" width="3" height="14" fill="#3987e5"><title>North Hill, 5.8 s: UP</title></rect>
+<rect x="133.7" y="94" width="3" height="14" fill="#3987e5"><title>North Hill, 9.1 s: UP</title></rect>
+<rect x="134.3" y="94" width="3" height="14" fill="#199e70"><title>North Hill, 9.2 s: FORWARD</title></rect>
+<rect x="142.5" y="94" width="3" height="14" fill="#3987e5"><title>North Hill, 10.6 s: UP</title></rect>
+<rect x="143.1" y="94" width="3" height="14" fill="#199e70"><title>North Hill, 10.7 s: FORWARD</title></rect>
+<rect x="173" y="94" width="3" height="14" fill="#c98500"><title>North Hill, 15.7 s: BACK</title></rect>
+<rect x="178.1" y="94" width="3" height="14" fill="#3987e5"><title>North Hill, 16.5 s: UP</title></rect>
+<rect x="183.2" y="94" width="3" height="14" fill="#3987e5"><title>North Hill, 17.4 s: UP</title></rect>
+<rect x="189.6" y="94" width="3" height="14" fill="#3987e5"><title>North Hill, 18.4 s: UP</title></rect>
+<rect x="203.7" y="94" width="3" height="14" fill="#3987e5"><title>North Hill, 20.8 s: UP</title></rect>
+<rect x="204.1" y="94" width="3" height="14" fill="#199e70"><title>North Hill, 20.9 s: FORWARD</title></rect>
+<rect x="216.8" y="94" width="3" height="14" fill="#199e70"><title>North Hill, 23.0 s: FORWARD</title></rect>
+<rect x="222.6" y="94" width="3" height="14" fill="#3987e5"><title>North Hill, 23.9 s: UP</title></rect>
+<rect x="234.2" y="94" width="3" height="14" fill="#3987e5"><title>North Hill, 25.9 s: UP</title></rect>
+<rect x="255.7" y="94" width="3" height="14" fill="#d95926"><title>North Hill, 29.5 s: DOWN</title></rect>
+<rect x="279.9" y="94" width="3" height="14" fill="#3987e5"><title>North Hill, 33.5 s: UP</title></rect>
+<rect x="284" y="94" width="3" height="14" fill="#3987e5"><title>North Hill, 34.2 s: UP</title></rect>
+<rect x="288.1" y="94" width="3" height="14" fill="#3987e5"><title>North Hill, 34.9 s: UP</title></rect>
+<rect x="322.5" y="94" width="3" height="14" fill="#3987e5"><title>North Hill, 40.6 s: UP</title></rect>
+<rect x="337" y="94" width="3" height="14" fill="#3987e5"><title>North Hill, 43.0 s: UP</title></rect>
+<rect x="353.6" y="94" width="3" height="14" fill="#199e70"><title>North Hill, 45.8 s: FORWARD</title></rect>
+<rect x="364.5" y="94" width="3" height="14" fill="#3987e5"><title>North Hill, 47.6 s: UP</title></rect>
+<rect x="365.1" y="94" width="3" height="14" fill="#199e70"><title>North Hill, 47.7 s: FORWARD</title></rect>
+<rect x="388.5" y="94" width="3" height="14" fill="#3987e5"><title>North Hill, 51.6 s: UP</title></rect>
+<rect x="389.9" y="94" width="3" height="14" fill="#3987e5"><title>North Hill, 51.8 s: UP</title></rect>
+<rect x="391.3" y="94" width="3" height="14" fill="#3987e5"><title>North Hill, 52.1 s: UP</title></rect>
+<rect x="392.5" y="94" width="3" height="14" fill="#3987e5"><title>North Hill, 52.3 s: UP</title></rect>
+<rect x="412.8" y="94" width="3" height="14" fill="#199e70"><title>North Hill, 55.6 s: FORWARD</title></rect>
+<text x="434" y="105" font-size="11" fill="#8b949e">30</text>
+<text x="72" y="125" font-size="12" fill="#e6edf3" text-anchor="end">Main St.</text>
+<line x1="80" y1="121" x2="419.1" y2="121" stroke="#30363d" stroke-width="1"/>
+<rect x="86.4" y="114" width="3" height="14" fill="#3987e5"><title>Main St., 1.2 s: UP</title></rect>
+<rect x="91.1" y="114" width="3" height="14" fill="#199e70"><title>Main St., 2.0 s: FORWARD</title></rect>
+<rect x="105.4" y="114" width="3" height="14" fill="#d95926"><title>Main St., 4.4 s: DOWN</title></rect>
+<rect x="139.8" y="114" width="3" height="14" fill="#3987e5"><title>Main St., 10.1 s: UP</title></rect>
+<rect x="143.9" y="114" width="3" height="14" fill="#c98500"><title>Main St., 10.8 s: BACK</title></rect>
+<rect x="147.8" y="114" width="3" height="14" fill="#3987e5"><title>Main St., 11.5 s: UP</title></rect>
+<rect x="156" y="114" width="3" height="14" fill="#c98500"><title>Main St., 12.8 s: BACK</title></rect>
+<rect x="159.7" y="114" width="3" height="14" fill="#3987e5"><title>Main St., 13.4 s: UP</title></rect>
+<rect x="163.4" y="114" width="3" height="14" fill="#3987e5"><title>Main St., 14.1 s: UP</title></rect>
+<rect x="188.8" y="114" width="3" height="14" fill="#d95926"><title>Main St., 18.3 s: DOWN</title></rect>
+<rect x="198" y="114" width="3" height="14" fill="#d95926"><title>Main St., 19.8 s: DOWN</title></rect>
+<rect x="232.4" y="114" width="3" height="14" fill="#3987e5"><title>Main St., 25.6 s: UP</title></rect>
+<rect x="233" y="114" width="3" height="14" fill="#199e70"><title>Main St., 25.7 s: FORWARD</title></rect>
+<rect x="240.2" y="114" width="3" height="14" fill="#3987e5"><title>Main St., 26.9 s: UP</title></rect>
+<rect x="243.9" y="114" width="3" height="14" fill="#3987e5"><title>Main St., 27.5 s: UP</title></rect>
+<rect x="246.1" y="114" width="3" height="14" fill="#c98500"><title>Main St., 27.9 s: BACK</title></rect>
+<rect x="252.5" y="114" width="3" height="14" fill="#c98500"><title>Main St., 28.9 s: BACK</title></rect>
+<rect x="260.7" y="114" width="3" height="14" fill="#3987e5"><title>Main St., 30.3 s: UP</title></rect>
+<rect x="263.5" y="114" width="3" height="14" fill="#3987e5"><title>Main St., 30.8 s: UP</title></rect>
+<rect x="266.4" y="114" width="3" height="14" fill="#c98500"><title>Main St., 31.2 s: BACK</title></rect>
+<rect x="269.5" y="114" width="3" height="14" fill="#3987e5"><title>Main St., 31.7 s: UP</title></rect>
+<rect x="276" y="114" width="3" height="14" fill="#3987e5"><title>Main St., 32.8 s: UP</title></rect>
+<rect x="289.3" y="114" width="3" height="14" fill="#c98500"><title>Main St., 35.1 s: BACK</title></rect>
+<rect x="295.7" y="114" width="3" height="14" fill="#d95926"><title>Main St., 36.1 s: DOWN</title></rect>
+<rect x="310" y="114" width="3" height="14" fill="#3987e5"><title>Main St., 38.5 s: UP</title></rect>
+<rect x="310.4" y="114" width="3" height="14" fill="#199e70"><title>Main St., 38.6 s: FORWARD</title></rect>
+<rect x="318.4" y="114" width="3" height="14" fill="#d95926"><title>Main St., 39.9 s: DOWN</title></rect>
+<rect x="349.5" y="114" width="3" height="14" fill="#3987e5"><title>Main St., 45.1 s: UP</title></rect>
+<rect x="353" y="114" width="3" height="14" fill="#3987e5"><title>Main St., 45.7 s: UP</title></rect>
+<rect x="357.5" y="114" width="3" height="14" fill="#c98500"><title>Main St., 46.4 s: BACK</title></rect>
+<rect x="362.2" y="114" width="3" height="14" fill="#3987e5"><title>Main St., 47.2 s: UP</title></rect>
+<rect x="370" y="114" width="3" height="14" fill="#c98500"><title>Main St., 48.5 s: BACK</title></rect>
+<rect x="373.5" y="114" width="3" height="14" fill="#3987e5"><title>Main St., 49.1 s: UP</title></rect>
+<rect x="378.4" y="114" width="3" height="14" fill="#3987e5"><title>Main St., 49.9 s: UP</title></rect>
+<rect x="380.5" y="114" width="3" height="14" fill="#c98500"><title>Main St., 50.2 s: BACK</title></rect>
+<rect x="383.9" y="114" width="3" height="14" fill="#3987e5"><title>Main St., 50.8 s: UP</title></rect>
+<rect x="386.8" y="114" width="3" height="14" fill="#c98500"><title>Main St., 51.3 s: BACK</title></rect>
+<text x="425.1" y="125" font-size="11" fill="#8b949e">37</text>
+<text x="72" y="145" font-size="12" fill="#e6edf3" text-anchor="end">East End</text>
+<line x1="80" y1="141" x2="373.9" y2="141" stroke="#30363d" stroke-width="1"/>
+<rect x="86" y="134" width="3" height="14" fill="#3987e5"><title>East End, 1.2 s: UP</title></rect>
+<rect x="86.6" y="134" width="3" height="14" fill="#199e70"><title>East End, 1.3 s: FORWARD</title></rect>
+<rect x="95.4" y="134" width="3" height="14" fill="#d95926"><title>East End, 2.7 s: DOWN</title></rect>
+<rect x="104.2" y="134" width="3" height="14" fill="#d95926"><title>East End, 4.2 s: DOWN</title></rect>
+<rect x="124.9" y="134" width="3" height="14" fill="#3987e5"><title>East End, 7.6 s: UP</title></rect>
+<rect x="132" y="134" width="3" height="14" fill="#3987e5"><title>East End, 8.8 s: UP</title></rect>
+<rect x="144.5" y="134" width="3" height="14" fill="#d95926"><title>East End, 10.9 s: DOWN</title></rect>
+<rect x="151.7" y="134" width="3" height="14" fill="#3987e5"><title>East End, 12.1 s: UP</title></rect>
+<rect x="155.6" y="134" width="3" height="14" fill="#3987e5"><title>East End, 12.8 s: UP</title></rect>
+<rect x="158.9" y="134" width="3" height="14" fill="#3987e5"><title>East End, 13.3 s: UP</title></rect>
+<rect x="181.2" y="134" width="3" height="14" fill="#3987e5"><title>East End, 17.0 s: UP</title></rect>
+<rect x="184.9" y="134" width="3" height="14" fill="#3987e5"><title>East End, 17.6 s: UP</title></rect>
+<rect x="193.7" y="134" width="3" height="14" fill="#c98500"><title>East End, 19.1 s: BACK</title></rect>
+<rect x="199.4" y="134" width="3" height="14" fill="#3987e5"><title>East End, 20.1 s: UP</title></rect>
+<rect x="207.4" y="134" width="3" height="14" fill="#c98500"><title>East End, 21.4 s: BACK</title></rect>
+<rect x="222.2" y="134" width="3" height="14" fill="#c98500"><title>East End, 23.9 s: BACK</title></rect>
+<rect x="232" y="134" width="3" height="14" fill="#d95926"><title>East End, 25.5 s: DOWN</title></rect>
+<rect x="238.1" y="134" width="3" height="14" fill="#c98500"><title>East End, 26.5 s: BACK</title></rect>
+<rect x="242.8" y="134" width="3" height="14" fill="#c98500"><title>East End, 27.3 s: BACK</title></rect>
+<rect x="249.2" y="134" width="3" height="14" fill="#c98500"><title>East End, 28.4 s: BACK</title></rect>
+<rect x="253.7" y="134" width="3" height="14" fill="#d95926"><title>East End, 29.1 s: DOWN</title></rect>
+<rect x="260" y="134" width="3" height="14" fill="#3987e5"><title>East End, 30.2 s: UP</title></rect>
+<rect x="272.3" y="134" width="3" height="14" fill="#3987e5"><title>East End, 32.2 s: UP</title></rect>
+<rect x="286.1" y="134" width="3" height="14" fill="#c98500"><title>East End, 34.5 s: BACK</title></rect>
+<rect x="296.1" y="134" width="3" height="14" fill="#3987e5"><title>East End, 36.2 s: UP</title></rect>
+<rect x="301.6" y="134" width="3" height="14" fill="#c98500"><title>East End, 37.1 s: BACK</title></rect>
+<rect x="310" y="134" width="3" height="14" fill="#3987e5"><title>East End, 38.5 s: UP</title></rect>
+<rect x="323.1" y="134" width="3" height="14" fill="#d95926"><title>East End, 40.7 s: DOWN</title></rect>
+<rect x="339.3" y="134" width="3" height="14" fill="#d95926"><title>East End, 43.4 s: DOWN</title></rect>
+<rect x="351.4" y="134" width="3" height="14" fill="#3987e5"><title>East End, 45.4 s: UP</title></rect>
+<rect x="352.2" y="134" width="3" height="14" fill="#199e70"><title>East End, 45.5 s: FORWARD</title></rect>
+<text x="379.9" y="145" font-size="11" fill="#8b949e">31</text>
+<text x="72" y="165" font-size="12" fill="#e6edf3" text-anchor="end">Juniper Point</text>
+<line x1="80" y1="161" x2="397.8" y2="161" stroke="#30363d" stroke-width="1"/>
+<rect x="90.3" y="154" width="3" height="14" fill="#3987e5"><title>Juniper Point, 1.9 s: UP</title></rect>
+<rect x="109.1" y="154" width="3" height="14" fill="#3987e5"><title>Juniper Point, 5.0 s: UP</title></rect>
+<rect x="116.3" y="154" width="3" height="14" fill="#3987e5"><title>Juniper Point, 6.2 s: UP</title></rect>
+<rect x="135.1" y="154" width="3" height="14" fill="#3987e5"><title>Juniper Point, 9.4 s: UP</title></rect>
+<rect x="143.1" y="154" width="3" height="14" fill="#3987e5"><title>Juniper Point, 10.7 s: UP</title></rect>
+<rect x="161.1" y="154" width="3" height="14" fill="#3987e5"><title>Juniper Point, 13.7 s: UP</title></rect>
+<rect x="168.1" y="154" width="3" height="14" fill="#3987e5"><title>Juniper Point, 14.8 s: UP</title></rect>
+<rect x="172.6" y="154" width="3" height="14" fill="#3987e5"><title>Juniper Point, 15.6 s: UP</title></rect>
+<rect x="189.6" y="154" width="3" height="14" fill="#3987e5"><title>Juniper Point, 18.4 s: UP</title></rect>
+<rect x="190" y="154" width="3" height="14" fill="#199e70"><title>Juniper Point, 18.5 s: FORWARD</title></rect>
+<rect x="198.6" y="154" width="3" height="14" fill="#3987e5"><title>Juniper Point, 19.9 s: UP</title></rect>
+<rect x="202.1" y="154" width="3" height="14" fill="#3987e5"><title>Juniper Point, 20.5 s: UP</title></rect>
+<rect x="205.8" y="154" width="3" height="14" fill="#3987e5"><title>Juniper Point, 21.1 s: UP</title></rect>
+<rect x="207.4" y="154" width="3" height="14" fill="#3987e5"><title>Juniper Point, 21.4 s: UP</title></rect>
+<rect x="212.9" y="154" width="3" height="14" fill="#3987e5"><title>Juniper Point, 22.3 s: UP</title></rect>
+<rect x="231.8" y="154" width="3" height="14" fill="#3987e5"><title>Juniper Point, 25.5 s: UP</title></rect>
+<rect x="239.8" y="154" width="3" height="14" fill="#3987e5"><title>Juniper Point, 26.8 s: UP</title></rect>
+<rect x="258" y="154" width="3" height="14" fill="#3987e5"><title>Juniper Point, 29.8 s: UP</title></rect>
+<rect x="266.2" y="154" width="3" height="14" fill="#c98500"><title>Juniper Point, 31.2 s: BACK</title></rect>
+<rect x="274.6" y="154" width="3" height="14" fill="#d95926"><title>Juniper Point, 32.6 s: DOWN</title></rect>
+<rect x="288.5" y="154" width="3" height="14" fill="#c98500"><title>Juniper Point, 34.9 s: BACK</title></rect>
+<rect x="293.2" y="154" width="3" height="14" fill="#d95926"><title>Juniper Point, 35.7 s: DOWN</title></rect>
+<rect x="302.6" y="154" width="3" height="14" fill="#3987e5"><title>Juniper Point, 37.3 s: UP</title></rect>
+<rect x="313.5" y="154" width="3" height="14" fill="#3987e5"><title>Juniper Point, 39.1 s: UP</title></rect>
+<rect x="351.2" y="154" width="3" height="14" fill="#3987e5"><title>Juniper Point, 45.4 s: UP</title></rect>
+<rect x="354.7" y="154" width="3" height="14" fill="#3987e5"><title>Juniper Point, 45.9 s: UP</title></rect>
+<rect x="357.3" y="154" width="3" height="14" fill="#c98500"><title>Juniper Point, 46.4 s: BACK</title></rect>
+<rect x="362.4" y="154" width="3" height="14" fill="#3987e5"><title>Juniper Point, 47.2 s: UP</title></rect>
+<rect x="364.5" y="154" width="3" height="14" fill="#3987e5"><title>Juniper Point, 47.6 s: UP</title></rect>
+<rect x="376.6" y="154" width="3" height="14" fill="#3987e5"><title>Juniper Point, 49.6 s: UP</title></rect>
+<rect x="377" y="154" width="3" height="14" fill="#199e70"><title>Juniper Point, 49.7 s: FORWARD</title></rect>
+<rect x="381.9" y="154" width="3" height="14" fill="#d95926"><title>Juniper Point, 50.5 s: DOWN</title></rect>
+<text x="403.8" y="165" font-size="11" fill="#8b949e">32</text>
+<text x="72" y="185" font-size="12" fill="#e6edf3" text-anchor="end">Oak Valley</text>
+<line x1="80" y1="181" x2="448.2" y2="181" stroke="#30363d" stroke-width="1"/>
+<rect x="90.5" y="174" width="3" height="14" fill="#3987e5"><title>Oak Valley, 1.9 s: UP</title></rect>
+<rect x="92.7" y="174" width="3" height="14" fill="#3987e5"><title>Oak Valley, 2.3 s: UP</title></rect>
+<rect x="104.4" y="174" width="3" height="14" fill="#3987e5"><title>Oak Valley, 4.2 s: UP</title></rect>
+<rect x="118.9" y="174" width="3" height="14" fill="#3987e5"><title>Oak Valley, 6.7 s: UP</title></rect>
+<rect x="136.1" y="174" width="3" height="14" fill="#199e70"><title>Oak Valley, 9.5 s: FORWARD</title></rect>
+<rect x="144.9" y="174" width="3" height="14" fill="#3987e5"><title>Oak Valley, 11.0 s: UP</title></rect>
+<rect x="146.4" y="174" width="3" height="14" fill="#3987e5"><title>Oak Valley, 11.2 s: UP</title></rect>
+<rect x="155.2" y="174" width="3" height="14" fill="#d95926"><title>Oak Valley, 12.7 s: DOWN</title></rect>
+<rect x="162.1" y="174" width="3" height="14" fill="#d95926"><title>Oak Valley, 13.9 s: DOWN</title></rect>
+<rect x="168.7" y="174" width="3" height="14" fill="#3987e5"><title>Oak Valley, 15.0 s: UP</title></rect>
+<rect x="169.7" y="174" width="3" height="14" fill="#3987e5"><title>Oak Valley, 15.1 s: UP</title></rect>
+<rect x="178.3" y="174" width="3" height="14" fill="#d95926"><title>Oak Valley, 16.6 s: DOWN</title></rect>
+<rect x="189.2" y="174" width="3" height="14" fill="#199e70"><title>Oak Valley, 18.4 s: FORWARD</title></rect>
+<rect x="190.2" y="174" width="3" height="14" fill="#3987e5"><title>Oak Valley, 18.5 s: UP</title></rect>
+<rect x="202.3" y="174" width="3" height="14" fill="#3987e5"><title>Oak Valley, 20.5 s: UP</title></rect>
+<rect x="205" y="174" width="3" height="14" fill="#3987e5"><title>Oak Valley, 21.0 s: UP</title></rect>
+<rect x="215.4" y="174" width="3" height="14" fill="#3987e5"><title>Oak Valley, 22.7 s: UP</title></rect>
+<rect x="222.2" y="174" width="3" height="14" fill="#3987e5"><title>Oak Valley, 23.9 s: UP</title></rect>
+<rect x="237.9" y="174" width="3" height="14" fill="#d95926"><title>Oak Valley, 26.5 s: DOWN</title></rect>
+<rect x="243.2" y="174" width="3" height="14" fill="#3987e5"><title>Oak Valley, 27.4 s: UP</title></rect>
+<rect x="248.8" y="174" width="3" height="14" fill="#d95926"><title>Oak Valley, 28.3 s: DOWN</title></rect>
+<rect x="256.6" y="174" width="3" height="14" fill="#3987e5"><title>Oak Valley, 29.6 s: UP</title></rect>
+<rect x="260.9" y="174" width="3" height="14" fill="#d95926"><title>Oak Valley, 30.3 s: DOWN</title></rect>
+<rect x="265.8" y="174" width="3" height="14" fill="#3987e5"><title>Oak Valley, 31.1 s: UP</title></rect>
+<rect x="266.2" y="174" width="3" height="14" fill="#199e70"><title>Oak Valley, 31.2 s: FORWARD</title></rect>
+<rect x="277.2" y="174" width="3" height="14" fill="#3987e5"><title>Oak Valley, 33.0 s: UP</title></rect>
+<rect x="285.4" y="174" width="3" height="14" fill="#3987e5"><title>Oak Valley, 34.4 s: UP</title></rect>
+<rect x="289.1" y="174" width="3" height="14" fill="#3987e5"><title>Oak Valley, 35.0 s: UP</title></rect>
+<rect x="292.2" y="174" width="3" height="14" fill="#3987e5"><title>Oak Valley, 35.5 s: UP</title></rect>
+<rect x="315.5" y="174" width="3" height="14" fill="#3987e5"><title>Oak Valley, 39.4 s: UP</title></rect>
+<rect x="323.1" y="174" width="3" height="14" fill="#3987e5"><title>Oak Valley, 40.7 s: UP</title></rect>
+<rect x="337.5" y="174" width="3" height="14" fill="#3987e5"><title>Oak Valley, 43.1 s: UP</title></rect>
+<rect x="345" y="174" width="3" height="14" fill="#3987e5"><title>Oak Valley, 44.3 s: UP</title></rect>
+<rect x="354.5" y="174" width="3" height="14" fill="#3987e5"><title>Oak Valley, 45.9 s: UP</title></rect>
+<rect x="373.1" y="174" width="3" height="14" fill="#d95926"><title>Oak Valley, 49.0 s: DOWN</title></rect>
+<rect x="388.2" y="174" width="3" height="14" fill="#199e70"><title>Oak Valley, 51.5 s: FORWARD</title></rect>
+<rect x="397.9" y="174" width="3" height="14" fill="#d95926"><title>Oak Valley, 53.1 s: DOWN</title></rect>
+<text x="454.2" y="185" font-size="11" fill="#8b949e">37</text>
+<text x="72" y="205" font-size="12" fill="#e6edf3" text-anchor="end">Grass Bay</text>
+<line x1="80" y1="201" x2="398.7" y2="201" stroke="#30363d" stroke-width="1"/>
+<rect x="87.6" y="194" width="3" height="14" fill="#3987e5"><title>Grass Bay, 1.4 s: UP</title></rect>
+<rect x="102.8" y="194" width="3" height="14" fill="#3987e5"><title>Grass Bay, 4.0 s: UP</title></rect>
+<rect x="105.6" y="194" width="3" height="14" fill="#3987e5"><title>Grass Bay, 4.4 s: UP</title></rect>
+<rect x="110.1" y="194" width="3" height="14" fill="#3987e5"><title>Grass Bay, 5.2 s: UP</title></rect>
+<rect x="129.8" y="194" width="3" height="14" fill="#3987e5"><title>Grass Bay, 8.5 s: UP</title></rect>
+<rect x="130.4" y="194" width="3" height="14" fill="#c98500"><title>Grass Bay, 8.6 s: BACK</title></rect>
+<rect x="137" y="194" width="3" height="14" fill="#d95926"><title>Grass Bay, 9.7 s: DOWN</title></rect>
+<rect x="150.7" y="194" width="3" height="14" fill="#3987e5"><title>Grass Bay, 11.9 s: UP</title></rect>
+<rect x="154.2" y="194" width="3" height="14" fill="#3987e5"><title>Grass Bay, 12.5 s: UP</title></rect>
+<rect x="168.3" y="194" width="3" height="14" fill="#c98500"><title>Grass Bay, 14.9 s: BACK</title></rect>
+<rect x="173" y="194" width="3" height="14" fill="#d95926"><title>Grass Bay, 15.7 s: DOWN</title></rect>
+<rect x="190.2" y="194" width="3" height="14" fill="#199e70"><title>Grass Bay, 18.5 s: FORWARD</title></rect>
+<rect x="209.9" y="194" width="3" height="14" fill="#199e70"><title>Grass Bay, 21.8 s: FORWARD</title></rect>
+<rect x="221.1" y="194" width="3" height="14" fill="#c98500"><title>Grass Bay, 23.7 s: BACK</title></rect>
+<rect x="232.4" y="194" width="3" height="14" fill="#3987e5"><title>Grass Bay, 25.6 s: UP</title></rect>
+<rect x="234.6" y="194" width="3" height="14" fill="#3987e5"><title>Grass Bay, 25.9 s: UP</title></rect>
+<rect x="237.5" y="194" width="3" height="14" fill="#3987e5"><title>Grass Bay, 26.4 s: UP</title></rect>
+<rect x="250.4" y="194" width="3" height="14" fill="#3987e5"><title>Grass Bay, 28.6 s: UP</title></rect>
+<rect x="263.1" y="194" width="3" height="14" fill="#3987e5"><title>Grass Bay, 30.7 s: UP</title></rect>
+<rect x="263.9" y="194" width="3" height="14" fill="#199e70"><title>Grass Bay, 30.8 s: FORWARD</title></rect>
+<rect x="268.2" y="194" width="3" height="14" fill="#d95926"><title>Grass Bay, 31.5 s: DOWN</title></rect>
+<rect x="269.9" y="194" width="3" height="14" fill="#d95926"><title>Grass Bay, 31.8 s: DOWN</title></rect>
+<rect x="279.3" y="194" width="3" height="14" fill="#199e70"><title>Grass Bay, 33.4 s: FORWARD</title></rect>
+<rect x="306.3" y="194" width="3" height="14" fill="#d95926"><title>Grass Bay, 37.9 s: DOWN</title></rect>
+<rect x="314.3" y="194" width="3" height="14" fill="#d95926"><title>Grass Bay, 39.2 s: DOWN</title></rect>
+<rect x="322.1" y="194" width="3" height="14" fill="#199e70"><title>Grass Bay, 40.5 s: FORWARD</title></rect>
+<rect x="340.5" y="194" width="3" height="14" fill="#199e70"><title>Grass Bay, 43.6 s: FORWARD</title></rect>
+<rect x="347.9" y="194" width="3" height="14" fill="#d95926"><title>Grass Bay, 44.8 s: DOWN</title></rect>
+<rect x="351" y="194" width="3" height="14" fill="#d95926"><title>Grass Bay, 45.3 s: DOWN</title></rect>
+<rect x="356.3" y="194" width="3" height="14" fill="#d95926"><title>Grass Bay, 46.2 s: DOWN</title></rect>
+<rect x="361.2" y="194" width="3" height="14" fill="#3987e5"><title>Grass Bay, 47.0 s: UP</title></rect>
+<rect x="375.3" y="194" width="3" height="14" fill="#3987e5"><title>Grass Bay, 49.4 s: UP</title></rect>
+<text x="404.7" y="205" font-size="11" fill="#8b949e">32</text>
+<text x="72" y="225" font-size="12" fill="#e6edf3" text-anchor="end">Sand Cape</text>
+<line x1="80" y1="221" x2="288.1" y2="221" stroke="#30363d" stroke-width="1"/>
+<rect x="87.4" y="214" width="3" height="14" fill="#3987e5"><title>Sand Cape, 1.4 s: UP</title></rect>
+<rect x="96.4" y="214" width="3" height="14" fill="#3987e5"><title>Sand Cape, 2.9 s: UP</title></rect>
+<rect x="103.4" y="214" width="3" height="14" fill="#3987e5"><title>Sand Cape, 4.1 s: UP</title></rect>
+<rect x="107.1" y="214" width="3" height="14" fill="#3987e5"><title>Sand Cape, 4.7 s: UP</title></rect>
+<rect x="118.3" y="214" width="3" height="14" fill="#3987e5"><title>Sand Cape, 6.6 s: UP</title></rect>
+<rect x="134.7" y="214" width="3" height="14" fill="#d95926"><title>Sand Cape, 9.3 s: DOWN</title></rect>
+<rect x="150.5" y="214" width="3" height="14" fill="#3987e5"><title>Sand Cape, 11.9 s: UP</title></rect>
+<rect x="155.2" y="214" width="3" height="14" fill="#199e70"><title>Sand Cape, 12.7 s: FORWARD</title></rect>
+<rect x="163" y="214" width="3" height="14" fill="#d95926"><title>Sand Cape, 14.0 s: DOWN</title></rect>
+<rect x="175.5" y="214" width="3" height="14" fill="#3987e5"><title>Sand Cape, 16.1 s: UP</title></rect>
+<rect x="186.9" y="214" width="3" height="14" fill="#3987e5"><title>Sand Cape, 18.0 s: UP</title></rect>
+<rect x="206.2" y="214" width="3" height="14" fill="#199e70"><title>Sand Cape, 21.2 s: FORWARD</title></rect>
+<rect x="214.6" y="214" width="3" height="14" fill="#3987e5"><title>Sand Cape, 22.6 s: UP</title></rect>
+<rect x="222.4" y="214" width="3" height="14" fill="#3987e5"><title>Sand Cape, 23.9 s: UP</title></rect>
+<rect x="229.7" y="214" width="3" height="14" fill="#3987e5"><title>Sand Cape, 25.1 s: UP</title></rect>
+<rect x="260.2" y="214" width="3" height="14" fill="#c98500"><title>Sand Cape, 30.2 s: BACK</title></rect>
+<rect x="267" y="214" width="3" height="14" fill="#d95926"><title>Sand Cape, 31.3 s: DOWN</title></rect>
+<rect x="269.9" y="214" width="3" height="14" fill="#3987e5"><title>Sand Cape, 31.8 s: UP</title></rect>
+<rect x="273.4" y="214" width="3" height="14" fill="#d95926"><title>Sand Cape, 32.4 s: DOWN</title></rect>
+<rect x="276" y="214" width="3" height="14" fill="#c98500"><title>Sand Cape, 32.8 s: BACK</title></rect>
+<rect x="285.6" y="214" width="3" height="14" fill="#d95926"><title>Sand Cape, 34.4 s: DOWN</title></rect>
+<text x="294.1" y="225" font-size="11" fill="#8b949e">21</text>
+<text x="72" y="245" font-size="12" fill="#e6edf3" text-anchor="end">Central Park</text>
+<line x1="80" y1="241" x2="377.4" y2="241" stroke="#30363d" stroke-width="1"/>
+<rect x="91.3" y="234" width="3" height="14" fill="#3987e5"><title>Central Park, 2.0 s: UP</title></rect>
+<rect x="94.6" y="234" width="3" height="14" fill="#199e70"><title>Central Park, 2.6 s: FORWARD</title></rect>
+<rect x="103.8" y="234" width="3" height="14" fill="#199e70"><title>Central Park, 4.1 s: FORWARD</title></rect>
+<rect x="109.5" y="234" width="3" height="14" fill="#199e70"><title>Central Park, 5.1 s: FORWARD</title></rect>
+<rect x="115.7" y="234" width="3" height="14" fill="#199e70"><title>Central Park, 6.1 s: FORWARD</title></rect>
+<rect x="122.2" y="234" width="3" height="14" fill="#d95926"><title>Central Park, 7.2 s: DOWN</title></rect>
+<rect x="140.2" y="234" width="3" height="14" fill="#3987e5"><title>Central Park, 10.2 s: UP</title></rect>
+<rect x="148.2" y="234" width="3" height="14" fill="#3987e5"><title>Central Park, 11.5 s: UP</title></rect>
+<rect x="154.6" y="234" width="3" height="14" fill="#3987e5"><title>Central Park, 12.6 s: UP</title></rect>
+<rect x="154.8" y="234" width="3" height="14" fill="#c98500"><title>Central Park, 12.6 s: BACK</title></rect>
+<rect x="161.3" y="234" width="3" height="14" fill="#d95926"><title>Central Park, 13.7 s: DOWN</title></rect>
+<rect x="168.3" y="234" width="3" height="14" fill="#d95926"><title>Central Park, 14.9 s: DOWN</title></rect>
+<rect x="184.3" y="234" width="3" height="14" fill="#3987e5"><title>Central Park, 17.5 s: UP</title></rect>
+<rect x="190.6" y="234" width="3" height="14" fill="#3987e5"><title>Central Park, 18.6 s: UP</title></rect>
+<rect x="206.4" y="234" width="3" height="14" fill="#d95926"><title>Central Park, 21.2 s: DOWN</title></rect>
+<rect x="210.7" y="234" width="3" height="14" fill="#3987e5"><title>Central Park, 21.9 s: UP</title></rect>
+<rect x="227.7" y="234" width="3" height="14" fill="#d95926"><title>Central Park, 24.8 s: DOWN</title></rect>
+<rect x="234" y="234" width="3" height="14" fill="#3987e5"><title>Central Park, 25.8 s: UP</title></rect>
+<rect x="249" y="234" width="3" height="14" fill="#d95926"><title>Central Park, 28.3 s: DOWN</title></rect>
+<rect x="255.5" y="234" width="3" height="14" fill="#d95926"><title>Central Park, 29.4 s: DOWN</title></rect>
+<rect x="279.5" y="234" width="3" height="14" fill="#3987e5"><title>Central Park, 33.4 s: UP</title></rect>
+<rect x="285.6" y="234" width="3" height="14" fill="#3987e5"><title>Central Park, 34.4 s: UP</title></rect>
+<rect x="290.6" y="234" width="3" height="14" fill="#3987e5"><title>Central Park, 35.3 s: UP</title></rect>
+<rect x="292" y="234" width="3" height="14" fill="#3987e5"><title>Central Park, 35.5 s: UP</title></rect>
+<rect x="292.8" y="234" width="3" height="14" fill="#3987e5"><title>Central Park, 35.6 s: UP</title></rect>
+<rect x="297.7" y="234" width="3" height="14" fill="#3987e5"><title>Central Park, 36.5 s: UP</title></rect>
+<rect x="298.8" y="234" width="3" height="14" fill="#3987e5"><title>Central Park, 36.6 s: UP</title></rect>
+<rect x="299.8" y="234" width="3" height="14" fill="#3987e5"><title>Central Park, 36.8 s: UP</title></rect>
+<rect x="314.9" y="234" width="3" height="14" fill="#3987e5"><title>Central Park, 39.3 s: UP</title></rect>
+<rect x="323.9" y="234" width="3" height="14" fill="#3987e5"><title>Central Park, 40.8 s: UP</title></rect>
+<rect x="328" y="234" width="3" height="14" fill="#d95926"><title>Central Park, 41.5 s: DOWN</title></rect>
+<rect x="336.2" y="234" width="3" height="14" fill="#199e70"><title>Central Park, 42.9 s: FORWARD</title></rect>
+<rect x="345" y="234" width="3" height="14" fill="#d95926"><title>Central Park, 44.3 s: DOWN</title></rect>
+<text x="383.4" y="245" font-size="11" fill="#8b949e">33</text>
+<text x="72" y="265" font-size="12" fill="#e6edf3" text-anchor="end">Bird Bay</text>
+<line x1="80" y1="261" x2="434.5" y2="261" stroke="#30363d" stroke-width="1"/>
+<rect x="95.6" y="254" width="3" height="14" fill="#3987e5"><title>Bird Bay, 2.8 s: UP</title></rect>
+<rect x="98.7" y="254" width="3" height="14" fill="#3987e5"><title>Bird Bay, 3.3 s: UP</title></rect>
+<rect x="104" y="254" width="3" height="14" fill="#3987e5"><title>Bird Bay, 4.2 s: UP</title></rect>
+<rect x="128.8" y="254" width="3" height="14" fill="#3987e5"><title>Bird Bay, 8.3 s: UP</title></rect>
+<rect x="129.2" y="254" width="3" height="14" fill="#c98500"><title>Bird Bay, 8.4 s: BACK</title></rect>
+<rect x="143.1" y="254" width="3" height="14" fill="#3987e5"><title>Bird Bay, 10.7 s: UP</title></rect>
+<rect x="148.2" y="254" width="3" height="14" fill="#199e70"><title>Bird Bay, 11.5 s: FORWARD</title></rect>
+<rect x="155.8" y="254" width="3" height="14" fill="#199e70"><title>Bird Bay, 12.8 s: FORWARD</title></rect>
+<rect x="162.8" y="254" width="3" height="14" fill="#199e70"><title>Bird Bay, 14.0 s: FORWARD</title></rect>
+<rect x="170.1" y="254" width="3" height="14" fill="#3987e5"><title>Bird Bay, 15.2 s: UP</title></rect>
+<rect x="172.8" y="254" width="3" height="14" fill="#3987e5"><title>Bird Bay, 15.6 s: UP</title></rect>
+<rect x="179.6" y="254" width="3" height="14" fill="#3987e5"><title>Bird Bay, 16.8 s: UP</title></rect>
+<rect x="181.2" y="254" width="3" height="14" fill="#3987e5"><title>Bird Bay, 17.0 s: UP</title></rect>
+<rect x="183.7" y="254" width="3" height="14" fill="#3987e5"><title>Bird Bay, 17.4 s: UP</title></rect>
+<rect x="191.4" y="254" width="3" height="14" fill="#3987e5"><title>Bird Bay, 18.7 s: UP</title></rect>
+<rect x="192.5" y="254" width="3" height="14" fill="#3987e5"><title>Bird Bay, 18.9 s: UP</title></rect>
+<rect x="204.3" y="254" width="3" height="14" fill="#3987e5"><title>Bird Bay, 20.9 s: UP</title></rect>
+<rect x="204.7" y="254" width="3" height="14" fill="#c98500"><title>Bird Bay, 21.0 s: BACK</title></rect>
+<rect x="210.3" y="254" width="3" height="14" fill="#d95926"><title>Bird Bay, 21.9 s: DOWN</title></rect>
+<rect x="218.5" y="254" width="3" height="14" fill="#d95926"><title>Bird Bay, 23.2 s: DOWN</title></rect>
+<rect x="230.6" y="254" width="3" height="14" fill="#199e70"><title>Bird Bay, 25.3 s: FORWARD</title></rect>
+<rect x="242.8" y="254" width="3" height="14" fill="#199e70"><title>Bird Bay, 27.3 s: FORWARD</title></rect>
+<rect x="246.7" y="254" width="3" height="14" fill="#d95926"><title>Bird Bay, 28.0 s: DOWN</title></rect>
+<rect x="252.1" y="254" width="3" height="14" fill="#3987e5"><title>Bird Bay, 28.8 s: UP</title></rect>
+<rect x="252.9" y="254" width="3" height="14" fill="#3987e5"><title>Bird Bay, 29.0 s: UP</title></rect>
+<rect x="261.1" y="254" width="3" height="14" fill="#3987e5"><title>Bird Bay, 30.3 s: UP</title></rect>
+<rect x="265.6" y="254" width="3" height="14" fill="#d95926"><title>Bird Bay, 31.1 s: DOWN</title></rect>
+<rect x="277" y="254" width="3" height="14" fill="#d95926"><title>Bird Bay, 33.0 s: DOWN</title></rect>
+<rect x="287.9" y="254" width="3" height="14" fill="#3987e5"><title>Bird Bay, 34.8 s: UP</title></rect>
+<rect x="297.5" y="254" width="3" height="14" fill="#3987e5"><title>Bird Bay, 36.4 s: UP</title></rect>
+<rect x="308.4" y="254" width="3" height="14" fill="#3987e5"><title>Bird Bay, 38.2 s: UP</title></rect>
+<rect x="319.8" y="254" width="3" height="14" fill="#3987e5"><title>Bird Bay, 40.1 s: UP</title></rect>
+<rect x="329.9" y="254" width="3" height="14" fill="#3987e5"><title>Bird Bay, 41.8 s: UP</title></rect>
+<rect x="336" y="254" width="3" height="14" fill="#d95926"><title>Bird Bay, 42.8 s: DOWN</title></rect>
+<rect x="340.9" y="254" width="3" height="14" fill="#199e70"><title>Bird Bay, 43.7 s: FORWARD</title></rect>
+<rect x="348.5" y="254" width="3" height="14" fill="#d95926"><title>Bird Bay, 44.9 s: DOWN</title></rect>
+<rect x="352" y="254" width="3" height="14" fill="#3987e5"><title>Bird Bay, 45.5 s: UP</title></rect>
+<rect x="353.2" y="254" width="3" height="14" fill="#3987e5"><title>Bird Bay, 45.7 s: UP</title></rect>
+<rect x="356.9" y="254" width="3" height="14" fill="#199e70"><title>Bird Bay, 46.3 s: FORWARD</title></rect>
+<rect x="367.8" y="254" width="3" height="14" fill="#d95926"><title>Bird Bay, 48.1 s: DOWN</title></rect>
+<rect x="371" y="254" width="3" height="14" fill="#3987e5"><title>Bird Bay, 48.7 s: UP</title></rect>
+<rect x="371.7" y="254" width="3" height="14" fill="#3987e5"><title>Bird Bay, 48.8 s: UP</title></rect>
+<rect x="389.1" y="254" width="3" height="14" fill="#199e70"><title>Bird Bay, 51.7 s: FORWARD</title></rect>
+<rect x="399.9" y="254" width="3" height="14" fill="#3987e5"><title>Bird Bay, 53.5 s: UP</title></rect>
+<rect x="400.9" y="254" width="3" height="14" fill="#c98500"><title>Bird Bay, 53.7 s: BACK</title></rect>
+<text x="440.5" y="265" font-size="11" fill="#8b949e">45</text>
+<text x="72" y="285" font-size="12" fill="#e6edf3" text-anchor="end">West Harbour</text>
+<line x1="80" y1="281" x2="676" y2="281" stroke="#30363d" stroke-width="1"/>
+<rect x="92.5" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 2.3 s: UP</title></rect>
+<rect x="107.1" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 4.7 s: UP</title></rect>
+<rect x="110.3" y="274" width="3" height="14" fill="#c98500"><title>West Harbour, 5.2 s: BACK</title></rect>
+<rect x="116.5" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 6.2 s: UP</title></rect>
+<rect x="123.2" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 7.4 s: UP</title></rect>
+<rect x="136.8" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 9.6 s: UP</title></rect>
+<rect x="151.9" y="274" width="3" height="14" fill="#c98500"><title>West Harbour, 12.2 s: BACK</title></rect>
+<rect x="154.2" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 12.5 s: UP</title></rect>
+<rect x="156.4" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 12.9 s: UP</title></rect>
+<rect x="182" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 17.2 s: UP</title></rect>
+<rect x="183.7" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 17.4 s: UP</title></rect>
+<rect x="191.6" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 18.8 s: UP</title></rect>
+<rect x="197" y="274" width="3" height="14" fill="#c98500"><title>West Harbour, 19.7 s: BACK</title></rect>
+<rect x="200" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 20.2 s: UP</title></rect>
+<rect x="208.6" y="274" width="3" height="14" fill="#d95926"><title>West Harbour, 21.6 s: DOWN</title></rect>
+<rect x="219.5" y="274" width="3" height="14" fill="#c98500"><title>West Harbour, 23.4 s: BACK</title></rect>
+<rect x="228.5" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 24.9 s: UP</title></rect>
+<rect x="230.6" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 25.3 s: UP</title></rect>
+<rect x="256.4" y="274" width="3" height="14" fill="#d95926"><title>West Harbour, 29.6 s: DOWN</title></rect>
+<rect x="275.4" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 32.7 s: UP</title></rect>
+<rect x="275.8" y="274" width="3" height="14" fill="#199e70"><title>West Harbour, 32.8 s: FORWARD</title></rect>
+<rect x="284.6" y="274" width="3" height="14" fill="#d95926"><title>West Harbour, 34.3 s: DOWN</title></rect>
+<rect x="301.6" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 37.1 s: UP</title></rect>
+<rect x="301.8" y="274" width="3" height="14" fill="#c98500"><title>West Harbour, 37.1 s: BACK</title></rect>
+<rect x="309.4" y="274" width="3" height="14" fill="#d95926"><title>West Harbour, 38.4 s: DOWN</title></rect>
+<rect x="314.9" y="274" width="3" height="14" fill="#c98500"><title>West Harbour, 39.3 s: BACK</title></rect>
+<rect x="332.1" y="274" width="3" height="14" fill="#d95926"><title>West Harbour, 42.2 s: DOWN</title></rect>
+<rect x="338.9" y="274" width="3" height="14" fill="#c98500"><title>West Harbour, 43.3 s: BACK</title></rect>
+<rect x="354.5" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 45.9 s: UP</title></rect>
+<rect x="361.8" y="274" width="3" height="14" fill="#199e70"><title>West Harbour, 47.1 s: FORWARD</title></rect>
+<rect x="372.9" y="274" width="3" height="14" fill="#199e70"><title>West Harbour, 49.0 s: FORWARD</title></rect>
+<rect x="380.9" y="274" width="3" height="14" fill="#d95926"><title>West Harbour, 50.3 s: DOWN</title></rect>
+<rect x="393" y="274" width="3" height="14" fill="#c98500"><title>West Harbour, 52.3 s: BACK</title></rect>
+<rect x="397.1" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 53.0 s: UP</title></rect>
+<rect x="400.5" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 53.6 s: UP</title></rect>
+<rect x="408.3" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 54.9 s: UP</title></rect>
+<rect x="429" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 58.3 s: UP</title></rect>
+<rect x="437" y="274" width="3" height="14" fill="#c98500"><title>West Harbour, 59.7 s: BACK</title></rect>
+<rect x="446.2" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 61.2 s: UP</title></rect>
+<rect x="464" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 64.2 s: UP</title></rect>
+<rect x="470.8" y="274" width="3" height="14" fill="#d95926"><title>West Harbour, 65.3 s: DOWN</title></rect>
+<rect x="480.8" y="274" width="3" height="14" fill="#199e70"><title>West Harbour, 67.0 s: FORWARD</title></rect>
+<rect x="488.6" y="274" width="3" height="14" fill="#d95926"><title>West Harbour, 68.3 s: DOWN</title></rect>
+<rect x="494.5" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 69.3 s: UP</title></rect>
+<rect x="495.2" y="274" width="3" height="14" fill="#c98500"><title>West Harbour, 69.4 s: BACK</title></rect>
+<rect x="501.1" y="274" width="3" height="14" fill="#d95926"><title>West Harbour, 70.3 s: DOWN</title></rect>
+<rect x="514.8" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 72.6 s: UP</title></rect>
+<rect x="515.2" y="274" width="3" height="14" fill="#c98500"><title>West Harbour, 72.7 s: BACK</title></rect>
+<rect x="521" y="274" width="3" height="14" fill="#d95926"><title>West Harbour, 73.7 s: DOWN</title></rect>
+<rect x="533.2" y="274" width="3" height="14" fill="#199e70"><title>West Harbour, 75.7 s: FORWARD</title></rect>
+<rect x="554.1" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 79.2 s: UP</title></rect>
+<rect x="555.8" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 79.5 s: UP</title></rect>
+<rect x="565" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 81.0 s: UP</title></rect>
+<rect x="573.2" y="274" width="3" height="14" fill="#d95926"><title>West Harbour, 82.4 s: DOWN</title></rect>
+<rect x="582.4" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 83.9 s: UP</title></rect>
+<rect x="584" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 84.2 s: UP</title></rect>
+<rect x="588.3" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 84.9 s: UP</title></rect>
+<rect x="599.8" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 86.8 s: UP</title></rect>
+<rect x="602.3" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 87.2 s: UP</title></rect>
+<rect x="620.9" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 90.3 s: UP</title></rect>
+<rect x="621.3" y="274" width="3" height="14" fill="#c98500"><title>West Harbour, 90.4 s: BACK</title></rect>
+<rect x="627.2" y="274" width="3" height="14" fill="#d95926"><title>West Harbour, 91.4 s: DOWN</title></rect>
+<rect x="637.5" y="274" width="3" height="14" fill="#199e70"><title>West Harbour, 93.1 s: FORWARD</title></rect>
+<rect x="644.9" y="274" width="3" height="14" fill="#d95926"><title>West Harbour, 94.3 s: DOWN</title></rect>
+<rect x="652.2" y="274" width="3" height="14" fill="#3987e5"><title>West Harbour, 95.5 s: UP</title></rect>
+<text x="682" y="285" font-size="11" fill="#8b949e">65</text>
+<text x="72" y="305" font-size="12" fill="#e6edf3" text-anchor="end">Pine Island</text>
+<line x1="80" y1="301" x2="399.3" y2="301" stroke="#30363d" stroke-width="1"/>
+<rect x="81.3" y="294" width="3" height="14" fill="#3987e5"><title>Pine Island, 0.4 s: UP</title></rect>
+<rect x="81.7" y="294" width="3" height="14" fill="#199e70"><title>Pine Island, 0.4 s: FORWARD</title></rect>
+<rect x="89.9" y="294" width="3" height="14" fill="#3987e5"><title>Pine Island, 1.8 s: UP</title></rect>
+<rect x="90.3" y="294" width="3" height="14" fill="#c98500"><title>Pine Island, 1.9 s: BACK</title></rect>
+<rect x="98.3" y="294" width="3" height="14" fill="#3987e5"><title>Pine Island, 3.2 s: UP</title></rect>
+<rect x="109.9" y="294" width="3" height="14" fill="#199e70"><title>Pine Island, 5.2 s: FORWARD</title></rect>
+<rect x="126.9" y="294" width="3" height="14" fill="#199e70"><title>Pine Island, 8.0 s: FORWARD</title></rect>
+<rect x="138.4" y="294" width="3" height="14" fill="#3987e5"><title>Pine Island, 9.9 s: UP</title></rect>
+<rect x="139.8" y="294" width="3" height="14" fill="#3987e5"><title>Pine Island, 10.1 s: UP</title></rect>
+<rect x="141.7" y="294" width="3" height="14" fill="#199e70"><title>Pine Island, 10.4 s: FORWARD</title></rect>
+<rect x="144.9" y="294" width="3" height="14" fill="#d95926"><title>Pine Island, 11.0 s: DOWN</title></rect>
+<rect x="165.2" y="294" width="3" height="14" fill="#3987e5"><title>Pine Island, 14.4 s: UP</title></rect>
+<rect x="170.1" y="294" width="3" height="14" fill="#c98500"><title>Pine Island, 15.2 s: BACK</title></rect>
+<rect x="174.4" y="294" width="3" height="14" fill="#d95926"><title>Pine Island, 15.9 s: DOWN</title></rect>
+<rect x="179.4" y="294" width="3" height="14" fill="#199e70"><title>Pine Island, 16.7 s: FORWARD</title></rect>
+<rect x="200" y="294" width="3" height="14" fill="#c98500"><title>Pine Island, 20.2 s: BACK</title></rect>
+<rect x="204.3" y="294" width="3" height="14" fill="#3987e5"><title>Pine Island, 20.9 s: UP</title></rect>
+<rect x="207.2" y="294" width="3" height="14" fill="#3987e5"><title>Pine Island, 21.4 s: UP</title></rect>
+<rect x="236.5" y="294" width="3" height="14" fill="#3987e5"><title>Pine Island, 26.2 s: UP</title></rect>
+<rect x="237.5" y="294" width="3" height="14" fill="#3987e5"><title>Pine Island, 26.4 s: UP</title></rect>
+<rect x="246.9" y="294" width="3" height="14" fill="#3987e5"><title>Pine Island, 28.0 s: UP</title></rect>
+<rect x="260.7" y="294" width="3" height="14" fill="#3987e5"><title>Pine Island, 30.3 s: UP</title></rect>
+<rect x="261.1" y="294" width="3" height="14" fill="#c98500"><title>Pine Island, 30.3 s: BACK</title></rect>
+<rect x="267" y="294" width="3" height="14" fill="#d95926"><title>Pine Island, 31.3 s: DOWN</title></rect>
+<rect x="275" y="294" width="3" height="14" fill="#c98500"><title>Pine Island, 32.7 s: BACK</title></rect>
+<rect x="278.3" y="294" width="3" height="14" fill="#3987e5"><title>Pine Island, 33.2 s: UP</title></rect>
+<rect x="281.5" y="294" width="3" height="14" fill="#3987e5"><title>Pine Island, 33.8 s: UP</title></rect>
+<rect x="313.1" y="294" width="3" height="14" fill="#3987e5"><title>Pine Island, 39.0 s: UP</title></rect>
+<rect x="313.9" y="294" width="3" height="14" fill="#3987e5"><title>Pine Island, 39.2 s: UP</title></rect>
+<rect x="314.7" y="294" width="3" height="14" fill="#3987e5"><title>Pine Island, 39.3 s: UP</title></rect>
+<rect x="321.9" y="294" width="3" height="14" fill="#c98500"><title>Pine Island, 40.5 s: BACK</title></rect>
+<rect x="328" y="294" width="3" height="14" fill="#3987e5"><title>Pine Island, 41.5 s: UP</title></rect>
+<rect x="330.3" y="294" width="3" height="14" fill="#c98500"><title>Pine Island, 41.9 s: BACK</title></rect>
+<rect x="336.4" y="294" width="3" height="14" fill="#3987e5"><title>Pine Island, 42.9 s: UP</title></rect>
+<rect x="346.3" y="294" width="3" height="14" fill="#3987e5"><title>Pine Island, 44.5 s: UP</title></rect>
+<rect x="354.9" y="294" width="3" height="14" fill="#c98500"><title>Pine Island, 46.0 s: BACK</title></rect>
+<rect x="366.3" y="294" width="3" height="14" fill="#c98500"><title>Pine Island, 47.9 s: BACK</title></rect>
+<rect x="368.6" y="294" width="3" height="14" fill="#3987e5"><title>Pine Island, 48.3 s: UP</title></rect>
+<rect x="370.8" y="294" width="3" height="14" fill="#3987e5"><title>Pine Island, 48.6 s: UP</title></rect>
+<rect x="375.6" y="294" width="3" height="14" fill="#3987e5"><title>Pine Island, 49.4 s: UP</title></rect>
+<rect x="384.8" y="294" width="3" height="14" fill="#3987e5"><title>Pine Island, 51.0 s: UP</title></rect>
+<rect x="385" y="294" width="3" height="14" fill="#c98500"><title>Pine Island, 51.0 s: BACK</title></rect>
+<text x="405.3" y="305" font-size="11" fill="#8b949e">42</text>
+<text x="80" y="328" font-size="11" fill="#8b949e" text-anchor="middle">0 s</text>
+<text x="140" y="328" font-size="11" fill="#8b949e" text-anchor="middle">10 s</text>
+<text x="200" y="328" font-size="11" fill="#8b949e" text-anchor="middle">20 s</text>
+<text x="260" y="328" font-size="11" fill="#8b949e" text-anchor="middle">30 s</text>
+<text x="320" y="328" font-size="11" fill="#8b949e" text-anchor="middle">40 s</text>
+<text x="380" y="328" font-size="11" fill="#8b949e" text-anchor="middle">50 s</text>
+<text x="440" y="328" font-size="11" fill="#8b949e" text-anchor="middle">60 s</text>
+<text x="500" y="328" font-size="11" fill="#8b949e" text-anchor="middle">70 s</text>
+<text x="560" y="328" font-size="11" fill="#8b949e" text-anchor="middle">80 s</text>
+<text x="620" y="328" font-size="11" fill="#8b949e" text-anchor="middle">90 s</text>
+<text x="680" y="328" font-size="11" fill="#8b949e" text-anchor="middle">100 s</text>
+<rect x="80" y="355" width="10" height="10" fill="#3987e5" rx="2"></rect>
+<text x="95" y="364" font-size="12" fill="#e6edf3">UP</text>
+<rect x="190" y="355" width="10" height="10" fill="#d95926" rx="2"></rect>
+<text x="205" y="364" font-size="12" fill="#e6edf3">DOWN</text>
+<rect x="300" y="355" width="10" height="10" fill="#199e70" rx="2"></rect>
+<text x="315" y="364" font-size="12" fill="#e6edf3">FORWARD</text>
+<rect x="410" y="355" width="10" height="10" fill="#c98500" rx="2"></rect>
+<text x="425" y="364" font-size="12" fill="#e6edf3">BACK</text>
+<text x="690" y="364" font-size="12" fill="#8b949e" text-anchor="end">n: presses</text>
+</svg>

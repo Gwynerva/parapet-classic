@@ -76,6 +76,34 @@ def grid(text, legend):
     return rows
 
 
+def padded_rows(rows):
+    """Text rows padded with '.' on the right to the widest one's width."""
+    w = max(len(r) for r in rows)
+    return [r.ljust(w, '.') for r in rows]
+
+
+def shift(rows, mapping):
+    """A picture with its characters swapped by `mapping` (the far limb a tone darker)."""
+    return [''.join(mapping.get(c, c) for c in r) for r in rows]
+
+
+def enc(rows, legend, pal):
+    """Text rows in a picture legend → rows in the look's palette (a `heads.Palette`), '.' and
+    '+' (an attachment's pivot) kept."""
+    return [''.join(c if c in '.+' else pal.char(legend[c]) for c in r) for r in rows]
+
+
+def check_pictures(names):
+    """Raises if a picture among a module's globals (`names`: an upper-case list of text rows) has
+    rows of different widths; a module of pictures ends with `check_pictures(globals())`."""
+    for name, rows in list(names.items()):
+        if name.isupper() and isinstance(rows, list) and rows and isinstance(rows[0], str):
+            w = len(rows[0])
+            bad = [(i, len(r)) for i, r in enumerate(rows) if len(r) != w]
+            if bad:
+                raise ValueError(f'{name}: rows {bad} not {w} wide')
+
+
 # Width and height parity of the base characters' heads (Blaise 16×17, the others 17×17).
 HEAD_PARITY = {0: (0, 1)}
 

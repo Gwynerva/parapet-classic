@@ -1,6 +1,7 @@
 /**
- * Run setup shared by the client and the server: turns a level, a game mode and the mission
- * table entry into a `World`. Both sides must build runs identically for replays to verify.
+ * Run setup shared by the game, replay verification and the tools: turns a level, a game mode
+ * and the mission table entry into a `World`. Every caller builds runs identically, so replays
+ * verify.
  */
 import type { LevelData } from './level/level.ts';
 import type { MoveTableData } from './runner/moves.ts';

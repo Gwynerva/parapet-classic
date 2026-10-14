@@ -34,7 +34,7 @@ export class OptionsScreen implements Screen {
   constructor(ctx: GameContext) {
     this.ctx = ctx;
     this.frame = new ScreenFrame(ctx);
-    this.menu = new Menu(ctx.fonts.text, ctx.fonts.small);
+    this.menu = new Menu(ctx.fonts.text);
   }
 
   private cycle<T>(list: readonly T[], current: T, delta: number): T {

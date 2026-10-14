@@ -40,7 +40,8 @@
  *
  * This module is pure (no DOM).
  */
-import { Family, familyOf, isLimb } from './Rig.ts';
+import { familyOf, isLimb } from './Rig.ts';
+import { DEFAULT_ACCENT, parseColor } from './color.ts';
 
 export interface LookRecolor {
   sprites: number[];
@@ -118,8 +119,6 @@ export interface LookData {
   recolor?: LookRecolor[];
   overlays?: Record<string, string[] | null>;
   parts?: Record<string, string[] | null>;
-  /** Old form of `parts["<id>:near"]`. */
-  near?: Record<string, string[]>;
   attachments?: Record<string, LookAttachment | null>;
   ribbons?: Record<string, LookRibbon | null>;
   /** Effect variants worn with this outfit instead of the boss's (`null` clears a parent's). */
@@ -152,18 +151,6 @@ export const LOOK_SPRITES: ReadonlySet<number> = new Set([
 
 /** Deepest chain of `extends`. */
 export const MAX_EXTENDS = 4;
-
-export type Rgba = readonly [number, number, number, number];
-
-/** `#rgb`, `#rrggbb` or `#rrggbbaa` → RGBA bytes, or null. */
-export function parseColor(text: string): Rgba | null {
-  const m = /^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.exec(text);
-  if (!m) return null;
-  let hex = m[1]!;
-  if (hex.length === 3) hex = hex.replace(/./g, (c) => c + c);
-  const v = (i: number): number => parseInt(hex.slice(i, i + 2), 16);
-  return [v(0), v(2), v(4), hex.length === 8 ? v(6) : 255];
-}
 
 /** A canonical part key: a sprite, maybe a side, maybe a mirroring. */
 export interface PartKey {
@@ -289,7 +276,7 @@ export function resolveLook(
   const out: ResolvedLook = {
     id,
     base: 0,
-    accent: '#ff3ea5',
+    accent: DEFAULT_ACCENT,
     palette: {},
     recolor: [],
     overlays: {},
@@ -305,11 +292,7 @@ export function resolveLook(
     Object.assign(out.palette, look.palette ?? {});
     out.recolor.push(...(look.recolor ?? []));
     mergeInto(out.overlays, expandMap(look.overlays, 'overlay', p));
-    const parts = expandMap(look.parts, 'part', p);
-    for (const [key, rows] of Object.entries(look.near ?? {})) {
-      parts.set(`${key}:near`, rows);
-    }
-    mergeInto(out.parts, parts);
+    mergeInto(out.parts, expandMap(look.parts, 'part', p));
     for (const [name, a] of Object.entries(look.attachments ?? {})) {
       if (a === null) {
         delete out.attachments[name];
@@ -462,14 +445,4 @@ export function pivotOf(rows: readonly string[]): { x: number; y: number; rows: 
 /** The sprite id of a canonical key text (`"17:near:flip"` → 17). */
 export function keyId(key: string): number {
   return Number(key.split(':')[0]);
-}
-
-/** Whether a family has a near and a far side in look keys (arms and legs). */
-export function hasSides(id: number): boolean {
-  return isLimb(familyOf(id));
-}
-
-/** Whether sprite `id` is a face (drawn instead of the upright head while it blinks). */
-export function isFace(id: number): boolean {
-  return familyOf(id) === Family.FACE;
 }

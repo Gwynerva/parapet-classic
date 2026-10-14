@@ -40,6 +40,24 @@ new, a readable reference for this kind of game.
 Space confirms, Esc steps back, P pauses, R starts the run over. Phones get touch buttons for
 two thumbs, with start-over and pause between them.
 
+## The original, taken apart
+
+<img src="reference/findings/08-one-vector-runner/parts.gif" alt="The original's runner pulled apart into the small sprites it is made of, and put back together" width="220" align="right">
+
+To rebuild the game exactly we had to understand it completely, and the original turned out to
+be full of clever ideas, a few accidents and things nobody was meant to notice. Fifteen of them
+are told, measured and animated in [`reference/findings`](reference/findings), for anyone
+curious how a 2007 phone game worked:
+
+- the game never knows a key is held, and a move pressed early simply waits;
+- running up a wall is prepared, not timed, and one press gives two kicks, or one;
+- the whole parkour is a table of 135 states, the runner and the levels are vector drawings;
+- a "circle" with 16 sides, slow phones that play in slow motion, a camera on a leash;
+- the rivals are the developers' own runs, four birds that never appear, a score that never
+  drops, and what the fast tricks and the showy ones cost.
+
+Or play with the experiments in the browser: [the Lab](https://gwynerva.github.io/parapet-classic/lab/).
+
 ## Development
 
 ```bash
@@ -51,7 +69,7 @@ npm run check     # format, types, tests
 
 Node 24+. TypeScript 7 and Canvas 2D, no engine: a deterministic integer simulation
 (`packages/sim`), a browser runtime (`packages/runtime`), the game (`packages/classic`), the
-tools and our content. Everything learned about the original is in `reference/`. The layout,
+tools, the experiments on the original (`packages/lab`) and our content. Everything learned about the original is in `reference/`; the history in [`CHANGELOG.md`](CHANGELOG.md). The layout,
 the tools and the dev pages: [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md).
 
 ## The original and its rights holders

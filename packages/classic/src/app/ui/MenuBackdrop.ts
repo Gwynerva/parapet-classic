@@ -15,14 +15,15 @@
 import {
   createReplayWorld,
   InputPlayer,
+  type InputRun,
   isRankedMode,
   Level,
   LEVEL_COUNT,
+  MissionType,
   NO_INPUT,
+  type RunMode,
   STEP,
   World,
-  type InputRun,
-  type RunMode,
 } from '@parapet/sim';
 import { FixedStepClock } from '@parapet/runtime/app/GameLoop.ts';
 import { Camera } from '@parapet/runtime/render/Camera.ts';
@@ -292,7 +293,7 @@ export class MenuBackdrop {
         level: data,
         moves: content.moves,
         tables: content.tables,
-        rules: { missionType: 0, freeRun: true },
+        rules: { missionType: MissionType.SPRINT, freeRun: true },
         rivals: [{ recording, startDelay: 0 }],
         levelId,
       });
@@ -356,13 +357,17 @@ export class MenuBackdrop {
     };
     const cast = this.cast(sources.length);
     // Runs in a shuffled order of phases, so a record is not always the one at the start.
-    const phases = PHASES.slice().sort(() => Math.random() - 0.5);
+    const phases = PHASES.slice();
+    for (let i = phases.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [phases[i], phases[j]] = [phases[j]!, phases[i]!];
+    }
     sources.forEach((s, i) => {
       const placeholder = new World({
         level: data,
         moves: content.moves,
         tables: content.tables,
-        rules: { missionType: 0, freeRun: true },
+        rules: { missionType: MissionType.SPRINT, freeRun: true },
       });
       const actor: Actor = {
         source: s.source,

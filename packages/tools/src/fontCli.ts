@@ -1,13 +1,11 @@
 // Entry point: `node src/fontCli.ts [--only <name>] [--out <dir>]` (npm run build-font).
 // Rasterises the bundled vector fonts in packages/content/fonts/src into bitmap font atlases.
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join, resolve } from 'node:path';
 import { buildFont, REQUIRED_CHARSET } from './buildFont.ts';
 import { TrueTypeFont } from './ttf.ts';
+import { FONTS_DIR } from './files.ts';
 
-const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
-const FONTS_DIR = resolve(REPO_ROOT, 'packages', 'content', 'fonts');
 const SOURCES_DIR = join(FONTS_DIR, 'src');
 
 interface FontSpec {

@@ -10,7 +10,8 @@ import { STEP, type World } from '@parapet/sim';
 import { decodeGlimpse, type GlimpsePose } from '@parapet/runtime/content/glimpses.ts';
 import { CharacterRenderer } from '@parapet/runtime/render/CharacterRenderer.ts';
 import type { SceneRenderer } from '@parapet/runtime/render/SceneRenderer.ts';
-import { GENERATED_DIR, levelContent, loadClipTable } from '../src/tas/content.ts';
+import { levelContent, loadClipTable } from '../src/tas/content.ts';
+import { EXTRACTED_DIR } from '../src/files.ts';
 import type { TasRunFile } from '../src/tas/files.ts';
 import {
   cutGlimpses,
@@ -40,7 +41,7 @@ function state(world: World): string {
   return [r.x, r.y, r.vx, r.vy, r.handsDx, r.handsDy, r.moveId, r.moveTimer, r.facingRight].join();
 }
 
-describe.skipIf(!existsSync(join(GENERATED_DIR, 'moves.json')))('glimpse recorder', () => {
+describe.skipIf(!existsSync(join(EXTRACTED_DIR, 'moves.json')))('glimpse recorder', () => {
   for (const { levelId, mode, presses } of MASHES) {
     const content = levelContent(levelId);
     const play = playFull(content, mode, presses);

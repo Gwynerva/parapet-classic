@@ -1,9 +1,8 @@
 /**
  * Draws the echoes: ghosts of recorded runs, as holograms.
  *
- * Every echo is drawn into an offscreen layer with its recoloured skin (`EchoSheets`), then
- * the layer gets scanlines (every third pixel row dimmed, the phase crawling downwards) and
- * is laid over the scene slightly transparent. On top of that:
+ * Every echo is drawn with its recoloured skin (`EchoSheets`) as a hologram (`Hologram.ts`).
+ * On top of that:
  *
  * - a speed trail: three afterimages of the poses two, four and six steps back while the
  *   runner moves fast;
@@ -22,18 +21,14 @@ import type { SceneRenderer, SpriteSwap } from './SceneRenderer.ts';
 import { PoseHistory } from './PoseHistory.ts';
 import { Sparks, sparkColors } from './Sparks.ts';
 import { toScreen, type CameraPos, type ViewSize } from './View.ts';
+import { HOLOGRAM_ALPHA, HologramLayer } from './Hologram.ts';
+import { FrameTimer } from '../math.ts';
 
 /** Pivot and size of the character object (feet at y = 76 of a 142 px tall box). */
 const BODY_TOP = 76;
 const BODY_HEIGHT = 142;
 const BODY_WIDTH = 134;
 const BODY_LEFT = 50;
-/** Opacity of the hologram layer. */
-const LAYER_ALPHA = 0.85;
-/** Scanlines: one dimmed row in every `SCAN_PERIOD`, moving one row every `SCAN_STEP_MS`. */
-const SCAN_PERIOD = 3;
-const SCAN_STEP_MS = 90;
-const SCAN_DIM = 'rgba(0, 0, 0, 0.55)';
 /** Steps back of the afterimages and their opacity. */
 const TRAIL = [
   { back: 6, alpha: 0.1 },
@@ -41,20 +36,6 @@ const TRAIL = [
   { back: 2, alpha: 0.35 },
 ] as const;
 const REVEAL_MS = 320;
-
-/** Dims every third row of a hologram layer, the phase crawling downwards with time. */
-export function applyScanlines(
-  lctx: CanvasRenderingContext2D,
-  width: number,
-  height: number,
-  nowMs: number,
-): void {
-  lctx.globalCompositeOperation = 'destination-out';
-  lctx.fillStyle = SCAN_DIM;
-  const phase = Math.floor(nowMs / SCAN_STEP_MS) % SCAN_PERIOD;
-  for (let y = phase; y < height; y += SCAN_PERIOD) lctx.fillRect(0, y, width, 1);
-  lctx.globalCompositeOperation = 'source-over';
-}
 
 export interface EchoStyle {
   color: EchoColor;
@@ -88,8 +69,8 @@ export class EchoRenderer {
   private readonly entries = new Map<RunnerState, Entry>();
   private readonly sparks = new Sparks();
   private readonly markerList: EchoMarker[] = [];
-  private layer: HTMLCanvasElement | null = null;
-  private lastDrawAt = -1;
+  private readonly hologram = new HologramLayer();
+  private readonly frames = new FrameTimer();
 
   constructor(characters: CharacterRenderer, sheets: EchoSheets) {
     this.characters = characters;
@@ -171,26 +152,16 @@ export class EchoRenderer {
     nowMs: number,
     view: ViewSize,
   ): void {
-    const dt = this.lastDrawAt < 0 ? 0 : Math.min(100, Math.max(0, nowMs - this.lastDrawAt));
-    this.lastDrawAt = nowMs;
+    const dt = this.frames.tick(nowMs);
     this.drawMarkers(ctx, cam);
-    const layer = this.ensureLayer(view);
-    const lctx = layer?.getContext('2d');
-    if (layer && lctx) {
-      lctx.clearRect(0, 0, layer.width, layer.height);
+    this.hologram.draw(ctx, view, nowMs, HOLOGRAM_ALPHA, (lctx) => {
       let drawn = false;
       for (const e of this.entries.values()) {
         if (e.revealAt < 0 || e.gone) continue;
         drawn = this.drawEntry(lctx, e, cam, alpha, clock, nowMs, view) || drawn;
       }
-      if (drawn) {
-        applyScanlines(lctx, layer.width, layer.height, nowMs);
-        ctx.save();
-        ctx.globalAlpha = LAYER_ALPHA;
-        ctx.drawImage(layer, 0, 0);
-        ctx.restore();
-      }
-    }
+      return drawn;
+    });
     this.sparks.draw(ctx, cam, dt);
   }
 
@@ -206,36 +177,36 @@ export class EchoRenderer {
     const pose = this.characters.pose(e.runner, alpha);
     if (!pose) return false;
     const scene = this.sheets.scene(e.style.color, e.style.textured, e.style.source);
-    scene.setViewport(view.width, view.height);
     const swap = e.style.swap(clock);
     const revealed = (nowMs - e.revealAt) / REVEAL_MS;
-
-    if (revealed >= 1 && e.history.fast) {
-      for (const { back, alpha: a } of TRAIL) {
-        const past = e.history.back(back);
-        if (!past) continue;
-        lctx.globalAlpha = a;
-        drawPose(lctx, scene, past, cam, swap);
+    scene.withViewport(view.width, view.height, () => {
+      if (revealed >= 1 && e.history.fast) {
+        for (const { back, alpha: a } of TRAIL) {
+          const past = e.history.back(back);
+          if (!past) continue;
+          lctx.globalAlpha = a;
+          drawPose(lctx, scene, past, cam, swap);
+        }
+        lctx.globalAlpha = 1;
       }
-      lctx.globalAlpha = 1;
-    }
 
-    if (revealed < 1) {
-      const sx = toScreen(pose.x, cam.x);
-      const top = toScreen(pose.y, cam.y) - BODY_TOP;
-      const left = sx - (pose.flipX ? BODY_WIDTH - BODY_LEFT : BODY_LEFT);
-      const edge = top + Math.round(BODY_HEIGHT * Math.max(0, revealed));
-      lctx.save();
-      lctx.beginPath();
-      lctx.rect(left, top, BODY_WIDTH, edge - top);
-      lctx.clip();
-      drawPose(lctx, scene, pose, cam, swap);
-      lctx.restore();
-      lctx.fillStyle = e.style.color.light;
-      lctx.fillRect(left + 24, edge, BODY_WIDTH - 48, 1);
-    } else {
-      drawPose(lctx, scene, pose, cam, swap);
-    }
+      if (revealed < 1) {
+        const sx = toScreen(pose.x, cam.x);
+        const top = toScreen(pose.y, cam.y) - BODY_TOP;
+        const left = sx - (pose.flipX ? BODY_WIDTH - BODY_LEFT : BODY_LEFT);
+        const edge = top + Math.round(BODY_HEIGHT * Math.max(0, revealed));
+        lctx.save();
+        lctx.beginPath();
+        lctx.rect(left, top, BODY_WIDTH, edge - top);
+        lctx.clip();
+        drawPose(lctx, scene, pose, cam, swap);
+        lctx.restore();
+        lctx.fillStyle = e.style.color.light;
+        lctx.fillRect(left + 24, edge, BODY_WIDTH - 48, 1);
+      } else {
+        drawPose(lctx, scene, pose, cam, swap);
+      }
+    });
     return true;
   }
 
@@ -254,15 +225,5 @@ export class EchoRenderer {
         ctx.fillRect(x + 1, y - 14 + row, w, 1);
       }
     }
-  }
-
-  private ensureLayer(view: ViewSize): HTMLCanvasElement | null {
-    if (typeof document === 'undefined') return null;
-    if (!this.layer) this.layer = document.createElement('canvas');
-    if (this.layer.width !== view.width) this.layer.width = view.width;
-    if (this.layer.height !== view.height) this.layer.height = view.height;
-    const lctx = this.layer.getContext('2d');
-    if (lctx) lctx.imageSmoothingEnabled = false;
-    return this.layer;
   }
 }

@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="234" viewBox="0 0 720 234" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" style="font-variant-numeric: tabular-nums">
+<title id="t">The rival of Sand Cape, byte by byte</title>
+<desc id="d">343 bytes; no end marker, the reader stops at the end of the blob</desc>
+<rect x="0.5" y="0.5" width="719" height="233" rx="10" fill="#161b22" stroke="#30363d"/>
+<text x="20" y="30" font-size="16" font-weight="600" fill="#e6edf3">The rival of Sand Cape, byte by byte</text>
+<text x="20" y="48" font-size="12" fill="#8b949e">343 bytes; no end marker, the reader stops at the end of the blob</text>
+<rect x="20" y="80" width="224" height="34" fill="#8b949e" rx="3"><title>snapshot: 114 bytes, 28 ints of the runner’s state and 2 flag bytes</title></rect>
+<line x1="24" y1="114" x2="24" y2="124" stroke="#8b949e" stroke-width="1"/>
+<text x="20" y="136" font-size="12" fill="#e6edf3">snapshot, 114 bytes</text>
+<text x="20" y="151" font-size="11" fill="#8b949e">28 ints of the runner’s state and 2 flag bytes</text>
+<rect x="246" y="80" width="5.9" height="34" fill="#c98500" rx="3"><title>total: 4 bytes, the time, 30390 ms</title></rect>
+<line x1="250" y1="114" x2="250" y2="158" stroke="#8b949e" stroke-width="1"/>
+<text x="246" y="170" font-size="12" fill="#e6edf3">total, 4 bytes</text>
+<text x="246" y="185" font-size="11" fill="#8b949e">the time, 30390 ms</text>
+<rect x="253.9" y="80" width="434.2" height="34" fill="#3987e5" rx="3"><title>entries: 220 bytes, 44 × (ticks: int, input: byte)</title></rect>
+<line x1="263.8" y1="84" x2="263.8" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="273.8" y1="84" x2="273.8" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="283.7" y1="84" x2="283.7" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="293.6" y1="84" x2="293.6" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="303.5" y1="84" x2="303.5" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="313.4" y1="84" x2="313.4" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="323.3" y1="84" x2="323.3" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="333.2" y1="84" x2="333.2" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="343.1" y1="84" x2="343.1" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="353.1" y1="84" x2="353.1" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="363" y1="84" x2="363" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="372.9" y1="84" x2="372.9" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="382.8" y1="84" x2="382.8" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="392.7" y1="84" x2="392.7" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="402.6" y1="84" x2="402.6" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="412.5" y1="84" x2="412.5" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="422.4" y1="84" x2="422.4" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="432.4" y1="84" x2="432.4" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="442.3" y1="84" x2="442.3" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="452.2" y1="84" x2="452.2" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="462.1" y1="84" x2="462.1" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="472" y1="84" x2="472" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="481.9" y1="84" x2="481.9" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="491.8" y1="84" x2="491.8" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="501.7" y1="84" x2="501.7" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="511.7" y1="84" x2="511.7" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="521.6" y1="84" x2="521.6" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="531.5" y1="84" x2="531.5" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="541.4" y1="84" x2="541.4" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="551.3" y1="84" x2="551.3" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="561.2" y1="84" x2="561.2" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="571.1" y1="84" x2="571.1" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="581" y1="84" x2="581" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="591" y1="84" x2="591" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="600.9" y1="84" x2="600.9" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="610.8" y1="84" x2="610.8" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="620.7" y1="84" x2="620.7" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="630.6" y1="84" x2="630.6" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="640.5" y1="84" x2="640.5" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="650.4" y1="84" x2="650.4" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="660.3" y1="84" x2="660.3" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="670.3" y1="84" x2="670.3" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="680.2" y1="84" x2="680.2" y2="110" stroke="#161b22" stroke-width="1" opacity="0.6"/>
+<line x1="257.9" y1="114" x2="257.9" y2="124" stroke="#8b949e" stroke-width="1"/>
+<text x="253.9" y="136" font-size="12" fill="#e6edf3">entries, 220 bytes</text>
+<text x="253.9" y="151" font-size="11" fill="#8b949e">44 × (ticks: int, input: byte)</text>
+<rect x="690.1" y="80" width="7.9" height="34" fill="#d95926" rx="3"><title>again: 5 bytes, the last entry, written twice</title></rect>
+<line x1="694.1" y1="114" x2="694.1" y2="158" stroke="#8b949e" stroke-width="1"/>
+<text x="690.1" y="170" font-size="12" fill="#e6edf3">again, 5 bytes</text>
+<text x="690.1" y="185" font-size="11" fill="#8b949e">the last entry, written twice</text>
+</svg>

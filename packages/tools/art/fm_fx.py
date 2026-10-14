@@ -193,11 +193,6 @@ def write():
     write_json(BOSSES + '/flittermouse/fx.json', tricks(copy.deepcopy(FX), 'flittermouse'))
 
 
-def preview():
-    """The sprites for view.py."""
-    return [(rows, {k: v[:7] if len(v) == 9 and False else v for k, v in PALETTE.items()}) for rows in SPRITES.values()]
-
-
 if __name__ == '__main__':
     write()
     print('fx written')

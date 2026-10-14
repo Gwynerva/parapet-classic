@@ -30,6 +30,11 @@ export interface LevelData {
 export const TILE = 1024;
 export const TILE_SHIFT = 10;
 
+/** The middle of tile column (or row) `cell`, in world units. */
+export function tileCentre(cell: number): number {
+  return (cell << TILE_SHIFT) + (TILE >> 1);
+}
+
 /** Tiles whose top counts as a floor for the pit check (line 9640). */
 const PIT_FLOOR_TILES = new Set([1, 3, 5, 6, 7, 8]);
 

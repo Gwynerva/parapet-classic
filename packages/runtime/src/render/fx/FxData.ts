@@ -7,7 +7,8 @@
  * Distances are pixels, speeds pixels per second, times milliseconds, angles degrees with 0
  * pointing behind the runner, 90 up, 180 ahead and -90 down.
  */
-import { parseColor, ribbonProblems, type LookRibbon } from '../Look.ts';
+import { parseColor } from '../color.ts';
+import { ribbonProblems, type LookRibbon } from '../Look.ts';
 
 /** A number, or a range a value is picked from uniformly. */
 export type Range = number | readonly [number, number];

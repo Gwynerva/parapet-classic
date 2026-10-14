@@ -10,11 +10,6 @@ SKIN5 = ['#fbe6d6', '#f3cdb4', '#e2aa8e', '#bf7f68', '#8e5446']
 SKIN_LEG = dict(zip('nNMqQ', SKIN5))
 
 
-def shift(rows, mapping):
-    """The same picture with characters swapped (a far limb a tone darker)."""
-    return [''.join(mapping.get(c, c) for c in r) for r in rows]
-
-
 def pad(rows, top=0, bottom=0, left=0, right=0):
     w = len(rows[0]) + left + right
     return ['.' * w] * top + ['.' * left + r + '.' * right for r in rows] + ['.' * w] * bottom

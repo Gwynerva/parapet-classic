@@ -11,11 +11,6 @@ import pr_her_parts as HP
 SKIN5 = HP.SKIN5
 
 
-def enc(rows, legend, pal):
-    """Text rows in a picture legend -> rows in the look's palette ('.' and '+' kept)."""
-    return [''.join(c if c in '.+' else pal.char(legend[c]) for c in r) for r in rows]
-
-
 def arm_rules(sleeve, cuff=None, wrist_right=None, wrist_left=None, sleeve_parts=None):
     """Her skin on the hands and arms, the sleeves over the arms (`sleeve`: 5 tones over
     `sleeve_parts`, the whole arm by default; None for bare arms), the original's wrist bands as a
@@ -61,8 +56,8 @@ def body(leg, top, thigh, knee, shin, far, shoe, s39, s47, s48, shoe_far):
     """The pictures of a look: the chest and the torso (profile 57 / 34, turned to us 61 / 38) in
     `leg`, the near thigh (the far one a tone darker), the knee, the shin, the shoes in `shoe`."""
     out = {k: (rows, leg) for k, rows in zip(('57', '61', '34', '38'), top)}
-    out.update({'53': (thigh, leg), '49': (HP.shift(thigh, far), leg), '62': (knee, leg), '30': (shin, leg)})
-    out.update({'39': (s39, shoe), '43': (HP.shift(s39, shoe_far), shoe), '47': (s47, shoe), '48': (s48, shoe)})
+    out.update({'53': (thigh, leg), '49': (shift(thigh, far), leg), '62': (knee, leg), '30': (shin, leg)})
+    out.update({'39': (s39, shoe), '43': (shift(s39, shoe_far), shoe), '47': (s47, shoe), '48': (s48, shoe)})
     return out
 
 

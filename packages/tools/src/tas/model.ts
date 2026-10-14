@@ -1,9 +1,9 @@
 /**
  * What a TAS run is made of: presses of the four direction keys, one key on one step, the way
- * a player's keyboard produces them (no holding, no chords; `InputManager.pressBits`). The
+ * a player's keyboard produces them (no holding, no chords; sim's `pressBits`). The
  * original's own rival recordings, made by its developers on a phone, look exactly like that.
  */
-import { Input, type RunMode } from '@parapet/sim';
+import { pressBits, type ArrowKey, type RunMode } from '@parapet/sim';
 
 /** The modes Gwynerva is raced in. */
 export const CONTEST_MODES = ['flags', 'sprint'] as const satisfies readonly RunMode[];
@@ -28,18 +28,11 @@ export function keyFromLetter(letter: string): KeyCode | null {
   return i >= 1 && i <= 4 ? (i as KeyCode) : null;
 }
 
-/** Press bits of `key` for a runner facing right or left (`InputManager.pressBits`). */
+const ARROWS: readonly ArrowKey[] = ['up', 'up', 'down', 'right', 'left'];
+
+/** Press bits of `key` for a runner facing right or left. */
 export function keyBits(key: KeyCode, facingRight: boolean): number {
-  switch (key) {
-    case Key.UP:
-      return Input.UP;
-    case Key.DOWN:
-      return Input.DOWN;
-    case Key.RIGHT:
-      return Input.RIGHT | (facingRight ? Input.FORWARD : Input.BACK);
-    case Key.LEFT:
-      return Input.LEFT | (facingRight ? Input.BACK : Input.FORWARD);
-  }
+  return pressBits(ARROWS[key]!, facingRight);
 }
 
 /** One key pressed on step `step` (0-based: the step that consumes it). */

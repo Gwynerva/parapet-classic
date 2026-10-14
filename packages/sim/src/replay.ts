@@ -1,7 +1,7 @@
 /**
  * Input logs. The original records the per-step press byte as runs of (count, value) and
  * replays them with `byte_a(int)` (d.java line 4919); the same format drives rivals, ghosts and
- * our leaderboard replays.
+ * shared replays.
  */
 
 export interface InputRun {
@@ -90,13 +90,6 @@ export class InputPlayer {
     }
     this.remaining--;
     return this.value;
-  }
-
-  reset(): void {
-    this.index = 0;
-    this.remaining = 0;
-    this.value = 0;
-    this.ended = false;
   }
 }
 

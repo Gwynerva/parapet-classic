@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="646" height="356" viewBox="0 0 646 356" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" style="font-variant-numeric: tabular-nums">
+<title id="t">When the wall run starts, by when UP is pressed</title>
+<desc id="d">The runner jumps at the wall (UP); a second UP 1 to 39 steps later</desc>
+<rect x="0.5" y="0.5" width="645" height="355" rx="10" fill="#161b22" stroke="#30363d"/>
+<text x="20" y="30" font-size="16" font-weight="600" fill="#e6edf3">When the wall run starts, by when UP is pressed</text>
+<text x="20" y="48" font-size="12" fill="#8b949e">The runner jumps at the wall (UP); a second UP 1 to 39 steps later</text>
+<line x1="76" y1="252" x2="622" y2="252" stroke="#30363d" stroke-width="1"/>
+<text x="68" y="256" font-size="11" fill="#8b949e" text-anchor="end">21</text>
+<line x1="76" y1="224" x2="622" y2="224" stroke="#30363d" stroke-width="1"/>
+<text x="68" y="228" font-size="11" fill="#8b949e" text-anchor="end">23</text>
+<line x1="76" y1="196" x2="622" y2="196" stroke="#30363d" stroke-width="1"/>
+<text x="68" y="200" font-size="11" fill="#8b949e" text-anchor="end">25</text>
+<line x1="76" y1="168" x2="622" y2="168" stroke="#30363d" stroke-width="1"/>
+<text x="68" y="172" font-size="11" fill="#8b949e" text-anchor="end">27</text>
+<line x1="76" y1="140" x2="622" y2="140" stroke="#30363d" stroke-width="1"/>
+<text x="68" y="144" font-size="11" fill="#8b949e" text-anchor="end">29</text>
+<line x1="76" y1="112" x2="622" y2="112" stroke="#30363d" stroke-width="1"/>
+<text x="68" y="116" font-size="11" fill="#8b949e" text-anchor="end">31</text>
+<line x1="76" y1="84" x2="622" y2="84" stroke="#30363d" stroke-width="1"/>
+<text x="68" y="88" font-size="11" fill="#8b949e" text-anchor="end">33</text>
+<rect x="188" y="84" width="196" height="168" fill="#199e70" opacity="0.14"></rect>
+<text x="286" y="76" font-size="11" fill="#8b949e" text-anchor="middle">the ray sees the wall</text>
+<line x1="391" y1="84" x2="391" y2="252" stroke="#8b949e" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="395" y="96" font-size="11" fill="#8b949e">touches the wall</text>
+<circle cx="391" cy="224" r="6" fill="none" stroke="#d95926" stroke-width="2"><title>If only touching the wall counted (condition 73 for 68): UP 23 steps after the jump, the wall run starts 23 steps after it</title></circle>
+<circle cx="405" cy="210" r="6" fill="none" stroke="#d95926" stroke-width="2"><title>If only touching the wall counted (condition 73 for 68): UP 24 steps after the jump, the wall run starts 24 steps after it</title></circle>
+<circle cx="419" cy="196" r="6" fill="none" stroke="#d95926" stroke-width="2"><title>If only touching the wall counted (condition 73 for 68): UP 25 steps after the jump, the wall run starts 25 steps after it</title></circle>
+<circle cx="433" cy="182" r="6" fill="none" stroke="#d95926" stroke-width="2"><title>If only touching the wall counted (condition 73 for 68): UP 26 steps after the jump, the wall run starts 26 steps after it</title></circle>
+<circle cx="447" cy="168" r="6" fill="none" stroke="#d95926" stroke-width="2"><title>If only touching the wall counted (condition 73 for 68): UP 27 steps after the jump, the wall run starts 27 steps after it</title></circle>
+<circle cx="461" cy="154" r="6" fill="none" stroke="#d95926" stroke-width="2"><title>If only touching the wall counted (condition 73 for 68): UP 28 steps after the jump, the wall run starts 28 steps after it</title></circle>
+<circle cx="475" cy="140" r="6" fill="none" stroke="#d95926" stroke-width="2"><title>If only touching the wall counted (condition 73 for 68): UP 29 steps after the jump, the wall run starts 29 steps after it</title></circle>
+<circle cx="489" cy="126" r="6" fill="none" stroke="#d95926" stroke-width="2"><title>If only touching the wall counted (condition 73 for 68): UP 30 steps after the jump, the wall run starts 30 steps after it</title></circle>
+<circle cx="503" cy="112" r="6" fill="none" stroke="#d95926" stroke-width="2"><title>If only touching the wall counted (condition 73 for 68): UP 31 steps after the jump, the wall run starts 31 steps after it</title></circle>
+<circle cx="195" cy="224" r="3.5" fill="#3987e5"><title>The original: the ray arms the wall run: UP 9 steps after the jump, the wall run starts 23 steps after it</title></circle>
+<circle cx="209" cy="224" r="3.5" fill="#3987e5"><title>The original: the ray arms the wall run: UP 10 steps after the jump, the wall run starts 23 steps after it</title></circle>
+<circle cx="223" cy="224" r="3.5" fill="#3987e5"><title>The original: the ray arms the wall run: UP 11 steps after the jump, the wall run starts 23 steps after it</title></circle>
+<circle cx="237" cy="224" r="3.5" fill="#3987e5"><title>The original: the ray arms the wall run: UP 12 steps after the jump, the wall run starts 23 steps after it</title></circle>
+<circle cx="251" cy="224" r="3.5" fill="#3987e5"><title>The original: the ray arms the wall run: UP 13 steps after the jump, the wall run starts 23 steps after it</title></circle>
+<circle cx="265" cy="224" r="3.5" fill="#3987e5"><title>The original: the ray arms the wall run: UP 14 steps after the jump, the wall run starts 23 steps after it</title></circle>
+<circle cx="279" cy="224" r="3.5" fill="#3987e5"><title>The original: the ray arms the wall run: UP 15 steps after the jump, the wall run starts 23 steps after it</title></circle>
+<circle cx="293" cy="224" r="3.5" fill="#3987e5"><title>The original: the ray arms the wall run: UP 16 steps after the jump, the wall run starts 23 steps after it</title></circle>
+<circle cx="307" cy="224" r="3.5" fill="#3987e5"><title>The original: the ray arms the wall run: UP 17 steps after the jump, the wall run starts 23 steps after it</title></circle>
+<circle cx="321" cy="224" r="3.5" fill="#3987e5"><title>The original: the ray arms the wall run: UP 18 steps after the jump, the wall run starts 23 steps after it</title></circle>
+<circle cx="335" cy="224" r="3.5" fill="#3987e5"><title>The original: the ray arms the wall run: UP 19 steps after the jump, the wall run starts 23 steps after it</title></circle>
+<circle cx="349" cy="224" r="3.5" fill="#3987e5"><title>The original: the ray arms the wall run: UP 20 steps after the jump, the wall run starts 23 steps after it</title></circle>
+<circle cx="363" cy="224" r="3.5" fill="#3987e5"><title>The original: the ray arms the wall run: UP 21 steps after the jump, the wall run starts 23 steps after it</title></circle>
+<circle cx="377" cy="224" r="3.5" fill="#3987e5"><title>The original: the ray arms the wall run: UP 22 steps after the jump, the wall run starts 23 steps after it</title></circle>
+<circle cx="391" cy="224" r="3.5" fill="#3987e5"><title>The original: the ray arms the wall run: UP 23 steps after the jump, the wall run starts 23 steps after it</title></circle>
+<circle cx="405" cy="210" r="3.5" fill="#3987e5"><title>The original: the ray arms the wall run: UP 24 steps after the jump, the wall run starts 24 steps after it</title></circle>
+<circle cx="419" cy="196" r="3.5" fill="#3987e5"><title>The original: the ray arms the wall run: UP 25 steps after the jump, the wall run starts 25 steps after it</title></circle>
+<circle cx="433" cy="182" r="3.5" fill="#3987e5"><title>The original: the ray arms the wall run: UP 26 steps after the jump, the wall run starts 26 steps after it</title></circle>
+<circle cx="447" cy="168" r="3.5" fill="#3987e5"><title>The original: the ray arms the wall run: UP 27 steps after the jump, the wall run starts 27 steps after it</title></circle>
+<circle cx="461" cy="154" r="3.5" fill="#3987e5"><title>The original: the ray arms the wall run: UP 28 steps after the jump, the wall run starts 28 steps after it</title></circle>
+<circle cx="475" cy="140" r="3.5" fill="#3987e5"><title>The original: the ray arms the wall run: UP 29 steps after the jump, the wall run starts 29 steps after it</title></circle>
+<circle cx="489" cy="126" r="3.5" fill="#3987e5"><title>The original: the ray arms the wall run: UP 30 steps after the jump, the wall run starts 30 steps after it</title></circle>
+<circle cx="503" cy="112" r="3.5" fill="#3987e5"><title>The original: the ray arms the wall run: UP 31 steps after the jump, the wall run starts 31 steps after it</title></circle>
+<line x1="139" y1="256" x2="139" y2="261" stroke="#8b949e" stroke-width="1"/>
+<text x="139" y="274" font-size="11" fill="#8b949e" text-anchor="middle">5</text>
+<line x1="209" y1="256" x2="209" y2="261" stroke="#8b949e" stroke-width="1"/>
+<text x="209" y="274" font-size="11" fill="#8b949e" text-anchor="middle">10</text>
+<line x1="279" y1="256" x2="279" y2="261" stroke="#8b949e" stroke-width="1"/>
+<text x="279" y="274" font-size="11" fill="#8b949e" text-anchor="middle">15</text>
+<line x1="349" y1="256" x2="349" y2="261" stroke="#8b949e" stroke-width="1"/>
+<text x="349" y="274" font-size="11" fill="#8b949e" text-anchor="middle">20</text>
+<line x1="419" y1="256" x2="419" y2="261" stroke="#8b949e" stroke-width="1"/>
+<text x="419" y="274" font-size="11" fill="#8b949e" text-anchor="middle">25</text>
+<line x1="489" y1="256" x2="489" y2="261" stroke="#8b949e" stroke-width="1"/>
+<text x="489" y="274" font-size="11" fill="#8b949e" text-anchor="middle">30</text>
+<line x1="559" y1="256" x2="559" y2="261" stroke="#8b949e" stroke-width="1"/>
+<text x="559" y="274" font-size="11" fill="#8b949e" text-anchor="middle">35</text>
+<text x="349" y="290" font-size="11" fill="#8b949e" text-anchor="middle">second UP, steps after the jump</text>
+<text x="20" y="168" font-size="11" fill="#8b949e" text-anchor="middle" transform="rotate(-90 20 168)">wall run starts, steps after the jump</text>
+<circle cx="25" cy="312" r="3.5" fill="#3987e5"></circle>
+<text x="38" y="316" font-size="12" fill="#e6edf3">The original: the ray arms the wall run</text>
+<circle cx="25" cy="332" r="5" fill="none" stroke="#d95926" stroke-width="2"></circle>
+<text x="38" y="336" font-size="12" fill="#e6edf3">If only touching the wall counted (condition 73 for 68)</text>
+</svg>

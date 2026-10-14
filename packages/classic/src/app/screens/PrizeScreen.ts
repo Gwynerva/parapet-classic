@@ -3,7 +3,7 @@
  * Island, the birds taking off, fireworks, the camera rising into the sky, then the
  * congratulations and the credits. Confirm leaves.
  */
-import { Level } from '@parapet/sim';
+import { Level, tileCentre } from '@parapet/sim';
 import { Theme, type GameContext } from '../Context.ts';
 import type { Screen, UiKey, UiPointer } from '@parapet/runtime/app/Screen.ts';
 import { Camera } from '@parapet/runtime/render/Camera.ts';
@@ -11,7 +11,7 @@ import { CharacterRenderer } from '@parapet/runtime/render/CharacterRenderer.ts'
 import { Particles } from '@parapet/runtime/render/Particles.ts';
 import { themeOfLevel } from '@parapet/runtime/render/LevelRenderer.ts';
 import { screenPixels, worldGrid, type ViewSize } from '@parapet/runtime/render/View.ts';
-import { smoothstep } from '@parapet/runtime/render/CameraTour.ts';
+import { smoothstep } from '@parapet/runtime/math.ts';
 import { IDLE_CLIP_OFFSET } from '@parapet/runtime/anim/Animator.ts';
 import { outlined, panel } from '@parapet/runtime/ui/draw.ts';
 import { centered, inset, safeRect } from '@parapet/runtime/ui/layout.ts';
@@ -54,14 +54,14 @@ export class PrizeScreen implements Screen {
     );
     const idle = ctx.render.clips[IDLE_CLIP_OFFSET + 1] ?? 0;
     this.characters.attachNpc('playman', {
-      x: (PLAYMAN_CELL.x << 10) + 512,
+      x: tileCentre(PLAYMAN_CELL.x),
       y: (PLAYMAN_CELL.y << 10) + 1024,
       character: 1,
       facingRight: false,
       idleKeyframe: idle,
     });
     const blaise = this.characters.attachNpc('blaise', {
-      x: (BLAISE_CELL.x << 10) + 512,
+      x: tileCentre(BLAISE_CELL.x),
       y: (BLAISE_CELL.y << 10) + 1024,
       character: 0,
       idleKeyframe: idle,
@@ -157,9 +157,9 @@ export class PrizeScreen implements Screen {
     c.save();
     c.translate(grid.dx, grid.dy);
     render.level.drawLevelArt(c, cam, this.view, 0);
-    this.particles.draw(c, cam, this.view, this.elapsed, false);
+    this.particles.draw(c, cam, this.elapsed, false);
     this.characters.drawNpcs(c, cam, now);
-    this.particles.draw(c, cam, this.view, this.elapsed, true);
+    this.particles.draw(c, cam, this.elapsed, true);
     c.restore();
     const safe = inset(safeRect(viewport), 8, 0);
     if (this.elapsed >= 14000) {

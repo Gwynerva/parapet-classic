@@ -3,6 +3,8 @@
  * far it went, the triggers going on this step and the ones that just started.
  */
 import { FX_TRIGGERS, type FxTrigger } from './FxData.ts';
+import { STEP } from '@parapet/sim';
+import { UNITS_PER_PX } from '../View.ts';
 
 /** Moves of each trigger (see `MoveId` in the simulation and reference/notes/02-moves.md). */
 export const TRIGGER_MOVES: Readonly<Partial<Record<FxTrigger, readonly number[]>>> = {
@@ -32,7 +34,7 @@ export const GROUND_MOVES: ReadonlySet<number> = new Set([2, 3, 4, 5, 21, 23, 24
 /** Speed (pixels per second) above which a runner counts as fast: beyond a good run. */
 export const FAST_PX = 140;
 /** Steps per second of the simulation. */
-const STEPS_PER_SECOND = 1000 / 30;
+const STEPS_PER_SECOND = 1000 / STEP;
 
 export function triggerBit(t: FxTrigger): number {
   return 1 << FX_TRIGGERS.indexOf(t);
@@ -89,7 +91,7 @@ export class MotionTracker {
     const o = this.out;
     const dx = this.started ? x - this.x : 0;
     const dy = this.started ? y - this.y : 0;
-    o.distance = Math.hypot(dx, dy) / 32;
+    o.distance = Math.hypot(dx, dy) / UNITS_PER_PX;
     o.vx = dx;
     o.vy = dy;
     this.recent.push(o.distance);

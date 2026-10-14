@@ -62,4 +62,60 @@ export class PressTracker<Id> {
     this.down = false;
     this.dragging = false;
   }
+
+  /** Whole rows of `pitch` px a finger dragging from where it went down has moved (up: +). */
+  dragRows(p: UiPointer, pitch: number): number {
+    return Math.round((this.startY - p.y) / pitch);
+  }
+}
+
+/** A touch or a pen (they scroll by dragging and do not hover), not a mouse. */
+export function isFinger(p: UiPointer): boolean {
+  return p.pointerType !== undefined && p.pointerType !== 'mouse';
+}
+
+/** The mouse wheel in whole rows: what is left of a row waits for the next turn. */
+export class WheelRows {
+  private rest = 0;
+
+  /** Rows to scroll for a wheel turn of `dy` px over rows `pitch` px high. */
+  take(dy: number, pitch: number): number {
+    this.rest += dy;
+    const rows = Math.trunc(this.rest / pitch);
+    this.rest -= rows * pitch;
+    return rows;
+  }
+}
+
+/**
+ * Actions that need the browser's user activation (a link, the clipboard, a file dialog): a
+ * mouse press fires at once, a finger or a pen on release over the target it went down on.
+ */
+export class GestureArm<Id> {
+  private armed: Id | null = null;
+
+  /** A pointer went down on `target`: true when the action fires now (a mouse). */
+  down(target: Id, pointerType: string | undefined): boolean {
+    this.armed = null;
+    if ((pointerType ?? 'mouse') === 'mouse') return true;
+    this.armed = target;
+    return false;
+  }
+
+  /** A press waits for its release (the target shows as pressed). */
+  get waiting(): boolean {
+    return this.armed !== null;
+  }
+
+  /** A pointer went down on nothing: forgets an armed press. */
+  clear(): void {
+    this.armed = null;
+  }
+
+  /** The pointer came up over `target`: null when nothing was armed, else whether it fires. */
+  up(target: Id | null): boolean | null {
+    const armed = this.armed;
+    this.armed = null;
+    return armed === null ? null : target === armed;
+  }
 }

@@ -5,9 +5,10 @@ import {
   type InputRun,
   type MissionInfo,
   type Replay,
+  type RunContent,
   type RunMode,
 } from '@parapet/sim';
-import { RunSession, type RunData, type RunSetup } from '../src/app/RunSession.ts';
+import { RunSession, type RunSetup } from '../src/app/RunSession.ts';
 import {
   hasContent,
   loadLevel,
@@ -17,7 +18,7 @@ import {
   loadTables,
 } from './helpers/content.ts';
 
-function data(levelId: number): RunData {
+function data(levelId: number): RunContent {
   return {
     level: loadLevel(levelId),
     mission: loadMissions().levels[levelId] as unknown as MissionInfo,
@@ -40,7 +41,7 @@ function input(steps: number): InputRun[] {
 }
 
 /** Runs a session with a scripted player until it finishes or `maxSteps` pass. */
-function play(setup: RunSetup, d: RunData, maxSteps: number): RunSession {
+function play(setup: RunSetup, d: RunContent, maxSteps: number): RunSession {
   const session = new RunSession(setup, d);
   // 35 ms of real time is exactly one 30-unit step of game time.
   for (let i = 0; i < maxSteps && !session.finished; i++) session.advance(35);

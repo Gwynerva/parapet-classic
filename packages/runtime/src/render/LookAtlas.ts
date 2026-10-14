@@ -17,17 +17,16 @@ import {
   keyChain,
   keyId,
   LOOK_SPRITES,
-  parseColor,
   partKeyText,
   type LookData,
   type ResolvedLook,
 } from './Look.ts';
-import { skinSwap } from './CharacterRenderer.ts';
 import { buildLookLayer } from './LookSheet.ts';
 import { packRows } from './pack.ts';
 import { mirrorImage, newImage, sheetFrame, type RgbaImage, type RgbaSheet } from './Raster.ts';
-import { FAMILY_NAMES, familyOf, isLimb, rotationIndex } from './Rig.ts';
+import { FAMILY_NAMES, familyOf, isLimb, rotationIndex, skinSwap } from './Rig.ts';
 import { rotsprite } from './rotsprite.ts';
+import { hexByte, parseColor } from './color.ts';
 
 /** One part of the atlas. */
 export interface AtlasCell {
@@ -98,17 +97,11 @@ function compareKeys(a: string, b: string): number {
   return 0;
 }
 
-export interface Pic {
-  w: number;
-  h: number;
-  data: Uint8ClampedArray;
-}
-
 /** The pictures a look shows for its keys, through its built layer. */
-export function pictures(base: RgbaSheet, look: ResolvedLook): (key: string) => Pic | null {
+export function pictures(base: RgbaSheet, look: ResolvedLook): (key: string) => RgbaImage | null {
   const layer = buildLookLayer(base, look);
   const sheet: RgbaSheet = { image: layer, frames: layer.frames, fallback: base };
-  const cut = (id: number): Pic | null => {
+  const cut = (id: number): RgbaImage | null => {
     const found = sheetFrame(sheet, id);
     if (!found) return null;
     const f = found.frame;
@@ -118,9 +111,9 @@ export function pictures(base: RgbaSheet, look: ResolvedLook): (key: string) => 
       const o = ((f.y + y) * src.width + f.x) * 4;
       data.set(src.data.subarray(o, o + f.w * 4), y * f.w * 4);
     }
-    return { w: f.w, h: f.h, data };
+    return { width: f.w, height: f.h, data };
   };
-  return (key: string): Pic | null => {
+  return (key: string): RgbaImage | null => {
     const at = key.indexOf('@');
     if (at >= 0) {
       const id = layer.keys.get(key);
@@ -196,16 +189,16 @@ export function atlasLayout(
     if (!p && at >= 0) {
       // A new attachment starts as an empty picture the size of its part.
       const part = pic(partKey);
-      p = { w: part?.w ?? 8, h: part?.h ?? 8, data: new Uint8ClampedArray(0) };
+      p = { width: part?.width ?? 8, height: part?.height ?? 8, data: new Uint8ClampedArray(0) };
     }
     if (!p) continue;
     items.push({
       key,
       family,
-      w: p.w + margin * 2,
-      h: p.h + margin * 2,
-      pw: p.w,
-      ph: p.h,
+      w: p.width + margin * 2,
+      h: p.height + margin * 2,
+      pw: p.width,
+      ph: p.height,
       breakBefore: group !== lastGroup,
     });
     lastGroup = group;
@@ -244,13 +237,13 @@ export function exportAtlas(
   for (const cell of layout.cells) {
     const p = pic(cell.key);
     if (!p || p.data.length === 0) continue;
-    let img: RgbaImage = { width: p.w, height: p.h, data: p.data };
+    let img: RgbaImage = { width: p.width, height: p.height, data: p.data };
     if (cell.mirrored) img = mirrorImage(img);
-    const ox = cell.x + (cell.w >> 1) - (p.w >> 1);
-    const oy = cell.y + (cell.h >> 1) - (p.h >> 1);
-    for (let y = 0; y < p.h; y++) {
-      const s = y * p.w * 4;
-      out.data.set(img.data.subarray(s, s + p.w * 4), ((oy + y) * out.width + ox) * 4);
+    const ox = cell.x + (cell.w >> 1) - (p.width >> 1);
+    const oy = cell.y + (cell.h >> 1) - (p.height >> 1);
+    for (let y = 0; y < p.height; y++) {
+      const s = y * p.width * 4;
+      out.data.set(img.data.subarray(s, s + p.width * 4), ((oy + y) * out.width + ox) * 4);
     }
   }
   return out;
@@ -264,10 +257,6 @@ function span(point: number, min: number, max: number, parity: number): [number,
     if (x0 <= min && x0 + w - 1 >= max) return [x0, w];
   }
   return [min, max - min + 1];
-}
-
-function hex2(v: number): string {
-  return v.toString(16).padStart(2, '0');
 }
 
 /**
@@ -286,7 +275,7 @@ export function paletteWriter(start: Record<string, string>): {
   }
   const free = PALETTE_CHARS.filter((c) => !(c in palette));
   const charOf = (r: number, g: number, b: number, a: number): string | null => {
-    const colour = '#' + hex2(r) + hex2(g) + hex2(b) + (a < 255 ? hex2(a) : '');
+    const colour = '#' + hexByte(r) + hexByte(g) + hexByte(b) + (a < 255 ? hexByte(a) : '');
     let ch = byColour.get(colour);
     if (!ch) {
       ch = free.shift();
@@ -301,14 +290,14 @@ export function paletteWriter(start: Record<string, string>): {
 
 /** Rows of palette characters for RGBA pixels (alpha below 128 is `.`), or null. */
 export function picToRows(
-  p: { w: number; h: number; data: Uint8ClampedArray },
+  p: RgbaImage,
   charOf: (r: number, g: number, b: number, a: number) => string | null,
 ): string[] | null {
   const rows: string[] = [];
-  for (let y = 0; y < p.h; y++) {
+  for (let y = 0; y < p.height; y++) {
     let row = '';
-    for (let x = 0; x < p.w; x++) {
-      const o = (y * p.w + x) * 4;
+    for (let x = 0; x < p.width; x++) {
+      const o = (y * p.width + x) * 4;
       if (p.data[o + 3]! < 128) {
         row += '.';
         continue;
@@ -355,8 +344,8 @@ export function rotateParts(
     for (let k = 1; k <= 3; k++) {
       const target = id + k;
       if (rotationIndex(target) !== k || familyOf(target) !== familyOf(id)) break;
-      const turned = rotsprite({ w: p.w, h: p.h, px: p.data }, 22.5 * k);
-      const rows = picToRows({ w: turned.w, h: turned.h, data: turned.px }, charOf);
+      const turned = rotsprite(p, 22.5 * k);
+      const rows = picToRows(turned, charOf);
       if (!rows) {
         problems.push(`${key}: too many colours`);
         break;
@@ -535,10 +524,5 @@ export function applyImport(look: LookData, imported: AtlasImport): LookData {
   }
   out.parts = parts;
   if (Object.keys(attachments).length > 0) out.attachments = attachments;
-  // Keep `near` out: its pictures now live in `parts`.
-  if (out.near) {
-    for (const [k, rows] of Object.entries(out.near)) parts[`${k}:near`] ??= rows;
-    delete out.near;
-  }
   return out;
 }

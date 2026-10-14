@@ -38,14 +38,32 @@ export function outlined(
   font.draw(ctx, text, x, y, inner);
 }
 
-export function clear(
+/** A one-pixel border just inside the rectangle. */
+export function border(
   ctx: CanvasRenderingContext2D,
-  width: number,
-  height: number,
-  color = Theme.background,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  color: string,
 ): void {
   ctx.fillStyle = color;
-  ctx.fillRect(0, 0, width, height);
+  ctx.fillRect(x, y, w, 1);
+  ctx.fillRect(x, y + h - 1, w, 1);
+  ctx.fillRect(x, y, 1, h);
+  ctx.fillRect(x + w - 1, y, 1, h);
+}
+
+/** A filled rectangle with a one-pixel border (buttons, tiles, toasts, panels). */
+export function framedBox(
+  ctx: CanvasRenderingContext2D,
+  r: { x: number; y: number; w: number; h: number },
+  fill: string,
+  edge: string,
+): void {
+  ctx.fillStyle = fill;
+  ctx.fillRect(r.x, r.y, r.w, r.h);
+  border(ctx, r.x, r.y, r.w, r.h, edge);
 }
 
 export function panel(
@@ -55,13 +73,7 @@ export function panel(
   w: number,
   h: number,
 ): void {
-  ctx.fillStyle = Theme.panel;
-  ctx.fillRect(x, y, w, h);
-  ctx.fillStyle = Theme.panelBorder;
-  ctx.fillRect(x, y, w, 1);
-  ctx.fillRect(x, y + h - 1, w, 1);
-  ctx.fillRect(x, y, 1, h);
-  ctx.fillRect(x + w - 1, y, 1, h);
+  framedBox(ctx, { x, y, w, h }, Theme.panel, Theme.panelBorder);
 }
 
 /** Title with a one-pixel drop shadow. */
@@ -77,40 +89,9 @@ export function heading(
   font.draw(ctx, text, x, y, { align, color: Theme.accent });
 }
 
-/** Footer hint line, e.g. "Enter: select   Esc: back"; wraps to at most two lines. */
-export function footer(
-  ctx: CanvasRenderingContext2D,
-  font: BitmapFont,
-  text: string,
-  width: number,
-  height: number,
-  safeBottom: number,
-): void {
-  const lines = font.wrap(text, width - 16).slice(0, 2);
-  font.draw(
-    ctx,
-    lines.join('\n'),
-    width >> 1,
-    height - safeBottom - lines.length * font.lineHeight - 4,
-    {
-      align: 'center',
-      color: Theme.muted,
-    },
-  );
-}
-
-/** Height the footer occupies, for screens that must not draw under it. */
-export function footerHeight(font: BitmapFont, lines = 1): number {
-  return lines * font.lineHeight + 8;
-}
-
 export const BACK_BUTTON_SIZE = 22;
 /** Touch target of the back button, larger than the drawn square. */
 export const BACK_BUTTON_HIT = 40;
-
-interface ViewportInsets {
-  safeArea: { top: number; left: number };
-}
 
 /** Top of a screen heading below the safe area (`heading(..., safe.y + HEADING_TOP)`). */
 export const HEADING_TOP = 8;
@@ -118,44 +99,6 @@ export const HEADING_TOP = 8;
 /** Vertical centre of a heading drawn with `font` at `HEADING_TOP` below the safe area. */
 export function headingCenterY(font: BitmapFont, safeTop: number): number {
   return safeTop + HEADING_TOP + font.lineHeight / 2;
-}
-
-/**
- * Small `<` button at the top-left of a sub-screen, the touch way back to the previous one.
- * `centerY` aligns it vertically with the heading (default: the top safe inset plus 6).
- */
-export function drawBackButton(
-  ctx: CanvasRenderingContext2D,
-  font: BitmapFont,
-  viewport: ViewportInsets,
-  centerY?: number,
-): void {
-  const x = viewport.safeArea.left + 6;
-  const y =
-    centerY === undefined ? viewport.safeArea.top + 6 : Math.round(centerY - BACK_BUTTON_SIZE / 2);
-  panel(ctx, x, y, BACK_BUTTON_SIZE, BACK_BUTTON_SIZE);
-  font.draw(
-    ctx,
-    '<',
-    x + (BACK_BUTTON_SIZE >> 1),
-    y + ((BACK_BUTTON_SIZE - font.lineHeight) >> 1),
-    {
-      align: 'center',
-      color: Theme.accent,
-    },
-  );
-}
-
-export function hitBackButton(viewport: ViewportInsets, x: number, y: number): boolean {
-  return (
-    x < viewport.safeArea.left + BACK_BUTTON_HIT && y < viewport.safeArea.top + BACK_BUTTON_HIT
-  );
-}
-
-/** A fixed-height column centred horizontally with a max width. */
-export function column(width: number, maxWidth: number): { x: number; w: number } {
-  const w = Math.min(maxWidth, width - 16);
-  return { x: (width - w) >> 1, w };
 }
 
 /**

@@ -9,7 +9,7 @@ import { LEVEL_COUNT } from '@parapet/sim';
 import { Theme, type GameContext } from '../Context.ts';
 import type { Screen, UiKey, UiPointer, UiWheel } from '@parapet/runtime/app/Screen.ts';
 import { outlined, panel } from '@parapet/runtime/ui/draw.ts';
-import { contains, type Rect } from '@parapet/runtime/ui/layout.ts';
+import type { Rect } from '@parapet/runtime/ui/layout.ts';
 import { PressTracker } from '@parapet/runtime/ui/press.ts';
 import { TextScroller } from '@parapet/runtime/ui/TextScroller.ts';
 import { ScreenFrame } from '../ui/ScreenFrame.ts';

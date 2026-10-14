@@ -33,28 +33,16 @@ export class ScoreState {
   pending = 0;
   /** Flow meter 0..5120 (`bz`). */
   meter = 0;
-  /** Meter flash timer for the HUD (`bA`). */
+  /**
+   * Meter flash for the HUD (`bA`): +400 when the multiplier goes up, -400 on a fail. The
+   * original's HUD counts it down by the frame's milliseconds (line 7325); ours counts from
+   * `meterFlashClock`, the game clock of the flash.
+   */
   meterFlash = 0;
+  meterFlashClock = 0;
   /** Popup ring (`var_int_arr_b`, `j`). */
   readonly popups: ScorePopup[] = [];
   popupCount = 0;
-
-  /** `aA` (line 7394): reset at run start. */
-  reset(): void {
-    this.score = 0;
-    this.multiplier = 1;
-    this.chainIndex = 0;
-    this.continuous = 0;
-    this.chainTime = -1;
-    this.chainFactor = 1;
-    this.pending = 0;
-    this.chain.fill(0);
-    this.penalty = 0;
-    this.meter = 0;
-    this.meterFlash = 0;
-    this.popups.length = 0;
-    this.popupCount = 0;
-  }
 
   /** `M(int)`: queue a popup. */
   private popup(value: number, clock: number): void {
@@ -135,9 +123,10 @@ export class ScoreState {
   }
 
   /** `L(int)`: raise the meter. */
-  addMeter(amount: number): void {
+  addMeter(amount: number, clock: number): void {
     if ((this.meter + amount) >> 10 > this.meter >> 10) {
       this.meterFlash = 400;
+      this.meterFlashClock = clock;
     }
     this.meter += amount;
     if (this.meter > 5120) {
@@ -147,9 +136,10 @@ export class ScoreState {
   }
 
   /** `av`: drop the meter by 2048. */
-  private dropMeter(): void {
+  private dropMeter(clock: number): void {
     if (this.meter >> 10 > (this.meter - 2048) >> 10) {
       this.meterFlash = -400;
+      this.meterFlashClock = clock;
     }
     this.meter -= 2048;
     if (this.meter < 0) {
@@ -159,7 +149,7 @@ export class ScoreState {
   }
 
   /** `aF`: a fail move was entered. Pending points are lost and the meter drops. */
-  fail(): void {
+  fail(clock: number): void {
     this.penalty = 0;
     for (let i = 0; i < this.chainIndex; i++) {
       this.penalty -= this.chain[i]! * this.multiplier;
@@ -170,7 +160,7 @@ export class ScoreState {
     this.chainTime = -1;
     this.pending = 0;
     this.resetChainFactor();
-    this.dropMeter();
+    this.dropMeter(clock);
   }
 
   /**
@@ -190,7 +180,7 @@ export class ScoreState {
         }
       }
     } else if (this.pending > 0) {
-      this.addMeter((this.pending * 2048) >> 10);
+      this.addMeter((this.pending * 2048) >> 10, clock);
       this.score += this.pending * this.multiplier;
       this.pending = 0;
     }
@@ -212,6 +202,7 @@ export class ScoreState {
     this.pending = o.pending;
     this.meter = o.meter;
     this.meterFlash = o.meterFlash;
+    this.meterFlashClock = o.meterFlashClock;
     this.popups.length = 0;
     for (const p of o.popups) {
       this.popups.push({ until: p.until, value: p.value });

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { cameraMaxY } from '../src/render/Camera.ts';
-import { CameraTour, LEG_BASE_MS, LEG_MS_PER_PX, smoothstep } from '../src/render/CameraTour.ts';
+import { CameraTour, LEG_BASE_MS, LEG_MS_PER_PX } from '../src/render/CameraTour.ts';
+import { smoothstep } from '../src/math.ts';
 
 const view = { viewW: 240 << 5, viewH: 320 << 5, levelW: 100 << 10, levelH: 40 << 10 };
 

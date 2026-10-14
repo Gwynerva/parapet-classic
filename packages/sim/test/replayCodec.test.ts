@@ -11,10 +11,6 @@ import {
 import { MAX_STEPS } from '../src/replay.ts';
 import { replayCompatibility } from '../src/verify.ts';
 
-/** `sample()` as the first format wrote it (links shared before format 2 must still open). */
-const SAMPLE_V1 =
-  'ARFwYXJhcGV0LXNpbUAwLjIuMAdjbGFzc2ljAwEBB---rd4BAAAA_____wvQktCw0YHRj185OQWYA0GAFH-ArIkG';
-
 function sample(patch: Partial<Replay> = {}): Replay {
   return {
     simVersion: 'parapet-sim@0.2.0',
@@ -36,30 +32,6 @@ function sample(patch: Partial<Replay> = {}): Replay {
   };
 }
 
-/** Format 1 bytes of a replay (the old encoder, for forging inputs it refused). */
-function bytesV1(replay: Replay, runs: number[]): Uint8Array {
-  const text = (s: string): number[] => {
-    const b = Array.from(new TextEncoder().encode(s));
-    return [b.length, ...b];
-  };
-  const u32 = (v: number): number[] => [v & 0xff, (v >>> 8) & 0xff, (v >>> 16) & 0xff, v >>> 24];
-  return Uint8Array.from([
-    1,
-    ...text(replay.simVersion),
-    ...text(replay.rulesetId),
-    replay.levelId,
-    1,
-    replay.withRival ? 1 : 0,
-    replay.character,
-    ...u32(replay.contentHash.level),
-    ...u32(replay.contentHash.moves),
-    ...u32(replay.contentHash.tables),
-    ...text(replay.playerName),
-    ...varint(runs.length),
-    ...runs.flatMap(varint),
-  ]);
-}
-
 /** Play like a person: a press of one step every so often, one of the usual ones. */
 function humanInput(presses: number): Replay['input'] {
   const usual = [1, 1, 2, 20, 24, 1, 36, 40];
@@ -68,17 +40,6 @@ function humanInput(presses: number): Replay['input'] {
       ? { ticks: 8 + ((i * 37) % 45), bits: 0 }
       : { ticks: 1, bits: usual[(i * 7) % usual.length]! },
   );
-}
-
-function varint(value: number): number[] {
-  const out: number[] = [];
-  let n = value;
-  while (n >= 0x80) {
-    out.push((n % 0x80) | 0x80);
-    n = Math.floor(n / 0x80);
-  }
-  out.push(n);
-  return out;
 }
 
 describe('base64url', () => {
@@ -94,6 +55,12 @@ describe('base64url', () => {
     expect(fromBase64Url('ab+c')).toBeNull();
     expect(fromBase64Url('abcde')).toBeNull();
     expect(fromBase64Url('ж')).toBeNull();
+  });
+
+  it('has one spelling: set bits after the last byte are refused', () => {
+    expect(fromBase64Url('AA')).toEqual(Uint8Array.of(0));
+    expect(fromBase64Url('AB')).toBeNull();
+    expect(fromBase64Url('AAB')).toBeNull();
   });
 });
 
@@ -134,18 +101,9 @@ describe('replay codec', () => {
     }
   });
 
-  it('still reads the first format', () => {
-    expect(decodeReplay(SAMPLE_V1)).toEqual({ ok: true, replay: sample() });
-  });
-
   it('keeps links short: half a minute of play under a hundred characters', () => {
     // Thirty presses with their pauses: the sprint of level 1 has twenty-eight.
     expect(encodeReplay(sample({ input: humanInput(30) })).length).toBeLessThan(100);
-    // A long run: under half the first format.
-    const long = sample({ input: humanInput(400) });
-    const runs = long.input.map((r) => r.ticks * 64 + r.bits);
-    const before = toBase64Url(bytesV1(long, runs)).length;
-    expect(encodeReplay(long).length).toBeLessThan(before * 0.5);
   });
 
   it('tells a replay of another build or of other content', () => {
@@ -199,15 +157,6 @@ describe('replay codec', () => {
     const forged = Uint8Array.from(bytes);
     forged[forged.length - 1] = last | 1;
     expect(decodeReplay(toBase64Url(forged)).ok).toBe(false);
-  });
-
-  it('rejects input covering more than the step limit', () => {
-    // The first format: one run of MAX_STEPS + 1 ticks.
-    const forged = bytesV1(sample(), [(MAX_STEPS + 1) * 64]);
-    expect(decodeReplay(toBase64Url(forged)).ok).toBe(false);
-    // Two runs that each fit but not together.
-    const two = bytesV1(sample(), [MAX_STEPS * 64, 64]);
-    expect(decodeReplay(toBase64Url(two)).ok).toBe(false);
   });
 });
 

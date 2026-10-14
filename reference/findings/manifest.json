@@ -1,0 +1,438 @@
+{
+  "ffmpeg": "ffmpeg version 9.0.2-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+  "pages": {
+    "03-one-press-two-kicks": {
+      "title": "One press, two kicks",
+      "claim": "Pressed on contact, one UP kicks off the wall twice and climbs; pressed a moment earlier, once, and falls.",
+      "facts": {
+        "jumpStep": 121,
+        "outcomes": "none one twoClimb twoFall none",
+        "bandEnds": [129, 143, 151, 152, 160],
+        "armed": [130, 143],
+        "climb": [144, 151],
+        "armedRunStep": 144,
+        "kickSpeeds": [-4123, -3293],
+        "noKeep33MostKicks": 1,
+        "keep30ArmedKicks": 2,
+        "keep30ArmedClimb": true
+      },
+      "charts": ["sweep"],
+      "pictures": [],
+      "clips": {
+        "kicks": {
+          "width": 320,
+          "height": 264,
+          "frames": 188,
+          "hash": "24cb0818f95a4427",
+          "gifBytes": 230358,
+          "mp4Bytes": 102778
+        }
+      }
+    },
+    "01-keys-are-pressed-never-held": {
+      "title": "Keys are pressed, never held",
+      "claim": "A press waits in a buffer until the runner can use it: a vault pressed anywhere in the jump starts on the same step, and one more key on that step loses it.",
+      "facts": {
+        "jumpStep": 111,
+        "outcomes": "vault lost jump",
+        "vaultBand": [112, 133],
+        "vaultSteps": [134],
+        "landingStep": 134,
+        "vaultingLandingKeys": "",
+        "keepBufferStates": 13,
+        "states": 135
+      },
+      "charts": ["window"],
+      "pictures": [],
+      "clips": {
+        "vault": {
+          "width": 444,
+          "height": 288,
+          "frames": 121,
+          "hash": "de113f356527eaf2",
+          "gifBytes": 640955,
+          "mp4Bytes": 190196
+        }
+      }
+    },
+    "02-armed-not-timed": {
+      "title": "Armed, not timed",
+      "claim": "In the air the runner looks ahead: UP pressed while it sees a wall arms the wall run, which starts on contact, the same step for every press.",
+      "facts": {
+        "jumpStep": 121,
+        "seeing": [130, 143],
+        "armed": [130, 143],
+        "armedStarts": [144],
+        "untucked": [130, 131],
+        "untuckedDrop": 160,
+        "contactStep": 144,
+        "reach": 1417,
+        "wallRunPresses": 23,
+        "contactOnlyPresses": 9,
+        "contactOnlyArmed": 0
+      },
+      "charts": ["start"],
+      "pictures": [],
+      "clips": {
+        "ray": {
+          "width": 288,
+          "height": 248,
+          "frames": 136,
+          "hash": "3f4d10703b80675d",
+          "gifBytes": 253938,
+          "mp4Bytes": 76934
+        },
+        "armed": {
+          "width": 388,
+          "height": 376,
+          "frames": 128,
+          "hash": "ffaa9d8c674b0da5",
+          "gifBytes": 783739,
+          "mp4Bytes": 207223
+        }
+      }
+    },
+    "04-the-parkour-is-a-table": {
+      "title": "The parkour is a table",
+      "claim": "Every move is a few rows of one table of 135 states; the code only runs it. Read whole, the table has instant states, a state only the code enters and transitions that never fire.",
+      "facts": {
+        "states": 135,
+        "recordInts": 14,
+        "transitions": 212,
+        "lists": 52,
+        "conditions": 80,
+        "impulseTypes": 22,
+        "snapTypes": 29,
+        "onlyLists": [1, 9, 10, 55],
+        "unreachable": [5],
+        "instant": 29,
+        "neverFire": "1: 25→100 behind 25→99; 5: 78→5 behind 78→2",
+        "withPoints": 31
+      },
+      "charts": ["table", "record"],
+      "pictures": [],
+      "clips": {
+        "trace": {
+          "width": 360,
+          "height": 384,
+          "frames": 176,
+          "hash": "54943dfa2f973551",
+          "gifBytes": 320227,
+          "mp4Bytes": 140895
+        }
+      }
+    },
+    "05-landing-keeps-horizontal-speed": {
+      "title": "Landing keeps the horizontal speed",
+      "claim": "At touchdown the fall’s speed is thrown away and the horizontal speed kept; how hard the landing is depends on the vertical speed alone.",
+      "facts": {
+        "clean": [1, 2],
+        "stumble": [3, 5],
+        "crash": [6, 20],
+        "soft": [1, 4],
+        "roll": [5, 12],
+        "crashDown": [13, 20],
+        "vxBefore": 3400,
+        "vxAfter": 3400,
+        "vyBefore": 4883,
+        "vyAfter": 0,
+        "vxStumble": 1725,
+        "vxCrash": 257,
+        "terminal": 17300,
+        "terminalDrop": 17,
+        "keptWhenNotFailed": true
+      },
+      "charts": ["grades"],
+      "pictures": [],
+      "clips": {
+        "landing": {
+          "width": 644,
+          "height": 238,
+          "frames": 127,
+          "hash": "2d202d54dcbe3abf",
+          "gifBytes": 554436,
+          "mp4Bytes": 149715
+        }
+      }
+    },
+    "06-fixed-point-maths": {
+      "title": "Fixed-point maths",
+      "claim": "No floating point anywhere: lengths come from a 16-sided “circle” with steps in it, the sine table is grown from one number, square roots are exact integers.",
+      "facts": {
+        "normMin": -0.0306,
+        "normMinAngle": 3.58,
+        "normMax": 0.0379,
+        "normMaxAngle": 24.5,
+        "sides": 16,
+        "stepAngle": 3.58,
+        "stepJump": 0.0389,
+        "sineEntries": 512,
+        "sineMaxError": 0.997,
+        "sineRounded": 268,
+        "isqrtExactBelow": 1073741824,
+        "isqrtChecked": 16863232,
+        "isqrtAbove": 32767
+      },
+      "charts": ["norm", "sine"],
+      "pictures": [],
+      "clips": {
+        "circle": {
+          "width": 220,
+          "height": 248,
+          "frames": 351,
+          "hash": "8f7af79997a65714",
+          "gifBytes": 247237,
+          "mp4Bytes": 136642
+        }
+      }
+    },
+    "07-slow-phones-slow-down": {
+      "title": "Slow phones slow down",
+      "claim": "Game time per frame is capped, so a slow phone plays in slow motion rather than skipping; and it is cut to whole units, so every screen runs a little slow, a fast one more.",
+      "facts": {
+        "stepMs": 34.13,
+        "units60": 14,
+        "pace60": 0.9557,
+        "pace144": 0.983,
+        "pace240": 0.8192,
+        "capMs": 170.67,
+        "units250": 150,
+        "pace250": 0.6827,
+        "steps10s250": 200,
+        "steps10sOwn": 292,
+        "standStillMs": 1.14,
+        "steps10s60": 280,
+        "steps10s240": 240,
+        "parapet10s60": 292,
+        "parapet10s240": 292
+      },
+      "charts": ["pace"],
+      "pictures": [],
+      "clips": {
+        "race": {
+          "width": 320,
+          "height": 200,
+          "frames": 188,
+          "hash": "d051e8cdb7a79725",
+          "gifBytes": 724388,
+          "mp4Bytes": 205389
+        }
+      }
+    },
+    "08-one-vector-runner": {
+      "title": "One vector runner",
+      "claim": "The runner is no sprite sheet: 19 layers of small sprites placed anew in each of 463 keyframes and tweened between them; a character is a swap of a few sprites.",
+      "facts": {
+        "keyframes": 463,
+        "parts": 19,
+        "sprites": 65,
+        "pivot": [50, 76],
+        "size": [134, 142],
+        "clips": 68,
+        "unused": 67
+      },
+      "charts": [],
+      "pictures": ["wardrobe"],
+      "clips": {
+        "parts": {
+          "width": 220,
+          "height": 220,
+          "frames": 154,
+          "hash": "373b932fc5538545",
+          "gifBytes": 260294,
+          "mp4Bytes": 100842
+        },
+        "skins": {
+          "width": 384,
+          "height": 152,
+          "frames": 39,
+          "hash": "1f095beb52bc8bc1",
+          "gifBytes": 574204,
+          "mp4Bytes": 197628
+        },
+        "tween": {
+          "width": 244,
+          "height": 110,
+          "frames": 89,
+          "hash": "8c7b7f1019067207",
+          "gifBytes": 67593,
+          "mp4Bytes": 38807
+        }
+      }
+    },
+    "09-vector-backgrounds": {
+      "title": "Vector backgrounds",
+      "claim": "The levels are not pictures: each is one object of coloured rectangles, sprites and shared props, drawn anew every frame, and the warm-up’s arrows pulse by tweening it.",
+      "facts": {
+        "levels": 12,
+        "primitives": 5855,
+        "rectShare": 77,
+        "nestedFiles": [1],
+        "widest": 5021,
+        "narrowest": 2450,
+        "warmUpFrames": 5,
+        "pulseUnits": 1024
+      },
+      "charts": ["kinds"],
+      "pictures": ["xray"],
+      "clips": {
+        "pulse": {
+          "width": 240,
+          "height": 160,
+          "frames": 77,
+          "hash": "1103ad9eaed9a5a0",
+          "gifBytes": 29712,
+          "mp4Bytes": 17712
+        }
+      }
+    },
+    "10-the-camera": {
+      "title": "The camera",
+      "claim": "The camera aims ahead of the runner by its speed, not when a wall is near, and a leash holds it back: at running speed it wants 98 pixels ahead and gets 60.",
+      "facts": {
+        "lookMax": 120,
+        "lookAtRun": 98,
+        "leash": 60,
+        "farthest": 60,
+        "leashed": 42,
+        "zeroed": 20,
+        "runSeconds": 59
+      },
+      "charts": ["offset"],
+      "pictures": [],
+      "clips": {
+        "view": {
+          "width": 240,
+          "height": 375,
+          "frames": 199,
+          "hash": "79e5f46cb7425ef4",
+          "gifBytes": 873686,
+          "mp4Bytes": 216519
+        }
+      }
+    },
+    "11-rivals-are-replays": {
+      "title": "Rivals are replays",
+      "claim": "The rivals are the developers’ own runs: presses recorded tick by tick and played back through the player’s physics. No AI.",
+      "facts": {
+        "recordings": 12,
+        "snapshotBytes": 114,
+        "entryBytes": 5,
+        "presses": 445,
+        "longPresses": 0,
+        "fewest": 21,
+        "fewestLevel": "Sand Cape",
+        "most": 65,
+        "mostLevel": "West Harbour",
+        "totalMatches": 12,
+        "swapped": [9, 10],
+        "swappedNames": "Bird Bay and West Harbour",
+        "delays": [50, 3000],
+        "linedUp": true
+      },
+      "charts": ["presses", "blob"],
+      "pictures": [],
+      "clips": {
+        "replay": {
+          "width": 240,
+          "height": 439,
+          "frames": 148,
+          "hash": "0568b02fde83c871",
+          "gifBytes": 998300,
+          "mp4Bytes": 207519
+        }
+      }
+    },
+    "12-level-map-quirks": {
+      "title": "Level map quirks",
+      "claim": "Loading a level stamps its checkpoints into the map: four birds sit where a stamp lands and never appear. Ten tile ids the engine knows are in no map.",
+      "facts": {
+        "birds": 105,
+        "erased": "3/0/0/26/9 9/0/2/95/9 9/1/4/15/11 10/0/0/13/3",
+        "erasedWhere": "East End, Sprint, checkpoint 1 (26, 9); Bird Bay, Sprint, checkpoint 3 (95, 9); Bird Bay, Flag hunt, checkpoint 5 (15, 11); West Harbour, Sprint, checkpoint 1 (13, 3)",
+        "stampedSolid": 0,
+        "stampedCells": 252,
+        "floorlessLevels": 6,
+        "floorlessInside": 0,
+        "unusedIds": [9, 10, 11, 12, 15, 16, 23, 24, 25, 26]
+      },
+      "charts": ["tiles"],
+      "pictures": ["birds"],
+      "clips": {}
+    },
+    "13-the-score-never-drops": {
+      "title": "The score never drops",
+      "claim": "A fail works out a penalty and never applies it: the score only goes up. A fail costs the trick in progress and part of the multiplier.",
+      "facts": {
+        "fails": 4,
+        "penalties": [-100, 0, -650, 0],
+        "total": -750,
+        "score": 2203,
+        "withPenalty": 1453,
+        "everDrops": false,
+        "meters": [0, 0, 1250, 0, 1100, 0, 400, 0],
+        "meterRule": true
+      },
+      "charts": ["score"],
+      "pictures": [],
+      "clips": {
+        "fail": {
+          "width": 240,
+          "height": 409,
+          "frames": 199,
+          "hash": "7c2de56008d6bd18",
+          "gifBytes": 1288464,
+          "mp4Bytes": 256922
+        }
+      }
+    },
+    "14-whats-in-the-jar": {
+      "title": "What’s in the jar",
+      "claim": "The sprites ship as raw pixels and become PNGs in memory, built byte by byte; the stored music lengths are mostly wrong; a tenth of the jar is not the game.",
+      "facts": {
+        "jarBytes": 271541,
+        "files": 41,
+        "groups": [54834, 89200, 57282, 16496, 6497, 6715, 26753],
+        "sprites": 314,
+        "rgbaSprites": 42,
+        "pngsEqual": 314,
+        "pngBytes": 586746,
+        "rawBytes": 519320,
+        "mostIdats": 7,
+        "prize": [0, 87273],
+        "menu": [127067, 43636],
+        "inGame": [43636, 43722],
+        "sameStored": 12,
+        "menuVolume": 1516
+      },
+      "charts": ["jar", "png", "music"],
+      "pictures": [],
+      "clips": {}
+    },
+    "15-what-tricks-cost": {
+      "title": "What tricks cost",
+      "claim": "The game pays for speed, not style: the quick tricks are in every fast run, and the showy ones cost a quarter of a second to almost a second each.",
+      "facts": {
+        "tricks": 12,
+        "cheapest": "tiger jump (kong)",
+        "dearest": "wall flip",
+        "ways": "tiger jump, jump, monkey vault, no key",
+        "arrivals": [190, 207, 207, 237],
+        "vaultLoss": 580,
+        "vaultCost": 534
+      },
+      "charts": ["cost"],
+      "pictures": [],
+      "clips": {
+        "race": {
+          "width": 392,
+          "height": 497,
+          "frames": 169,
+          "hash": "5ac4c43c801b1c6d",
+          "gifBytes": 886663,
+          "mp4Bytes": 333529
+        }
+      }
+    }
+  }
+}

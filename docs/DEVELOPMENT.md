@@ -14,17 +14,38 @@ site, an anonymous visit count).
 - `packages/runtime` — browser runtime: viewport, fonts, i18n, input, renderers (including the
   echo holograms and the bosses' looks and effects), camera, mission flow, message boxes,
   audio, storage, clipboard and files.
-- `packages/classic` — the game (Vite + TypeScript + Canvas 2D).
+- `packages/classic` — the game (Vite + TypeScript + Canvas 2D), and the Lab page (`lab/`).
+- `packages/lab` — the experiments on the original behind the findings and the Lab: runs of the
+  simulation recorded step by step, drawn into RGBA frames and SVG charts (no DOM, no files, so
+  the same code runs in Node and in the browser).
 - `packages/tools` — extracts sprites, levels, move tables, music and more from the original jar
   into `packages/content/playman`; builds the bitmap fonts; checks translations; searches the
   bosses' records; draws and checks looks; the bosses' art generators (`art/`).
 - `packages/content` — `playman/`: the original jar and everything extracted from it, and
   nothing else; next to it our own fonts, translations (`i18n/`, one folder per language) and
   the bosses: records, looks, effects, worlds and theme (`bosses/`).
-- `reference/` — everything learned about the original game: formats, physics, flow, menus,
-  curiosities and bugs, plus a headless Java oracle that runs the original class files and
-  produces the reference traces.
-- `docs/` — this page and the README's pictures.
+- `reference/` — everything learned about the original game: notes on its formats, physics,
+  flow, menus, curiosities and bugs (`notes/`), the findings told and animated for everyone
+  (`findings/`), and a headless Java oracle that runs the original class files and produces the
+  reference traces.
+- `docs/` — this page and the README's pictures. The release history is
+  [`CHANGELOG.md`](../CHANGELOG.md).
+
+## Architecture
+
+1. **`sim` is the only home of mechanics.** No DOM, no floats; the move table and the levels are
+   data, and the code that runs them maps line by line to the original's (`d.java`). Replays
+   carry the simulation version, the ruleset and the content's hashes.
+2. **`runtime` is one package with internal boundaries**: platform (viewport, input, storage,
+   audio, clipboard, files), render (sprites, scenes, characters, echoes, levels, camera), ui
+   (fonts, i18n, screens, widgets). It knows no level or menu; `classic` composes it. Its
+   renderers paint through a painter (`ScenePainter`, `TilePainter`), on a canvas in the game
+   and into bytes for the findings and the Lab (`SceneRaster`, `RasterText`).
+3. **`lab` experiments on data, never on code.** A "what if" is a copy of the move table with a
+   rule changed (`patchMoves`); what an experiment watches it computes on a copy of the runner.
+4. **Not doing**: a general-purpose engine (Phaser, Pixi) or an ECS. The original's data-driven
+   state machine is the right architecture for these mechanics, and either would make the exact
+   port and determinism harder.
 
 ## Getting started
 
@@ -58,21 +79,30 @@ sheet | poses | lineup | rotate` draws and checks the bosses' looks (see
   favicons.
 - `npm run decompile` reproduces the decompiled source under `reference/decompiled/` (Docker or
   a local JDK).
+- `npm run findings -- [<page>…] [--no-video] [--check]` measures the findings about the original
+  again, writes their charts, pictures and numbers into `reference/findings/<page>/` and encodes
+  the animations that changed (ffmpeg 6 or newer on the PATH, or `FFMPEG`): a GIF at 25 frames a
+  second and an MP4 at 60. A fingerprint of every animation's frames in `manifest.json` keeps
+  another ffmpeg build from churning the binaries. The pages' text is written by hand; the
+  generated parts sit between `<!-- findings:… -->` comments. The pages are
+  `packages/lab/src/findings/` (and `packages/tools/src/findings/` for the two that read files);
+  `npm test` checks them without ffmpeg.
 - `reference/oracle` runs the original class files headlessly and writes the golden traces the
   simulation, animator and camera tests compare against.
 
 ## The dev server
 
-Shortcuts of the client (dev server only): `?level=N&mode=M` jumps into a run,
-`?replay=/dev/l0-flags.json` plays a recorded input log, `?touch=1` shows the touch buttons,
+Shortcuts of the client (dev server only): `?level=N&mode=M` jumps into a run, `?touch=1` shows
+the touch buttons,
 `?tas=<level>-<mode>` plays a local TAS run (`?tas=style-15/<level>-<mode>` the stylish one
 the boss races; `&autopilot=1` races the boss with it), `?contestTime=<ms>` makes the boss's
 time beatable, `?vp=292x633` lays the game out for a phone's screen and `?coarse=1` treats
 the mouse as a finger.
 
-Pages of the dev server, never published:
+The Lab is at `/lab/`. Pages of the dev server, never published:
 
-- `debug.html` — a bare level viewer (`C` cycles the characters, `O` a boss's outfits, `G` the
+- `debug.html` — a bare level viewer (built too, but left out of offline play and of search
+  engines) (`C` cycles the characters, `O` a boss's outfits, `G` the
   echo looks, `V` a magnified sheet of poses).
 - `/dev/looks.html` — a boss's outfit running both ways with its effect in its world, a sheet
   of poses and its atlas; drop a painted atlas on it to see it at once, Save writes the look.
@@ -104,7 +134,8 @@ repository's variables, Settings → Secrets and variables → Actions → Varia
   lets pictures come from that host. Without it nothing is counted.
 
 The build also writes `sitemap.xml` and `robots.txt` for `VITE_SITE_URL` (a robots file counts
-only at a domain's root, on a domain of the site's own), and `r/index.html`: the game again,
+only at a domain's root, on a domain of the site's own), the Lab (`lab/`), and
+`r/index.html`: the game again,
 one folder down, with the link preview of a challenge (`public/og-race.png`). Challenge links
 open it with the replay code as the query (`r/?<code>`; chats keep a query where some drop a
 fragment). Link previews are read from a page's HTML as served, so one preview serves every
@@ -114,8 +145,8 @@ without a race asks to stay out of the index. Links are offered up to 4000 chara
 server takes about 8 KB of address, a Telegram message 4096 characters); a longer run is sent
 as a file.
 
-Last, the build writes `sw.js`, a service worker that keeps every file the game needs (both
-pages, the scripts, the pictures, every music track and the name field's font; not the debug
+Last, the build writes `sw.js`, a service worker that keeps every file the game needs (the
+game's pages and the Lab, the scripts, the pictures, every music track and the name field's font; not the debug
 page, the link previews or the search engines' files), so the site, once opened, plays with no
 connection (`src/app/offline.ts`). Its cache is named by a hash of those files: a new build
 comes on the next launch, while a page already open plays on with its own files (the build

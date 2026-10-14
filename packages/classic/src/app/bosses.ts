@@ -19,12 +19,12 @@ import { bossProblems, type BossData, type BossRoster } from '@parapet/runtime/c
 import {
   lookDataProblems,
   lookProblems,
-  parseColor,
   resolveLook,
   type LookData,
   type ResolvedLook,
 } from '@parapet/runtime/render/Look.ts';
-import { makeEchoColor, rgbCss, type EchoColor } from '@parapet/runtime/render/EchoSkin.ts';
+import { makeEchoColor, type EchoColor } from '@parapet/runtime/render/EchoSkin.ts';
+import { cssColor, DEFAULT_ACCENT, parseColor } from '@parapet/runtime/render/color.ts';
 import type { FxFile } from '@parapet/runtime/render/fx/FxData.ts';
 import { compileFx } from '@parapet/runtime/render/fx/FxSheet.ts';
 import type { FxStyle } from '@parapet/runtime/render/fx/CharacterFx.ts';
@@ -46,6 +46,7 @@ import {
 import contestsJson from '@content/bosses/contests.json';
 import glimpsesJson from '@content/bosses/glimpses.json';
 import rosterJson from '@content/bosses/bosses.json';
+import { type I18n } from '@parapet/runtime/i18n/i18n.ts';
 
 const bossFiles = import.meta.glob('@content/bosses/*/boss.json', {
   eager: true,
@@ -61,8 +62,6 @@ const stageFiles = import.meta.glob('@content/bosses/*/stage.json', {
   import: 'default',
 });
 
-/** Name of the bosses' runs and replays (never shown: the runs are not published). */
-export const RECORD_HOLDER = 'Gwynerva';
 /** The silhouette of a boss still in the workshop. */
 export const WORKSHOP_COLOR: EchoColor = makeEchoColor('workshop', '#7d2a63');
 export const CONTEST_KINDS: readonly ContestKind[] = ['flags', 'sprint'];
@@ -76,8 +75,8 @@ export const FIRST_BOSS_CHARACTER = 10;
 export function bossTint(color: EchoColor): MenuTint {
   return {
     edge: color.css,
-    fill: rgbCss(color.ramp.shadow),
-    idle: rgbCss(color.ramp.shadow, 0.45),
+    fill: cssColor(color.ramp.shadow),
+    idle: cssColor(color.ramp.shadow, 0.45),
     label: color.light,
     value: color.css,
   };
@@ -149,10 +148,9 @@ export function contestRecord(levelId: number, kind: ContestKind): ContestRecord
   if (contests.simVersion !== SIM_VERSION || contests.rulesetId !== RULESET_ID) return null;
   const found = contests.levels.find((l) => l.levelId === levelId)?.[kind];
   if (!found) return null;
-  const allowance = CONTEST_ALLOWANCE;
   return {
-    timeMs: allowed(found.timeMs, allowance),
-    splitsMs: found.splitsMs.map((ms) => allowed(ms, allowance)),
+    timeMs: allowed(found.timeMs, CONTEST_ALLOWANCE),
+    splitsMs: found.splitsMs.map((ms) => allowed(ms, CONTEST_ALLOWANCE)),
   };
 }
 
@@ -231,7 +229,7 @@ function load(): Boss[] {
       id,
       levelId,
       data,
-      color: makeEchoColor(`boss-${id}`, parseColor(data.color) ? data.color : '#ff3ea5'),
+      color: makeEchoColor(`boss-${id}`, parseColor(data.color) ? data.color : DEFAULT_ACCENT),
       looks,
       fx,
       stage: stages.get(id) ?? null,
@@ -359,4 +357,9 @@ export function characterFx(
     ribbonColor: (token) => look.palette[token] ?? token,
     seed,
   };
+}
+
+/** A boss's name in the current language ('' for none). */
+export function bossName(i18n: I18n, boss: Boss | null | undefined): string {
+  return boss ? i18n.t(`boss.${boss.id}.name`) : '';
 }

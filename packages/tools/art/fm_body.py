@@ -100,15 +100,6 @@ def paint(pic, rows, legend, x0=0, y0=0, only_on=True):
     return pic
 
 
-def recolour_where(pic, test, colour):
-    for y in range(pic.h):
-        for x in range(pic.w):
-            c = pic.get(x, y)
-            if c and test(x, y, c):
-                pic.set(x, y, colour)
-    return pic
-
-
 def materials(rows, mats, centre=None, radii=None, along=None, light=LIGHT):
     """A part drawn as regions of materials: `rows` of characters ('.' empty), `mats` maps a
     character to (ramp, outline, sel, spec, gloss); every region is lit with the same volume

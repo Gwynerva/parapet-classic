@@ -1,7 +1,5 @@
 /** The generated game data a TAS run needs, read from packages/content in Node. */
-import { readFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
 import {
   LEVEL_COUNT,
   runContentHash,
@@ -13,12 +11,10 @@ import {
   type RunContent,
 } from '@parapet/sim';
 import { buildClipTable } from '@parapet/runtime/anim/Animator.ts';
+import { EXTRACTED_DIR, readJson } from '../files.ts';
 
-export const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..');
-export const GENERATED_DIR = join(REPO_ROOT, 'packages', 'content', 'playman', 'extracted');
-
-function readJson<T>(rel: string): T {
-  return JSON.parse(readFileSync(join(GENERATED_DIR, rel), 'utf8')) as T;
+function extracted<T>(rel: string): T {
+  return readJson<T>(join(EXTRACTED_DIR, rel));
 }
 
 export interface GameData {
@@ -31,9 +27,9 @@ let cached: GameData | null = null;
 
 export function loadGameData(): GameData {
   cached ??= {
-    moves: readJson<MoveTableData>('moves.json'),
-    tables: readJson<PhysicsTables>('tables.json'),
-    missions: readJson<{ levels: MissionInfo[] }>('missions.json').levels,
+    moves: extracted<MoveTableData>('moves.json'),
+    tables: extracted<PhysicsTables>('tables.json'),
+    missions: extracted<{ levels: MissionInfo[] }>('missions.json').levels,
   };
   return cached;
 }
@@ -47,7 +43,7 @@ export function levelContent(levelId: number): RunContent {
   const mission = data.missions[levelId];
   if (!mission) throw new Error(`level ${levelId} has no mission data`);
   return {
-    level: readJson<LevelData>(`levels/${levelId}.json`),
+    level: extracted<LevelData>(`levels/${levelId}.json`),
     mission,
     moves: data.moves,
     tables: data.tables,
@@ -63,6 +59,6 @@ let clipTable: Int16Array | null = null;
 
 /** The animation clip table (`short_h`) the renderer plays the moves with, for the glimpses. */
 export function loadClipTable(): Int16Array {
-  clipTable ??= buildClipTable(readJson<{ clips: Record<string, number[]> }>('anims.json').clips);
+  clipTable ??= buildClipTable(extracted<{ clips: Record<string, number[]> }>('anims.json').clips);
   return clipTable;
 }

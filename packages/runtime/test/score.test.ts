@@ -4,7 +4,6 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { noteNumber, scoreProblems, scoreToSong, type Score } from '../src/audio/Score.ts';
-import { normalisationGain } from '../src/audio/Loudness.ts';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const THEME = join(here, '..', '..', 'content', 'bosses', 'theme.json');
@@ -53,7 +52,7 @@ describe('scores', () => {
   it('finds mistakes', () => {
     const bad = scoreProblems(
       score({
-        patterns: { a: 'C4 X9 .', d: ['K.Z.'] },
+        patterns: { a: 'C4 X9 .', d: ['K.Z.'], e: [''], f: ['K...', 'K.'] },
         sections: { s: { bars: 1, play: { lead: ['d', 'zzz'], bass: ['a'] } } },
         song: ['s', 'nope'],
       }),
@@ -66,6 +65,19 @@ describe('scores', () => {
     expect(text).toMatch(/unknown pattern zzz/);
     expect(text).toMatch(/unknown track bass/);
     expect(text).toMatch(/unknown section nope/);
+    expect(text).toMatch(/e: no steps/);
+    expect(text).toMatch(/f lane 1: 2 steps, not as long as lane 0/);
+  });
+
+  it('plays a drum pattern without steps as silence instead of hanging', () => {
+    const song = scoreToSong(
+      score({
+        patterns: { e: [''] },
+        sections: { s: { bars: 1, play: { drums: ['e'] } } },
+        song: ['s'],
+      }),
+    );
+    expect(song.notes.filter((n) => n.channel === 9)).toEqual([]);
   });
 
   it('the contest theme is sound and loops after its last note', () => {
@@ -76,7 +88,6 @@ describe('scores', () => {
     expect(song.durationMs / 1000).toBeLessThan(60);
     const lastEnd = Math.max(...song.notes.map((n) => n.time + n.duration));
     expect(lastEnd).toBeLessThanOrEqual(song.durationMs + 1e-6);
-    expect(normalisationGain(song)).toBeGreaterThan(0);
     // Never more voices at once than the synthesiser has (32).
     const starts = new Map<number, number>();
     for (const n of song.notes) starts.set(n.time, (starts.get(n.time) ?? 0) + 1);

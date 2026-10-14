@@ -176,7 +176,7 @@ export function reportMarkdown(
         continue;
       }
       const more: Record<string, number> = {};
-      TRICKS.forEach((t, k) => {
+      TRICKS.forEach((t) => {
         const d = (s.tricks[t.id] ?? 0) - (o.tricks[t.id] ?? 0);
         if (d > 0) more[t.id] = d;
       });

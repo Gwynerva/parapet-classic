@@ -6,7 +6,17 @@
 import { iabs } from '../math/int.ts';
 import type { Level } from '../level/level.ts';
 import { cellIndex, rayMarch } from '../collision/raymarch.ts';
-import { bitIn, tileHasFlag, type PhysicsTables } from '../tables.ts';
+import {
+  AIR_OR_POLE,
+  ANY_SLOPE,
+  bitIn,
+  tileHasFlag,
+  WALL_AHEAD_LEFT,
+  WALL_AHEAD_RIGHT,
+  WALL_OR_LEDGE,
+  type PhysicsTables,
+} from '../tables.ts';
+import { Surface } from '../collision/probe.ts';
 import type { RunnerState } from './runner.ts';
 
 export const Input = {
@@ -17,6 +27,26 @@ export const Input = {
   FORWARD: 16,
   BACK: 32,
 } as const;
+
+/** An arrow key (a pad's direction, a touch button). */
+export type ArrowKey = 'up' | 'down' | 'left' | 'right';
+
+/**
+ * Press bits of an arrow key the way the original reads a press (`boolean_f`, line 5173): the
+ * direction, plus FORWARD or BACK resolved from the runner's facing at the moment of the press.
+ */
+export function pressBits(key: ArrowKey, facingRight: boolean): number {
+  switch (key) {
+    case 'up':
+      return Input.UP;
+    case 'down':
+      return Input.DOWN;
+    case 'right':
+      return Input.RIGHT | (facingRight ? Input.FORWARD : Input.BACK);
+    case 'left':
+      return Input.LEFT | (facingRight ? Input.BACK : Input.FORWARD);
+  }
+}
 
 export interface ConditionContext {
   level: Level;
@@ -106,10 +136,22 @@ export function lookaheadRay(
 export function isOnSurface(r: RunnerState): boolean {
   if (r.handsAnchored) {
     const k = r.probes[0].surface;
-    return k === 12 || k === 11 || k === 9 || k === 8 || k === 17;
+    return (
+      k === Surface.LEDGE_RIGHT ||
+      k === Surface.LEDGE_LEFT ||
+      k === Surface.WALL_LEFT ||
+      k === Surface.WALL_RIGHT ||
+      k === Surface.CEILING
+    );
   }
+  // Feet against a wall count as airborne.
   const k = r.probes[2].surface;
-  return k !== 0 && k !== 17 && k !== 9 && k !== 8;
+  return (
+    k !== Surface.NONE &&
+    k !== Surface.CEILING &&
+    k !== Surface.WALL_LEFT &&
+    k !== Surface.WALL_RIGHT
+  );
 }
 
 /** `boolean_g(int)`: buffered press that has not been superseded by a new press this step. */
@@ -118,7 +160,7 @@ function bufferedPress(r: RunnerState, mask: number): boolean {
 }
 
 function wallAheadMask(r: RunnerState): number {
-  return r.facingRight ? 2304 : 4608;
+  return r.facingRight ? WALL_AHEAD_RIGHT : WALL_AHEAD_LEFT;
 }
 
 /** Evaluate condition `id` for runner `r`. */
@@ -142,21 +184,21 @@ export function evalCondition(r: RunnerState, ctx: ConditionContext, id: number)
     case 5:
       return !feet.hit;
     case 6:
-      return (r.pressedBits & 0x20) !== 0;
+      return (r.pressedBits & Input.BACK) !== 0;
     case 7:
-      return (r.pressedBits & 0x10) !== 0;
+      return (r.pressedBits & Input.FORWARD) !== 0;
     case 8:
-      return (r.pressedBits & 1) !== 0;
+      return (r.pressedBits & Input.UP) !== 0;
     case 9:
-      return (r.pressedBits & 2) !== 0;
+      return (r.pressedBits & Input.DOWN) !== 0;
     case 10:
-      return bufferedPress(r, 32);
+      return bufferedPress(r, Input.BACK);
     case 11:
-      return bufferedPress(r, 16);
+      return bufferedPress(r, Input.FORWARD);
     case 12:
-      return bufferedPress(r, 1);
+      return bufferedPress(r, Input.UP);
     case 13:
-      return bufferedPress(r, 2);
+      return bufferedPress(r, Input.DOWN);
     case 14:
       return (
         tileHasFlag(tables, tileRelative(r, level, 0), 1) &&
@@ -171,12 +213,13 @@ export function evalCondition(r: RunnerState, ctx: ConditionContext, id: number)
     case 18:
       return !tileHasFlag(tables, tileRelative(r, level, 0), r.facingRight ? 64 : 128);
     case 19:
-      return tileHasFlag(tables, tileRelative(r, level, 0), 252);
+      return tileHasFlag(tables, tileRelative(r, level, 0), ANY_SLOPE);
     case 20:
       return (feet.hit && !bitIn(feet.surface, 1)) || (hands.hit && !bitIn(hands.surface, 1));
     case 21:
       return (
-        (feet.hit && !bitIn(feet.surface, 98305)) || (hands.hit && !bitIn(hands.surface, 98305))
+        (feet.hit && !bitIn(feet.surface, AIR_OR_POLE)) ||
+        (hands.hit && !bitIn(hands.surface, AIR_OR_POLE))
       );
     case 22: {
       const head = tileRelative(r, level, 32);
@@ -232,7 +275,7 @@ export function evalCondition(r: RunnerState, ctx: ConditionContext, id: number)
     case 32:
       return contact.hit && bitIn(contact.surface, wallAheadMask(r));
     case 33:
-      return contact.hit && bitIn(contact.surface, 6912);
+      return contact.hit && bitIn(contact.surface, WALL_OR_LEDGE);
     case 34: {
       const under = tileRelative(r, level, 0);
       return contact.surface === 1 && (under === 15 || under === 16);
@@ -325,8 +368,8 @@ export function evalCondition(r: RunnerState, ctx: ConditionContext, id: number)
       return (
         feet.hit &&
         (feet.surface === 9 - (r.facingRight ? 1 : 0) || feet.surface === 21) &&
-        tileHasFlag(tables, tileRelative(r, level, 128), 98305) &&
-        tileHasFlag(tables, tileRelative(r, level, 129), 98305)
+        tileHasFlag(tables, tileRelative(r, level, 128), AIR_OR_POLE) &&
+        tileHasFlag(tables, tileRelative(r, level, 129), AIR_OR_POLE)
       );
     case 67: {
       const t = tileRelative(r, level, 0);
@@ -336,7 +379,7 @@ export function evalCondition(r: RunnerState, ctx: ConditionContext, id: number)
       const mask = wallAheadMask(r);
       if (
         lookaheadRay(r, ctx, ((r.vy * 400) / 1024) | 0, 400) &&
-        bitIn(r.lookahead.surface, 6912) &&
+        bitIn(r.lookahead.surface, WALL_OR_LEDGE) &&
         tileHasFlag(tables, tileRelative(r, level, 192), mask)
       ) {
         return true;

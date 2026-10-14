@@ -5,6 +5,7 @@
  */
 import type { EchoColor } from './EchoSkin.ts';
 import { toScreen, type CameraPos } from './View.ts';
+import { cssColor } from './color.ts';
 
 interface Spark {
   x: number;
@@ -20,13 +21,9 @@ interface Spark {
 export const BODY_CENTRE_HEIGHT = 900;
 const SPARK_COUNT = 28;
 
-function rgbCss(c: readonly [number, number, number]): string {
-  return `rgb(${c[0]}, ${c[1]}, ${c[2]})`;
-}
-
 /** The three tones a burst of `color` is made of. */
 export function sparkColors(color: EchoColor): string[] {
-  return [color.css, color.light, rgbCss(color.ramp.highlight)];
+  return [color.css, color.light, cssColor(color.ramp.highlight)];
 }
 
 export class Sparks {
@@ -48,23 +45,6 @@ export class Sparks {
         color: colors[i % colors.length] ?? '#ffffff',
       });
     }
-  }
-
-  /** One ember drifting up from a point (world units), e.g. behind a running runner's feet. */
-  ember(x: number, y: number, color: string): void {
-    this.list.push({
-      x: x + (Math.random() - 0.5) * 300,
-      y,
-      vx: (Math.random() - 0.5) * 0.8,
-      vy: -1 - Math.random() * 1.5,
-      age: 0,
-      life: 250 + Math.random() * 300,
-      color,
-    });
-  }
-
-  get active(): boolean {
-    return this.list.length > 0;
   }
 
   /** Moves the sparks by `dt` ms of real time and draws them. */

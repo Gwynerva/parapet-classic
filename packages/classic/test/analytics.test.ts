@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { counterOrigin } from '../src/app/analytics.ts';
+import { counterOrigin } from '../src/app/counter.ts';
 
 describe('counterOrigin', () => {
   it('takes a goatcounter.com code or an https address of our own', () => {

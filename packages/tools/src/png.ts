@@ -1,12 +1,12 @@
 /**
  * Minimal PNG encoder: 8-bit RGBA, one zlib-compressed IDAT, filter type 0 on every row, and
- * a decoder for the PNGs this project writes (8-bit RGBA or RGB, not interlaced).
+ * a decoder for 8-bit PNGs without interlace: RGBA, RGB, or indexed with a PLTE (and tRNS).
  * (A plain codec of its own; it has nothing to do with the runtime PNG builder of the game.)
  */
 import { deflateSync, inflateSync } from 'node:zlib';
 import { crc32 } from './crc32.ts';
 
-const SIGNATURE = Uint8Array.of(0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a);
+export const SIGNATURE = Uint8Array.of(0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a);
 
 export function encodePng(width: number, height: number, rgba: Uint8Array): Uint8Array {
   if (!Number.isInteger(width) || !Number.isInteger(height) || width <= 0 || height <= 0) {
@@ -52,23 +52,28 @@ export function readPngSize(png: Uint8Array): { width: number; height: number } 
   return { width: view.getUint32(16), height: view.getUint32(20) };
 }
 
-/** Decodes an 8-bit RGBA or RGB, non-interlaced PNG into RGBA bytes. */
+/** Decodes an 8-bit RGBA, RGB or indexed, non-interlaced PNG into RGBA bytes. */
 export function decodePng(png: Uint8Array): { width: number; height: number; rgba: Uint8Array } {
   const { width, height } = readPngSize(png);
   const view = new DataView(png.buffer, png.byteOffset, png.byteLength);
   const depth = png[24];
   const colourType = png[25];
-  if (depth !== 8 || (colourType !== 6 && colourType !== 2) || png[28] !== 0) {
+  if (depth !== 8 || (colourType !== 6 && colourType !== 2 && colourType !== 3) || png[28] !== 0) {
     throw new Error(
-      `png: only 8-bit RGB(A) without interlace (depth ${depth}, type ${colourType})`,
+      `png: only 8-bit RGB(A) or indexed without interlace (depth ${depth}, type ${colourType})`,
     );
   }
-  const channels = colourType === 6 ? 4 : 3;
+  const channels = colourType === 6 ? 4 : colourType === 2 ? 3 : 1;
   const idat: Uint8Array[] = [];
+  let plte: Uint8Array = new Uint8Array(0);
+  let trns: Uint8Array = new Uint8Array(0);
   for (let pos = 8; pos < png.length;) {
     const length = view.getUint32(pos);
     const type = String.fromCharCode(...png.subarray(pos + 4, pos + 8));
-    if (type === 'IDAT') idat.push(png.subarray(pos + 8, pos + 8 + length));
+    const data = png.subarray(pos + 8, pos + 8 + length);
+    if (type === 'IDAT') idat.push(data);
+    if (type === 'PLTE') plte = data;
+    if (type === 'tRNS') trns = data;
     if (type === 'IEND') break;
     pos += 12 + length;
   }
@@ -98,6 +103,14 @@ export function decodePng(png: Uint8Array): { width: number; height: number; rgb
   }
   if (channels === 4) return { width, height, rgba: pixels };
   const rgba = new Uint8Array(width * height * 4);
+  if (channels === 1) {
+    for (let i = 0; i < width * height; i++) {
+      const index = pixels[i]!;
+      rgba.set(plte.subarray(index * 3, index * 3 + 3), i * 4);
+      rgba[i * 4 + 3] = index < trns.length ? trns[index]! : 255;
+    }
+    return { width, height, rgba };
+  }
   for (let i = 0; i < width * height; i++) {
     rgba[i * 4] = pixels[i * 3]!;
     rgba[i * 4 + 1] = pixels[i * 3 + 1]!;
@@ -107,7 +120,8 @@ export function decodePng(png: Uint8Array): { width: number; height: number; rgb
   return { width, height, rgba };
 }
 
-function chunk(type: string, data: Uint8Array): Uint8Array {
+/** A PNG chunk: length, type, data and the CRC-32 of type and data. */
+export function chunk(type: string, data: Uint8Array): Uint8Array {
   const out = new Uint8Array(12 + data.length);
   const view = new DataView(out.buffer);
   view.setUint32(0, data.length);
@@ -117,7 +131,7 @@ function chunk(type: string, data: Uint8Array): Uint8Array {
   return out;
 }
 
-function concat(parts: readonly Uint8Array[]): Uint8Array {
+export function concat(parts: readonly Uint8Array[]): Uint8Array {
   let total = 0;
   for (const part of parts) total += part.length;
   const out = new Uint8Array(total);

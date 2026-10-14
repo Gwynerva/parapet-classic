@@ -13,7 +13,8 @@ import {
 } from '../src/tas/constraints.ts';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { GENERATED_DIR, levelContent } from '../src/tas/content.ts';
+import { levelContent } from '../src/tas/content.ts';
+import { EXTRACTED_DIR } from '../src/files.ts';
 import { jobKey } from '../src/tas/files.ts';
 import {
   betterRun,
@@ -168,8 +169,8 @@ describe('style', () => {
   });
 });
 
-describe.skipIf(!existsSync(join(GENERATED_DIR, 'moves.json')))('TAS search', () => {
-  const content = existsSync(join(GENERATED_DIR, 'moves.json')) ? levelContent(0) : null;
+describe.skipIf(!existsSync(join(EXTRACTED_DIR, 'moves.json')))('TAS search', () => {
+  const content = existsSync(join(EXTRACTED_DIR, 'moves.json')) ? levelContent(0) : null;
   let found: FinalRun[] = [];
 
   beforeAll(() => {

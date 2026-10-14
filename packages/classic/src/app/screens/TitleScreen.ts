@@ -27,7 +27,7 @@ export class TitleScreen implements Screen {
 
   constructor(ctx: GameContext) {
     this.ctx = ctx;
-    this.menu = new Menu(ctx.fonts.text, ctx.fonts.small);
+    this.menu = new Menu(ctx.fonts.text);
     this.rebuild();
   }
 
@@ -83,14 +83,7 @@ export class TitleScreen implements Screen {
     });
     this.titleX = layout.title.x + (layout.title.w >> 1);
     this.titleY = layout.title.y;
-    Object.assign(this.menu.layout, {
-      x: layout.menu.x,
-      y: layout.menu.y,
-      width: layout.menu.w,
-      rowHeight: layout.rowHeight,
-      align: 'center',
-    });
-    this.menu.fit(layout.menu.h);
+    this.menu.place(layout.menu, layout.rowHeight);
   }
 
   update(): void {}

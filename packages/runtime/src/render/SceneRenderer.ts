@@ -13,7 +13,6 @@ import {
   CMD_SPRITE,
   CMD_TILED,
   composePose,
-  mixRgb565,
   type DrawCommand,
   type SpriteSizes,
   type SpriteSwap,
@@ -33,6 +32,7 @@ export {
   type PartContext,
   type SpriteSwap,
 } from './Pose.ts';
+import { cssOf24 } from './color.ts';
 
 /** Anchor value meaning "place the object's pivot on (x, y)" (the original passes 1024). */
 export const PIVOT_ANCHOR = 1024;
@@ -40,21 +40,25 @@ export const PIVOT_ANCHOR = 1024;
 /** Id of the character object (the single object of `k0`). */
 export const CHARACTER_OBJECT = 0;
 
-/** RGB565 → 24-bit RGB (frame A only). */
-export function rgb565ToRgb(c: number): number {
-  return mixRgb565(c, c, 0);
-}
-
-/** 24-bit RGB → CSS colour. */
-export function cssColour(rgb: number): string {
-  return '#' + (rgb & 0xffffff).toString(16).padStart(6, '0');
-}
-
 /** A composed pose: its object, its commands and how many of them there are. */
 export interface ComposedPose {
   obj: SceneObject;
   cmds: readonly DrawCommand[];
   count: number;
+}
+
+/**
+ * What scenes are drawn with: a canvas (`SceneRenderer.drawObject`), or RGBA bytes
+ * (`SceneRaster.ts`) for the tools and the Lab. Positions are logical pixels of the target.
+ */
+export interface ScenePainter {
+  /** Sprite `id` turned by `transform`, its `anchor` point at (x, y). */
+  sprite(id: number, x: number, y: number, transform: number, anchor: number): void;
+  /** A rectangle in the original's 24-bit colour. */
+  rect(x: number, y: number, w: number, h: number, rgb: number): void;
+  /** Clips what follows to a rectangle, until `unclip` (tiled sprites). */
+  clip(x: number, y: number, w: number, h: number): void;
+  unclip(): void;
 }
 
 export class SceneRenderer {
@@ -103,16 +107,8 @@ export class SceneRenderer {
     return this.view.width;
   }
 
-  set viewWidth(width: number) {
-    this.view.width = width;
-  }
-
   get viewHeight(): number {
     return this.view.height;
-  }
-
-  set viewHeight(height: number) {
-    this.view.height = height;
   }
 
   getObject(id: number): SceneObject | undefined {
@@ -126,6 +122,20 @@ export class SceneRenderer {
   setViewport(width: number, height: number): void {
     this.view.width = width;
     this.view.height = height;
+  }
+
+  /**
+   * Runs `draw` with the culling box set to `width` × `height`, then puts the family's box
+   * back: scenes are shared, and menus, stages and layers draw with them at other sizes.
+   */
+  withViewport<T>(width: number, height: number, draw: () => T): T {
+    const { width: savedW, height: savedH } = this.view;
+    this.setViewport(width, height);
+    try {
+      return draw();
+    } finally {
+      this.setViewport(savedW, savedH);
+    }
   }
 
   /** `a(6 ints)`: draw a single frame with no tween. */
@@ -150,6 +160,33 @@ export class SceneRenderer {
    */
   drawObject(
     ctx: CanvasRenderingContext2D,
+    objectId: number,
+    frameA: number,
+    frameB: number,
+    t: number,
+    x: number,
+    y: number,
+    flipX = false,
+    swap?: SpriteSwap,
+    anchor: number = PIVOT_ANCHOR,
+  ): void {
+    this.paintObject(
+      this.canvasPainter(ctx),
+      objectId,
+      frameA,
+      frameB,
+      t,
+      x,
+      y,
+      flipX,
+      swap,
+      anchor,
+    );
+  }
+
+  /** `drawObject` with any painter: the same object, the same culling, the same order. */
+  paintObject(
+    painter: ScenePainter,
     objectId: number,
     frameA: number,
     frameB: number,
@@ -188,27 +225,25 @@ export class SceneRenderer {
       this.buffers[depth] = cmds;
     }
     const count = composePose(obj, this.sizes, frameA, frameB, t, flipX, swap, cmds);
-    const sheet = this.sheet;
     for (let i = 0; i < count; i++) {
       const c = cmds[i]!;
       const px = c.x + ox;
       const sy = c.y + oy;
       switch (c.kind) {
         case CMD_SPRITE:
-          sheet.drawSprite(ctx, c.id, px, sy, c.transform, ANCHOR_CENTER);
+          painter.sprite(c.id, px, sy, c.transform, ANCHOR_CENTER);
           break;
         case CMD_RECT:
-          ctx.fillStyle = this.colour(c.rgb);
-          ctx.fillRect(px, sy, c.w, c.h);
+          painter.rect(px, sy, c.w, c.h, c.rgb);
           break;
         case CMD_NESTED:
           // `a(id, 0, x, y, 20, 0)`: frame 0, top-left anchor, never mirrored.
           this.depth = depth + 1;
-          this.drawObject(ctx, c.id, 0, 0, 0, px, sy, false, undefined, ANCHOR_TOP_LEFT);
+          this.paintObject(painter, c.id, 0, 0, 0, px, sy, false, undefined, ANCHOR_TOP_LEFT);
           this.depth = depth;
           break;
         case CMD_TILED:
-          this.drawTiled(ctx, c.id, c.transform, px, sy, c.w, c.h);
+          this.paintTiled(painter, c.id, c.transform, px, sy, c.w, c.h);
           break;
         default:
           break;
@@ -249,19 +284,15 @@ export class SceneRenderer {
     const ctx = canvas.getContext('2d');
     if (!ctx) return canvas;
     ctx.imageSmoothingEnabled = false;
-    const savedW = this.viewWidth;
-    const savedH = this.viewHeight;
-    this.viewWidth = obj.width;
-    this.viewHeight = obj.height;
-    this.drawObject(ctx, objectId, frame, frame, 0, 0, 0, false, undefined, ANCHOR_TOP_LEFT);
-    this.viewWidth = savedW;
-    this.viewHeight = savedH;
+    this.withViewport(obj.width, obj.height, () =>
+      this.drawObject(ctx, objectId, frame, frame, 0, 0, 0, false, undefined, ANCHOR_TOP_LEFT),
+    );
     return canvas;
   }
 
   /** Tiled sprite across a rectangle, clipped to it and to the viewport (line 3400). */
-  private drawTiled(
-    ctx: CanvasRenderingContext2D,
+  private paintTiled(
+    painter: ScenePainter,
     id: number,
     transform: number,
     x: number,
@@ -282,23 +313,39 @@ export class SceneRenderer {
     if (x1 > this.viewWidth) x1 = this.viewWidth;
     if (y1 > this.viewHeight) y1 = this.viewHeight;
     if (sx >= x1 || sy >= y1) return;
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(x, y, w, h);
-    ctx.clip();
+    painter.clip(x, y, w, h);
     for (let yy = sy; yy < y1; yy += th) {
       for (let xx = sx; xx < x1; xx += tw) {
-        this.sheet.drawSprite(ctx, id, xx, yy, transform, ANCHOR_TOP_LEFT);
+        painter.sprite(id, xx, yy, transform, ANCHOR_TOP_LEFT);
       }
     }
-    ctx.restore();
+    painter.unclip();
+  }
+
+  /** The canvas painter of `ctx` (the sprites from this renderer's sheet). */
+  private canvasPainter(ctx: CanvasRenderingContext2D): ScenePainter {
+    const sheet = this.sheet;
+    return {
+      sprite: (id, x, y, transform, anchor) => sheet.drawSprite(ctx, id, x, y, transform, anchor),
+      rect: (x, y, w, h, rgb) => {
+        ctx.fillStyle = this.colour(rgb);
+        ctx.fillRect(x, y, w, h);
+      },
+      clip: (x, y, w, h) => {
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(x, y, w, h);
+        ctx.clip();
+      },
+      unclip: () => ctx.restore(),
+    };
   }
 
   private colour(rgb: number): string {
     let css = this.colours.get(rgb);
     if (css === undefined) {
       if (this.colours.size > 4096) this.colours.clear();
-      css = cssColour(rgb);
+      css = cssOf24(rgb);
       this.colours.set(rgb, css);
     }
     return css;

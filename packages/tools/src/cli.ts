@@ -1,18 +1,7 @@
 // Entry point: `node src/cli.ts extract [--jar <path>] [--out <dir>]`
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
 import { extract } from './extract.ts';
-
-const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
-const DEFAULT_JAR = resolve(
-  REPO_ROOT,
-  'packages',
-  'content',
-  'playman',
-  'original',
-  'Playman_Extreme_Running_240x320.jar',
-);
-const DEFAULT_OUT = resolve(REPO_ROOT, 'packages', 'content', 'playman', 'extracted');
+import { EXTRACTED_DIR as DEFAULT_OUT, ORIGINAL_JAR as DEFAULT_JAR } from './files.ts';
 
 const USAGE = `usage: node src/cli.ts extract [--jar <path>] [--out <dir>]
 

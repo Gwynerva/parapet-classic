@@ -3,7 +3,7 @@
  * mission menu): the first frame of the run demo with the head a little above the middle of the
  * tile, clipped to its inside.
  */
-import { HEAD_SPRITE } from '@parapet/runtime/anim/Animator.ts';
+import { HEAD_SPRITE } from '@parapet/runtime/render/Rig.ts';
 import {
   CHARACTER_OBJECT,
   type SceneRenderer,

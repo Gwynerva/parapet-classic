@@ -4,7 +4,14 @@
  * it, then the demo starts over. `checkDemo` proves that a demo shows its move (tests and the
  * authoring tool use it).
  */
-import { World, type MoveTableData, type PhysicsTables, type WorldEvent } from '@parapet/sim';
+import {
+  MissionType,
+  type MoveTableData,
+  type PhysicsTables,
+  pressBits,
+  World,
+  type WorldEvent,
+} from '@parapet/sim';
 import { parseDemoLevel, type DemoLevel } from './demoLevel.ts';
 
 export type DemoKey = 'up' | 'down' | 'fwd' | 'back';
@@ -37,16 +44,9 @@ export interface DemoContent {
 
 /** Press bits of a key, like a keyboard: arrows resolve to FORWARD/BACK by the facing. */
 export function demoKeyBits(key: DemoKey, facingRight: boolean): number {
-  switch (key) {
-    case 'up':
-      return 1;
-    case 'down':
-      return 2;
-    case 'fwd':
-      return facingRight ? 4 | 16 : 8 | 16;
-    case 'back':
-      return facingRight ? 8 | 32 : 4 | 32;
-  }
+  const ahead = facingRight ? 'right' : 'left';
+  const behind = facingRight ? 'left' : 'right';
+  return pressBits(key === 'fwd' ? ahead : key === 'back' ? behind : key, facingRight);
 }
 
 /** Steps of run-up a demo gives before its move, and of running after it. */
@@ -76,7 +76,7 @@ export class DemoRun {
       level: this.level.data,
       moves: this.content.moves,
       tables: this.content.tables,
-      rules: { missionType: 0, freeRun: true },
+      rules: { missionType: MissionType.SPRINT, freeRun: true },
     });
   }
 

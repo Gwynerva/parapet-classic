@@ -10,6 +10,7 @@ Every picture is text with a legend of semantic characters, drawn round the orig
 centre with a margin each way (its centre stays the part's point; `fit` pads it to the part's
 parity, so that it mirrors round the same point)."""
 from heads import Pic
+from lookgen import shift
 from body import part
 import fv_heads
 
@@ -50,11 +51,6 @@ def fit(pic_, w, h):
     if pic_.h % 2 != h % 2:
         pic_.pad(top=1) if pic_.h % 2 else pic_.pad(bottom=1)
     return pic_
-
-
-def darker(rows, shift):
-    """Rows with characters shifted a shade (the far arm or leg, in the body's shadow)."""
-    return [''.join(shift.get(c, c) for c in r) for r in rows]
 
 
 # --------------------------------------------------------------------------------------------
@@ -414,19 +410,19 @@ def _pictures(who):
         return {
             '57': pic(broader(HER_57, {6, 8}), leg), '61': pic(broader(HER_61, {2, 12}), leg),
             '34': pic(HIM_34, leg), '38': pic(HIM_38, leg),
-            '53': pic(HIM_THIGH, leg), '49': pic(darker(HIM_THIGH, FAR_LEG), leg), '62': pic(HIM_KNEE, leg),
+            '53': pic(HIM_THIGH, leg), '49': pic(shift(HIM_THIGH, FAR_LEG), leg), '62': pic(HIM_KNEE, leg),
             '30': pic(HIM_SHIN, leg),
-            '39': pic(HIM_SHOE_39, leg), '43': pic(darker(HIM_SHOE_39, HIM_FAR_SHOE), leg),
+            '39': pic(HIM_SHOE_39, leg), '43': pic(shift(HIM_SHOE_39, HIM_FAR_SHOE), leg),
             '47': pic(HIM_SHOE_47, leg), '48': pic(HIM_SHOE_48, leg),
-            '5': pic(HIM_UPPER, leg), '9': pic(darker(HIM_UPPER, FAR_ARM), leg),
+            '5': pic(HIM_UPPER, leg), '9': pic(shift(HIM_UPPER, FAR_ARM), leg),
             '1': pic(HIM_FOREARM, leg),
         }
     return {
         '57': pic(HER_57, leg), '61': pic(HER_61, leg), '34': pic(HER_34, leg), '38': pic(HER_38, leg),
-        '53': pic(HER_THIGH, leg), '49': pic(darker(HER_THIGH, FAR_LEG), leg), '62': pic(HER_KNEE, leg),
+        '53': pic(HER_THIGH, leg), '49': pic(shift(HER_THIGH, FAR_LEG), leg), '62': pic(HER_KNEE, leg),
         '30': pic(HER_SHIN, leg),
-        '39': pic(HER_SHOE_39, leg), '43': pic(darker(HER_SHOE_39, FAR_LEG), leg),
+        '39': pic(HER_SHOE_39, leg), '43': pic(shift(HER_SHOE_39, FAR_LEG), leg),
         '47': pic(HER_SHOE_47, leg), '48': pic(HER_SHOE_48, leg),
-        '5': pic(HER_UPPER, leg), '9': pic(darker(HER_UPPER, FAR_ARM), leg),
+        '5': pic(HER_UPPER, leg), '9': pic(shift(HER_UPPER, FAR_ARM), leg),
         '1': pic(HER_FOREARM, leg),
     }

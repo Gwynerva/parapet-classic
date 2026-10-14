@@ -15,25 +15,12 @@ in every one of them (a black top, white legs, red feet, ONE red hand), her head
 Her arms are the original ones in her light skin, her right one painted along the limb on every
 turn of its pictures; trousers, tops and shoes are drawn anew."""
 from lookgen import *
-from heads import Pic, Palette
+from heads import Palette
 from body import part, apply_rules
 import vr_heads as VH
 
 # Her skin on the arms and the neck (the head's tones): highlight, light, mid, shadow, outline.
 SKIN5 = ['#fff2d8', '#f8d2b0', '#e8a585', '#c97461', '#7a3438']
-
-
-def enc(rows, legend, pal):
-    """Text rows in a picture legend → rows in the look's palette."""
-    return [''.join(c if c in '.+' else pal.char(legend[c]) for c in r) for r in rows]
-
-
-def darker(rows, shift):
-    return [''.join(shift.get(c, c) for c in r) for r in rows]
-
-
-def pic_rows(p, pal):
-    return pal.rows(p)
 
 
 # ------------------------------------------------------------------------------------ arms
@@ -304,9 +291,9 @@ def glove_rules(glove=None):
 def tank():
     leg = ME1
     pics = {'57': (TANK_57, leg), '61': (TANK_61, leg), '34': (TANK_34, leg), '38': (TANK_38, leg),
-            '53': (CARGO_53, leg), '49': (darker(CARGO_53, FAR_LEG), leg), '62': (CARGO_62, leg),
+            '53': (CARGO_53, leg), '49': (shift(CARGO_53, FAR_LEG), leg), '62': (CARGO_62, leg),
             '30': (CARGO_30, leg),
-            '39': (TABI_39, TABI), '43': (darker(TABI_39, TABI_FAR), TABI), '47': (TABI_47, TABI),
+            '39': (TABI_39, TABI), '43': (shift(TABI_39, TABI_FAR), TABI), '47': (TABI_47, TABI),
             '48': (TABI_48, TABI)}
     make('vera-tank', pics, heads_me1(), '#e5332a', glove_rules(), arms_kit())
 
@@ -514,9 +501,9 @@ def gauntlet(p, al):
 def vest():
     leg = CAT
     pics = {'57': (VEST_57, leg), '57:left': (VEST_57L, leg), '61': (VEST_61, leg), '34': (VEST_34, leg),
-            '34:left': (VEST_34L, leg), '38': (VEST_38, leg), '53': (CAPRI_53, leg), '49': (darker(CAPRI_53, FAR_LEG), leg), '62': (CAPRI_62, leg),
+            '34:left': (VEST_34L, leg), '38': (VEST_38, leg), '53': (CAPRI_53, leg), '49': (shift(CAPRI_53, FAR_LEG), leg), '62': (CAPRI_62, leg),
             '30': (CAPRI_30, leg),
-            '39': (SLIP_39, SLIP), '43': (darker(SLIP_39, SLIP_FAR), SLIP), '47': (SLIP_47, SLIP),
+            '39': (SLIP_39, SLIP), '43': (shift(SLIP_39, SLIP_FAR), SLIP), '47': (SLIP_47, SLIP),
             '48': (SLIP_48, SLIP)}
     make('vera-vest', pics, heads_cat(), '#e5332a', glove_rules(GLOVE_CAT), arms_kit(circuit_band, gauntlet),
          turn=['57:left', '34:left'])
@@ -689,17 +676,16 @@ OLIVE = ['#8e8868', '#726c50', '#5a553e', '#433f2e', '#27251a']
 def street():
     leg = STREET
     pics = {'57': (JACKET_57, leg), '61': (JACKET_61, leg), '34': (JACKET_34, leg), '38': (JACKET_38, leg),
-            '53': (JEANS_53, leg), '49': (darker(JEANS_53, FAR_JEANS), leg), '62': (JEANS_62, leg),
+            '53': (JEANS_53, leg), '49': (shift(JEANS_53, FAR_JEANS), leg), '62': (JEANS_62, leg),
             '30': (JEANS_30, leg),
-            '39': (HTOP_39, HTOP), '43': (darker(HTOP_39, HTOP_FAR), HTOP), '47': (HTOP_47, HTOP),
+            '39': (HTOP_39, HTOP), '43': (shift(HTOP_39, HTOP_FAR), HTOP), '47': (HTOP_47, HTOP),
             '48': (HTOP_48, HTOP)}
     rules = [recolor(ARMS, ramp(SKIN5, OLIVE)),
              recolor(FOREARM, {WRIST[0]: OLIVE[3], WRIST[1]: OLIVE[4], WRIST[2]: OLIVE[4]})]
     make('vera-street', pics, heads_cat(), '#e5332a', rules)
 
 
-if __name__ == '__main__' or True:
-    tank()
-    vest()
-    street()
-    print('vera looks written')
+tank()
+vest()
+street()
+print('vera looks written')

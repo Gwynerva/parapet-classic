@@ -107,6 +107,20 @@ class Pic:
         print(' '.join(f'{v}={k}' for k, v in pal.items()))
 
 
+def centred(pic, box, wp=0, hp=1):
+    """Pads a head drawn from scratch so that the base's head box, whose top left corner is at
+    `box` in it, sits where the game draws a head: the box's pixel (8, 8) on the picture's centre,
+    the width and the height of the parity `wp`, `hp` (Blaise's head is 16 x 17, the default; the
+    men's 17 x 17)."""
+    c, r = box[0] + 8, box[1] + 8
+    w0, h0 = pic.w, pic.h
+    pad_l = max(0, w0 - wp - 2 * c)
+    W = 2 * (c + pad_l) + wp
+    pad_t = max(0, h0 - hp - 2 * r)
+    H = 2 * (r + pad_t) + hp
+    return pic.pad(pad_l, pad_t, W - w0 - pad_l, H - h0 - pad_t)
+
+
 _POOL = ('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
          '!$%&*=?@^~<>/|;:#(){}[]_-,\'"`' + ''.join(chr(c) for c in range(0x3b1, 0x3ca)))
 
@@ -155,6 +169,16 @@ def lum(colour):
     c = colour.lstrip('#')
     r, g, b = (int(c[i:i + 2], 16) for i in (0, 2, 4))
     return 0.299 * r + 0.587 * g + 0.114 * b
+
+
+def mix(a, b, t):
+    """The colour a fraction `t` of the way from `a` to `b`."""
+    a, b = a.lstrip('#'), b.lstrip('#')
+    out = []
+    for i in (0, 2, 4):
+        x, y = int(a[i:i + 2], 16), int(b[i:i + 2], 16)
+        out.append(max(0, min(255, round(x + (y - x) * t))))
+    return '#%02x%02x%02x' % tuple(out)
 
 
 def by_light(pic, colours, ramp):

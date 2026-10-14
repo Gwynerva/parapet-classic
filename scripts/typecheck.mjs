@@ -1,19 +1,38 @@
-// Runs `tsc --noEmit` for every workspace package that has a tsconfig.json.
+// Runs `tsc` (no emit) for every workspace package that has a tsconfig.json, and for every
+// further `tsconfig.*.json` beside it (the build configuration of a package).
 import { readdirSync, existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
+import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
-const packagesDir = join(root, 'packages');
-let failed = false;
-for (const name of readdirSync(packagesDir)) {
-  const dir = join(packagesDir, name);
+const tsc = join(
+  dirname(createRequire(import.meta.url).resolve('typescript/package.json')),
+  'bin',
+  'tsc',
+);
+const projects = [];
+for (const name of readdirSync(join(root, 'packages'))) {
+  const dir = join(root, 'packages', name);
   if (!existsSync(join(dir, 'tsconfig.json'))) continue;
-  process.stdout.write(`typecheck ${name}... `);
-  const r = spawnSync('npx', ['tsc', '-p', dir], {
+  for (const file of readdirSync(dir).sort()) {
+    if (/^tsconfig(\.[\w-]+)?\.json$/.test(file)) {
+      const label = file === 'tsconfig.json' ? name : `${name} (${file})`;
+      projects.push({ label, config: join(dir, file) });
+    }
+  }
+}
+if (existsSync(join(root, 'tsconfig.json'))) {
+  projects.push({ label: 'root', config: join(root, 'tsconfig.json') });
+}
+
+let failed = false;
+for (const { label, config } of projects) {
+  process.stdout.write(`typecheck ${label}... `);
+  // No shell: the paths go to tsc as they are, spaces and all.
+  const r = spawnSync(process.execPath, [tsc, '-p', config], {
     stdio: ['ignore', 'pipe', 'pipe'],
-    shell: true,
     cwd: root,
   });
   if (r.status === 0) {

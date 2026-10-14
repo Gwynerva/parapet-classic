@@ -20,6 +20,8 @@ const METER_WIDTH = 60;
 const METER_HEIGHT = 5;
 const DOT_SIZE = 8;
 const DOT_PITCH = 11;
+/** The meter flash (`bA`) lasts 400 ms (d.java line 7325). */
+const FLASH_MS = 400;
 
 export interface HudOptions {
   /** 'elapsed' shows the clock, 'countdown' the time left of `limitMs`, 'none' no timer. */
@@ -82,13 +84,19 @@ export class Hud {
       const mult = MULTIPLIERS[Math.min(5, score.meter >> 10)] ?? 1;
       const barX = right - METER_WIDTH;
       const barY = top + display.lineHeight + 3;
+      // The original's flash (`ax`, line 7293): a rise bounces the multiplier out and back, a
+      // fail shakes it and shows the meter red, both for 400 ms.
+      const flashLeft = FLASH_MS - (world.clock - score.meterFlashClock);
+      const flash = score.meterFlash !== 0 && flashLeft > 0 ? Math.sign(score.meterFlash) : 0;
+      const bounce = flash > 0 ? Math.round(5 * Math.sin((Math.PI * flashLeft) / FLASH_MS)) : 0;
+      const shake = flash < 0 ? (world.clock >> 5) % 3 : 0;
       ctx.fillStyle = '#000000';
       ctx.fillRect(barX - 1, barY - 1, METER_WIDTH + 2, METER_HEIGHT + 2);
       ctx.fillStyle = Theme.panelBorder;
       ctx.fillRect(barX, barY, METER_WIDTH, METER_HEIGHT);
-      ctx.fillStyle = score.meterFlash < 0 ? Theme.danger : Theme.accent;
+      ctx.fillStyle = flash < 0 ? Theme.danger : Theme.accent;
       ctx.fillRect(barX, barY, Math.round((METER_WIDTH * score.meter) / METER_MAX), METER_HEIGHT);
-      outlined(ctx, small, `x${mult}`, barX - 4, barY - 3, {
+      outlined(ctx, small, `x${mult}`, barX - 4 - bounce, barY - 3 + shake, {
         align: 'right',
         color: Theme.accent,
         tabular: true,

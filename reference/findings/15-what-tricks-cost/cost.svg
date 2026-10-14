@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="710" height="376" viewBox="0 0 710 376" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" style="font-variant-numeric: tabular-nums">
+<title id="t">What a trick costs a fast run</title>
+<desc id="d">Time lost per trick of a kind added to a run, from the search for the bosses’ stylish records; and its points</desc>
+<rect x="0.5" y="0.5" width="709" height="375" rx="10" fill="#161b22" stroke="#30363d"/>
+<text x="20" y="30" font-size="16" font-weight="600" fill="#e6edf3">What a trick costs a fast run</text>
+<text x="20" y="48" font-size="12" fill="#8b949e">Time lost per trick of a kind added to a run, from the search for the bosses’ stylish records; and its points</text>
+<text x="142" y="87" font-size="12" fill="#e6edf3" text-anchor="end">tiger jump (kong)</text>
+<rect x="150" y="76" width="2" height="14" fill="#3987e5" rx="2"><title>tiger jump (kong): 0 ms per trick, 100 points</title></rect>
+<text x="156" y="87" font-size="11" fill="#8b949e">0 ms</text>
+<text x="690" y="87" font-size="11" fill="#c98500" text-anchor="end">100 points</text>
+<text x="142" y="109" font-size="12" fill="#e6edf3" text-anchor="end">tic-tac</text>
+<rect x="150" y="98" width="37.9" height="14" fill="#3987e5" rx="2"><title>tic-tac: 76 ms per trick, 50 points</title></rect>
+<text x="193.9" y="109" font-size="11" fill="#8b949e">76 ms</text>
+<text x="690" y="109" font-size="11" fill="#c98500" text-anchor="end">50 points</text>
+<text x="142" y="131" font-size="12" fill="#e6edf3" text-anchor="end">pole spin</text>
+<rect x="150" y="120" width="51.8" height="14" fill="#3987e5" rx="2"><title>pole spin: 104 ms per trick, 50 points</title></rect>
+<text x="207.8" y="131" font-size="11" fill="#8b949e">104 ms</text>
+<text x="690" y="131" font-size="11" fill="#c98500" text-anchor="end">50 points</text>
+<text x="142" y="153" font-size="12" fill="#e6edf3" text-anchor="end">front flip</text>
+<rect x="150" y="142" width="74.2" height="14" fill="#3987e5" rx="2"><title>front flip: 149 ms per trick, 100 points</title></rect>
+<text x="230.2" y="153" font-size="11" fill="#8b949e">149 ms</text>
+<text x="690" y="153" font-size="11" fill="#c98500" text-anchor="end">100 points</text>
+<text x="142" y="175" font-size="12" fill="#e6edf3" text-anchor="end">pole jump</text>
+<rect x="150" y="164" width="80.2" height="14" fill="#3987e5" rx="2"><title>pole jump: 161 ms per trick, 50 points</title></rect>
+<text x="236.2" y="175" font-size="11" fill="#8b949e">161 ms</text>
+<text x="690" y="175" font-size="11" fill="#c98500" text-anchor="end">50 points</text>
+<text x="142" y="197" font-size="12" fill="#e6edf3" text-anchor="end">back flip</text>
+<rect x="150" y="186" width="109.6" height="14" fill="#3987e5" rx="2"><title>back flip: 220 ms per trick, 150 points</title></rect>
+<text x="265.6" y="197" font-size="11" fill="#8b949e">220 ms</text>
+<text x="690" y="197" font-size="11" fill="#c98500" text-anchor="end">150 points</text>
+<text x="142" y="219" font-size="12" fill="#e6edf3" text-anchor="end">dash</text>
+<rect x="150" y="208" width="116.6" height="14" fill="#3987e5" rx="2"><title>dash: 234 ms per trick, 100 points</title></rect>
+<text x="272.6" y="219" font-size="11" fill="#8b949e">234 ms</text>
+<text x="690" y="219" font-size="11" fill="#c98500" text-anchor="end">100 points</text>
+<text x="142" y="241" font-size="12" fill="#e6edf3" text-anchor="end">kong onto a ledge</text>
+<rect x="150" y="230" width="124.6" height="14" fill="#3987e5" rx="2"><title>kong onto a ledge: 250 ms per trick, 100 points</title></rect>
+<text x="280.6" y="241" font-size="11" fill="#8b949e">250 ms</text>
+<text x="690" y="241" font-size="11" fill="#c98500" text-anchor="end">100 points</text>
+<text x="142" y="263" font-size="12" fill="#e6edf3" text-anchor="end">monkey flip</text>
+<rect x="150" y="252" width="236.2" height="14" fill="#3987e5" rx="2"><title>monkey flip: 474 ms per trick, 250 points</title></rect>
+<text x="392.2" y="263" font-size="11" fill="#8b949e">474 ms</text>
+<text x="690" y="263" font-size="11" fill="#c98500" text-anchor="end">250 points</text>
+<text x="142" y="285" font-size="12" fill="#e6edf3" text-anchor="end">monkey vault</text>
+<rect x="150" y="274" width="266.1" height="14" fill="#3987e5" rx="2"><title>monkey vault: 534 ms per trick, 200 points</title></rect>
+<text x="422.1" y="285" font-size="11" fill="#8b949e">534 ms</text>
+<text x="690" y="285" font-size="11" fill="#c98500" text-anchor="end">200 points</text>
+<text x="142" y="307" font-size="12" fill="#e6edf3" text-anchor="end">spider jump</text>
+<rect x="150" y="296" width="267.1" height="14" fill="#3987e5" rx="2"><title>spider jump: 536 ms per trick, 250 points</title></rect>
+<text x="423.1" y="307" font-size="11" fill="#8b949e">536 ms</text>
+<text x="690" y="307" font-size="11" fill="#c98500" text-anchor="end">250 points</text>
+<text x="142" y="329" font-size="12" fill="#e6edf3" text-anchor="end">wall flip</text>
+<rect x="150" y="318" width="440" height="14" fill="#3987e5" rx="2"><title>wall flip: 883 ms per trick, 250 points</title></rect>
+<text x="596" y="329" font-size="11" fill="#8b949e">883 ms</text>
+<text x="690" y="329" font-size="11" fill="#c98500" text-anchor="end">250 points</text>
+</svg>

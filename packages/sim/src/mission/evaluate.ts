@@ -1,7 +1,7 @@
 /**
  * Judges a finished run against its mission goal: the original's `boolean_b()` (d.java line
- * 5111) and the results logic of `x(7)` (line 5359). Shared by the results screen, the
- * progress bookkeeping and the server, so "mission completed" means the same everywhere.
+ * 5111) and the results logic of `x(7)` (line 5359). Shared by the results screen and the
+ * progress bookkeeping, so "mission completed" means the same everywhere.
  */
 import { ChallengeBit } from '../runner/moves.ts';
 import type { RunResult } from '../rules.ts';

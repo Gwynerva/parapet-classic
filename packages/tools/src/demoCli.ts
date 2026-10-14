@@ -9,7 +9,6 @@
  * keeps the timings whose demo passes `checkDemo`, and picks the one with the most passing
  * neighbours (one or two steps off on any press), so the demo does not hang on one exact step.
  */
-import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   checkDemo,
@@ -18,20 +17,21 @@ import {
   type DemoPress,
   type MoveDemoData,
 } from '@parapet/runtime/moves/MoveDemo.ts';
-import { REPO_ROOT, loadGameData } from './tas/content.ts';
+import { loadGameData } from './tas/content.ts';
+import { CONTENT_DIR, readJson, writeJson } from './files.ts';
 
-export const DEMOS_FILE = join(REPO_ROOT, 'packages', 'content', 'moves', 'demos.json');
+const DEMOS_FILE = join(CONTENT_DIR, 'moves', 'demos.json');
 
 interface DemosFile {
   demos: MoveDemoData[];
 }
 
 function load(): DemosFile {
-  return JSON.parse(readFileSync(DEMOS_FILE, 'utf8')) as DemosFile;
+  return readJson<DemosFile>(DEMOS_FILE);
 }
 
 function save(file: DemosFile): void {
-  writeFileSync(DEMOS_FILE, JSON.stringify(file, null, 2) + '\n');
+  writeJson(DEMOS_FILE, file);
 }
 
 function find(file: DemosFile, move: string): MoveDemoData {

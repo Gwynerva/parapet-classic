@@ -1,6 +1,5 @@
 // Entry point: `npm run tas -- <command> [options]` (see USAGE).
 import { availableParallelism } from 'node:os';
-import { Worker } from 'node:worker_threads';
 import {
   LEVEL_COUNT,
   RULESET_ID,
@@ -18,6 +17,7 @@ import {
   type GlimpsesFile,
 } from '@parapet/runtime/content/glimpses.ts';
 import { checkRun, DEFAULT_CONSTRAINTS, type Constraints } from './constraints.ts';
+import { runPool } from './pool.ts';
 import { levelContent, loadGameData } from './content.ts';
 import { ANALYSIS_DIR, writeAnalysis } from './analyze.ts';
 import {
@@ -44,7 +44,6 @@ import {
   needsStyleSearch,
   runFile,
   styleCap,
-  type JobMessage,
   type StyleJob,
   type TasJob,
 } from './job.ts';
@@ -301,85 +300,65 @@ async function commandRun(args: Args): Promise<number> {
   );
   const started = performance.now();
   let failed = 0;
-  const queue = jobs.slice();
-  await Promise.all(
-    Array.from({ length: workerCount }, async () => {
-      const worker = new Worker(new URL('./worker.ts', import.meta.url));
-      try {
-        for (let job = queue.shift(); job; job = queue.shift()) {
-          const current = job;
-          await new Promise<void>((resolve) => {
-            const onMessage = (m: JobMessage): void => {
-              const seed = args.seeds.length > 1 ? ` s${current.seed}` : '';
-              const name = `${label(m.levelId, m.mode)}${seed}`;
-              if (m.type === 'progress') {
-                const best = m.progress.best === null ? '-' : seconds(m.progress.best);
-                const style = current.style ? ` style ${Math.round(m.progress.style)}` : '';
-                console.log(
-                  `${name} ${(m.progress.steps / 1e6).toFixed(0).padStart(5)}M steps ` +
-                    `${String(m.progress.cells).padStart(7)} cells  best ${best}${style}` +
-                    `  (${m.progress.rejected} frame-perfect runs turned down)`,
-                );
-                return;
-              }
-              if (m.type === 'phase') {
-                console.log(`${name} ${m.phase}`);
-                return;
-              }
-              worker.off('message', onMessage);
-              if (m.type !== 'error') {
-                logJob({
-                  variant,
-                  levelId: current.levelId,
-                  mode: current.mode,
-                  seed: current.seed,
-                  budgetSteps: current.budgetSteps,
-                  capMs: jobCap(current),
-                  timeMs: m.run?.timeMs ?? null,
-                  style: m.run?.style?.score ?? null,
-                  at: new Date().toISOString(),
-                });
-              }
-              if (m.type === 'error') {
-                failed++;
-                console.error(`${name} FAILED\n${m.error}`);
-              } else if (!m.run) {
-                failed++;
-                console.log(`${name} no run without a frame-perfect press found`);
-              } else {
-                const stored = readRun(current.levelId, current.mode, variant);
-                const better = current.style ? betterStyleRun : betterRun;
-                // A stored stylish run counts only against the same optimal run, within its cap.
-                const sameCap =
-                  !current.style ||
-                  (stored?.optimalMs === current.style.optimalMs &&
-                    stored.timeMs <= jobCap(current));
-                const keep =
-                  stored && isCurrent(stored, current.levelId) && sameCap && !better(m.run, stored);
-                const fragileNote =
-                  m.run.fragile.length > 0 ? `, ${m.run.fragile.length} fragile` : '';
-                const note = current.style
-                  ? `${fragileNote}, style ${m.run.style?.score ?? 0}`
-                  : fragileNote;
-                if (keep) {
-                  console.log(
-                    `${name} ${seconds(m.run.timeMs)}${note}: stored run ${seconds(stored.timeMs)} stays`,
-                  );
-                } else {
-                  writeRun(m.run);
-                  console.log(`${name} ${seconds(m.run.timeMs)}${note}: saved`);
-                }
-              }
-              resolve();
-            };
-            worker.on('message', onMessage);
-            worker.postMessage(current);
-          });
-        }
-      } finally {
-        await worker.terminate();
+  const nameOf = (job: TasJob): string =>
+    `${label(job.levelId, job.mode)}${args.seeds.length > 1 ? ` s${job.seed}` : ''}`;
+  await runPool(
+    jobs,
+    workerCount,
+    (job, m) => {
+      if (m.type === 'phase') {
+        console.log(`${nameOf(job)} ${m.phase}`);
+        return;
       }
-    }),
+      const best = m.progress.best === null ? '-' : seconds(m.progress.best);
+      const style = job.style ? ` style ${Math.round(m.progress.style)}` : '';
+      console.log(
+        `${nameOf(job)} ${(m.progress.steps / 1e6).toFixed(0).padStart(5)}M steps ` +
+          `${String(m.progress.cells).padStart(7)} cells  best ${best}${style}` +
+          `  (${m.progress.rejected} frame-perfect runs turned down)`,
+      );
+    },
+    (job, m) => {
+      const name = nameOf(job);
+      if (m.type === 'error') {
+        failed++;
+        console.error(`${name} FAILED
+${m.error}`);
+        return;
+      }
+      logJob({
+        variant,
+        levelId: job.levelId,
+        mode: job.mode,
+        seed: job.seed,
+        budgetSteps: job.budgetSteps,
+        capMs: jobCap(job),
+        timeMs: m.run?.timeMs ?? null,
+        style: m.run?.style?.score ?? null,
+        at: new Date().toISOString(),
+      });
+      if (!m.run) {
+        failed++;
+        console.log(`${name} no run without a frame-perfect press found`);
+        return;
+      }
+      const stored = readRun(job.levelId, job.mode, variant);
+      const better = job.style ? betterStyleRun : betterRun;
+      // A stored stylish run counts only against the same optimal run, within its cap.
+      const sameCap =
+        !job.style || (stored?.optimalMs === job.style.optimalMs && stored.timeMs <= jobCap(job));
+      const keep = stored && isCurrent(stored, job.levelId) && sameCap && !better(m.run, stored);
+      const fragileNote = m.run.fragile.length > 0 ? `, ${m.run.fragile.length} fragile` : '';
+      const note = job.style ? `${fragileNote}, style ${m.run.style?.score ?? 0}` : fragileNote;
+      if (keep) {
+        console.log(
+          `${name} ${seconds(m.run.timeMs)}${note}: stored run ${seconds(stored.timeMs)} stays`,
+        );
+      } else {
+        writeRun(m.run);
+        console.log(`${name} ${seconds(m.run.timeMs)}${note}: saved`);
+      }
+    },
   );
   console.log(`done in ${((performance.now() - started) / 60000).toFixed(1)} min`);
   return failed > 0 ? 1 : 0;

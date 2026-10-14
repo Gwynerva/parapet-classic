@@ -208,7 +208,18 @@ export class MessageBox implements Screen {
     const titleH = this.page === 0 ? titleBar : 0;
     const h = titleH + Math.max(1, this.lines.length) * lineH + footerH + 2 * PADDING;
     this.box = { x: this.boxLeft(w), y: this.boxTop(h), w, h };
-    this.retryRect = null;
+    this.retryRect = this.retryArea();
+  }
+
+  /** Where the retry label sits: in the middle of the footer, when the box offers a retry. */
+  private retryArea(): Rect | null {
+    const retry = this.opts.labels.retry;
+    if (!retry || !this.opts.onRetry) return null;
+    const small = this.host.fonts.small;
+    const { x, y, w, h } = this.box;
+    const rw = small.measure(retry) + 2 * PADDING;
+    const footerY = y + h - PADDING - small.lineHeight;
+    return { x: x + ((w - rw) >> 1), y: footerY - 3, w: rw, h: small.lineHeight + 6 };
   }
 
   /** The top of a panel `h` high anchored to the bottom, above the tail and a margin. */
@@ -289,12 +300,10 @@ export class MessageBox implements Screen {
         color: BOX_MUTED,
       });
     }
-    const retry = this.opts.labels.retry;
-    if (retry && this.opts.onRetry) {
-      const rw = fonts.small.measure(retry) + 2 * PADDING;
-      const rx = x + ((w - rw) >> 1);
-      this.retryRect = { x: rx, y: footerY - 3, w: rw, h: fonts.small.lineHeight + 6 };
-      fonts.small.draw(ctx, retry, rx + PADDING, footerY, { color: BOX_TITLE_FAILURE });
+    if (this.retryRect && this.opts.labels.retry) {
+      fonts.small.draw(ctx, this.opts.labels.retry, this.retryRect.x + PADDING, footerY, {
+        color: BOX_TITLE_FAILURE,
+      });
     }
 
     const target = this.opts.tailTarget?.();

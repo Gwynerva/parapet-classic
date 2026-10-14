@@ -51,13 +51,21 @@ npx prettier --config .prettierrc --write "/tmp/bosses/*/looks/*.json" "/tmp/bos
 diff -r /tmp/bosses packages/content/bosses
 ```
 
+Such a run reproduces the content byte for byte, but for a few pixels of Shahzada's and Sir
+Nobody's looks: their parts are bent with trigonometry, and Python's `math` follows the
+platform's C library (they were drawn on Linux; Windows rounds a handful of pixels the other
+way).
+
 ## The toolkit
 
 - `lookgen.py` — paths (and `PARAPET_BOSSES`), the base characters' colour ramps and sprite
-  numbers, recolour rules, pictures as text grids, `write_look`, `rotate` and `preview` (the look
-  tool), a `Canvas` for props and effect sprites.
+  numbers, recolour rules, pictures as text grids (`grid`, `padded_rows`, `shift` for a far limb a
+  tone darker, `enc` into a look's palette, `check_pictures` at the end of a module of pictures),
+  `write_look`, `rotate` and `preview` (the look tool), a `Canvas` for props and effect sprites.
 - `heads.py` — `Pic` (a picture in hex colours), the `Palette` builder that gives every colour a
-  character, ramps by lightness, `shaded`, `hood`, `beard`, `rim`, `neat_mouth`.
+  character, `centred` (a head drawn from scratch padded so that its box sits where the game draws
+  a head), `mix` of two colours, ramps by lightness, `shaded`, `hood`, `beard`, `rim`,
+  `neat_mouth`.
 - `body.py` — the original parts grown or thinned by family (`outfit_parts`, `inflate`,
   `shrink`), relit as `metal`, `dome` or a `suit`.
 - `base_heads.json`, `base_body.json` — the original characters' heads and body parts from the

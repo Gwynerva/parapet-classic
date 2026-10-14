@@ -6,7 +6,7 @@
  */
 import { createHash } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-import { skinSwap } from '../src/render/CharacterRenderer.ts';
+import { skinSwap } from '../src/render/Rig.ts';
 import { CHARACTER_OBJECT, SceneRenderer, type SpriteSwap } from '../src/render/SceneRenderer.ts';
 import { mirrorTransform, SpriteSheet } from '../src/render/SpriteSheet.ts';
 import { hasContent, loadScenes } from './helpers/content.ts';

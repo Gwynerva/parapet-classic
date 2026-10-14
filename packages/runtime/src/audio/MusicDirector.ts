@@ -78,11 +78,8 @@ export class MusicDirector {
     return this.wanted?.id ?? null;
   }
 
+  /** The menu track: the menus' music, and the warm-ups' too (as in the original). */
   menu(): void {
-    this.start(MENU_TRACK, true);
-  }
-
-  warmUp(): void {
     this.start(MENU_TRACK, true);
   }
 

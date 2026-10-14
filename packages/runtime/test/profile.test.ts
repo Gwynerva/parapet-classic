@@ -2,12 +2,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   clearRecords,
   completeMission,
-  dropLegacyEntries,
   isBetterRecord,
   isContestBeaten,
   isLevelComplete,
   isLevelUnlocked,
-  listRecords,
   loadContestProgress,
   loadContestRecord,
   loadOptions,
@@ -48,8 +46,8 @@ function entry(patch: Partial<RecordEntry>): RecordEntry {
     playerName: '',
     character: 0,
     withRival: false,
-    simVersion: '',
-    date: '',
+    simVersion: 'parapet-sim@test',
+    date: '2026-10-14T00:00:00.000Z',
     ...patch,
   };
 }
@@ -64,14 +62,6 @@ describe('profile', () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
-  });
-
-  it('drops the claimed identity of the leaderboard era', () => {
-    store.setItem('parapet.identity', JSON.stringify({ v: 1, data: { name: 'a', token: 'b' } }));
-    store.setItem('parapet.options', JSON.stringify({ v: 1, data: { vibration: false } }));
-    dropLegacyEntries();
-    expect(store.getItem('parapet.identity')).toBeNull();
-    expect(loadOptions().vibration).toBe(false);
   });
 
   it('remembers the best-ghost switch, on by default', () => {
@@ -89,24 +79,22 @@ describe('profile', () => {
     expect(isBetterRecord('free', entry({}), null)).toBe(false);
   });
 
-  it('keeps the music volume of older schemas', () => {
+  it('keeps the music level, 40 % by default', () => {
     expect(loadOptions().musicLevel).toBe(40);
-    // The old default (4 of 8 steps, or 70 %) was never a choice: it takes today's.
-    store.setItem('parapet.options', JSON.stringify({ v: 1, data: { musicVolume: 4 } }));
-    expect(loadOptions().musicLevel).toBe(40);
-    store.setItem('parapet.options', JSON.stringify({ v: 1, data: { musicLevel: 70 } }));
-    expect(loadOptions().musicLevel).toBe(40);
-    store.setItem('parapet.options', JSON.stringify({ v: 1, data: { musicLevel: 55 } }));
-    expect(loadOptions().musicLevel).toBe(55);
-    store.setItem('parapet.options', JSON.stringify({ v: 1, data: { musicVolume: 8 } }));
-    expect(loadOptions().musicLevel).toBe(100);
-    store.setItem('parapet.options', JSON.stringify({ v: 1, data: { music: false } }));
-    expect(loadOptions().musicLevel).toBe(0);
-    saveOptions({ musicLevel: 35 });
-    expect(loadOptions().musicLevel).toBe(35);
-    // Chosen after this change, 70 stays 70.
     saveOptions({ musicLevel: 70 });
     expect(loadOptions().musicLevel).toBe(70);
+    store.setItem('parapet.options', JSON.stringify({ v: 1, data: { musicLevel: 140 } }));
+    expect(loadOptions().musicLevel).toBe(100);
+  });
+
+  it('ignores entries of another schema and records without their version', () => {
+    store.setItem('parapet.options', JSON.stringify({ v: 2, data: { vibration: false } }));
+    expect(loadOptions().vibration).toBe(true);
+    saveOptions({ vibration: false });
+    expect(loadOptions().vibration).toBe(false);
+    const { simVersion: _, ...old } = entry({});
+    store.setItem('parapet.record.contest.1.flags', JSON.stringify({ v: 1, data: old }));
+    expect(loadContestRecord(1, 'flags')).toBeNull();
   });
 
   it('wants full screen on touch screens unless told otherwise', () => {
@@ -117,9 +105,7 @@ describe('profile', () => {
     expect(wantsFullscreen(loadOptions(), true)).toBe(false);
   });
 
-  it('has no language until the first launch picks one; the old "auto" counts as none', () => {
-    expect(loadOptions().locale).toBe('');
-    store.setItem('parapet.options', JSON.stringify({ v: 1, data: { locale: 'auto' } }));
+  it('has no language until the first launch picks one', () => {
     expect(loadOptions().locale).toBe('');
     saveOptions({ locale: 'ru' });
     expect(loadOptions().locale).toBe('ru');
@@ -141,7 +127,6 @@ describe('profile', () => {
     expect(updateContestRecord(2, 'sprint', entry({ time: 41000 }))).toBe(false);
     expect(updateContestRecord(2, 'sprint', entry({ time: 39000 }))).toBe(true);
     expect(loadContestRecord(2, 'sprint')?.time).toBe(39000);
-    expect(listRecords()).toEqual([]);
     markContestBeaten(2, 'sprint');
     clearRecords();
     expect(loadContestRecord(2, 'sprint')).toBeNull();
@@ -158,9 +143,9 @@ describe('profile', () => {
     expect(completeMission(0, 1).firstTime).toBe(true);
     expect(isLevelComplete(loadProgress(), levels, 0)).toBe(true);
     expect([open(1), open(2)]).toEqual([true, false]);
-    // A level played under the original's mission count stays open.
+    // A mission done on a level not open yet (a race from a link) does not open it.
     completeMission(2, 1);
-    expect(open(2)).toBe(true);
+    expect(open(2)).toBe(false);
     expect(isLevelComplete(loadProgress(), levels, 1)).toBe(false);
   });
 });

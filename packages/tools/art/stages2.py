@@ -1,7 +1,7 @@
 """The other bosses' worlds (see stages.py)."""
 import math
 from lookgen import Canvas
-from scene import blob, foliage, lit_blob, palm, pine, rng, skyline, strip, tree, building
+from scene import blob, lit_blob, palm, rng, skyline, strip, tree
 from stages import stage
 
 

@@ -5,6 +5,7 @@
  * pixel of distance plus 625 ms, in game time.
  */
 import { cameraMaxY } from './Camera.ts';
+import { clamp, smoothstep } from '../math.ts';
 
 export interface TourPoint {
   /** World position in units to centre on screen. */
@@ -25,17 +26,6 @@ export interface TourView {
 
 export const LEG_MS_PER_PX = 2;
 export const LEG_BASE_MS = 625;
-
-function clamp(n: number, lo: number, hi: number): number {
-  if (n < lo) return lo;
-  if (n > hi) return hi;
-  return n;
-}
-
-export function smoothstep(t: number): number {
-  const u = clamp(t, 0, 1);
-  return u * u * (3 - 2 * u);
-}
 
 export class CameraTour {
   private readonly points: readonly TourPoint[];

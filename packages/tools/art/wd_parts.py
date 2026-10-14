@@ -20,6 +20,7 @@ gives each look its colours):
 Pictures face right (the toe, the bust); upright limbs lie along y (legs) or x (arms: the shoulder
 or the elbow on the left). Sizes keep Blaise's part centred where hers is (a picture grown on the
 right or the bottom only, or by one on each side)."""
+from lookgen import check_pictures
 
 # ------------------------------------------------------------------------------- the chest
 # The chest in profile (57), 13 x 13 (Blaise's 10 x 12 grown by one on the left and the bottom and
@@ -759,19 +760,4 @@ COMTESSE_48 = [
 SLEEVE = {'W': 'a', 'S': 'b', 's': 'c', 't': 'd', 'T': 'e', 'z': 'c'}
 
 
-def check(name, rows):
-    w = len(rows[0])
-    bad = [(i, len(r)) for i, r in enumerate(rows) if len(r) != w]
-    if bad:
-        raise ValueError(f'{name}: rows {bad} not {w} wide')
-    return rows
-
-
-def shift(rows, mapping):
-    """A picture with its characters shifted (the far limb a tone darker)."""
-    return [''.join(mapping.get(c, c) for c in r) for r in rows]
-
-
-for _n, _v in list(globals().items()):
-    if _n.isupper() and isinstance(_v, list) and _v and isinstance(_v[0], str):
-        check(_n, _v)
+check_pictures(globals())

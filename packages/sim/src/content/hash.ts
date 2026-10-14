@@ -1,8 +1,8 @@
 /**
- * Content hashes carried by replays. A leaderboard entry is only comparable with runs made on
- * the same level data, move table and physics tables; the hashes let the server refuse a
- * replay recorded on edited content instead of ranking it. FNV-1a over canonical JSON (keys
- * sorted) so the value does not depend on the serialiser or the key order of a file.
+ * Content hashes carried by replays. A run is only comparable with runs made on the same level
+ * data, move table and physics tables; the hashes let a player's browser refuse a replay
+ * recorded on edited content instead of racing it. FNV-1a over canonical JSON (keys sorted) so
+ * the value does not depend on the serialiser or the key order of a file.
  */
 import type { LevelData } from '../level/level.ts';
 import type { MoveTableData } from '../runner/moves.ts';

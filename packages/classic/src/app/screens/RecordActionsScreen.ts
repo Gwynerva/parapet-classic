@@ -2,8 +2,8 @@
  * What can be done with a local record: watch it, race it as a ghost, or send it out as a
  * challenge link or a replay file.
  */
-import { rankingSort, type RunMode } from '@parapet/sim';
-import { formatTime, Theme, type GameContext } from '../Context.ts';
+import type { RunMode } from '@parapet/sim';
+import { formatResult, Theme, type GameContext } from '../Context.ts';
 import type { Screen, UiGesture, UiKey, UiPointer, UiWheel } from '@parapet/runtime/app/Screen.ts';
 import { Menu, type MenuItem } from '@parapet/runtime/ui/Menu.ts';
 import { heading, panel } from '@parapet/runtime/ui/draw.ts';
@@ -33,11 +33,9 @@ export class RecordActionsScreen implements Screen {
 
   constructor(ctx: GameContext, levelId: number, mode: RunMode, entry: RecordEntry) {
     this.ctx = ctx;
-    this.menu = new Menu(ctx.fonts.text, ctx.fonts.small);
+    this.menu = new Menu(ctx.fonts.text);
     const { i18n, screens } = ctx;
-    const value =
-      rankingSort(mode, levelId) === 'score' ? String(entry.score) : formatTime(entry.time);
-    this.title = `${i18n.t(`mode.${mode}`)}: ${value}`;
+    this.title = `${i18n.t(`mode.${mode}`)}: ${formatResult(mode, levelId, entry)}`;
     this.subtitle = i18n.t(`level.names.${levelId}`);
     const replay = recordReplay(ctx, levelId, mode, entry);
     const result = { time: entry.time, score: entry.score };
@@ -102,14 +100,7 @@ export class RecordActionsScreen implements Screen {
       rowHeight: row,
     });
     this.panelRect = d.panel;
-    Object.assign(this.menu.layout, {
-      x: d.menu.x,
-      y: d.menu.y,
-      width: d.menu.w,
-      rowHeight: row,
-      align: 'center',
-    });
-    this.menu.fit(d.menu.h);
+    this.menu.place(d.menu, row);
   }
 
   private panelRect: Rect = { x: 0, y: 0, w: 0, h: 0 };

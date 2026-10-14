@@ -61,7 +61,7 @@ export function approxLength(a: number, b: number): number {
 /**
  * Sine table of 512 entries built by the original recurrence (`short_arr_a`, line 3447).
  * `shift` is the argument `n` (the table holds `value >> (30 - n)`), `offset` is the `bl` flag
- * (true starts the table at index 128, i.e. a cosine table).
+ * (the recurrence yields cosines; started at index 128 they make the table a sine table).
  */
 export function buildSineTable(shift: number, offset: boolean): Int16Array {
   const table = new Int16Array(512);

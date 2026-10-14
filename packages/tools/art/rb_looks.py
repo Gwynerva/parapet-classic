@@ -33,13 +33,12 @@ as volumes; the look tool turns them into their tilted pictures, so camouflage t
 The arms and hands keep the man's own shading (their tones mapped onto each material's ramp)."""
 import json
 
-from lookgen import write_look, write_json, rotate, preview, look_cmd
-from heads import Palette, Pic
+from lookgen import write_look, rotate, preview
+from heads import Palette, Pic, mix
 from body import part as base_part, inflate, shrink
 from gridpng import sheet
 import rb_heads as H
-from rb_kit import (Mat, Part, ramp5, mix, mask_of, grow_mask, shrink_mask, aligned, blotches, tiger, noise,
-                    LIGHT, render)
+from rb_kit import Mat, Part, ramp5, mask_of, grow_mask, shrink_mask, aligned, blotches, tiger, LIGHT
 
 FRONT_LIGHT = LIGHT
 # Turned by the look tool from these upright pictures (and the arms' and hands').
@@ -301,13 +300,6 @@ def boot(kind, key, mats, letters, light_dir=LIGHT):
 
 
 # ------------------------------------------------------------------------------- the trunk
-def neckline(p, rows, m, mats=None):
-    """The neck of the chest picture (its first rows) in material m (skin or the mask's)."""
-    for y in rows:
-        p.rows(y, y, m)
-    return p
-
-
 def write(look_id, accent, head, parts, effect=None, ribbons=None, attachments=None):
     """Writes the look: the head's pictures, the parts (Pic), turns the upright ones."""
     pal = Palette()

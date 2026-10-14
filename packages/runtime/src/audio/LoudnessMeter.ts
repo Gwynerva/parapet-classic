@@ -9,6 +9,7 @@ import { drumFor, PATCH_COUNT, patchFor } from './Instruments.ts';
 import { songEvents, type MidiSong } from './MidiFile.ts';
 import { TRACK_PATCHES } from './MusicDirector.ts';
 import { Synth, SYNTH_VERSION } from './Synth.ts';
+import { fnv1a } from '@parapet/sim';
 
 /** Sample rate the K-weighting coefficients below are given for. */
 export const METER_RATE = 48000;
@@ -71,13 +72,7 @@ export function synthFingerprint(): string {
   const patches = Array.from({ length: PATCH_COUNT }, (_, i) => patchFor(i));
   const drums = Array.from({ length: 128 }, (_, k) => drumFor(k));
   const text = JSON.stringify([patches, drums, TRACK_PATCHES]);
-  // FNV-1a, 32 bits.
-  let hash = 0x811c9dc5;
-  for (let i = 0; i < text.length; i++) {
-    hash ^= text.charCodeAt(i);
-    hash = Math.imul(hash, 0x01000193) >>> 0;
-  }
-  return `${SYNTH_VERSION}-${hash.toString(16).padStart(8, '0')}`;
+  return `${SYNTH_VERSION}-${fnv1a(text).toString(16).padStart(8, '0')}`;
 }
 
 /** Length of a rendered piece, seconds (a whole song at once is slow: every note's nodes live

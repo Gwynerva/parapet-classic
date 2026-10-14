@@ -22,13 +22,13 @@ import { idiv, type Level, type MissionRules } from '@parapet/sim';
 import type { LevelArtContent } from '../content/types.ts';
 import { PIVOT_ANCHOR, type SceneRenderer, TWEEN_ONE } from './SceneRenderer.ts';
 import {
-  ANCHOR_BOTTOM_CENTER,
   ANCHOR_BOTTOM_LEFT,
   ANCHOR_CENTER,
   ANCHOR_TOP_LEFT,
   type SpriteSheet,
 } from './SpriteSheet.ts';
 import { screenPixels, splitPixel, toScreen, type CameraPos, type ViewSize } from './View.ts';
+import { cssOf24 } from './color.ts';
 
 /** Original screen height the vertical layout constants refer to. */
 const BASE_HEIGHT = 320;
@@ -65,7 +65,6 @@ const FLAG_SPRITE = 137;
 const FLAG_FRAMES = 3;
 const FLAG_INACTIVE = 140;
 const FINISH_SPRITE = 191;
-const BIRD_SPRITE = 296;
 /** Bounce of a just-collected flag lasts this long (`bO = 0x1F400 | bit`, line 9498). */
 export const FLAG_BOUNCE_MS = 500;
 
@@ -339,7 +338,7 @@ export class LevelRenderer {
     const end = (y + h) << 8;
     for (let yy = y << 8; yy < end; yy += step) {
       if (yy >> 8 >= view.height) return;
-      ctx.fillStyle = cssRgb(((r << 8) & 0xff0000) | (g & 0xff00) | ((b >> 8) & 0xff));
+      ctx.fillStyle = cssOf24(((r << 8) & 0xff0000) | (g & 0xff00) | ((b >> 8) & 0xff));
       ctx.fillRect(x, yy >> 8, w, bandH);
       r += dr;
       g += dg;
@@ -481,80 +480,22 @@ export class LevelRenderer {
     t: number,
   ): void {
     if (this.artObjectId < 0) return;
-    this.scene.setViewport(view.width, view.height);
-    this.scene.drawObject(
-      ctx,
-      this.artObjectId,
-      frameA,
-      frameB,
-      Math.max(0, Math.min(TWEEN_ONE, t)),
-      -((cam.x * 32) >> 10),
-      -((cam.y * 32) >> 10),
-      false,
-      undefined,
-      PIVOT_ANCHOR,
+    this.scene.withViewport(view.width, view.height, () =>
+      this.scene.drawObject(
+        ctx,
+        this.artObjectId,
+        frameA,
+        frameB,
+        Math.max(0, Math.min(TWEEN_ONE, t)),
+        -((cam.x * 32) >> 10),
+        -((cam.y * 32) >> 10),
+        false,
+        undefined,
+        PIVOT_ANCHOR,
+      ),
     );
     // Under it, the frame it is closer to (their bottoms hardly differ).
     this.drawUnder(ctx, cam, view, t < TWEEN_ONE / 2 ? frameA : frameB);
-  }
-
-  /**
-   * A small picture of a level for the menus: the real level art at 1:1 around the start
-   * cell, on the theme's sky colour. The scene renderer culls objects outside the small
-   * canvas, so this is one cheap draw without a large intermediate canvas.
-   */
-  renderPreview(
-    levelId: number,
-    level: Level,
-    width: number,
-    height: number,
-    zoom = 2,
-  ): HTMLCanvasElement {
-    const canvas = document.createElement('canvas');
-    canvas.width = Math.max(1, width);
-    canvas.height = Math.max(1, height);
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return canvas;
-    ctx.imageSmoothingEnabled = false;
-    if (zoom > 1) {
-      // Render a window `zoom` times larger at 1:1 and shrink it without smoothing, so the
-      // preview shows more of the level while every pixel stays a level pixel.
-      const large = this.renderPreview(levelId, level, width * zoom, height * zoom, 1);
-      ctx.drawImage(large, 0, 0, width, height);
-      return canvas;
-    }
-    const theme = themeOfLevel(levelId);
-    const M = this.content.tables.M;
-    const base = theme * 5;
-    const colours = this.themeColours(theme, M[base] ?? 0, M[base + 1] ?? 0, M[base + 2] ?? 0);
-    ctx.fillStyle = colours.skyBottom;
-    ctx.fillRect(0, 0, width, height);
-    const mission = this.content.missions.levels[levelId];
-    const objectId = mission ? mission.backgroundSceneId : -1;
-    const obj = this.scene.getObject(objectId);
-    if (!obj) return canvas;
-    // The start cell sits a third up from the bottom, horizontally centred.
-    const startPx = level.start.x * 32 + 16;
-    const startPy = (level.start.y + 1) * 32;
-    const cropX = Math.max(0, Math.min(obj.width - width, startPx - (width >> 1)));
-    const cropY = Math.max(0, Math.min(obj.height - height, startPy - Math.round(height * 0.7)));
-    const savedW = this.scene.viewWidth;
-    const savedH = this.scene.viewHeight;
-    this.scene.setViewport(width, height);
-    this.scene.drawObject(
-      ctx,
-      objectId,
-      defaultLevelArtFrame(levelId),
-      defaultLevelArtFrame(levelId),
-      0,
-      -cropX,
-      -cropY,
-      false,
-      undefined,
-      PIVOT_ANCHOR,
-    );
-    this.scene.setViewport(savedW, savedH);
-    return canvas;
   }
 
   /** Pulse fraction 0..65536 of the tutorial level art at real time `clockMs` (line 9849). */
@@ -615,47 +556,6 @@ export class LevelRenderer {
     }
   }
 
-  /** Resting birds at the positions that replaced tile 63 (`Particles` animates them). */
-  drawBirds(ctx: CanvasRenderingContext2D, cam: CameraPos, view: ViewSize, level: Level): void {
-    for (const b of level.birds) {
-      const x = toScreen(b.x, cam.x);
-      const y = toScreen(b.y, cam.y);
-      if (x < -16 || x > view.width + 16 || y < -16 || y > view.height + 16) continue;
-      this.sheet.drawSprite(ctx, BIRD_SPRITE, x, y, 0, ANCHOR_BOTTOM_CENTER);
-    }
-  }
-
-  // -------------------------------------------------------------------------------------------
-  // Debug
-  // -------------------------------------------------------------------------------------------
-
-  /** Outline the collision shape of every visible tile (see the tile catalogue in 01-formats). */
-  drawDebugTiles(
-    ctx: CanvasRenderingContext2D,
-    cam: CameraPos,
-    view: ViewSize,
-    level: Level,
-  ): void {
-    const x0 = Math.max(0, cam.x >> 10);
-    const y0 = Math.max(0, cam.y >> 10);
-    const x1 = Math.min(level.width - 1, (cam.x + (view.width << 5)) >> 10);
-    const y1 = Math.min(level.height - 1, (cam.y + (view.height << 5)) >> 10);
-    ctx.save();
-    ctx.lineWidth = 1;
-    ctx.font = '8px monospace';
-    ctx.textBaseline = 'top';
-    for (let ty = y0; ty <= y1; ty++) {
-      for (let tx = x0; tx <= x1; tx++) {
-        const tile = level.tileAt(tx, ty);
-        if (tile === 0) continue;
-        const px = toScreen(tx << 10, cam.x) + 0.5;
-        const py = toScreen(ty << 10, cam.y) + 0.5;
-        drawTileShape(ctx, tile, px, py);
-      }
-    }
-    ctx.restore();
-  }
-
   private themeColours(
     theme: number,
     ground: number,
@@ -665,110 +565,11 @@ export class LevelRenderer {
     if (!this.colourCache || this.colourCache.theme !== theme) {
       this.colourCache = {
         theme,
-        ground: cssRgb(ground),
-        skyBottom: cssRgb(skyBottom),
-        skyTop: cssRgb(skyTop),
+        ground: cssOf24(ground),
+        skyBottom: cssOf24(skyBottom),
+        skyTop: cssOf24(skyTop),
       };
     }
     return this.colourCache;
   }
-}
-
-function cssRgb(rgb: number): string {
-  return '#' + (rgb & 0xffffff).toString(16).padStart(6, '0');
-}
-
-const SOLID = '#ff4040';
-const SURFACE = '#40ff40';
-const WALL = '#ffb040';
-const HANDS = '#40c0ff';
-const MARKER = '#ff40ff';
-
-function drawTileShape(ctx: CanvasRenderingContext2D, tile: number, x: number, y: number): void {
-  const s = 32;
-  ctx.strokeStyle = SOLID;
-  switch (tile) {
-    case 1:
-      ctx.strokeRect(x, y, s - 1, s - 1);
-      return;
-    case 2:
-    case 17:
-      ctx.strokeStyle = tile === 17 ? HANDS : WALL;
-      line(ctx, x, y, x, y + s - 1);
-      return;
-    case 4:
-    case 18:
-      ctx.strokeStyle = tile === 18 ? HANDS : WALL;
-      line(ctx, x + s - 1, y, x + s - 1, y + s - 1);
-      return;
-    case 3:
-    case 20:
-      ctx.strokeStyle = SURFACE;
-      line(ctx, x, y, x + s - 1, y);
-      return;
-    case 5:
-      ctx.strokeStyle = SURFACE;
-      line(ctx, x, y, x + s - 1, y);
-      ctx.strokeStyle = WALL;
-      line(ctx, x, y, x, y + s - 1);
-      ctx.strokeStyle = HANDS;
-      line(ctx, x, y, x, y + (s >> 1));
-      return;
-    case 6:
-      ctx.strokeStyle = SURFACE;
-      line(ctx, x, y, x + s - 1, y);
-      ctx.strokeStyle = WALL;
-      line(ctx, x + s - 1, y, x + s - 1, y + s - 1);
-      ctx.strokeStyle = HANDS;
-      line(ctx, x + s - 1, y, x + s - 1, y + (s >> 1));
-      return;
-    case 7:
-      ctx.strokeStyle = SURFACE;
-      line(ctx, x, y + s - 1, x + s - 1, y);
-      return;
-    case 8:
-      ctx.strokeStyle = SURFACE;
-      line(ctx, x, y, x + s - 1, y + s - 1);
-      return;
-    case 13:
-      ctx.strokeRect(x, y, 7, s - 1);
-      return;
-    case 14:
-      ctx.strokeRect(x + s - 8, y, 7, s - 1);
-      return;
-    case 19:
-      ctx.strokeStyle = HANDS;
-      line(ctx, x, y, x + s - 1, y);
-      return;
-    case 21:
-      ctx.strokeStyle = SURFACE;
-      line(ctx, x, y, x + s - 1, y);
-      ctx.strokeStyle = SOLID;
-      line(ctx, x, y + 8, x + s - 1, y + 8);
-      return;
-    case 22:
-      ctx.strokeStyle = HANDS;
-      line(ctx, x + (s >> 1), y, x + (s >> 1), y + s - 1);
-      return;
-    default:
-      if (tile >= 49) {
-        ctx.strokeStyle = MARKER;
-        ctx.setLineDash([2, 2]);
-        ctx.strokeRect(x, y, s - 1, s - 1);
-        ctx.setLineDash([]);
-      } else {
-        ctx.strokeStyle = '#ffffff';
-        ctx.strokeRect(x, y, s - 1, s - 1);
-        ctx.fillStyle = '#ffffff';
-        ctx.fillText(String(tile), x + 2, y + 2);
-      }
-      return;
-  }
-}
-
-function line(ctx: CanvasRenderingContext2D, x0: number, y0: number, x1: number, y1: number): void {
-  ctx.beginPath();
-  ctx.moveTo(x0, y0);
-  ctx.lineTo(x1, y1);
-  ctx.stroke();
 }

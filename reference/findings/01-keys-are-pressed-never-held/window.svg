@@ -1,0 +1,144 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="584" height="619" viewBox="0 0 584 619" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" style="font-variant-numeric: tabular-nums">
+<title id="t">How long a press waits</title>
+<desc id="d">The runner jumps at a low block (UP); a second UP on each of the steps after</desc>
+<rect x="0.5" y="0.5" width="583" height="618" rx="10" fill="#161b22" stroke="#30363d"/>
+<text x="20" y="30" font-size="16" font-weight="600" fill="#e6edf3">How long a press waits</text>
+<text x="20" y="48" font-size="12" fill="#8b949e">The runner jumps at a low block (UP); a second UP on each of the steps after</text>
+<rect x="64" y="80" width="334" height="14" fill="#30363d" rx="3"><title>rising (18): steps 0 to 20</title></rect>
+<text x="231" y="91" font-size="11" fill="#e6edf3" text-anchor="middle">rising</text>
+<rect x="400" y="80" width="30" height="14" fill="#30363d" rx="3"><title>falling (12): steps 21 to 22</title></rect>
+<line x1="439" y1="76" x2="439" y2="491" stroke="#8b949e" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="443" y="72" font-size="11" fill="#8b949e">lands on the block</text>
+<text x="54" y="91" font-size="11" fill="#8b949e" text-anchor="end">in the air</text>
+<text x="54" y="108" font-size="11" fill="#8b949e" text-anchor="end">UP at</text>
+<text x="54" y="123" font-size="11" fill="#8b949e" text-anchor="end" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">+1</text>
+<rect x="80" y="118" width="352" height="3" fill="#3987e5"></rect>
+<rect x="432" y="115" width="14" height="9" fill="#3987e5" rx="2"><title>UP 1 steps after the jump waits 22 steps; the vault on step 23</title></rect>
+<path d="M83 122L87 116L91 122Z" fill="#e6edf3" stroke="none" stroke-width="1"></path>
+<text x="54" y="136" font-size="11" fill="#8b949e" text-anchor="end" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">+2</text>
+<rect x="96" y="131" width="336" height="3" fill="#3987e5"></rect>
+<rect x="432" y="128" width="14" height="9" fill="#3987e5" rx="2"><title>UP 2 steps after the jump waits 21 steps; the vault on step 23</title></rect>
+<path d="M99 135L103 129L107 135Z" fill="#e6edf3" stroke="none" stroke-width="1"></path>
+<text x="54" y="149" font-size="11" fill="#8b949e" text-anchor="end" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">+3</text>
+<rect x="112" y="144" width="320" height="3" fill="#3987e5"></rect>
+<rect x="432" y="141" width="14" height="9" fill="#3987e5" rx="2"><title>UP 3 steps after the jump waits 20 steps; the vault on step 23</title></rect>
+<path d="M115 148L119 142L123 148Z" fill="#e6edf3" stroke="none" stroke-width="1"></path>
+<text x="54" y="162" font-size="11" fill="#8b949e" text-anchor="end" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">+4</text>
+<rect x="128" y="157" width="304" height="3" fill="#3987e5"></rect>
+<rect x="432" y="154" width="14" height="9" fill="#3987e5" rx="2"><title>UP 4 steps after the jump waits 19 steps; the vault on step 23</title></rect>
+<path d="M131 161L135 155L139 161Z" fill="#e6edf3" stroke="none" stroke-width="1"></path>
+<text x="54" y="175" font-size="11" fill="#8b949e" text-anchor="end" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">+5</text>
+<rect x="144" y="170" width="288" height="3" fill="#3987e5"></rect>
+<rect x="432" y="167" width="14" height="9" fill="#3987e5" rx="2"><title>UP 5 steps after the jump waits 18 steps; the vault on step 23</title></rect>
+<path d="M147 174L151 168L155 174Z" fill="#e6edf3" stroke="none" stroke-width="1"></path>
+<text x="54" y="188" font-size="11" fill="#8b949e" text-anchor="end" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">+6</text>
+<rect x="160" y="183" width="272" height="3" fill="#3987e5"></rect>
+<rect x="432" y="180" width="14" height="9" fill="#3987e5" rx="2"><title>UP 6 steps after the jump waits 17 steps; the vault on step 23</title></rect>
+<path d="M163 187L167 181L171 187Z" fill="#e6edf3" stroke="none" stroke-width="1"></path>
+<text x="54" y="201" font-size="11" fill="#8b949e" text-anchor="end" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">+7</text>
+<rect x="176" y="196" width="256" height="3" fill="#3987e5"></rect>
+<rect x="432" y="193" width="14" height="9" fill="#3987e5" rx="2"><title>UP 7 steps after the jump waits 16 steps; the vault on step 23</title></rect>
+<path d="M179 200L183 194L187 200Z" fill="#e6edf3" stroke="none" stroke-width="1"></path>
+<text x="54" y="214" font-size="11" fill="#8b949e" text-anchor="end" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">+8</text>
+<rect x="192" y="209" width="240" height="3" fill="#3987e5"></rect>
+<rect x="432" y="206" width="14" height="9" fill="#3987e5" rx="2"><title>UP 8 steps after the jump waits 15 steps; the vault on step 23</title></rect>
+<path d="M195 213L199 207L203 213Z" fill="#e6edf3" stroke="none" stroke-width="1"></path>
+<text x="54" y="227" font-size="11" fill="#8b949e" text-anchor="end" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">+9</text>
+<rect x="208" y="222" width="224" height="3" fill="#3987e5"></rect>
+<rect x="432" y="219" width="14" height="9" fill="#3987e5" rx="2"><title>UP 9 steps after the jump waits 14 steps; the vault on step 23</title></rect>
+<path d="M211 226L215 220L219 226Z" fill="#e6edf3" stroke="none" stroke-width="1"></path>
+<text x="54" y="240" font-size="11" fill="#8b949e" text-anchor="end" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">+10</text>
+<rect x="224" y="235" width="208" height="3" fill="#3987e5"></rect>
+<rect x="432" y="232" width="14" height="9" fill="#3987e5" rx="2"><title>UP 10 steps after the jump waits 13 steps; the vault on step 23</title></rect>
+<path d="M227 239L231 233L235 239Z" fill="#e6edf3" stroke="none" stroke-width="1"></path>
+<text x="54" y="253" font-size="11" fill="#8b949e" text-anchor="end" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">+11</text>
+<rect x="240" y="248" width="192" height="3" fill="#3987e5"></rect>
+<rect x="432" y="245" width="14" height="9" fill="#3987e5" rx="2"><title>UP 11 steps after the jump waits 12 steps; the vault on step 23</title></rect>
+<path d="M243 252L247 246L251 252Z" fill="#e6edf3" stroke="none" stroke-width="1"></path>
+<text x="54" y="266" font-size="11" fill="#8b949e" text-anchor="end" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">+12</text>
+<rect x="256" y="261" width="176" height="3" fill="#3987e5"></rect>
+<rect x="432" y="258" width="14" height="9" fill="#3987e5" rx="2"><title>UP 12 steps after the jump waits 11 steps; the vault on step 23</title></rect>
+<path d="M259 265L263 259L267 265Z" fill="#e6edf3" stroke="none" stroke-width="1"></path>
+<text x="54" y="279" font-size="11" fill="#8b949e" text-anchor="end" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">+13</text>
+<rect x="272" y="274" width="160" height="3" fill="#3987e5"></rect>
+<rect x="432" y="271" width="14" height="9" fill="#3987e5" rx="2"><title>UP 13 steps after the jump waits 10 steps; the vault on step 23</title></rect>
+<path d="M275 278L279 272L283 278Z" fill="#e6edf3" stroke="none" stroke-width="1"></path>
+<text x="54" y="292" font-size="11" fill="#8b949e" text-anchor="end" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">+14</text>
+<rect x="288" y="287" width="144" height="3" fill="#3987e5"></rect>
+<rect x="432" y="284" width="14" height="9" fill="#3987e5" rx="2"><title>UP 14 steps after the jump waits 9 steps; the vault on step 23</title></rect>
+<path d="M291 291L295 285L299 291Z" fill="#e6edf3" stroke="none" stroke-width="1"></path>
+<text x="54" y="305" font-size="11" fill="#8b949e" text-anchor="end" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">+15</text>
+<rect x="304" y="300" width="128" height="3" fill="#3987e5"></rect>
+<rect x="432" y="297" width="14" height="9" fill="#3987e5" rx="2"><title>UP 15 steps after the jump waits 8 steps; the vault on step 23</title></rect>
+<path d="M307 304L311 298L315 304Z" fill="#e6edf3" stroke="none" stroke-width="1"></path>
+<text x="54" y="318" font-size="11" fill="#8b949e" text-anchor="end" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">+16</text>
+<rect x="320" y="313" width="112" height="3" fill="#3987e5"></rect>
+<rect x="432" y="310" width="14" height="9" fill="#3987e5" rx="2"><title>UP 16 steps after the jump waits 7 steps; the vault on step 23</title></rect>
+<path d="M323 317L327 311L331 317Z" fill="#e6edf3" stroke="none" stroke-width="1"></path>
+<text x="54" y="331" font-size="11" fill="#8b949e" text-anchor="end" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">+17</text>
+<rect x="336" y="326" width="96" height="3" fill="#3987e5"></rect>
+<rect x="432" y="323" width="14" height="9" fill="#3987e5" rx="2"><title>UP 17 steps after the jump waits 6 steps; the vault on step 23</title></rect>
+<path d="M339 330L343 324L347 330Z" fill="#e6edf3" stroke="none" stroke-width="1"></path>
+<text x="54" y="344" font-size="11" fill="#8b949e" text-anchor="end" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">+18</text>
+<rect x="352" y="339" width="80" height="3" fill="#3987e5"></rect>
+<rect x="432" y="336" width="14" height="9" fill="#3987e5" rx="2"><title>UP 18 steps after the jump waits 5 steps; the vault on step 23</title></rect>
+<path d="M355 343L359 337L363 343Z" fill="#e6edf3" stroke="none" stroke-width="1"></path>
+<text x="54" y="357" font-size="11" fill="#8b949e" text-anchor="end" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">+19</text>
+<rect x="368" y="352" width="64" height="3" fill="#3987e5"></rect>
+<rect x="432" y="349" width="14" height="9" fill="#3987e5" rx="2"><title>UP 19 steps after the jump waits 4 steps; the vault on step 23</title></rect>
+<path d="M371 356L375 350L379 356Z" fill="#e6edf3" stroke="none" stroke-width="1"></path>
+<text x="54" y="370" font-size="11" fill="#8b949e" text-anchor="end" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">+20</text>
+<rect x="384" y="365" width="48" height="3" fill="#3987e5"></rect>
+<rect x="432" y="362" width="14" height="9" fill="#3987e5" rx="2"><title>UP 20 steps after the jump waits 3 steps; the vault on step 23</title></rect>
+<path d="M387 369L391 363L395 369Z" fill="#e6edf3" stroke="none" stroke-width="1"></path>
+<text x="54" y="383" font-size="11" fill="#8b949e" text-anchor="end" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">+21</text>
+<rect x="400" y="378" width="32" height="3" fill="#3987e5"></rect>
+<rect x="432" y="375" width="14" height="9" fill="#3987e5" rx="2"><title>UP 21 steps after the jump waits 2 steps; the vault on step 23</title></rect>
+<path d="M403 382L407 376L411 382Z" fill="#e6edf3" stroke="none" stroke-width="1"></path>
+<text x="54" y="396" font-size="11" fill="#8b949e" text-anchor="end" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">+22</text>
+<rect x="416" y="391" width="16" height="3" fill="#3987e5"></rect>
+<rect x="432" y="388" width="14" height="9" fill="#3987e5" rx="2"><title>UP 22 steps after the jump waits 1 steps; the vault on step 23</title></rect>
+<path d="M419 395L423 389L427 395Z" fill="#e6edf3" stroke="none" stroke-width="1"></path>
+<text x="54" y="409" font-size="11" fill="#8b949e" text-anchor="end" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">+23</text>
+<rect x="432" y="401" width="14" height="9" fill="#8b949e" rx="2"><title>UP 23 steps after the jump: pressed on the landing step: lost</title></rect>
+<path d="M435 408L439 402L443 408Z" fill="#e6edf3" stroke="none" stroke-width="1"></path>
+<text x="54" y="422" font-size="11" fill="#8b949e" text-anchor="end" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">+24</text>
+<rect x="448" y="414" width="14" height="9" fill="#d95926" rx="2"><title>UP 24 steps after the jump: pressed after the landing: a new jump</title></rect>
+<path d="M451 421L455 415L459 421Z" fill="#e6edf3" stroke="none" stroke-width="1"></path>
+<text x="54" y="435" font-size="11" fill="#8b949e" text-anchor="end" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">+25</text>
+<rect x="464" y="427" width="14" height="9" fill="#d95926" rx="2"><title>UP 25 steps after the jump: pressed after the landing: a new jump</title></rect>
+<path d="M467 434L471 428L475 434Z" fill="#e6edf3" stroke="none" stroke-width="1"></path>
+<text x="54" y="448" font-size="11" fill="#8b949e" text-anchor="end" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">+26</text>
+<rect x="480" y="440" width="14" height="9" fill="#d95926" rx="2"><title>UP 26 steps after the jump: pressed after the landing: a new jump</title></rect>
+<path d="M483 447L487 441L491 447Z" fill="#e6edf3" stroke="none" stroke-width="1"></path>
+<text x="54" y="461" font-size="11" fill="#8b949e" text-anchor="end" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">+27</text>
+<rect x="496" y="453" width="14" height="9" fill="#d95926" rx="2"><title>UP 27 steps after the jump: pressed after the landing: a new jump</title></rect>
+<path d="M499 460L503 454L507 460Z" fill="#e6edf3" stroke="none" stroke-width="1"></path>
+<text x="54" y="474" font-size="11" fill="#8b949e" text-anchor="end" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">+28</text>
+<rect x="512" y="466" width="14" height="9" fill="#d95926" rx="2"><title>UP 28 steps after the jump: pressed after the landing: a new jump</title></rect>
+<path d="M515 473L519 467L523 473Z" fill="#e6edf3" stroke="none" stroke-width="1"></path>
+<text x="54" y="487" font-size="11" fill="#8b949e" text-anchor="end" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">+29</text>
+<rect x="528" y="479" width="14" height="9" fill="#d95926" rx="2"><title>UP 29 steps after the jump: pressed after the landing: a new jump</title></rect>
+<path d="M531 486L535 480L539 486Z" fill="#e6edf3" stroke="none" stroke-width="1"></path>
+<line x1="71" y1="495" x2="71" y2="500" stroke="#8b949e" stroke-width="1"/>
+<text x="71" y="513" font-size="11" fill="#8b949e" text-anchor="middle">0</text>
+<line x1="151" y1="495" x2="151" y2="500" stroke="#8b949e" stroke-width="1"/>
+<text x="151" y="513" font-size="11" fill="#8b949e" text-anchor="middle">5</text>
+<line x1="231" y1="495" x2="231" y2="500" stroke="#8b949e" stroke-width="1"/>
+<text x="231" y="513" font-size="11" fill="#8b949e" text-anchor="middle">10</text>
+<line x1="311" y1="495" x2="311" y2="500" stroke="#8b949e" stroke-width="1"/>
+<text x="311" y="513" font-size="11" fill="#8b949e" text-anchor="middle">15</text>
+<line x1="391" y1="495" x2="391" y2="500" stroke="#8b949e" stroke-width="1"/>
+<text x="391" y="513" font-size="11" fill="#8b949e" text-anchor="middle">20</text>
+<line x1="471" y1="495" x2="471" y2="500" stroke="#8b949e" stroke-width="1"/>
+<text x="471" y="513" font-size="11" fill="#8b949e" text-anchor="middle">25</text>
+<line x1="551" y1="495" x2="551" y2="500" stroke="#8b949e" stroke-width="1"/>
+<text x="551" y="513" font-size="11" fill="#8b949e" text-anchor="middle">30</text>
+<text x="312" y="529" font-size="11" fill="#8b949e" text-anchor="middle">steps after the jump (30 ms each)</text>
+<rect x="20" y="548" width="10" height="10" fill="#3987e5" rx="2"></rect>
+<text x="35" y="557" font-size="12" fill="#e6edf3">waits, then the vault starts on the landing</text>
+<rect x="20" y="568" width="10" height="10" fill="#8b949e" rx="2"></rect>
+<text x="35" y="577" font-size="12" fill="#e6edf3">pressed on the landing step: lost</text>
+<rect x="20" y="588" width="10" height="10" fill="#d95926" rx="2"></rect>
+<text x="35" y="597" font-size="12" fill="#e6edf3">pressed after the landing: a new jump</text>
+</svg>

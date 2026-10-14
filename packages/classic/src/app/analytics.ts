@@ -11,18 +11,7 @@
  * Privacy Control). A replay link's code (`r/?…`) never goes to the counter: only the page's
  * path and its own title do (the visit is counted before a race page takes the race's title).
  */
-
-/** Where counts go: `https://<code>.goatcounter.com` for a code, else an `https://` address. */
-export function counterOrigin(setting: string): string {
-  const v = setting.trim();
-  if (/^[a-z0-9-]+$/.test(v)) return `https://${v}.goatcounter.com`;
-  try {
-    const url = new URL(v);
-    return url.protocol === 'https:' ? url.origin : '';
-  } catch {
-    return '';
-  }
-}
+import { counterOrigin } from './counter.ts';
 
 const COUNTER = counterOrigin(import.meta.env.VITE_GOATCOUNTER ?? '');
 const sent = new Set<string>();

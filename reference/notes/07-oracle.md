@@ -14,8 +14,7 @@ node reference/oracle/run.mjs --golden                     # regenerate every tr
 ```
 
 `run.mjs` uses a local JDK (JAVA_HOME, PATH or the Windows vendor directories) and falls back to
-Docker `eclipse-temurin:17-jdk`. Both paths produce byte-identical traces. `build.ps1` is the
-Windows-only variant.
+Docker `eclipse-temurin:17-jdk`. Both paths produce byte-identical traces.
 
 Script format: `# level: N`, `# mission: T` headers, then one `ticks keys` line per block —
 run `ticks` steps and press `keys` on the first step only. Keys: `U D L R` (resolved to the

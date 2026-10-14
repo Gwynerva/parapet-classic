@@ -16,7 +16,7 @@ export class PauseScreen implements Screen {
   constructor(ctx: GameContext, play: PlayScreen) {
     this.ctx = ctx;
     this.play = play;
-    this.menu = new Menu(ctx.fonts.text, ctx.fonts.small);
+    this.menu = new Menu(ctx.fonts.text);
     const { i18n, screens } = ctx;
     this.menu.setItems([
       { label: i18n.t('menu.resume'), onSelect: () => screens.pop() },
@@ -54,14 +54,7 @@ export class PauseScreen implements Screen {
       rowHeight: row,
     });
     this.panelRect = d.panel;
-    Object.assign(this.menu.layout, {
-      x: d.menu.x,
-      y: d.menu.y,
-      width: d.menu.w,
-      rowHeight: row,
-      align: 'center',
-    });
-    this.menu.fit(d.menu.h);
+    this.menu.place(d.menu, row);
   }
 
   private panelRect: Rect = { x: 0, y: 0, w: 0, h: 0 };

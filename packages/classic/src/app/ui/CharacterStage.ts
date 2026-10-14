@@ -18,17 +18,16 @@ import type { Rect } from '@parapet/runtime/ui/layout.ts';
 import type { GameContext } from '../Context.ts';
 import { bossOfCharacter, characterFx } from '../bosses.ts';
 import { rivalLevels } from '../characters.ts';
+import { UNITS_PER_PX } from '@parapet/runtime/render/View.ts';
+import { STEP } from '@parapet/sim';
 
 /** The run demo of the Moves menu (demo 0), played in place. */
 const RUN_DEMO = 0;
 const FRAME_MS = 110;
-const STEP_MS = 30;
 /** How fast the world goes by, in pixels per second (about a good run). */
 const RUN_PX = 120;
 /** A boss changes outfit this often. */
 const OUTFIT_MS = 4200;
-/** World units per pixel. */
-const UNITS = 32;
 const GROUND_COLOR = '#3a3f4b';
 const GROUND_EDGE = '#5b6270';
 /** The stand-in for a world not open yet: the checker of the looks page, a little darker. */
@@ -136,7 +135,7 @@ export class CharacterStage {
     if (!s) return;
     const moving = !this.reduced;
     this.clock += dt;
-    if (moving) this.x += (RUN_PX * UNITS * dt) / 1000;
+    if (moving) this.x += (RUN_PX * UNITS_PER_PX * dt) / 1000;
     // Outfits take turns.
     const n = this.outfits();
     const outfit = n > 1 ? Math.floor(this.clock / OUTFIT_MS) % n : 0;
@@ -145,8 +144,8 @@ export class CharacterStage {
       this.attach();
     }
     this.acc += dt;
-    while (this.acc >= STEP_MS) {
-      this.acc -= STEP_MS;
+    while (this.acc >= STEP) {
+      this.acc -= STEP;
       this.fx.step({ clock: this.clock });
       this.ambient();
     }
@@ -166,7 +165,7 @@ export class CharacterStage {
       return ((s >>> 0) % 100000) / 100000;
     };
     // Spread over a screen's width around the runner, ahead of it more than behind.
-    const x = this.x + (rand() * 360 - 100) * UNITS;
+    const x = this.x + (rand() * 360 - 100) * UNITS_PER_PX;
     this.fx.idleAt(stage.fx, names, x, 0, true, rand);
   }
 
@@ -182,7 +181,7 @@ export class CharacterStage {
     const view = { width: Math.ceil(d.w / zoom), height: Math.ceil(d.h / zoom) };
     const feetX = Math.round(view.width * 0.42);
     const feetY = view.height - 10;
-    const scroll = this.x / UNITS;
+    const scroll = this.x / UNITS_PER_PX;
     c.save();
     c.beginPath();
     c.rect(d.x, d.y, d.w, d.h);
@@ -206,17 +205,12 @@ export class CharacterStage {
         c.fillRect(0, feetY, view.width, 1);
       }
     }
-    const cam = { x: Math.round(this.x - feetX * UNITS), y: -feetY * UNITS };
+    const cam = { x: Math.round(this.x - feetX * UNITS_PER_PX), y: -feetY * UNITS_PER_PX };
     const now = performance.now();
     this.fx.drawBehind(c, cam, this.clock, now, view);
     const { scene, swap } = this.look(s);
     const pose = this.pose();
-    // Scenes are shared (the tiles draw with them too): the stage's culling box only for now.
-    const savedW = scene.viewWidth;
-    const savedH = scene.viewHeight;
-    scene.setViewport(view.width, view.height);
-    drawPose(c, scene, pose, cam, swap);
-    scene.setViewport(savedW, savedH);
+    scene.withViewport(view.width, view.height, () => drawPose(c, scene, pose, cam, swap));
     this.fx.drawFront(c, cam);
     if (s.stage) s.stage.draw(c, 0, view.width, feetY, scroll, true, 0, this.clock);
     c.restore();

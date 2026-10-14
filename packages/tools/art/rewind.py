@@ -16,6 +16,7 @@ import json
 import math
 
 from lookgen import *
+from heads import mix
 from tricks import tricks
 
 import rw_looks  # noqa: F401  (the looks)
@@ -124,12 +125,6 @@ PICTURES = {
         ['#2a2a30', '#48404c', '#48404c', '#2a2a30'],
     ],
 }
-
-
-def mix(a, b, t):
-    a = [int(a[i:i + 2], 16) for i in (1, 3, 5)]
-    b = [int(b[i:i + 2], 16) for i in (1, 3, 5)]
-    return '#%02x%02x%02x' % tuple(round(x + (y - x) * t) for x, y in zip(a, b))
 
 
 def luma(c):

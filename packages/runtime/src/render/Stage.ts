@@ -9,9 +9,10 @@ import type { FxEmitter, FxFile } from './fx/FxData.ts';
 import { fxProblems } from './fx/FxData.ts';
 import { compileFx, type CompiledFx } from './fx/FxSheet.ts';
 import { sheetOf } from './fx/FxSystem.ts';
-import { parseColor } from './Look.ts';
-import { ANCHOR_BOTTOM_LEFT } from './SpriteSheet.ts';
+import { parseColor } from './color.ts';
+import { ANCHOR_BOTTOM_LEFT, Transform } from './SpriteSheet.ts';
 import { screenPixels, splitPixel } from './View.ts';
+import { Xorshift32 } from '../math.ts';
 
 export interface StageItem {
   sprite: string;
@@ -132,13 +133,8 @@ export class StageRenderer {
     });
     const stars = this.file.stars;
     if (!stars?.count || !stars.colors.length) return;
-    let s = 0x2545f491;
-    const next = (): number => {
-      s ^= s << 13;
-      s ^= s >>> 17;
-      s ^= s << 5;
-      return (s >>> 0) / 4294967296;
-    };
+    const rng = new Xorshift32(0x2545f491);
+    const next = (): number => rng.unit();
     for (let i = 0; i < stars.count; i++) {
       const sx = x + Math.floor(next() * width);
       const sy = top + Math.floor(next() * h * 0.7);
@@ -198,7 +194,7 @@ export class StageRenderer {
             id,
             sx,
             groundY - (item.y ?? 0),
-            item.flip ? 4 : 0,
+            item.flip ? Transform.MIRROR : Transform.NONE,
             ANCHOR_BOTTOM_LEFT,
           );
         }

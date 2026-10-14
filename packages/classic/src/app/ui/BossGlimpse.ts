@@ -14,10 +14,11 @@
 import type { GlimpseTrack } from '@parapet/runtime/content/glimpses.ts';
 import { drawPose, type CharacterPose } from '@parapet/runtime/render/CharacterRenderer.ts';
 import type { EchoColor } from '@parapet/runtime/render/EchoSkin.ts';
-import { applyScanlines } from '@parapet/runtime/render/EchoRenderer.ts';
+import { HologramLayer } from '@parapet/runtime/render/Hologram.ts';
 import type { SceneRenderer, SpriteSwap } from '@parapet/runtime/render/SceneRenderer.ts';
 import { Sparks, sparkColors } from '@parapet/runtime/render/Sparks.ts';
 import type { CameraPos, ViewSize } from '@parapet/runtime/render/View.ts';
+import { FrameTimer } from '@parapet/runtime/math.ts';
 
 export interface GlimpseLook {
   /** The hologram's atlas (`EchoSheets.scene` of the boss's outfit). */
@@ -73,8 +74,8 @@ export class BossGlimpse {
   private track: GlimpseTrack | null = null;
   /** Steps since the loop started (negative: waiting to start). */
   private cursor = 0;
-  private layer: HTMLCanvasElement | null = null;
-  private lastDrawAt = -1;
+  private readonly hologram = new HologramLayer();
+  private readonly frames = new FrameTimer();
 
   constructor(look: GlimpseLook, reducedMotion = false) {
     this.look = look;
@@ -115,8 +116,7 @@ export class BossGlimpse {
     nowMs: number,
     view: ViewSize,
   ): void {
-    const dt = this.lastDrawAt < 0 ? 0 : Math.min(100, Math.max(0, nowMs - this.lastDrawAt));
-    this.lastDrawAt = nowMs;
+    const dt = this.frames.tick(nowMs);
     const track = this.track;
     const frames: { pose: CharacterPose; opacity: number }[] = [];
     if (track && this.reducedMotion) {
@@ -139,30 +139,13 @@ export class BossGlimpse {
     nowMs: number,
     view: ViewSize,
   ): void {
-    const layer = this.ensureLayer(view);
-    const lctx = layer?.getContext('2d');
-    if (!layer || !lctx) return;
     const { scene, swap } = this.look;
-    scene.setViewport(view.width, view.height);
-    ctx.save();
     for (const { pose, opacity } of frames) {
       if (opacity <= 0) continue;
-      lctx.clearRect(0, 0, layer.width, layer.height);
-      drawPose(lctx, scene, pose, cam, swap);
-      applyScanlines(lctx, layer.width, layer.height, nowMs);
-      ctx.globalAlpha = GLIMPSE_ALPHA * opacity;
-      ctx.drawImage(layer, 0, 0);
+      this.hologram.draw(ctx, view, nowMs, GLIMPSE_ALPHA * opacity, (lctx) => {
+        scene.withViewport(view.width, view.height, () => drawPose(lctx, scene, pose, cam, swap));
+        return true;
+      });
     }
-    ctx.restore();
-  }
-
-  private ensureLayer(view: ViewSize): HTMLCanvasElement | null {
-    if (typeof document === 'undefined') return null;
-    if (!this.layer) this.layer = document.createElement('canvas');
-    if (this.layer.width !== view.width) this.layer.width = view.width;
-    if (this.layer.height !== view.height) this.layer.height = view.height;
-    const lctx = this.layer.getContext('2d');
-    if (lctx) lctx.imageSmoothingEnabled = false;
-    return this.layer;
   }
 }

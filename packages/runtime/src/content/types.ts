@@ -1,6 +1,6 @@
 /**
- * Shapes of the generated content files (`packages/content/playman/extracted`). Loaders live
- * in the apps; the runtime only needs the types.
+ * Shapes of the content extracted from the original (`packages/content/playman/extracted`).
+ * Loaders live in the apps; the runtime only needs the types, and what a run is built from.
  */
 import type {
   LevelData,
@@ -8,6 +8,7 @@ import type {
   MoveTableData,
   PhysicsTables,
   RivalRecording,
+  RunContent,
 } from '@parapet/sim';
 
 // ---------------------------------------------------------------------------------------------
@@ -122,8 +123,6 @@ export interface GameContent {
   missions: MissionsData;
   /** Original rival recordings by level id. */
   rivals: Map<number, RivalRecording>;
-  /** The 205 original (Russian) strings. */
-  strings: string[];
   /** URLs of the bundled MIDI tracks by track id (0..13), fetched on demand. */
   music: Map<number, string>;
 }
@@ -132,4 +131,21 @@ export interface GameContent {
 export interface LevelArtContent {
   missions: { levels: { backgroundSceneId: number }[] };
   tables: { M: number[] };
+}
+
+/** What a run of `levelId` is built from, its rival included; null for a level that does not exist. */
+export function runContentOf(
+  content: Pick<GameContent, 'levels' | 'missions' | 'moves' | 'tables' | 'rivals'>,
+  levelId: number,
+): RunContent | null {
+  const level = content.levels[levelId];
+  const mission = content.missions.levels[levelId];
+  if (!level || !mission) return null;
+  return {
+    level,
+    mission,
+    moves: content.moves,
+    tables: content.tables,
+    rival: content.rivals.get(levelId) ?? null,
+  };
 }

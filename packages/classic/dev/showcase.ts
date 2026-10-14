@@ -10,40 +10,31 @@
  * (particles and cloth move as they are drawn): a browser driven by a script (Playwright) takes
  * the same picture every time.
  */
-import { MoveTable, STEP } from '@parapet/sim';
-import { buildClipTable } from '@parapet/runtime/anim/Animator.ts';
+import { STEP } from '@parapet/sim';
 import { GameLoop } from '@parapet/runtime/app/GameLoop.ts';
 import {
   CharacterRenderer,
   drawPose,
   type CharacterPose,
 } from '@parapet/runtime/render/CharacterRenderer.ts';
-import { EchoSheets, makeEchoColor } from '@parapet/runtime/render/EchoSkin.ts';
+import { makeEchoColor } from '@parapet/runtime/render/EchoSkin.ts';
 import { CharacterFx, type FxStyle } from '@parapet/runtime/render/fx/CharacterFx.ts';
 import type { FxFile } from '@parapet/runtime/render/fx/FxData.ts';
 import { compileFx } from '@parapet/runtime/render/fx/FxSheet.ts';
 import type { ResolvedLook } from '@parapet/runtime/render/Look.ts';
-import { drawPlaceholderTiles } from '@parapet/runtime/render/PlaceholderTiles.ts';
+import { canvasPainter, drawPlaceholderTiles } from '@parapet/runtime/render/PlaceholderTiles.ts';
 import { SceneRenderer } from '@parapet/runtime/render/SceneRenderer.ts';
-import { SkinLibrary } from '@parapet/runtime/render/SkinLibrary.ts';
-import { SpriteSheet } from '@parapet/runtime/render/SpriteSheet.ts';
 import { StageRenderer } from '@parapet/runtime/render/Stage.ts';
-import { DemoRun, type MoveDemoData } from '@parapet/runtime/moves/MoveDemo.ts';
+import { DemoRun } from '@parapet/runtime/moves/MoveDemo.ts';
 import { MOVE_KEYS } from '@parapet/runtime/moves/moveKeys.ts';
-import demosJson from '@content/moves/demos.json';
-import {
-  allBosses,
-  contestCharacter,
-  effectOf,
-  registerBosses,
-  type Boss,
-} from '../src/app/bosses.ts';
+import { allBosses, contestCharacter, effectOf, type Boss } from '../src/app/bosses.ts';
 import { loadContent } from '../src/assets/content.ts';
 import { forced } from './flourishes.ts';
+import { UNITS_PER_PX } from '@parapet/runtime/render/View.ts';
+import { createRenderers } from '../src/app/renderers.ts';
+import { $ } from './dom.ts';
+import { MOVE_DEMOS } from '../src/assets/demos.ts';
 
-const DEMOS = (demosJson as unknown as { demos: MoveDemoData[] }).demos;
-/** World units per pixel. */
-const UNITS = 32;
 const VIEW = { width: 256, height: 144 };
 /** The run in the world: where the feet are, how fast the world goes by, a keyframe's time. */
 const FEET_X = Math.round(VIEW.width * 0.42);
@@ -57,8 +48,6 @@ const SKY = '#9fb3c8';
 const GROUND = '#3a3f4b';
 const GROUND_EDGE = '#5b6270';
 
-const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
-
 interface Options {
   look: string;
   /** `world`, or a move of the Moves menu. */
@@ -70,13 +59,7 @@ interface Options {
 
 async function main(): Promise<void> {
   const content = await loadContent();
-  const sheet = new SpriteSheet(content.atlas.image, content.atlas.frames);
-  const scene = new SceneRenderer(sheet, content.scenes.values());
-  const echo = new EchoSheets(scene);
-  const skins = new SkinLibrary(scene);
-  registerBosses(skins);
-  const clips = buildClipTable(content.anims.clips);
-  const moves = new MoveTable(content.moves);
+  const { scene, echo, skins, clips, moves } = createRenderers(content);
   const runDemo = content.anims.demos[0];
   const forcedFx = new Map<Boss, FxFile>();
   const stages = new Map<Boss, StageRenderer>();
@@ -173,8 +156,8 @@ async function main(): Promise<void> {
   /** The camera of a demo: the runner a little left of the middle, the level in view. */
   const demoTarget = (run: DemoRun): { x: number; y: number } => {
     const p = run.world.player;
-    const viewW = VIEW.width * UNITS;
-    const viewH = VIEW.height * UNITS;
+    const viewW = VIEW.width * UNITS_PER_PX;
+    const viewH = VIEW.height * UNITS_PER_PX;
     const levelW = run.level.width * 1024;
     const levelH = run.level.height * 1024;
     const cx =
@@ -214,7 +197,7 @@ async function main(): Promise<void> {
     clock = 0;
     x = 0;
     ambientRand = options.seed * 7919;
-    const data = DEMOS.find((d) => d.move === options.scene);
+    const data = MOVE_DEMOS.find((d) => d.move === options.scene);
     if (data) {
       // The run-up is played here, quietly, so the renderers see its steps.
       demo = new DemoRun({ ...data, from: 0 }, content);
@@ -229,7 +212,10 @@ async function main(): Promise<void> {
     } else {
       demo = null;
       characters = null;
-      const st = style(() => skins.swapFor(character, -1, outfit), skins.sceneFor(character, outfit));
+      const st = style(
+        () => skins.swapFor(character, -1, outfit),
+        skins.sceneFor(character, outfit),
+      );
       if (st) fx.add({}, { pose: runPose, move: () => 2 }, st);
     }
     lookSelect.value = options.look;
@@ -264,7 +250,7 @@ async function main(): Promise<void> {
         };
       } else {
         clock += STEP;
-        x += (RUN_PX * UNITS * STEP) / 1000;
+        x += (RUN_PX * UNITS_PER_PX * STEP) / 1000;
         fx.step({ clock });
         const names = stage?.file.ambient;
         if (stage && names?.length) {
@@ -276,7 +262,7 @@ async function main(): Promise<void> {
             ambientRand = s;
             return ((s >>> 0) % 100000) / 100000;
           };
-          fx.idleAt(stage.fx, names, x + (rand() * 360 - 100) * UNITS, 0, true, rand);
+          fx.idleAt(stage.fx, names, x + (rand() * 360 - 100) * UNITS_PER_PX, 0, true, rand);
         }
       }
       // Particles and cloth move when drawn, by the time since the last picture.
@@ -300,14 +286,21 @@ async function main(): Promise<void> {
         c.fillStyle = SKY;
         c.fillRect(0, 0, VIEW.width, VIEW.height);
       }
-      drawPlaceholderTiles(c, demo.level, cam.x / UNITS, cam.y / UNITS, VIEW.width, VIEW.height);
+      drawPlaceholderTiles(
+        canvasPainter(c),
+        demo.level,
+        cam.x / UNITS_PER_PX,
+        cam.y / UNITS_PER_PX,
+        VIEW.width,
+        VIEW.height,
+      );
       fx.drawBehind(c, cam, clock, now, VIEW);
       scene.setViewport(VIEW.width, VIEW.height);
       characters.drawAll(c, cam, 1, clock, demo.world.player);
       fx.drawFront(c, cam);
       return;
     }
-    const scroll = 100_000 + x / UNITS;
+    const scroll = 100_000 + x / UNITS_PER_PX;
     if (stage?.hasSky) stage.drawSky(c, 0, VIEW.width, FEET_Y, clock);
     else {
       c.fillStyle = SKY;
@@ -320,7 +313,7 @@ async function main(): Promise<void> {
       c.fillStyle = GROUND_EDGE;
       c.fillRect(0, FEET_Y, VIEW.width, 1);
     }
-    const view = { x: Math.round(x - FEET_X * UNITS), y: -FEET_Y * UNITS };
+    const view = { x: Math.round(x - FEET_X * UNITS_PER_PX), y: -FEET_Y * UNITS_PER_PX };
     fx.drawBehind(c, view, clock, now, VIEW);
     const source = skins.sceneFor(character, outfit);
     source.setViewport(VIEW.width, VIEW.height);

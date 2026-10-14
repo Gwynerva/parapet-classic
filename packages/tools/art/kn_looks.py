@@ -15,8 +15,7 @@ import math
 
 from lookgen import write_look, rotate, preview
 from heads import Palette, Pic, shaded
-from kn_parts import (Frame, repaint, plate, mail, cloth, tone, shift, outfit, far, dome, is_edge, family,
-                      is_front, L3)
+from kn_parts import Frame, repaint, plate, mail, cloth, tone, shift, outfit, far, dome, family, L3
 import kn_helms
 
 OUT = '#1c1a1c'

@@ -30,15 +30,17 @@ export function precacheFiles(paths: readonly string[]): string[] {
 }
 
 /**
- * The page for a visit (a navigation), by its path under the site's root: the game, or the
- * same game one folder down for challenge links (`r/?<code>`). The query is the page's own
- * business (`?app=1`, the race's code).
+ * The page for a visit (a navigation), by its path under the site's root: the game, the
+ * same game one folder down for challenge links (`r/?<code>`), or the Lab. The query is the
+ * page's own business (`?app=1`, the race's code).
  */
 const PAGES: Readonly<Record<string, string>> = {
   '': 'index.html',
   'index.html': 'index.html',
   'r/': 'r/index.html',
   'r/index.html': 'r/index.html',
+  'lab/': 'lab/index.html',
+  'lab/index.html': 'lab/index.html',
 };
 
 /**

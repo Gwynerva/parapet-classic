@@ -20,13 +20,9 @@
  *       one-step presses both cost little; a huge one escapes to Exp-Golomb.
  *   ..  zero bits to the byte.
  *
- * Less than half of format 1 for human play: a sprint of half a minute is under a hundred
- * characters. The keys only tell whether a replay was made by this build on this content
- * (`replayCompatibility`); a decoded replay carries them in `keys`.
- *
- * Format 1 (still read): bytes; u8 format, versions as strings, levelId, mode, flags and
- * character as bytes, the three content hashes as u32, the name, then the number of runs and
- * per run `ticks * 64 + bits` as unsigned LEB128.
+ * A sprint of half a minute is under a hundred characters. The keys only tell whether a replay
+ * was made by this build on this content (`replayCompatibility`); a decoded replay carries
+ * them in `keys`. (Format 1, plain bytes, was retired with 1.0.0.)
  *
  * Decoding never throws: any malformed, truncated or oversized input yields an error result,
  * and a code has one spelling only (no stray bits, no trailing bytes).
@@ -39,15 +35,11 @@ import { RULESET_ID, SIM_VERSION } from './version.ts';
 
 /** The format codes are written in (see above). */
 export const REPLAY_FORMAT = 2;
-/** The first format, still read. */
-const FORMAT_BYTES = 1;
 
 /** Longest runner name a replay carries, in characters. */
 export const MAX_REPLAY_NAME_LENGTH = 24;
 
-const MAX_VERSION_BYTES = 64;
 const MAX_NAME_BYTES = MAX_REPLAY_NAME_LENGTH * 4;
-const WRAP_TICKS = MAX_INPUT_BITS + 1;
 
 export interface Replay {
   /** `SIM_VERSION` of the simulation that recorded the run. */
@@ -150,7 +142,10 @@ export function toBase64Url(bytes: Uint8Array): string {
   return out;
 }
 
-/** Decodes unpadded base64url; null for any other character or an impossible length. */
+/**
+ * Decodes unpadded base64url; null for any other character, an impossible length or set bits
+ * after the last byte (so every byte string has exactly one spelling).
+ */
 export function fromBase64Url(text: string): Uint8Array | null {
   if (text.length % 4 === 1) return null;
   const out = new Uint8Array(Math.floor((text.length * 3) / 4));
@@ -168,6 +163,7 @@ export function fromBase64Url(text: string): Uint8Array | null {
       out[o++] = (acc >> bits) & 0xff;
     }
   }
+  if ((acc & ((1 << bits) - 1)) !== 0) return null;
   return out;
 }
 
@@ -399,7 +395,6 @@ export function decodeReplay(code: string): DecodeResult {
   const bytes = fromBase64Url(code.trim());
   if (!bytes) return fail('not a replay code');
   if (bytes.length === 0) return fail('empty replay');
-  if (bytes[0] === FORMAT_BYTES) return decodeBytes(bytes);
   if (bytes[0] !== REPLAY_FORMAT) return fail(`unknown replay format ${bytes[0]}`);
   const r = new BitReader(bytes);
   r.bits(8);
@@ -454,116 +449,6 @@ export function decodeReplay(code: string): DecodeResult {
   };
   const problem = checkReplay(replay);
   return problem ? fail(problem) : { ok: true, replay };
-}
-
-/** Format 1: plain bytes (see the top of the file). */
-function decodeBytes(bytes: Uint8Array): DecodeResult {
-  const r = new Reader(bytes);
-  r.u8();
-  const simVersion = r.str(MAX_VERSION_BYTES);
-  const rulesetId = r.str(MAX_VERSION_BYTES);
-  const levelId = r.u8();
-  const modeIndex = r.u8();
-  const flags = r.u8();
-  const character = r.u8();
-  const level = r.u32();
-  const moves = r.u32();
-  const tables = r.u32();
-  const playerName = r.str(MAX_NAME_BYTES);
-  const count = r.varint();
-  if (
-    simVersion === null ||
-    rulesetId === null ||
-    levelId === null ||
-    modeIndex === null ||
-    flags === null ||
-    character === null ||
-    level === null ||
-    moves === null ||
-    tables === null ||
-    playerName === null ||
-    count === null
-  ) {
-    return fail('truncated replay');
-  }
-  if (count > MAX_STEPS) return fail('too many input runs');
-  const input: InputRun[] = [];
-  for (let i = 0; i < count; i++) {
-    const v = r.varint();
-    if (v === null) return fail('truncated input');
-    input.push({ ticks: Math.floor(v / WRAP_TICKS), bits: v % WRAP_TICKS });
-  }
-  if (!r.done) return fail('trailing bytes');
-  const mode = RUN_MODES[modeIndex];
-  if (!mode) return fail('unknown mode');
-  const replay: Replay = {
-    simVersion,
-    rulesetId,
-    contentHash: { level, moves, tables },
-    levelId,
-    mode,
-    withRival: (flags & 1) !== 0,
-    character,
-    playerName,
-    input,
-  };
-  const problem = checkReplay(replay);
-  return problem ? fail(problem) : { ok: true, replay };
-}
-
-// ---------------------------------------------------------------------------------------------
-// Format 1 bytes
-// ---------------------------------------------------------------------------------------------
-
-class Reader {
-  private pos = 0;
-  private readonly bytes: Uint8Array;
-
-  constructor(bytes: Uint8Array) {
-    this.bytes = bytes;
-  }
-
-  get done(): boolean {
-    return this.pos >= this.bytes.length;
-  }
-
-  u8(): number | null {
-    return this.pos < this.bytes.length ? this.bytes[this.pos++]! : null;
-  }
-
-  u32(): number | null {
-    if (this.pos + 4 > this.bytes.length) return null;
-    const b = this.bytes;
-    const p = this.pos;
-    this.pos += 4;
-    return (b[p]! | (b[p + 1]! << 8) | (b[p + 2]! << 16) | (b[p + 3]! << 24)) >>> 0;
-  }
-
-  /** Unsigned LEB128 of at most 5 bytes (values below 2^35). */
-  varint(): number | null {
-    let value = 0;
-    let scale = 1;
-    for (let i = 0; i < 5; i++) {
-      const b = this.u8();
-      if (b === null) return null;
-      value += (b & 0x7f) * scale;
-      if ((b & 0x80) === 0) return value;
-      scale *= 0x80;
-    }
-    return null;
-  }
-
-  str(maxBytes: number): string | null {
-    const length = this.u8();
-    if (length === null || length > maxBytes || this.pos + length > this.bytes.length) return null;
-    const data = this.bytes.subarray(this.pos, this.pos + length);
-    this.pos += length;
-    try {
-      return new TextDecoder('utf-8', { fatal: true }).decode(data);
-    } catch {
-      return null;
-    }
-  }
 }
 
 /** Structural checks shared by encoding and decoding; null when the replay is sound. */

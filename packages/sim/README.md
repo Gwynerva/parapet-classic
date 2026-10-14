@@ -2,8 +2,9 @@
 
 Deterministic simulation core of Parapet. No DOM, no floats, no randomness: integer math with
 Java `int` semantics, a fixed step of 30 time units (about 34 ms of real time) and
-press-only input, exactly like the original game. The same package runs in the browser client
-and on the server that verifies replays.
+press-only input, exactly like the original game. The same package runs the game in the
+browser, re-runs the replays a challenge link brings, and runs the tools' searches and the
+experiments of `packages/lab` in Node.
 
 ## Concepts
 
@@ -30,7 +31,7 @@ const world = createRun({ mode: 'sprint', level, mission, moves, tables, rival }
 world.step(Input.UP); // presses collected since the previous step, 0 when none
 world.player.x; // feet position in units
 world.rules.result; // { finished, timeUp, time, splits } once the run ended
-const log = world.recorder.finish(); // input log for the leaderboard
+const log = world.recorder.finish(); // input log for a replay
 ```
 
 Press bits: `UP = 1`, `DOWN = 2`, `RIGHT = 4 | (facingRight ? FORWARD : BACK)`,

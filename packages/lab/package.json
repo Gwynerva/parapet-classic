@@ -1,0 +1,14 @@
+{
+  "name": "@parapet/lab",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The original taken apart: experiments on the real simulation, drawn into RGBA frames and SVG charts, for the findings pages and the site's Lab",
+  "exports": {
+    "./*": "./src/*"
+  },
+  "dependencies": {
+    "@parapet/runtime": "*",
+    "@parapet/sim": "*"
+  }
+}

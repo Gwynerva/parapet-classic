@@ -19,6 +19,11 @@ const TYPES = {
   '.ttf': 'font/ttf',
   '.mid': 'audio/midi',
   '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon',
+  '.xml': 'application/xml; charset=utf-8',
+  '.txt': 'text/plain; charset=utf-8',
+  '.gif': 'image/gif',
+  '.mp4': 'video/mp4',
   '.webmanifest': 'application/manifest+json',
 };
 
@@ -28,7 +33,13 @@ if (!existsSync(join(root, 'index.html'))) {
 }
 
 createServer((req, res) => {
-  const path = decodeURIComponent((req.url ?? '/').split('?')[0]);
+  let path;
+  try {
+    path = decodeURIComponent((req.url ?? '/').split('?')[0]);
+  } catch {
+    res.writeHead(400).end('bad request');
+    return;
+  }
   if (path === '/' || path === base.slice(0, -1)) {
     res.writeHead(302, { Location: base });
     res.end();

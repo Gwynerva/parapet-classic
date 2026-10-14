@@ -7,20 +7,6 @@ import sys
 TRICKS = ['flip', 'vault', 'wall', 'roll']
 
 
-def every_way(e, chance, burst=None, speed=None):
-    e = dict(e)
-    e['enter'] = TRICKS + (['land'] if 'land' in e.get('enter', []) else [])
-    e['chance'] = chance
-    e['angle'] = [0, 360]
-    if burst:
-        e['burst'] = burst
-    if speed:
-        e['speed'] = speed
-    for k in ('while', 'every', 'perSecond', 'minSpeed'):
-        e.pop(k, None)
-    return e
-
-
 def tricks(fx, boss):
     em = fx['emitters']
     if boss == 'vera':

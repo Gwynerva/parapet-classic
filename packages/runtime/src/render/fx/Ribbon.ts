@@ -17,13 +17,14 @@
  * run along the chain, each texel put where the bent chain carries it (sampled twice per texel
  * each way so bends leave no holes), into a pixel buffer drawn in one go.
  */
-import { parseColor, ribbonChain, type LookRibbon } from '../Look.ts';
-import { objectGrid, screenPixels, toScreen, type CameraPos } from '../View.ts';
+import { parseColor } from '../color.ts';
+import { ribbonChain, type LookRibbon } from '../Look.ts';
+import { type CameraPos, objectGrid, screenPixels, toScreen, UNITS_PER_PX } from '../View.ts';
+import { STEP } from '@parapet/sim';
 
-const UNITS = 32;
 const SUBSTEP_MS = 8;
 /** The anchor moves once per simulation step: the root glides over this long. */
-const FOLLOW_MS = 30;
+const FOLLOW_MS = STEP;
 /** How fast the runner's speed is taken in, ms (vertical bobbing is calmed more). */
 const SPEED_MS = 110;
 const SPEED_Y_MS = 220;
@@ -177,8 +178,8 @@ export class Ribbon {
   follow(anchorX: number, anchorY: number, facingRight: boolean): void {
     const behind = facingRight ? -1 : 1;
     const [ox, oy] = this.spec.offset ?? [0, 0];
-    const x = anchorX + ox * behind * UNITS;
-    const y = anchorY + oy * UNITS;
+    const x = anchorX + ox * behind * UNITS_PER_PX;
+    const y = anchorY + oy * UNITS_PER_PX;
     if (!this.placed) {
       this.behind = behind;
       this.fromX = this.toX = this.rootX = x;
@@ -190,7 +191,7 @@ export class Ribbon {
       return;
     }
     if (behind !== this.behind) this.turn(behind);
-    const s = 1000 / FOLLOW_MS / UNITS;
+    const s = 1000 / FOLLOW_MS / UNITS_PER_PX;
     let vx = (x - this.toX) * s;
     let vy = (y - this.toY) * s;
     const v = Math.hypot(vx, vy);
@@ -253,8 +254,8 @@ export class Ribbon {
       this.rootX = this.fromX + (this.toX - this.fromX) * a;
       this.rootY = this.fromY + (this.toY - this.fromY) * a;
       // The root's jolt: how its speed changed (px/s²), capped.
-      const rvx = (this.rootX - px) / UNITS / dt;
-      const rvy = (this.rootY - py) / UNITS / dt;
+      const rvx = (this.rootX - px) / UNITS_PER_PX / dt;
+      const rvy = (this.rootY - py) / UNITS_PER_PX / dt;
       let jx = (rvx - this.rootVx) / dt;
       let jy = (rvy - this.rootVy) / dt;
       this.rootVx = rvx;
@@ -305,7 +306,7 @@ export class Ribbon {
 
   /** The points from the root along the segments' angles. */
   private layOut(): void {
-    const len = this.len * UNITS;
+    const len = this.len * UNITS_PER_PX;
     this.xs[0] = this.rootX;
     this.ys[0] = this.rootY;
     for (let i = 0; i < this.rel.length; i++) {
@@ -362,8 +363,8 @@ export class Ribbon {
     let minX = Infinity;
     let minY = Infinity;
     for (let i = 0; i < n; i++) {
-      sx[i] = (this.xs[i]! - cam.x) / UNITS;
-      sy[i] = (this.ys[i]! - cam.y) / UNITS;
+      sx[i] = (this.xs[i]! - cam.x) / UNITS_PER_PX;
+      sy[i] = (this.ys[i]! - cam.y) / UNITS_PER_PX;
     }
     // Tangents at the points: along the segments around them.
     for (let i = 0; i < n; i++) {

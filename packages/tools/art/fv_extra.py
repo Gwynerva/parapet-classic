@@ -10,7 +10,8 @@
 
 Every picture is drawn at the original part's size plus a margin, so its centre stays the part's;
 `fv_parts.pictures` pads them to the part's parity."""
-from fv_parts import pic, darker, merged, fitted, HER_SKIN, HIM_SKIN
+from lookgen import shift
+from fv_parts import pic, merged, fitted, HER_SKIN, HIM_SKIN
 
 # --------------------------------------------------------------------------------------------
 # Street Kid.
@@ -200,11 +201,11 @@ def kid_pictures():
     leg_shoe = merged(SLIPON)
     return fitted(0, {
         '57': pic(KID_57, leg), '61': pic(KID_61, leg), '34': pic(KID_34, leg), '38': pic(KID_38, leg),
-        '53': pic(KID_THIGH, leg), '49': pic(darker(KID_THIGH, KID_FAR_LEG), leg), '62': pic(KID_KNEE, leg),
+        '53': pic(KID_THIGH, leg), '49': pic(shift(KID_THIGH, KID_FAR_LEG), leg), '62': pic(KID_KNEE, leg),
         '30': pic(KID_SHIN, leg),
-        '39': pic(KID_SHOE_39, leg_shoe), '43': pic(darker(KID_SHOE_39, KID_FAR_SHOE), leg_shoe),
+        '39': pic(KID_SHOE_39, leg_shoe), '43': pic(shift(KID_SHOE_39, KID_FAR_SHOE), leg_shoe),
         '47': pic(KID_SHOE_47, leg_shoe), '48': pic(KID_SHOE_48, leg_shoe),
-        '5': pic(KID_UPPER, leg), '9': pic(darker(KID_UPPER, KID_FAR_ARM), leg),
+        '5': pic(KID_UPPER, leg), '9': pic(shift(KID_UPPER, KID_FAR_ARM), leg),
         '1': pic(KID_FOREARM, leg),
     })
 
@@ -334,11 +335,11 @@ def david_pictures():
     return fitted(1, {
         '57': pic(chest57, leg), '61': pic(chest61, leg),
         '34': pic(P.HIM_34, leg), '38': pic(P.HIM_38, leg),
-        '53': pic(DAVID_THIGH, leg), '49': pic(darker(DAVID_THIGH, DAVID_FAR_LEG), leg), '62': pic(DAVID_KNEE, leg),
+        '53': pic(DAVID_THIGH, leg), '49': pic(shift(DAVID_THIGH, DAVID_FAR_LEG), leg), '62': pic(DAVID_KNEE, leg),
         '30': pic(DAVID_SHIN, leg),
-        '39': pic(DAVID_SHOE_39, shoe), '43': pic(darker(DAVID_SHOE_39, DAVID_FAR_SHOE), shoe),
+        '39': pic(DAVID_SHOE_39, shoe), '43': pic(shift(DAVID_SHOE_39, DAVID_FAR_SHOE), shoe),
         '47': pic(DAVID_SHOE_47, shoe), '48': pic(DAVID_SHOE_48, shoe),
-        '5': pic(DAVID_UPPER, leg), '9': pic(darker(DAVID_UPPER, DAVID_FAR_ARM), leg),
+        '5': pic(DAVID_UPPER, leg), '9': pic(shift(DAVID_UPPER, DAVID_FAR_ARM), leg),
         '1': pic(DAVID_FOREARM, leg),
     })
 

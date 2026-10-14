@@ -7,6 +7,8 @@
  * characters' heads and the male torso and chest that their skin rules swap in.
  */
 import type { SceneObject } from '../content/types.ts';
+import type { SpriteSwap } from './Pose.ts';
+import { Transform } from './SpriteSheet.ts';
 
 /** Body-part families. */
 export const Family = {
@@ -213,3 +215,47 @@ export function emptyAnchors(): PoseAnchors {
     box: { x: 0, y: 0, w: 0, h: 0 },
   };
 }
+
+// ---------------------------------------------------------------------------------------------
+// The original characters
+// ---------------------------------------------------------------------------------------------
+
+/** Face sprites (`ag`, line 5755). */
+export const FACE_BLINK_A = 76;
+export const FACE_BLINK_B = 77;
+export const FACE_PAIN = 78;
+/** Head sprite the face replaces (`a(int,int[])`, line 5935). */
+export const HEAD_SPRITE = 25;
+
+/** Male characters get the male torso/arm parts (`a(int,int[])`: n2 ∈ {0, 1, 3, 6, 8}). */
+const MALE_CHARACTERS = new Set([1, 2, 4, 7, 9]);
+
+/**
+ * Body-part swap of original character `character` (0 = Blaise with the default heads 25–29;
+ * anything outside 1..9 counts as Blaise). `face` is the face sprite replacing the head this
+ * frame, or -1; it only applies to Blaise because the other characters replace the head before
+ * the face check can keep it.
+ */
+export function skinSwap(character: number, face = -1): SpriteSwap {
+  if (character <= 0 || character > 9) {
+    if (face < 0) return identitySwap;
+    return (id, transform) =>
+      id === HEAD_SPRITE && (transform === Transform.NONE || transform === Transform.MIRROR)
+        ? face
+        : id;
+  }
+  const c = character - 1;
+  const male = MALE_CHARACTERS.has(character);
+  return (id) => {
+    if (id >= 13 && id <= 16) return -1;
+    if (id >= 25 && id <= 29) return 82 + c * 5 + (id - 25);
+    if (male) {
+      if (id >= 34 && id <= 38) return 127 + (id - 34);
+      if (id >= 57 && id <= 61) return 132 + (id - 57);
+    }
+    return id;
+  };
+}
+
+/** The swap that keeps every sprite. */
+export const identitySwap: SpriteSwap = (id) => id;

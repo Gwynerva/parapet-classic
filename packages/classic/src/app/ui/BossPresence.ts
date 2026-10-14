@@ -21,6 +21,7 @@ import {
 import { Sparks, sparkColors } from '@parapet/runtime/render/Sparks.ts';
 import { toScreen, type CameraPos } from '@parapet/runtime/render/View.ts';
 import type { PresenceSpot } from './bossSpots.ts';
+import { FrameTimer } from '@parapet/runtime/math.ts';
 
 export type PresenceState = 'start' | 'away' | 'end';
 
@@ -68,7 +69,7 @@ export class BossPresence {
   private stateValue: PresenceState = 'start';
   /** Real time of the last vanish or appearance, for the fade. */
   private changedAt = -Infinity;
-  private lastDrawAt = -1;
+  private readonly frames = new FrameTimer();
 
   constructor(opts: PresenceOptions) {
     this.opts = opts;
@@ -163,8 +164,7 @@ export class BossPresence {
     nowMs: number,
     view: { width: number; height: number },
   ): void {
-    const dt = this.lastDrawAt < 0 ? 0 : Math.min(100, Math.max(0, nowMs - this.lastDrawAt));
-    this.lastDrawAt = nowMs;
+    const dt = this.frames.tick(nowMs);
     this.particles.drawBehind(ctx, cam, 0, nowMs, view);
     const t = (nowMs - this.changedAt) / FADE_MS;
     const leaving = this.leaving;

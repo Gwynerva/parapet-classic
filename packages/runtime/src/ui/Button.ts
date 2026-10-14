@@ -5,9 +5,9 @@
  */
 import type { UiGesture, UiPointer } from '../app/Screen.ts';
 import type { BitmapFont } from '../text/BitmapFont.ts';
-import { BACK_BUTTON_HIT, BACK_BUTTON_SIZE } from './draw.ts';
+import { BACK_BUTTON_HIT, BACK_BUTTON_SIZE, framedBox } from './draw.ts';
 import { contains, type Rect } from './layout.ts';
-import { PressTracker } from './press.ts';
+import { GestureArm, PressTracker } from './press.ts';
 import { Theme } from './theme.ts';
 
 export interface ButtonLook {
@@ -23,7 +23,7 @@ export class Button {
   slop = 0;
   private readonly press = new PressTracker<true>();
   /** A finger pressed a gesture button; it fires on release. */
-  private armed = false;
+  private readonly gesture = new GestureArm<true>();
 
   get pressed(): boolean {
     return this.press.pressed === true;
@@ -68,16 +68,14 @@ export class Button {
     if (g.kind !== 'pointer') return false;
     const over = this.hit(g.x, g.y);
     if (g.type === 'down') {
-      this.armed = false;
+      this.gesture.clear();
       if (!over) return false;
-      if (g.pointerType === 'mouse') fire();
-      else this.armed = true;
+      if (this.gesture.down(true, g.pointerType)) fire();
       return true;
     }
-    const armed = this.armed;
-    this.armed = false;
-    if (!armed) return false;
-    if (over) fire();
+    const fired = this.gesture.up(over ? true : null);
+    if (fired === null) return false;
+    if (fired) fire();
     return true;
   }
 
@@ -89,7 +87,7 @@ export class Button {
   ): void {
     drawButtonFace(ctx, font, label, this.rect, {
       ...look,
-      pressed: this.pressed || this.armed,
+      pressed: this.pressed || this.gesture.waiting,
     });
   }
 }
@@ -103,13 +101,12 @@ export function drawButtonFace(
   look: ButtonLook & { pressed?: boolean },
 ): void {
   const pressed = look.pressed === true && !look.disabled;
-  ctx.fillStyle = pressed ? Theme.accent : look.focused ? Theme.accentDark : Theme.panel;
-  ctx.fillRect(r.x, r.y, r.w, r.h);
-  ctx.fillStyle = look.focused || pressed ? Theme.accent : Theme.panelBorder;
-  ctx.fillRect(r.x, r.y, r.w, 1);
-  ctx.fillRect(r.x, r.y + r.h - 1, r.w, 1);
-  ctx.fillRect(r.x, r.y, 1, r.h);
-  ctx.fillRect(r.x + r.w - 1, r.y, 1, r.h);
+  framedBox(
+    ctx,
+    r,
+    pressed ? Theme.accent : look.focused ? Theme.accentDark : Theme.panel,
+    look.focused || pressed ? Theme.accent : Theme.panelBorder,
+  );
   const color = look.disabled
     ? Theme.muted
     : pressed

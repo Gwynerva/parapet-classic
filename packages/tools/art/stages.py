@@ -2,7 +2,7 @@
 `bosses/<boss>/stage.json` (`python stages.py [boss ...]`)."""
 import sys
 from lookgen import BOSSES, Canvas, write_json
-from scene import blob, foliage, lit_blob, palm, pine, rng, skyline, strip, tree, building
+from scene import blob, pine, rng, tree
 
 STAGES = {}
 

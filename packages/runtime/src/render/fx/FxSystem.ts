@@ -4,11 +4,9 @@
  * the runners. Sprites turn in right angles and keep their pixels square.
  */
 import { SpriteSheet, ANCHOR_CENTER, mirrorTransform } from '../SpriteSheet.ts';
-import { toScreen, type CameraPos } from '../View.ts';
+import { type CameraPos, toScreen, UNITS_PER_PX } from '../View.ts';
 import { pick, type CompiledEmitter, type CompiledFx } from './FxSheet.ts';
-
-/** World units per pixel. */
-export const UNITS = 32;
+import { rgbaToCanvas } from '../canvas.ts';
 
 interface Particle {
   alive: boolean;
@@ -132,15 +130,15 @@ export class FxSystem {
     }
     const behind = at.facingRight ? -1 : 1;
     const angle = (pick(spec.angle, rand, 90) * Math.PI) / 180;
-    const speed = pick(spec.speed, rand, 0) * UNITS;
+    const speed = pick(spec.speed, rand, 0) * UNITS_PER_PX;
     const inherit = spec.inherit ?? 0;
     const [ox, oy] = spec.offset ?? [0, 0];
     const [jx, jy] = spec.jitter ?? [0, 0];
     p.alive = true;
     p.fx = fx;
     p.emitter = e;
-    p.x = at.x + (ox * behind + (rand() * 2 - 1) * jx) * UNITS;
-    p.y = at.y + (oy + (rand() * 2 - 1) * jy) * UNITS;
+    p.x = at.x + (ox * behind + (rand() * 2 - 1) * jx) * UNITS_PER_PX;
+    p.y = at.y + (oy + (rand() * 2 - 1) * jy) * UNITS_PER_PX;
     p.vx = Math.cos(angle) * speed * behind + at.vx * inherit;
     p.vy = -Math.sin(angle) * speed + at.vy * inherit;
     p.age = 0;
@@ -151,10 +149,10 @@ export class FxSystem {
     p.s1 = spec.scaleEnd ?? p.s0;
     p.tumble = pick(spec.tumble, rand, 0) * (rand() < 0.5 ? -1 : 1);
     p.turn = spec.tumble ? Math.floor(rand() * 4) : 0;
-    p.flutterAmp = (spec.flutter?.amp ?? 0) * UNITS;
+    p.flutterAmp = (spec.flutter?.amp ?? 0) * UNITS_PER_PX;
     p.flutterFreq = spec.flutter?.freq ?? 0;
     p.phase = rand() * Math.PI * 2;
-    p.gravity = (spec.gravity ?? 0) * UNITS;
+    p.gravity = (spec.gravity ?? 0) * UNITS_PER_PX;
     p.drag = spec.drag ?? 0;
     p.frames = e.sets.length > 0 ? e.sets[Math.floor(rand() * e.sets.length)]! : e.frames;
     const frames = p.frames.length;
@@ -253,15 +251,9 @@ export class FxSystem {
 /** The sprite sheet of compiled effects (a canvas made the first time). */
 export function sheetOf(fx: CompiledFx): SpriteSheet | null {
   if (fx.image instanceof SpriteSheet) return fx.image;
-  if (typeof document === 'undefined' || fx.width <= 0) return null;
-  const canvas = document.createElement('canvas');
-  canvas.width = Math.max(1, fx.width);
-  canvas.height = Math.max(1, fx.height);
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return null;
-  const img = ctx.createImageData(canvas.width, canvas.height);
-  img.data.set(fx.data);
-  ctx.putImageData(img, 0, 0);
+  if (fx.width <= 0) return null;
+  const canvas = rgbaToCanvas(fx.width, fx.height, fx.data);
+  if (!canvas) return null;
   const sheet = new SpriteSheet(canvas, fx.frames);
   fx.image = sheet;
   return sheet;

@@ -1,19 +1,8 @@
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { decodeIndex, type GameIndex } from '../src/decodeIndex.ts';
+import { ORIGINAL_JAR } from '../src/files.ts';
 import { ZipArchive } from '../src/zip.ts';
 
-export const JAR_PATH = resolve(
-  dirname(fileURLToPath(import.meta.url)),
-  '..',
-  '..',
-  '..',
-  'packages',
-  'content',
-  'playman',
-  'original',
-  'Playman_Extreme_Running_240x320.jar',
-);
+export const JAR_PATH = ORIGINAL_JAR;
 
 let archive: ZipArchive | undefined;
 export function jar(): ZipArchive {

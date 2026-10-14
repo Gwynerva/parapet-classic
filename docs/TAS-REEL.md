@@ -5,6 +5,8 @@ it: the boss runs its record through the real level while hundreds of pale attem
 it, branch off and go wrong. It is made for footage (a video about the bosses' records) and
 records itself in 4K.
 
+![A frame of the reel: a boss on a rooftop at night among pale attempts that fell, stumbled or ran off](tas-poster.png)
+
 It reads the records' inputs from `packages/tools/tas-out/`, which stay on the machine that
 searched them (git ignores the folder), so it works on the dev server only and never ships.
 

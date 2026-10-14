@@ -9,7 +9,7 @@
 //   node reference/oracle/run.mjs --golden                     (re-run every script in packages/sim/test/golden/{scripts/,}*.txt)
 //   node reference/oracle/run.mjs --build                      (compile only)
 //
-// Uses a local JDK (JAVA_HOME, then PATH), otherwise Docker (eclipse-temurin:17-jdk).
+// Uses a local JDK if there is one, otherwise Docker (scripts/java.mjs).
 import {
   existsSync,
   mkdirSync,
@@ -20,61 +20,24 @@ import {
   statSync,
 } from 'node:fs';
 import { gzipSync } from 'node:zlib';
-import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { dirname, join, resolve, relative, basename, delimiter, sep } from 'node:path';
+import { dirname, join, resolve, basename, delimiter } from 'node:path';
+import {
+  ORIGINAL_JAR as jar,
+  ROOT as root,
+  dockerArgs,
+  findJdk,
+  run,
+  toDocker,
+} from '../../scripts/java.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const root = resolve(here, '..', '..');
-const jar = join(
-  root,
-  'packages',
-  'content',
-  'playman',
-  'original',
-  'Playman_Extreme_Running_240x320.jar',
-);
 const build = join(here, 'build');
 const classesDir = join(build, 'classes');
 const stubsDir = join(build, 'stubs');
 const oracleDir = join(build, 'oracle');
 const goldenDir = join(root, 'packages', 'sim', 'test', 'golden');
 const scriptsDir = join(goldenDir, 'scripts');
-
-function findJdk() {
-  const candidates = [];
-  if (process.env.JAVA_HOME) candidates.push(join(process.env.JAVA_HOME, 'bin'));
-  candidates.push(''); // PATH
-  if (process.platform === 'win32') {
-    // common vendor install roots, newest first
-    for (const vendor of [
-      'C:\\Program Files\\Eclipse Adoptium',
-      'C:\\Program Files\\Java',
-      'C:\\Program Files\\Microsoft',
-    ]) {
-      if (!existsSync(vendor)) continue;
-      const jdks = readdirSync(vendor)
-        .filter((n) => /^jdk/i.test(n))
-        .sort()
-        .reverse();
-      for (const n of jdks) candidates.push(join(vendor, n, 'bin'));
-    }
-  }
-  for (const bin of candidates) {
-    const javac = bin ? join(bin, 'javac') : 'javac';
-    const r = spawnSync(javac, ['-version'], { encoding: 'utf8' });
-    if (!r.error && r.status === 0) return bin;
-  }
-  return null;
-}
-
-function run(cmd, args, opts = {}) {
-  const r = spawnSync(cmd, args, { stdio: 'inherit', ...opts });
-  if (r.error) throw r.error;
-  if (r.status !== 0) {
-    throw new Error(`${basename(cmd)} ${args.slice(0, 3).join(' ')}... exited with ${r.status}`);
-  }
-}
 
 function listJava(dir) {
   const out = [];
@@ -92,14 +55,9 @@ function newest(files) {
 
 const jdkBin = findJdk();
 const useDocker = jdkBin === null;
-const toDocker = (p) => '/w/' + relative(root, p).split(sep).join('/');
 
 function tool(name) {
   return jdkBin ? join(jdkBin, name) : name;
-}
-
-function dockerArgs(args) {
-  return ['run', '--rm', '-v', `${root}:/w`, '-w', '/w', 'eclipse-temurin:17-jdk', ...args];
 }
 
 function buildAll() {
@@ -213,13 +171,43 @@ function gzipTrace(file) {
   unlinkSync(file);
 }
 
-const args = process.argv.slice(2);
-if (useDocker) console.log('no local JDK found, using docker eclipse-temurin:17-jdk');
-buildAll();
+const USAGE =
+  'usage: node run.mjs <level> <missionType> <script.txt> <out.jsonl> | <script.txt> <out.jsonl>' +
+  ' | --random <seed> <steps> <level> <missionType> <out.jsonl> [minWait maxWait] | --golden | --build';
 
-if (args[0] === '--build') {
-  console.log('build ok');
-} else if (args[0] === '--golden') {
+/** What the arguments ask for, checked before anything is built; null for bad arguments. */
+function command(args) {
+  if (args.length === 1 && args[0] === '--build') return () => console.log('build ok');
+  if (args.length === 1 && args[0] === '--golden') return runGolden;
+  if (args[0] === '--random' && (args.length === 6 || args.length === 8)) {
+    const [seed, steps, level, mission] = args.slice(1, 5).map(Number);
+    if (![seed, steps, level, mission].every(Number.isInteger)) return null;
+    const out = resolve(args[5]);
+    const waits = args.length === 8 ? args.slice(6, 8).map(Number) : [];
+    return () => {
+      const script = out.replace(/\.jsonl$/i, '') + '.txt';
+      mkdirSync(dirname(out), { recursive: true });
+      writeFileSync(script, randomScript(seed, steps, level, mission, ...waits));
+      console.log(`wrote ${script}`);
+      runOracle(level, mission, script, out);
+    };
+  }
+  if (args.length === 4 && !args[0].startsWith('--')) {
+    const [level, mission] = args.slice(0, 2).map(Number);
+    if (!Number.isInteger(level) || !Number.isInteger(mission)) return null;
+    return () => runOracle(level, mission, resolve(args[2]), resolve(args[3]));
+  }
+  if (args.length === 2 && !args[0].startsWith('--')) {
+    return () => {
+      const script = resolve(args[0]);
+      const { level, mission } = directives(script);
+      runOracle(level, mission, script, resolve(args[1]));
+    };
+  }
+  return null;
+}
+
+function runGolden() {
   // hand-written scripts live in golden/scripts/, generated ones next to their trace in golden/
   const scripts = [
     ...readdirSync(scriptsDir)
@@ -236,25 +224,13 @@ if (args[0] === '--build') {
     gzipTrace(out);
   }
   console.log(`regenerated ${scripts.length} golden traces in ${goldenDir}`);
-} else if (args[0] === '--random' && (args.length === 6 || args.length === 8)) {
-  const [seed, steps, level, mission] = args.slice(1, 5).map(Number);
-  const out = resolve(args[5]);
-  const waits = args.length === 8 ? args.slice(6, 8).map(Number) : [];
-  const script = out.replace(/\.jsonl$/i, '') + '.txt';
-  mkdirSync(dirname(out), { recursive: true });
-  writeFileSync(script, randomScript(seed, steps, level, mission, ...waits));
-  console.log(`wrote ${script}`);
-  runOracle(level, mission, script, out);
-} else if (args.length === 4) {
-  runOracle(Number(args[0]), Number(args[1]), resolve(args[2]), resolve(args[3]));
-} else if (args.length === 2) {
-  const script = resolve(args[0]);
-  const { level, mission } = directives(script);
-  runOracle(level, mission, script, resolve(args[1]));
-} else {
-  console.error(
-    'usage: node run.mjs <level> <missionType> <script.txt> <out.jsonl> | <script.txt> <out.jsonl>' +
-      ' | --random <seed> <steps> <level> <missionType> <out.jsonl> [minWait maxWait] | --golden | --build',
-  );
+}
+
+const action = command(process.argv.slice(2));
+if (!action) {
+  console.error(USAGE);
   process.exit(2);
 }
+if (useDocker) console.log('no local JDK found, using docker');
+buildAll();
+action();

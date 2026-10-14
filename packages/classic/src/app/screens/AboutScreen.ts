@@ -1,7 +1,7 @@
 /**
- * About the game, in three tabs instead of one wall of text: what the game is, how to play
- * (the original's rules and the controls) and who made it, with a button to the source code.
- * Long pages scroll by themselves and by hand.
+ * About the game, in three tabs instead of one wall of text: what the game is (with a button to
+ * the Lab, how the original works), how to play (the original's rules and the controls) and who
+ * made it (with a button to the source code). Long pages scroll by themselves and by hand.
  */
 import { Theme, type GameContext } from '../Context.ts';
 import type { Screen, UiGesture, UiKey, UiPointer, UiWheel } from '@parapet/runtime/app/Screen.ts';
@@ -9,14 +9,20 @@ import { Button } from '@parapet/runtime/ui/Button.ts';
 import { fitWidth, rowHeight, type Rect } from '@parapet/runtime/ui/layout.ts';
 import { TextScroller, type TextBlock } from '@parapet/runtime/ui/TextScroller.ts';
 import { ScreenFrame } from '../ui/ScreenFrame.ts';
-
-export const SOURCE_URL = 'https://github.com/Gwynerva/parapet-classic';
+import { labUrl, SOURCE_URL } from '../links.ts';
 
 const TABS = ['game', 'howTo', 'credits'] as const;
 type Tab = (typeof TABS)[number];
 
-/** Keyboard focus: the tab row or the source-code button. */
-type Focus = 'tabs' | 'source';
+/** Keyboard focus: the tab row or the page's button. */
+type Focus = 'tabs' | 'link';
+
+/** A tab's button under its page: its label, where it goes and the address shown under it. */
+interface TabLink {
+  label: string;
+  url: () => string;
+  caption: string | null;
+}
 
 const COLUMN = 440;
 /** Text at 16 px needs about 30 characters per line; narrower columns use the 12 px font. */
@@ -27,11 +33,11 @@ export class AboutScreen implements Screen {
   private readonly ctx: GameContext;
   private readonly frame: ScreenFrame;
   private readonly tabs = TABS.map(() => new Button());
-  private readonly source = new Button();
+  private readonly linkButton = new Button();
   private readonly text = new TextScroller();
   private tab: Tab = 'game';
   private focus: Focus = 'tabs';
-  private sourceUrlY = 0;
+  private captionY = 0;
   private pageRect: Rect = { x: 0, y: 0, w: 0, h: 0 };
 
   constructor(ctx: GameContext) {
@@ -45,8 +51,18 @@ export class AboutScreen implements Screen {
     this.onResize();
   }
 
-  private get hasSource(): boolean {
-    return this.tab === 'credits';
+  /** The button under the page: the Lab with the game, the source code with the credits. */
+  private get link(): TabLink | null {
+    const { i18n } = this.ctx;
+    if (this.tab === 'game') return { label: i18n.t('about.lab'), url: labUrl, caption: null };
+    if (this.tab === 'credits') {
+      return {
+        label: i18n.t('about.github'),
+        url: () => SOURCE_URL,
+        caption: SOURCE_URL.replace('https://', ''),
+      };
+    }
+    return null;
   }
 
   onResize(): void {
@@ -59,8 +75,9 @@ export class AboutScreen implements Screen {
       b.rect = { x: col.x + i * (tabW + 4), y: col.y, w: tabW, h: tabH };
     });
     const buttonH = rowHeight(22, viewport.isCoarsePointer);
-    // Room under the page for the source-code button and its address.
-    const footer = this.hasSource ? 8 + buttonH + 4 + fonts.small.lineHeight : 0;
+    // Room under the page for its button and the address under it.
+    const link = this.link;
+    const footer = link ? 8 + buttonH + (link.caption ? 4 + fonts.small.lineHeight : 0) : 0;
     const top = col.y + tabH + 6;
     const page: Rect = { x: col.x, y: top, w: col.w, h: Math.max(0, col.y + col.h - footer - top) };
     // The text sits in a panel with an 8 px margin; a short text gets a short panel.
@@ -77,18 +94,15 @@ export class AboutScreen implements Screen {
       this.text.setRect(textRect(page.h));
     }
     this.pageRect = page;
-    if (this.hasSource) {
-      const buttonW = Math.min(
-        col.w,
-        Math.max(160, fonts.text.measure(this.ctx.i18n.t('about.github')) + 24),
-      );
-      this.source.rect = {
+    if (link) {
+      const buttonW = Math.min(col.w, Math.max(160, fonts.text.measure(link.label) + 24));
+      this.linkButton.rect = {
         x: col.x + ((col.w - buttonW) >> 1),
         y: page.y + page.h + 8,
         w: buttonW,
         h: buttonH,
       };
-      this.sourceUrlY = this.source.rect.y + buttonH + 4;
+      this.captionY = this.linkButton.rect.y + buttonH + 4;
     }
   }
 
@@ -136,14 +150,15 @@ export class AboutScreen implements Screen {
     const next = TABS[((index % n) + n) % n]!;
     if (next === this.tab) return;
     this.tab = next;
-    if (!this.hasSource) this.focus = 'tabs';
+    if (!this.link) this.focus = 'tabs';
     this.onResize();
     this.text.restart();
   }
 
-  private openSource(): void {
+  private openLink(): void {
+    const link = this.link;
     // A new tab; the game stays where it is.
-    window.open(SOURCE_URL, '_blank', 'noopener,noreferrer');
+    if (link) window.open(link.url(), '_blank', 'noopener,noreferrer');
   }
 
   update(dt: number): void {
@@ -168,7 +183,7 @@ export class AboutScreen implements Screen {
         return;
       case 'next':
       case 'prev':
-        if (this.hasSource) this.focus = this.focus === 'tabs' ? 'source' : 'tabs';
+        if (this.link) this.focus = this.focus === 'tabs' ? 'link' : 'tabs';
         else this.setTab(index + (key.action === 'next' ? 1 : -1));
         return;
       case 'confirm':
@@ -180,13 +195,13 @@ export class AboutScreen implements Screen {
   }
 
   onGesture(g: UiGesture): boolean {
-    if (!this.hasSource) return false;
+    if (!this.link) return false;
     if (g.kind === 'key') {
-      if (g.action !== 'confirm' || this.focus !== 'source') return false;
-      this.openSource();
+      if (g.action !== 'confirm' || this.focus !== 'link') return false;
+      this.openLink();
       return true;
     }
-    return this.source.onGesture(g, () => this.openSource());
+    return this.linkButton.onGesture(g, () => this.openLink());
   }
 
   onPointer(p: UiPointer): void {
@@ -226,16 +241,19 @@ export class AboutScreen implements Screen {
     c.fillRect(page.x, page.y, 1, page.h);
     c.fillRect(page.x + page.w - 1, page.y, 1, page.h);
     this.text.draw(c);
-    if (this.hasSource) {
-      this.source.draw(c, fonts.text, i18n.t('about.github'), {
-        focused: this.focus === 'source',
+    const link = this.link;
+    if (link) {
+      this.linkButton.draw(c, fonts.text, link.label, {
+        focused: this.focus === 'link',
         color: Theme.accent,
       });
-      const r = this.source.rect;
-      fonts.small.draw(c, SOURCE_URL.replace('https://', ''), r.x + (r.w >> 1), this.sourceUrlY, {
-        align: 'center',
-        color: Theme.muted,
-      });
+      const r = this.linkButton.rect;
+      if (link.caption) {
+        fonts.small.draw(c, link.caption, r.x + (r.w >> 1), this.captionY, {
+          align: 'center',
+          color: Theme.muted,
+        });
+      }
     }
   }
 }

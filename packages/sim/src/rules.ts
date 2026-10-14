@@ -5,6 +5,7 @@
 import type { Level } from './level/level.ts';
 import { CHECKPOINT_TILE_BASE } from './level/level.ts';
 import type { RunnerState } from './runner/runner.ts';
+import { DEFAULT_HANDS_DY } from './runner/runner.ts';
 
 export const MissionType = {
   SPRINT: 0,
@@ -19,9 +20,7 @@ export interface RulesOptions {
   missionType: number;
   /** Free run: never finishes, checkpoints still light up. */
   freeRun?: boolean;
-  /** Hot-seat multiplayer semantics (hard time cut-offs). */
-  multiplayer?: boolean;
-  /** Time limit in ms for Score runs (`z[4]`), Challenges (goal word) and multiplayer races. */
+  /** Time limit in ms for Score runs (`z[4]`) and Challenges (goal word). */
   timeLimit?: number;
   /**
    * Flags to collect (`aS`): 5 in a flag hunt, 1 in the challenges of levels 2/3/5/6 and 0 in
@@ -47,7 +46,6 @@ export type RulesEvent =
 export class MissionRules {
   readonly missionType: number;
   readonly freeRun: boolean;
-  readonly multiplayer: boolean;
   readonly timeLimit: number;
   /** Bit i set = checkpoint/flag i not yet taken (`bM`, starts at -1 = all). */
   remainingMask = -1;
@@ -63,7 +61,6 @@ export class MissionRules {
   constructor(opts: RulesOptions) {
     this.missionType = opts.missionType;
     this.freeRun = opts.freeRun ?? false;
-    this.multiplayer = opts.multiplayer ?? false;
     this.timeLimit = opts.timeLimit ?? -1;
     this.flagsLeft = opts.flagCount ?? 5;
   }
@@ -108,9 +105,6 @@ export class MissionRules {
           this.splits[this.nextCheckpoint++] = clock;
           events.push({ type: 'checkpoint', index: marker });
         }
-        if (this.multiplayer && this.timeLimit >= 0 && clock >= this.timeLimit && !this.freeRun) {
-          return this.finish(0, true, events);
-        }
         return false;
       }
       case MissionType.FLAG_HUNT: {
@@ -123,9 +117,6 @@ export class MissionRules {
             return this.finish(clock, false, events);
           }
         }
-        if (this.multiplayer && this.timeLimit >= 0 && clock >= this.timeLimit && !this.freeRun) {
-          return this.finish(0, true, events);
-        }
         return false;
       }
       case MissionType.SCORE_RUN: {
@@ -134,7 +125,7 @@ export class MissionRules {
           return this.finish(clock, false, events);
         }
         if (this.timeLimit >= 0 && this.timeLimit - clock < 0) {
-          return this.finish(this.multiplayer ? 0 : this.timeLimit, true, events);
+          return this.finish(this.timeLimit, true, events);
         }
         return false;
       }
@@ -164,8 +155,8 @@ export class MissionRules {
         if (this.freeRun) return false;
         if (!atFinish || (this.remainingMask & 1) !== 0) return false;
         // The original stands the player up at the coach when the warm-up ends.
-        player.renderHandsDy = -1536;
-        player.handsDy = -1536;
+        player.renderHandsDy = DEFAULT_HANDS_DY;
+        player.handsDy = DEFAULT_HANDS_DY;
         player.y = player.renderY = ((finish!.y + 1) << 10) - 1;
         player.handsAnchored = false;
         return this.finish(clock, false, events);

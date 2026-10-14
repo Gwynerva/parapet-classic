@@ -19,8 +19,8 @@ A slim teen of average build on Blaise's body: narrow, slim legs, her silhouette
 open top, the bag at the hip and the chunky shoes. The upright pictures (chest 57, torso 34,
 thighs 49 / 53, knee 62, shin 30, shoes 39 / 43) are drawn here; the look tool turns them."""
 from lookgen import *
-from heads import Pic, Palette
-from body import outfit_parts, write_parts, part, apply_rules
+from heads import Palette
+from body import outfit_parts, write_parts
 from gridpng import sheet
 import rw_heads as RH
 
@@ -33,11 +33,6 @@ JEANS = ['#8eaacc', '#6a88b0', '#506c94', '#3c547a', '#2a3c5c']
 CYAN = ['#5ad8f8', '#2aa8dc']
 STRAP = ['#7a5236', '#5a3a22', '#3a2414']
 SOCK = '#b8b8bc'
-
-
-def enc(rows, legend, pal):
-    """Text rows in a picture legend → rows in the look's palette."""
-    return [''.join(c if c in '.+' else pal.char(legend[c]) for c in r) for r in rows]
 
 
 def legend(**ramps):
@@ -94,10 +89,6 @@ SHIN = [
     'GJJj.',
     'ooo..',
 ]
-
-
-def darker(rows, shift):
-    return [''.join(shift.get(c, c) for c in r) for r in rows]
 
 
 FAR = {'G': 'J', 'J': 'j', 'j': 'H', 'H': 'Z', 'a': 'b', 'b': 'c', 'c': 'd', 'd': 'e'}
@@ -273,12 +264,12 @@ def make(look_id, rules, plan, pics, head, front, ribbons, accent, attachments=N
 
 def legs(leg):
     return {
-        '53': (THIGH, leg), '49': (darker(THIGH, FAR), leg), '62': (KNEE, leg), '30': (SHIN, leg),
+        '53': (THIGH, leg), '49': (shift(THIGH, FAR), leg), '62': (KNEE, leg), '30': (SHIN, leg),
     }
 
 
 def shoes(rows39, rows47, rows48, leg, far):
-    return {'39': (rows39, leg), '43': (darker(rows39, far), leg), '47': (rows47, leg), '48': (rows48, leg)}
+    return {'39': (rows39, leg), '43': (shift(rows39, far), leg), '47': (rows47, leg), '48': (rows48, leg)}
 
 
 def hoodie():

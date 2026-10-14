@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { checkLocales, hasErrors } from '../src/i18n/check.ts';
 import { collectLocales } from '../src/i18n/locales.ts';
-import { loadFontCoverage, loadLocales } from './helpers/locales.ts';
+import { loadLocales } from '../../tools/src/i18nFiles.ts';
 import {
   I18n,
   fallbackPluralCategory,
@@ -109,26 +108,17 @@ describe('I18n', () => {
     i18n.setLocale('en');
   });
 
-  it('formats Russian plurals used by the results screen', () => {
+  it('formats Russian plurals used by the game', () => {
     i18n.setLocale('ru');
     const flags = [
-      [1, '1 флаг'],
-      [2, '2 флага'],
-      [5, '5 флагов'],
-      [11, '11 флагов'],
-      [21, '21 флаг'],
-      [22, '22 флага'],
+      [1, 'Остался 1 флаг'],
+      [2, 'Осталось 2 флага'],
+      [5, 'Осталось 5 флагов'],
+      [11, 'Осталось 11 флагов'],
+      [21, 'Остался 21 флаг'],
+      [22, 'Осталось 22 флага'],
     ] as const;
-    for (const [n, text] of flags) expect(i18n.t('results.flags', { n })).toBe(text);
-    const attempts = [
-      [1, '1 попытка'],
-      [2, '2 попытки'],
-      [5, '5 попыток'],
-      [11, '11 попыток'],
-      [21, '21 попытка'],
-      [22, '22 попытки'],
-    ] as const;
-    for (const [n, text] of attempts) expect(i18n.t('results.attempts', { n })).toBe(text);
+    for (const [n, text] of flags) expect(i18n.t('hud.flagsLeft', { n })).toBe(text);
     expect(i18n.t('hud.flagsLeft', { n: 3 })).toBe('Осталось 3 флага');
     expect(i18n.t('contest.outfits', { n: 1 })).toBe('1 образ, каждый забег — случайный');
     expect(i18n.t('level.locked', { name: 'Мельничный ручей' })).toBe(
@@ -138,11 +128,9 @@ describe('I18n', () => {
   });
 
   it('formats English plurals', () => {
-    expect(i18n.t('results.flags', { n: 1 })).toBe('1 flag');
-    expect(i18n.t('results.flags', { n: 2 })).toBe('2 flags');
-    expect(i18n.t('results.attempts', { n: 1 })).toBe('1 attempt');
-    expect(i18n.t('results.attempts', { n: 2 })).toBe('2 attempts');
-    expect(i18n.t('player.numbered', { n: 3 })).toBe('Player 3');
+    expect(i18n.t('hud.flagsLeft', { n: 1 })).toBe('1 flag left');
+    expect(i18n.t('hud.flagsLeft', { n: 2 })).toBe('2 flags left');
+    expect(i18n.t('contest.outfits', { n: 1 })).toBe('1 look, a random one every run');
   });
 
   it('falls back to English for missing keys and to the key for unknown ones', () => {
@@ -188,19 +176,6 @@ describe('bundled dictionaries', () => {
     expect(Object.keys(en).length).toBeGreaterThan(150);
   });
 
-  it('pass the translation checks (keys, files, arguments, glyphs)', () => {
-    for (const report of checkLocales(locales, loadFontCoverage())) {
-      expect(hasErrors(report), JSON.stringify(report, null, 2)).toBe(false);
-    }
-  });
-
-  it('are complete in the maintained languages', () => {
-    const reports = checkLocales(locales, loadFontCoverage());
-    for (const code of ['en', 'ru']) {
-      expect(reports.find((r) => r.code === code)?.missing, code).toEqual([]);
-    }
-  });
-
   it('contain the keys the UI relies on', () => {
     for (const key of [
       'menu.start',
@@ -211,10 +186,7 @@ describe('bundled dictionaries', () => {
       'mode.free',
       'level.names.0',
       'level.names.11',
-      'hud.time',
       'results.newRecord',
-      'results.flags',
-      'results.attempts',
       'moves.run',
       'moves.poleSpin.desc',
       'hints.wallTurn',
@@ -260,21 +232,5 @@ describe('collectLocales', () => {
         'x/fr/ui.json': { a: 1 },
       }),
     ).toThrow(/strings/);
-  });
-
-  it('reports unknown, misplaced and argument-changing keys', () => {
-    const [en, xx] = collectLocales({
-      'en/meta.json': { name: 'English', englishName: 'English' },
-      'en/ui.json': { 'a.one': 'Hi {name}', 'a.two': 'Two' },
-      'xx/meta.json': { name: 'Xx', englishName: 'Xx' },
-      'xx/game.json': { 'a.two': 'Zwei' },
-      'xx/ui.json': { 'a.one': 'Hallo', 'a.three': 'Drei' },
-    });
-    const all = new Set(Array.from({ length: 0x500 }, (_, i) => i));
-    const report = checkLocales([en!, xx!], { text: [all], display: [all] })[1]!;
-    expect(report.unknown).toEqual(['a.three']);
-    expect(report.misplaced).toEqual(['a.two (game.json, expected ui.json)']);
-    expect(report.argumentMismatch).toEqual(['a.one: ']);
-    expect(hasErrors(report)).toBe(true);
   });
 });

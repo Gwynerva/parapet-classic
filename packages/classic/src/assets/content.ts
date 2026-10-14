@@ -1,42 +1,21 @@
 /**
- * Typed loaders for the generated game content (`packages/content/generated`, produced by
- * `@parapet/tools` from the original jar). JSON is bundled by Vite through the `@playman`
- * alias; the sprite atlas is loaded as an image.
+ * Typed loaders for the content extracted from the original jar
+ * (`packages/content/playman/extracted`, written by `npm run extract`). JSON is bundled by Vite
+ * through the `@playman` alias; the sprite atlas is loaded as an image.
  */
 import animsJson from '@playman/anims.json';
 import atlasJson from '@playman/atlas.json';
 import atlasUrl from '@playman/atlas.png';
 import missionsJson from '@playman/missions.json';
 import movesJson from '@playman/moves.json';
-import stringsJson from '@playman/strings/ru.json';
 import tablesJson from '@playman/tables.json';
 
 import type { LevelData, MoveTableData, PhysicsTables, RivalRecording } from '@parapet/sim';
 import type {
   AtlasFrame,
   AtlasData,
-  Atlas,
-  PrimitiveKind,
-  ScenePrimitive,
-  SceneObject,
   SceneFile,
   AnimData,
-  MissionGoal,
-  MissionLevel,
-  MissionsData,
-  GameContent,
-} from '@parapet/runtime/content/types.ts';
-export type {
-  AtlasFrame,
-  AtlasData,
-  Atlas,
-  PrimitiveKind,
-  ScenePrimitive,
-  SceneObject,
-  SceneFile,
-  AnimData,
-  MissionGoal,
-  MissionLevel,
   MissionsData,
   GameContent,
 } from '@parapet/runtime/content/types.ts';
@@ -130,7 +109,6 @@ async function load(): Promise<GameContent> {
     levels,
     missions: missionsJson as MissionsData,
     rivals,
-    strings: stringsJson as string[],
     music,
   };
 }

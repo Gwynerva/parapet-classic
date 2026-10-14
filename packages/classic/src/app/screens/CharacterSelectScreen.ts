@@ -23,7 +23,7 @@ import {
   type ContestProgress,
   type Progress,
 } from '@parapet/runtime/storage/profile.ts';
-import { isCharacterOpen, rivalLevels } from '../characters.ts';
+import { isCharacterOpen, rivalLevels, skinName } from '../characters.ts';
 import { demoZoom, ShowcaseBox } from '@parapet/runtime/ui/ShowcaseBox.ts';
 import { TileGrid } from '@parapet/runtime/ui/TileGrid.ts';
 import { contains } from '@parapet/runtime/ui/layout.ts';
@@ -185,8 +185,7 @@ export class CharacterSelectScreen implements Screen {
     let desc: string;
     const levelId = entry.levelId;
     if (levelId === undefined) {
-      const skin = skins.find((s) => s.character === entry.character);
-      name = skin?.name ?? '';
+      name = skinName(skins, entry.character);
       if (entry.character === 0) desc = i18n.t('player.blaise.desc');
       else if (entry.character === 1) desc = i18n.t('player.playman.desc');
       else {
@@ -328,6 +327,6 @@ export class CharacterSelectScreen implements Screen {
         }
       }
     });
-    this.grid.drawScrollMarkers(c, this.ctx.fonts.small);
+    this.grid.drawScrollMarkers(c);
   }
 }

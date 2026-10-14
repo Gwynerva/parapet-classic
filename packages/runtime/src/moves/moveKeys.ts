@@ -21,5 +21,3 @@ export const MOVE_KEYS = [
   'poleJump',
   'poleSpin',
 ] as const;
-
-export type MoveKey = (typeof MOVE_KEYS)[number];

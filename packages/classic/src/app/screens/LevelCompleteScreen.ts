@@ -20,9 +20,16 @@ import {
   type ContestProgress,
   type Progress,
 } from '@parapet/runtime/storage/profile.ts';
-import type { GameContent } from '../../assets/content.ts';
-import { bossOfLevel, bossTint, CONTEST_KINDS, contestRecord, type Boss } from '../bosses.ts';
-import { isCharacterOpen } from '../characters.ts';
+import type { GameContent } from '@parapet/runtime/content/types.ts';
+import {
+  type Boss,
+  bossName,
+  bossOfLevel,
+  bossTint,
+  CONTEST_KINDS,
+  contestRecord,
+} from '../bosses.ts';
+import { isCharacterOpen, skinName } from '../characters.ts';
 import { contestSetup } from '../ghosts.ts';
 import { dialogLayout } from '../layouts.ts';
 import { LevelSelectScreen } from './LevelSelectScreen.ts';
@@ -124,7 +131,7 @@ export class LevelNews {
     this.next = levelId + 1 < LEVEL_COUNT ? levelId + 1 : -1;
     this.lines = [i18n.t('level.complete.done', { name: levelName(levelId) })];
     for (const c of completion.opened) {
-      const name = ctx.skins.find((s) => s.character === c)?.name;
+      const name = skinName(ctx.skins, c);
       if (name) this.lines.push(i18n.t('level.complete.character', { name }));
     }
     if (this.next >= 0)
@@ -134,7 +141,7 @@ export class LevelNews {
   }
 
   private get bossName(): string {
-    return this.boss ? this.ctx.i18n.t(`boss.${this.boss.id}.name`) : '';
+    return bossName(this.ctx.i18n, this.boss);
   }
 
   /** Wraps the lines to a section `width` wide. */
@@ -248,7 +255,7 @@ export class LevelCompleteScreen implements Screen {
   constructor(ctx: GameContext, opts: LevelCompleteOptions) {
     this.ctx = ctx;
     this.opts = opts;
-    this.menu = new Menu(ctx.fonts.text, ctx.fonts.small);
+    this.menu = new Menu(ctx.fonts.text);
     this.news = new LevelNews(ctx, opts);
     this.menu.setItems([
       ...this.news.items((then) => {
@@ -284,14 +291,7 @@ export class LevelCompleteScreen implements Screen {
       rowHeight: row,
     });
     this.panelRect = d.panel;
-    Object.assign(this.menu.layout, {
-      x: d.menu.x,
-      y: d.menu.y,
-      width: d.menu.w,
-      rowHeight: row,
-      align: 'center',
-    });
-    this.menu.fit(d.menu.h);
+    this.menu.place(d.menu, row);
   }
 
   update(): void {}

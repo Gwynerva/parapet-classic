@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="260" viewBox="0 0 720 260" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" style="font-variant-numeric: tabular-nums">
+<title id="t">The PNG the game builds for sprite 212</title>
+<desc id="d">200 × 100 pixels, 20456 bytes: every chunk in order; the pixel data is stored, not compressed</desc>
+<rect x="0.5" y="0.5" width="719" height="259" rx="10" fill="#161b22" stroke="#30363d"/>
+<text x="20" y="30" font-size="16" font-weight="600" fill="#e6edf3">The PNG the game builds for sprite 212</text>
+<text x="20" y="48" font-size="12" fill="#8b949e">200 × 100 pixels, 20456 bytes: every chunk in order; the pixel data is stored, not compressed</text>
+<rect x="20" y="80" width="1.5" height="30" fill="#c98500"><title>signature: 8 bytes</title></rect>
+<rect x="20.3" y="80" width="1.5" height="30" fill="#c98500"><title>IHDR: 25 bytes</title></rect>
+<rect x="21.1" y="80" width="5.1" height="30" fill="#c98500"><title>PLTE: 183 bytes</title></rect>
+<rect x="27.2" y="80" width="1.5" height="30" fill="#c98500"><title>tRNS: 13 bytes</title></rect>
+<rect x="27.6" y="80" width="1.5" height="30" fill="#3987e5"><title>IDAT: 14 bytes</title></rect>
+<rect x="28.1" y="80" width="135.4" height="30" fill="#2f6fbd"><title>IDAT: 4104 bytes</title></rect>
+<rect x="164.5" y="80" width="135.4" height="30" fill="#3987e5"><title>IDAT: 4104 bytes</title></rect>
+<rect x="300.9" y="80" width="135.4" height="30" fill="#2f6fbd"><title>IDAT: 4104 bytes</title></rect>
+<rect x="437.4" y="80" width="135.4" height="30" fill="#3987e5"><title>IDAT: 4104 bytes</title></rect>
+<rect x="573.8" y="80" width="124.3" height="30" fill="#2f6fbd"><title>IDAT: 3769 bytes</title></rect>
+<rect x="699.1" y="80" width="1.5" height="30" fill="#3987e5"><title>IDAT: 16 bytes</title></rect>
+<rect x="699.6" y="80" width="1.5" height="30" fill="#8b949e"><title>IEND: 12 bytes</title></rect>
+<line x1="21" y1="110" x2="21" y2="118" stroke="#30363d" stroke-width="1"/>
+<text x="23" y="128" font-size="11" fill="#e6edf3" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">signature 8</text>
+<line x1="21.3" y1="110" x2="21.3" y2="134" stroke="#30363d" stroke-width="1"/>
+<text x="23.3" y="144" font-size="11" fill="#e6edf3" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">IHDR 25</text>
+<line x1="22.1" y1="110" x2="22.1" y2="150" stroke="#30363d" stroke-width="1"/>
+<text x="24.1" y="160" font-size="11" fill="#e6edf3" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">PLTE 183</text>
+<line x1="28.2" y1="110" x2="28.2" y2="166" stroke="#30363d" stroke-width="1"/>
+<text x="30.2" y="176" font-size="11" fill="#e6edf3" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">tRNS 13</text>
+<line x1="28.6" y1="110" x2="28.6" y2="182" stroke="#30363d" stroke-width="1"/>
+<text x="30.6" y="192" font-size="11" fill="#e6edf3" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">IDAT 14</text>
+<line x1="29.1" y1="110" x2="29.1" y2="198" stroke="#30363d" stroke-width="1"/>
+<text x="31.1" y="208" font-size="11" fill="#e6edf3" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">IDAT 4104</text>
+<line x1="165.5" y1="110" x2="165.5" y2="118" stroke="#30363d" stroke-width="1"/>
+<text x="167.5" y="128" font-size="11" fill="#e6edf3" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">IDAT 4104</text>
+<line x1="301.9" y1="110" x2="301.9" y2="134" stroke="#30363d" stroke-width="1"/>
+<text x="303.9" y="144" font-size="11" fill="#e6edf3" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">IDAT 4104</text>
+<line x1="438.4" y1="110" x2="438.4" y2="150" stroke="#30363d" stroke-width="1"/>
+<text x="440.4" y="160" font-size="11" fill="#e6edf3" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">IDAT 4104</text>
+<line x1="574.8" y1="110" x2="574.8" y2="166" stroke="#30363d" stroke-width="1"/>
+<text x="576.8" y="176" font-size="11" fill="#e6edf3" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">IDAT 3769</text>
+<line x1="700.1" y1="110" x2="700.1" y2="182" stroke="#30363d" stroke-width="1"/>
+<text x="702.1" y="192" font-size="11" fill="#e6edf3" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">IDAT 16</text>
+<line x1="700.6" y1="110" x2="700.6" y2="198" stroke="#30363d" stroke-width="1"/>
+<text x="702.6" y="208" font-size="11" fill="#e6edf3" font-family="ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace">IEND 12</text>
+</svg>

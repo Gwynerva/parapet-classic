@@ -16,23 +16,15 @@
  * there is one) and the dev server muxes the stream into an MP4 with ffmpeg. The same
  * parameters always give the same attempts.
  */
-import { buildSineTable, createRun, MoveTable, STEP, type World, type WorldState } from '@parapet/sim';
-import { buildClipTable } from '@parapet/runtime/anim/Animator.ts';
+import { createRun, MoveTable, STEP, type World, type WorldState } from '@parapet/sim';
 import { GameLoop } from '@parapet/runtime/app/GameLoop.ts';
 import { Camera } from '@parapet/runtime/render/Camera.ts';
 import { CharacterRenderer, drawPose } from '@parapet/runtime/render/CharacterRenderer.ts';
-import { applyScanlines } from '@parapet/runtime/render/EchoRenderer.ts';
-import { EchoSheets, makeEchoColor } from '@parapet/runtime/render/EchoSkin.ts';
+import { applyScanlines } from '@parapet/runtime/render/Hologram.ts';
+import { makeEchoColor } from '@parapet/runtime/render/EchoSkin.ts';
 import { CharacterFx } from '@parapet/runtime/render/fx/CharacterFx.ts';
-import {
-  defaultLevelArtFrame,
-  LevelRenderer,
-  themeOfLevel,
-} from '@parapet/runtime/render/LevelRenderer.ts';
+import { defaultLevelArtFrame, themeOfLevel } from '@parapet/runtime/render/LevelRenderer.ts';
 import { Particles } from '@parapet/runtime/render/Particles.ts';
-import { SceneRenderer } from '@parapet/runtime/render/SceneRenderer.ts';
-import { SkinLibrary } from '@parapet/runtime/render/SkinLibrary.ts';
-import { SpriteSheet } from '@parapet/runtime/render/SpriteSheet.ts';
 import { screenPixels, worldGrid, type CameraPos } from '@parapet/runtime/render/View.ts';
 import { BitmapFont, type BitmapFontData } from '@parapet/runtime/text/BitmapFont.ts';
 import { outlined } from '@parapet/runtime/ui/draw.ts';
@@ -43,10 +35,12 @@ import {
   type ContestMode,
   type Press,
 } from '../../tools/src/tas/model.ts';
-import { bossOfLevel, characterFx, contestCharacter, registerBosses } from '../src/app/bosses.ts';
+import { bossOfLevel, characterFx, contestCharacter } from '../src/app/bosses.ts';
 import { loadContent } from '../src/assets/content.ts';
 import display16 from '../../content/fonts/display-16.json';
 import display16Png from '../../content/fonts/display-16.png';
+import { createRenderers } from '../src/app/renderers.ts';
+import { $ } from './dom.ts';
 
 const LEVELS = 12;
 /** The leader stands at the start this long before it runs, and at the end after it. */
@@ -76,8 +70,6 @@ const FADE_OUT_MS = 700;
 const RETIRE_SPREAD_MS = 1600;
 /** A crashed or fallen attempt lies there this long before it fades. */
 const WRONG_LINGER_MS = 1100;
-
-const $ = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
 
 interface Options {
   levels: number[];
@@ -183,7 +175,12 @@ interface Content {
 }
 
 /** One press or two of the record's, between `from` and `until`, changed. */
-function mutate(presses: readonly Press[], from: number, until: number, rand: () => number): Press[] {
+function mutate(
+  presses: readonly Press[],
+  from: number,
+  until: number,
+  rand: () => number,
+): Press[] {
   const v = presses.slice();
   const count = rand() < 0.3 ? 2 : 1;
   for (let m = 0; m < count; m++) {
@@ -238,7 +235,10 @@ function goesWrong(
     }
     const s = sim.stepCount;
     if (s < track.x.length) {
-      stray = Math.max(stray, Math.abs(sim.player.x - track.x[s]!) + Math.abs(sim.player.y - track.y[s]!));
+      stray = Math.max(
+        stray,
+        Math.abs(sim.player.x - track.x[s]!) + Math.abs(sim.player.y - track.y[s]!),
+      );
     }
     const late = s > batch.flagAt + SAME_STEPS;
     if (!going) return (!sim.rules.result?.finished || late) && stray >= MIN_STRAY;
@@ -357,15 +357,7 @@ async function main(): Promise<void> {
     loadContent(),
     BitmapFont.fromData(display16 as BitmapFontData, display16Png),
   ]);
-  const sheet = new SpriteSheet(content.atlas.image, content.atlas.frames);
-  const scene = new SceneRenderer(sheet, content.scenes.values());
-  const sine = buildSineTable(10, true);
-  const levels = new LevelRenderer(content, sheet, scene, sine);
-  const skins = new SkinLibrary(scene);
-  registerBosses(skins);
-  const echo = new EchoSheets(scene);
-  const clips = buildClipTable(content.anims.clips);
-  const moves = new MoveTable(content.moves);
+  const { sheet, scene, sine, level: levels, skins, echo, clips, moves } = createRenderers(content);
 
   const canvas = $<HTMLCanvasElement>('view');
   canvas.width = options.width;
@@ -538,8 +530,7 @@ async function main(): Promise<void> {
       const going = a.world.step(bitsAt(a.world, a.presses, a.cursor));
       characters.onEvents(a.world.events);
       for (const e of a.world.events) {
-        const wrong =
-          e.type === 'pit' || (e.type === 'move' && moves.get(e.to).scoreType === 0);
+        const wrong = e.type === 'pit' || (e.type === 'move' && moves.get(e.to).scoreType === 0);
         if (wrong && a.wrongAt === Infinity) a.wrongAt = t;
       }
       if (!going) a.ended = true;
@@ -602,16 +593,19 @@ async function main(): Promise<void> {
     c.translate(grid.dx, grid.dy);
     levels.drawLevelArt(c, cam, view, defaultLevelArtFrame(p.levelId));
     levels.drawMarkers(c, cam, view, world.level, world.rules, now);
-    particles.draw(c, cam, view, clock, false);
+    particles.draw(c, cam, clock, false);
     drawAttempts(cam, alpha, clock, now);
     fx.drawBehind(c, cam, clock, now, view);
     characters.drawAll(c, cam, alpha, clock, world.player);
     fx.drawFront(c, cam);
-    particles.draw(c, cam, view, clock, true);
+    particles.draw(c, cam, clock, true);
     c.restore();
     if (fullHud) {
       outlined(c, font, `attempts ${spawned}`, 8, 8, { color: '#ffffff' });
-      outlined(c, font, formatClock(clock), view.width - 8, 8, { align: 'right', color: '#ffffff' });
+      outlined(c, font, formatClock(clock), view.width - 8, 8, {
+        align: 'right',
+        color: '#ffffff',
+      });
     }
     // From and to black.
     const out = endedAt < 0 ? 0 : (pageMs - endedAt - OUTRO_MS + BLACK_MS) / BLACK_MS;
@@ -625,9 +619,12 @@ async function main(): Promise<void> {
   // ------------------------------------------------------------------ recording
   let recorder: MediaRecorder | null = null;
   let chunks: Blob[] = [];
-  const mime = ['video/mp4;codecs=avc1.640033', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm'].find(
-    (m) => MediaRecorder.isTypeSupported(m),
-  );
+  const mime = [
+    'video/mp4;codecs=avc1.640033',
+    'video/mp4',
+    'video/webm;codecs=vp9',
+    'video/webm',
+  ].find((m) => MediaRecorder.isTypeSupported(m));
   const startRecording = (): void => {
     if (recorder || !mime) return;
     chunks = [];
@@ -650,7 +647,7 @@ async function main(): Promise<void> {
       r.stop();
     });
     const ext = mime?.startsWith('video/mp4') ? 'mp4' : 'webm';
-    const name = `L${String(plan.levelId + 1).padStart(2, '0')}-${options.mode}.${ext}`;
+    const name = `${videoName(plan.levelId)}.${ext}`;
     const blob = new Blob(chunks, { type: mime });
     chunks = [];
     status(`saving ${name} (${(blob.size / 1e6).toFixed(0)} MB)…`, true);
@@ -679,7 +676,11 @@ async function main(): Promise<void> {
     const tries: { config: VideoEncoderConfig; ext: string }[] = [
       { config: { ...base, codec: 'avc1.640033', avc: { format: 'annexb' } }, ext: 'h264' },
       {
-        config: { ...base, codec: 'hvc1.1.6.L153.B0', hevc: { format: 'annexb' } } as VideoEncoderConfig,
+        config: {
+          ...base,
+          codec: 'hvc1.1.6.L153.B0',
+          hevc: { format: 'annexb' },
+        } as VideoEncoderConfig,
         ext: 'hevc',
       },
       {
@@ -766,7 +767,16 @@ async function main(): Promise<void> {
   const playLevel = async (index: number): Promise<void> => {
     levelIndex = index;
     over = false;
-    await loadLevel(options.levels[index]!);
+    try {
+      await loadLevel(options.levels[index]!);
+    } catch (err) {
+      // Nothing to play: keys still work (Enter tries again, N goes on).
+      busy = false;
+      plan = null;
+      over = true;
+      status(String(err), true);
+      return;
+    }
     if (options.record) startRecording();
   };
   const nextLevel = async (): Promise<void> => {

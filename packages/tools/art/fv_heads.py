@@ -26,7 +26,8 @@ the left), so the heads have no `:left` pictures.
 Each grid marks the base's head box (`*_BOX`, its top left corner in the grid; Blaise's is 16 x
 17, the man's 17 x 17): `centred` pads the picture so the box sits where the game puts a head.
 76 / 77 are the blinks, 78 the pain face."""
-from heads import Pic
+from heads import Pic, centred
+from lookgen import padded_rows
 
 # --------------------------------------------------------------------------------------------
 # Her legend. The skin's five tones are the body's (fv_parts.py takes HER_SKIN for her hands and
@@ -231,25 +232,7 @@ def him_head(front=False, face=None):
     rows, box = (HIM_FRONT, HIM_FRONT_BOX) if front else (HIM_PROF, HIM_PROF_BOX)
     if face:
         rows = marked(rows, HIM_FACES[face])
-    return centred(Pic.text(grid(rows), HIM), box, 1, 1)
-
-
-def grid(rows):
-    w = max(len(r) for r in rows)
-    return [r.ljust(w, '.') for r in rows]
-
-
-def centred(pic, box, wp=0, hp=1):
-    """Pads a head picture so that the head box, whose top left corner is at `box` in it, sits
-    where the game draws a head: the box's pixel (8, 8) on the picture's centre, the width and
-    the height of the parity `wp`, `hp` (Blaise's head is 16 x 17, the man's 17 x 17)."""
-    c, r = box[0] + 8, box[1] + 8
-    w0, h0 = pic.w, pic.h
-    pad_l = max(0, w0 - wp - 2 * c)
-    W = 2 * (c + pad_l) + wp
-    pad_t = max(0, h0 - hp - 2 * r)
-    H = 2 * (r + pad_t) + hp
-    return pic.pad(pad_l, pad_t, W - w0 - pad_l, H - h0 - pad_t)
+    return centred(Pic.text(padded_rows(rows), HIM), box, 1, 1)
 
 
 # The profile's faces, as changes of the grid (column, row), made from the eye of 25: 76 the eye
@@ -268,7 +251,7 @@ HER_FACES = {
 
 
 def marked(rows, marks):
-    g = [list(r) for r in grid(rows)]
+    g = [list(r) for r in padded_rows(rows)]
     for (x, y), ch in marks.items():
         g[y][x] = ch
     return [''.join(r) for r in g]
@@ -280,10 +263,4 @@ def her_head(front=False, face=None, hair=None):
     rows, box = (HER_FRONT, HER_FRONT_BOX) if front else (HER_PROF, HER_PROF_BOX)
     if face:
         rows = marked(rows, HER_FACES[face])
-    return centred(Pic.text(grid(rows), {**HER, **(hair or {})}), box)
-
-
-def preview_heads():
-    """(label, Pic) of every head, for the preview sheets."""
-    return [('her 25', her_head()), ('her 29', her_head(True)), ('him 25', him_head()), ('him 29', him_head(True))] + \
-        [(f'her {f}', her_head(face=f)) for f in (76, 77, 78)] + [(f'him {f}', him_head(face=f)) for f in (76, 77, 78)]
+    return centred(Pic.text(padded_rows(rows), {**HER, **(hair or {})}), box)

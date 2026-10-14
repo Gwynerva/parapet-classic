@@ -2,7 +2,6 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parseMidi, songEvents, stripEndMarker, type MidiSong } from '../src/audio/MidiFile.ts';
-import { estimateLoudness, normalisationGain } from '../src/audio/Loudness.ts';
 import { drumFor, PATCH_COUNT, patchFor, songPatch } from '../src/audio/Instruments.ts';
 import { SongCursor, type DueEvent } from '../src/audio/MusicPlayer.ts';
 import { MENU_TRACK, MusicDirector, trackPatches, trackTrim } from '../src/audio/MusicDirector.ts';
@@ -268,36 +267,5 @@ describe('MusicDirector', () => {
     director.setVolume(70);
     await Promise.resolve();
     expect(player.playing).toBe(true);
-  });
-});
-
-describe('loudness normalisation', () => {
-  it('scales a quiet song up and a loud song down within bounds', () => {
-    const quiet = parseMidi(tinyMidi());
-    for (const n of quiet.notes) n.volume = 0.05;
-    expect(normalisationGain(quiet)).toBeGreaterThan(1);
-    expect(normalisationGain(quiet)).toBeLessThanOrEqual(4);
-    const loud = parseMidi(tinyMidi());
-    for (const n of loud.notes) {
-      n.volume = 1;
-      n.velocity = 127;
-      n.duration = 100000;
-    }
-    loud.durationMs = 1000;
-    expect(normalisationGain(loud)).toBe(0.5);
-    expect(estimateLoudness({ ...loud, durationMs: 0 })).toBe(0);
-  });
-
-  it.skipIf(!hasContent())('brings the menu pad up to the level of the game tracks', () => {
-    const song = (id: number) => parseMidi(readFileSync(join(CONTENT_DIR, 'music', `${id}.mid`)));
-    expect(normalisationGain(song(1))).toBeGreaterThan(2.5);
-    expect(normalisationGain(song(2))).toBeLessThan(1);
-    const scaled = [1, 2, 5, 9, 12].map(
-      (id) => estimateLoudness(song(id)) * normalisationGain(song(id)),
-    );
-    for (const value of scaled) {
-      expect(value).toBeGreaterThan(300);
-      expect(value).toBeLessThanOrEqual(701);
-    }
   });
 });

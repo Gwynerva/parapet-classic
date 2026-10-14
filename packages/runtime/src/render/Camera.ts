@@ -22,6 +22,7 @@
  * and the horizontal rules, use the whole view.
  */
 import type { Level } from '@parapet/sim';
+import { clamp } from '../math.ts';
 
 /** The lowest the view's top may go (units): the level's bottom edge at the frame's bottom. */
 export function cameraMaxY(levelH: number, frameH: number): number {
@@ -57,12 +58,6 @@ export function tileFacesRunner(vx: number, tile: number): boolean {
     default:
       return false;
   }
-}
-
-function clamp(n: number, lo: number, hi: number): number {
-  if (n < lo) return lo;
-  if (n > hi) return hi;
-  return n;
 }
 
 /** Per-step camera displacement treated as a cut rather than a pan (see `update`). */
@@ -133,15 +128,6 @@ export class Camera {
     this.leash(player);
     this.clampToLevel(level);
     this.cutIfJumped();
-  }
-
-  /**
-   * `l(int,int)` from the menus and message boxes: aim at an explicit corner, for example the
-   * coach view `(coachX - 512, coachY - viewH + 1536)` or a flag centred on screen.
-   */
-  aimAt(x: number, y: number, level: Level): void {
-    this.focus = null;
-    this.setTarget(x, y, level);
   }
 
   /** Aim so that the world point `(x, y)` sits at the screen fractions `(fx, fy)`. */

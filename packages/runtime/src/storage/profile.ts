@@ -7,7 +7,6 @@
 import {
   compareRuns,
   isRankedMode,
-  isRunMode,
   parseInputRuns,
   rankingSort,
   type InputRun,
@@ -24,10 +23,7 @@ export type TouchControlsSetting = 'auto' | 'on' | 'off';
 export type FullscreenSetting = 'auto' | 'on' | 'off';
 
 export interface Options {
-  /**
-   * BCP 47 code of the chosen language; empty until the first launch picks one from the
-   * browser's preferences ('auto', the old default, counts as empty).
-   */
+  /** BCP 47 code of the chosen language; empty until the first launch picks one. */
   locale: string;
   scaleMode: ScaleMode;
   vibration: boolean;
@@ -51,21 +47,6 @@ export const DEFAULT_OPTIONS: Readonly<Options> = {
   fullscreen: 'auto',
 };
 
-/**
- * The default music level of the saves made before each save noted its default
- * (`musicDefault`); a level left there follows the default of today.
- */
-const OLD_DEFAULT_MUSIC_LEVEL = 70;
-
-/**
- * The volume of the first schemas, 0..8 steps on a linear scale, as a percentage on the
- * slider's curve (gain = level²) that sounds the same: 4 of 8 becomes 70 %.
- */
-export function levelFromVolumeSteps(steps: number): number {
-  const s = Math.max(0, Math.min(8, steps));
-  return Math.round((Math.sqrt(s / 8) * 100) / 5) * 5;
-}
-
 export interface RecordEntry {
   /** Finish time in ms of game clock (0 when the time ran out). */
   time: number;
@@ -80,12 +61,6 @@ export interface RecordEntry {
   simVersion: string;
   /** ISO 8601 timestamp of the run. */
   date: string;
-}
-
-export interface StoredRecord {
-  levelId: number;
-  mode: RunMode;
-  entry: RecordEntry;
 }
 
 export interface PlayerInfo {
@@ -120,27 +95,6 @@ function storage(): Storage | null {
   }
 }
 
-/** Whether `localStorage` can be read and written right now. */
-export function isStorageAvailable(): boolean {
-  const store = storage();
-  if (!store) return false;
-  try {
-    const probe = `${STORAGE_PREFIX}probe`;
-    store.setItem(probe, '1');
-    store.removeItem(probe);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-/** Upgrades an older envelope to the current schema; null drops entries we cannot read. */
-function migrate(envelope: Envelope): unknown {
-  if (envelope.v === SCHEMA_VERSION) return envelope.data;
-  // Newer than this build, or an unknown older version: ignore rather than misread.
-  return null;
-}
-
 function read<T>(key: string, validate: (raw: unknown) => T | null): T | null {
   const store = storage();
   if (!store) return null;
@@ -148,9 +102,9 @@ function read<T>(key: string, validate: (raw: unknown) => T | null): T | null {
     const raw = store.getItem(STORAGE_PREFIX + key);
     if (raw === null) return null;
     const parsed: unknown = JSON.parse(raw);
-    if (!isEnvelope(parsed)) return null;
-    const data = migrate(parsed);
-    return data === null ? null : validate(data);
+    // An entry of another schema (a newer build's) is ignored rather than misread.
+    if (!isEnvelope(parsed) || parsed.v !== SCHEMA_VERSION) return null;
+    return validate(parsed.data);
   } catch {
     return null;
   }
@@ -167,35 +121,16 @@ function write(key: string, data: unknown): boolean {
   }
 }
 
-function remove(key: string): void {
-  try {
-    storage()?.removeItem(STORAGE_PREFIX + key);
-  } catch {
-    // nothing to do
-  }
-}
-
 function validateOptions(raw: unknown): Partial<Options> | null {
   if (!isRecordObject(raw)) return null;
   const out: Partial<Options> = {};
-  if (typeof raw['locale'] === 'string') out.locale = raw['locale'] === 'auto' ? '' : raw['locale'];
+  if (typeof raw['locale'] === 'string') out.locale = raw['locale'];
   if (isScaleMode(raw['scaleMode'])) out.scaleMode = raw['scaleMode'];
   if (typeof raw['vibration'] === 'boolean') out.vibration = raw['vibration'];
   const musicLevel = raw['musicLevel'];
-  const musicVolume = raw['musicVolume'];
-  let level: number | undefined;
   if (typeof musicLevel === 'number' && Number.isFinite(musicLevel)) {
-    level = Math.max(0, Math.min(100, Math.round(musicLevel)));
-  } else if (typeof musicVolume === 'number' && Number.isInteger(musicVolume)) {
-    level = levelFromVolumeSteps(musicVolume); // the 0..8 steps of the second schema
-  } else if (raw['music'] === false) {
-    level = 0; // the on/off switch of the first schema
+    out.musicLevel = Math.max(0, Math.min(100, Math.round(musicLevel)));
   }
-  // A level still at the default it was saved under is no choice: it takes today's default
-  // (the music got quieter by default: 70 % was far too loud).
-  const savedDefault =
-    typeof raw['musicDefault'] === 'number' ? raw['musicDefault'] : OLD_DEFAULT_MUSIC_LEVEL;
-  if (level !== undefined && level !== savedDefault) out.musicLevel = level;
   const fullscreen = raw['fullscreen'];
   if (fullscreen === 'auto' || fullscreen === 'on' || fullscreen === 'off') {
     out.fullscreen = fullscreen;
@@ -213,13 +148,10 @@ export function loadOptions(): Options {
   return { ...DEFAULT_OPTIONS, ...(read(OPTIONS_KEY, validateOptions) ?? {}) };
 }
 
-/**
- * Merges `patch` into the stored options and returns the result. The default music level goes
- * with them, so a level left at the default follows a later one.
- */
+/** Merges `patch` into the stored options and returns the result. */
 export function saveOptions(patch: Partial<Options>): Options {
   const merged = { ...loadOptions(), ...patch };
-  write(OPTIONS_KEY, { ...merged, musicDefault: DEFAULT_OPTIONS.musicLevel });
+  write(OPTIONS_KEY, merged);
   return merged;
 }
 
@@ -257,7 +189,10 @@ function validateRecord(raw: unknown): RecordEntry | null {
   const time = raw['time'];
   const score = raw['score'];
   const input: InputRun[] | null = parseInputRuns(raw['input']);
+  const simVersion = raw['simVersion'];
+  const date = raw['date'];
   if (typeof time !== 'number' || typeof score !== 'number' || !input) return null;
+  if (typeof simVersion !== 'string' || typeof date !== 'string') return null;
   const character = raw['character'];
   return {
     time,
@@ -268,8 +203,8 @@ function validateRecord(raw: unknown): RecordEntry | null {
     playerName: typeof raw['playerName'] === 'string' ? raw['playerName'] : '',
     character: typeof character === 'number' && Number.isInteger(character) ? character : 0,
     withRival: raw['withRival'] === true,
-    simVersion: typeof raw['simVersion'] === 'string' ? raw['simVersion'] : '',
-    date: typeof raw['date'] === 'string' ? raw['date'] : '',
+    simVersion,
+    date,
   };
 }
 
@@ -283,10 +218,6 @@ export function loadRecord(levelId: number, mode: RunMode): RecordEntry | null {
 
 export function saveRecord(levelId: number, mode: RunMode, entry: RecordEntry): boolean {
   return write(recordKey(levelId, mode), entry);
-}
-
-export function removeRecord(levelId: number, mode: RunMode): void {
-  remove(recordKey(levelId, mode));
 }
 
 /**
@@ -304,34 +235,6 @@ export function isBetterRecord(
   const sort = rankingSort(mode, levelId);
   if (sort === 'time' && !candidate.finished) return false;
   return existing === null || compareRuns(sort, candidate, existing) < 0;
-}
-
-/** Stores `entry` when it beats the current record; returns whether it did. */
-export function updateRecord(levelId: number, mode: RunMode, entry: RecordEntry): boolean {
-  if (!isBetterRecord(mode, entry, loadRecord(levelId, mode), levelId)) return false;
-  return saveRecord(levelId, mode, entry);
-}
-
-/** Every stored record, in storage order. */
-export function listRecords(): StoredRecord[] {
-  const store = storage();
-  if (!store) return [];
-  const out: StoredRecord[] = [];
-  try {
-    const prefix = STORAGE_PREFIX + RECORD_PREFIX;
-    for (let i = 0; i < store.length; i++) {
-      const key = store.key(i);
-      if (!key || !key.startsWith(prefix)) continue;
-      const [level, mode] = key.slice(prefix.length).split('.');
-      const levelId = Number(level);
-      if (!Number.isInteger(levelId) || !isRunMode(mode)) continue;
-      const entry = loadRecord(levelId, mode);
-      if (entry) out.push({ levelId, mode, entry });
-    }
-  } catch {
-    // partial results are fine
-  }
-  return out;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -421,9 +324,8 @@ export function isLevelComplete(
 }
 
 /**
- * A level opens once the one before it is complete. The original counted the missions done
- * over all levels instead (`z[8]`, kept as `unlockThreshold`); a level already played under
- * that rule stays open.
+ * A level opens once the one before it is complete. (The original counted the missions done
+ * over all levels instead: `z[8]`, kept as `unlockThreshold`.)
  */
 export function isLevelUnlocked(
   progress: Progress,
@@ -431,7 +333,7 @@ export function isLevelUnlocked(
   levelId: number,
 ): boolean {
   if (levelId <= 0) return true;
-  return isLevelComplete(progress, levels, levelId - 1) || completedMissions(progress, levelId) > 0;
+  return isLevelComplete(progress, levels, levelId - 1);
 }
 
 export function markPrizeSeen(): void {
@@ -439,10 +341,6 @@ export function markPrizeSeen(): void {
   if (progress.prizeSeen) return;
   progress.prizeSeen = true;
   saveProgress(progress);
-}
-
-export function clearProgress(): void {
-  remove(PROGRESS_KEY);
 }
 
 export function clearRecords(): void {
@@ -459,21 +357,6 @@ export function clearRecords(): void {
   } catch {
     // nothing to do
   }
-}
-
-// ---------------------------------------------------------------------------------------------
-// Entries of earlier builds
-// ---------------------------------------------------------------------------------------------
-
-/**
- * Keys written by earlier builds that nothing reads any more: `identity` held the claimed
- * public name and its token from the time Parapet had an online leaderboard.
- */
-const LEGACY_KEYS = ['identity'];
-
-/** Removes the entries of earlier builds (call once at start-up). */
-export function dropLegacyEntries(): void {
-  for (const key of LEGACY_KEYS) remove(key);
 }
 
 // ---------------------------------------------------------------------------------------------

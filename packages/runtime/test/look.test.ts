@@ -9,7 +9,6 @@ import {
   expandPartKey,
   lookDataProblems,
   lookProblems,
-  parseColor,
   pivotOf,
   resolveLook,
   resolveSingle,
@@ -17,6 +16,7 @@ import {
   ribbonProblems,
   type LookData,
 } from '../src/render/Look.ts';
+import { parseColor } from '../src/render/color.ts';
 import {
   buildLookLayer,
   FALLTHROUGH,

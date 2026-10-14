@@ -24,7 +24,8 @@ grooves meeting above it, the temples flaring, the face narrowing to the chin; t
 behind the neck there. 76-78 are the profile blinking (shut, half shut) and wincing. Every grid
 marks Blaise's head box (`*_BOX`, its top left corner in the grid): `centred` pads the picture so
 the box sits where the game puts a head."""
-from heads import Pic
+from heads import Pic, centred
+from lookgen import padded_rows
 
 # Skin: highlight (cool, a little cyan) → light → mid-light → mid → shadow → deep (violet) → the
 # outline in shade.
@@ -101,26 +102,8 @@ FACES = {
 }
 
 
-def grid(rows):
-    w = max(len(r) for r in rows)
-    return [r.ljust(w, '.') for r in rows]
-
-
-def centred(pic, box):
-    """Pads a head picture so that Blaise's head box, whose top left corner is at `box` in it,
-    sits where the game draws a head: the box's pixel (8, 8) on the picture's centre, the width
-    even and the height odd like hers."""
-    c, r = box[0] + 8, box[1] + 8
-    w0, h0 = pic.w, pic.h
-    pad_l = max(0, w0 - 2 * c)
-    W = 2 * (c + pad_l)
-    pad_t = max(0, h0 - 1 - 2 * r)
-    H = 2 * (r + pad_t) + 1
-    return pic.pad(pad_l, pad_t, W - w0 - pad_l, H - h0 - pad_t)
-
-
 def overlay(rows, paint):
-    rows = [list(r) for r in grid(rows)]
+    rows = [list(r) for r in padded_rows(rows)]
     for y, row in (paint or {}).items():
         for x, c in enumerate(row):
             if c != '.':
@@ -133,7 +116,7 @@ def profile(face=None, extra=None):
 
 
 def front(extra=None):
-    return centred(Pic.text(grid(FRONT), legend(extra)), FRONT_BOX)
+    return centred(Pic.text(padded_rows(FRONT), legend(extra)), FRONT_BOX)
 
 
 if __name__ == '__main__':

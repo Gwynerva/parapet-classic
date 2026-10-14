@@ -1,7 +1,8 @@
 /**
- * Drawing into RGBA bytes without a canvas, for the tools and the tests: sprites blitted with
- * the original's transforms exactly like `SpriteSheet.drawSprite`, and composed poses
- * (`Pose.ts`) drawn like `SceneRenderer.drawObject`. Alpha is composited source-over.
+ * Drawing into RGBA bytes without a canvas, for the tools, the tests and the Lab: sprites
+ * blitted with the original's transforms exactly like `SpriteSheet.drawSprite`, composed poses
+ * (`Pose.ts`) drawn like `SceneRenderer.drawObject` (whole scenes: `SceneRaster.ts`), crops,
+ * layers and tinted sheets. Alpha is composited source-over.
  */
 import type { AtlasFrame } from '../content/types.ts';
 import { CMD_RECT, CMD_SPRITE, type DrawCommand } from './Pose.ts';
@@ -22,6 +23,26 @@ export interface RgbaSheet {
 
 export function newImage(width: number, height: number): RgbaImage {
   return { width, height, data: new Uint8ClampedArray(width * height * 4) };
+}
+
+/**
+ * Paints pixel art written as text into `dst` with its top-left at (x, y): each character is a
+ * pixel of `colourOf(character)`, written as it is (no blending); null leaves the pixel alone.
+ */
+export function paintRows(
+  dst: RgbaImage,
+  rows: readonly (readonly string[])[],
+  colourOf: (ch: string) => readonly number[] | null | undefined,
+  x = 0,
+  y = 0,
+): void {
+  for (let ry = 0; ry < rows.length; ry++) {
+    const row = rows[ry]!;
+    for (let rx = 0; rx < row.length; rx++) {
+      const c = colourOf(row[rx]!);
+      if (c) dst.data.set(c, ((y + ry) * dst.width + x + rx) * 4);
+    }
+  }
 }
 
 /** The sheet holding sprite `id` and its frame, following the fallbacks. */
@@ -66,9 +87,18 @@ export function blendPixel(
   d[o + 3] = Math.round(oa * 255);
 }
 
+/** The part of the target pixels may land on: `x0 <= x < x1`, `y0 <= y < y1`. */
+export interface ClipRect {
+  x0: number;
+  y0: number;
+  x1: number;
+  y1: number;
+}
+
 /**
  * Draws sprite `id` of `sheet` with its top-left corner (after the transform) at (x, y), like
- * `SpriteSheet.drawSprite` with a top-left anchor. `alpha` scales its opacity.
+ * `SpriteSheet.drawSprite` with a top-left anchor. `alpha` scales its opacity; nothing lands
+ * outside `clip`.
  */
 export function blitSprite(
   dst: RgbaImage,
@@ -78,6 +108,7 @@ export function blitSprite(
   y: number,
   transform = 0,
   alpha = 1,
+  clip?: ClipRect,
 ): void {
   const found = sheetFrame(sheet, id);
   if (!found) return;
@@ -91,10 +122,13 @@ export function blitSprite(
       const a = src.data[o + 3]!;
       if (a === 0) continue;
       const [dx, dy] = transformPixel(transform, sx, sy, w, h);
+      const px = (x | 0) + dx;
+      const py = (y | 0) + dy;
+      if (clip && (px < clip.x0 || py < clip.y0 || px >= clip.x1 || py >= clip.y1)) continue;
       blendPixel(
         dst,
-        (x | 0) + dx,
-        (y | 0) + dy,
+        px,
+        py,
         src.data[o]!,
         src.data[o + 1]!,
         src.data[o + 2]!,
@@ -102,6 +136,86 @@ export function blitSprite(
       );
     }
   }
+}
+
+/**
+ * Copies the `w × h` window of `src` at (sx, sy) to (dx, dy) of `dst`, source-over (opaque
+ * pixels are written as they are): a crop of a big picture, such as a level's art.
+ */
+export function blitImage(
+  dst: RgbaImage,
+  src: RgbaImage,
+  sx: number,
+  sy: number,
+  w: number,
+  h: number,
+  dx: number,
+  dy: number,
+): void {
+  for (let y = 0; y < h; y++) {
+    const ty = dy + y;
+    const fy = sy + y;
+    if (ty < 0 || ty >= dst.height || fy < 0 || fy >= src.height) continue;
+    for (let x = 0; x < w; x++) {
+      const tx = dx + x;
+      const fx = sx + x;
+      if (tx < 0 || tx >= dst.width || fx < 0 || fx >= src.width) continue;
+      const o = (fy * src.width + fx) * 4;
+      const a = src.data[o + 3]!;
+      if (a === 0) continue;
+      blendPixel(dst, tx, ty, src.data[o]!, src.data[o + 1]!, src.data[o + 2]!, a);
+    }
+  }
+}
+
+/**
+ * Lays `layer` (the size of `dst`) over `dst` at `alpha`: a see-through runner drawn whole
+ * first, so its limbs do not show through one another.
+ */
+export function compositeLayer(dst: RgbaImage, layer: RgbaImage, alpha: number): void {
+  const n = Math.min(dst.width * dst.height, layer.width * layer.height);
+  const w = dst.width;
+  for (let i = 0; i < n; i++) {
+    const o = i * 4;
+    const a = layer.data[o + 3]!;
+    if (a === 0) continue;
+    blendPixel(
+      dst,
+      i % w,
+      Math.floor(i / w),
+      layer.data[o]!,
+      layer.data[o + 1]!,
+      layer.data[o + 2]!,
+      Math.round(a * alpha),
+    );
+  }
+}
+
+/** A copy of `sheet` whose sprites `recolor(id)` returns a colour for are painted flat in it. */
+export function tintSheet(
+  sheet: RgbaSheet,
+  recolor: (id: number) => readonly [number, number, number] | null,
+): RgbaSheet {
+  const data = new Uint8ClampedArray(sheet.image.data);
+  const width = sheet.image.width;
+  sheet.frames.forEach((f, id) => {
+    const rgb = f ? recolor(id) : null;
+    if (!f || !rgb) return;
+    for (let y = f.y; y < f.y + f.h; y++) {
+      for (let x = f.x; x < f.x + f.w; x++) {
+        const o = (y * width + x) * 4;
+        if (data[o + 3]! < 128) continue;
+        data[o] = rgb[0];
+        data[o + 1] = rgb[1];
+        data[o + 2] = rgb[2];
+      }
+    }
+  });
+  return {
+    image: { width, height: sheet.image.height, data },
+    frames: sheet.frames,
+    fallback: sheet.fallback ?? null,
+  };
 }
 
 /**

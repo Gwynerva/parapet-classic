@@ -49,11 +49,6 @@ def slim_hand(pic):
     return pic
 
 
-def enc(rows, legend, pal):
-    """Text rows in a picture legend → rows in the look's palette."""
-    return [''.join(c if c in '.+' else pal.char(legend[c]) for c in r) for r in rows]
-
-
 def make(look_id, legend, pics, hands, accent, skirt=None, ribbons=None, effect=None):
     """Writes a look: the pictures drawn here (`pics`: key → rows in `legend`), the hands in their
     ramp, the heads and the profile's faces, the skirts (`skirt`: (rows on 34, rows on 38)) and the
@@ -92,9 +87,9 @@ def body(legend, chest, torso, legs, knee, shin, shoes, upper, fore, far_leg=AP.
     one shifted darker), the knee, the boot's shaft and its foot (39, 47, 48), the arms."""
     return {
         '57': chest[0], '61': chest[1], '34': torso[0], '38': torso[1],
-        '53': legs, '49': AP.shift(legs, far_leg), '62': knee, '30': shin,
-        '39': shoes[0], '43': AP.shift(shoes[0], AP.SHOE_FAR), '47': shoes[1], '48': shoes[2],
-        '5': upper, '9': AP.shift(upper, far_arm), '1': fore,
+        '53': legs, '49': shift(legs, far_leg), '62': knee, '30': shin,
+        '39': shoes[0], '43': shift(shoes[0], AP.SHOE_FAR), '47': shoes[1], '48': shoes[2],
+        '5': upper, '9': shift(upper, far_arm), '1': fore,
     }
 
 

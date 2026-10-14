@@ -3,8 +3,6 @@ wrist end of a forearm, a seam down a trouser leg, a band round an upper arm), a
 shoes and props drawn as text pictures."""
 import math
 
-from heads import Pic
-
 # Families by sprite id (Blaise's numbering) and how a family's upright picture lies.
 ARM_IDS = set(range(1, 13)) | set(range(17, 25))
 
@@ -83,19 +81,6 @@ def ramp_by(colour_ramp, value):
     """A colour of a ramp (light → dark) for value 0 (lightest) … 1 (darkest)."""
     i = round(max(0.0, min(1.0, value)) * (len(colour_ramp) - 1))
     return colour_ramp[i]
-
-
-def tone_of(colour, ramp):
-    """The index of `colour` in `ramp`, or of the nearest colour of it by lightness."""
-    from heads import lum
-    if colour is None:
-        return None
-    c = colour.lower()
-    for i, r in enumerate(ramp):
-        if r.lower() == c:
-            return i
-    l = lum(c)
-    return min(range(len(ramp)), key=lambda i: abs(lum(ramp[i]) - l))
 
 
 def relight(pic, id_, ramp, outline, light=(0.45, -0.6, 0.65), keep=()):

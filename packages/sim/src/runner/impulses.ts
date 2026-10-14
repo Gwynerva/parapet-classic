@@ -4,6 +4,7 @@
  */
 import { iabs, imin, isqrt } from '../math/int.ts';
 import type { RunnerState } from './runner.ts';
+import { DEFAULT_HANDS_DY } from './runner.ts';
 
 export function applyImpulse(r: RunnerState, z: number, dt: number, stepLen: number): void {
   let rotated = false;
@@ -147,7 +148,7 @@ export function applyImpulse(r: RunnerState, z: number, dt: number, stepLen: num
       r.x += r.handsDx;
       r.y += 1536 + r.handsDy;
       r.handsDx = 0;
-      r.handsDy = -1536;
+      r.handsDy = DEFAULT_HANDS_DY;
       break;
     case 5:
       if (r.phaseTime === 0) {

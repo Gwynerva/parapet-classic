@@ -17,7 +17,7 @@
  * run is played (`shown`); menus get every tap.
  */
 import type { SafeArea, Viewport } from '../render/Viewport.ts';
-import type { Direction } from './InputManager.ts';
+import type { ArrowKey } from '@parapet/sim';
 
 /** Which side the left/right (move) buttons sit on; up/down take the other side. */
 export type TouchLayout = 'move-left' | 'move-right';
@@ -42,7 +42,7 @@ export interface TouchRect {
 }
 
 export interface TouchButton extends TouchRect {
-  direction: Direction;
+  direction: ArrowKey;
 }
 
 export interface TouchControlsOptions {
@@ -69,11 +69,11 @@ export interface TouchControlsLayout {
   pause: TouchRect;
 }
 
-export type TouchHit = Direction | 'pause' | 'restart';
+export type TouchHit = ArrowKey | 'pause' | 'restart';
 
 /** Comfortable minimum touch target in CSS pixels. */
 const MIN_HIT_CSS_PX = 44;
-/** Direction buttons: this share of the screen's shorter side, within the bounds below. */
+/** ArrowKey buttons: this share of the screen's shorter side, within the bounds below. */
 const BUTTON_SHARE = 0.15;
 export const BUTTON_MIN_CSS_PX = 52;
 export const BUTTON_MAX_CSS_PX = 72;
@@ -287,7 +287,7 @@ function drawDisc(ctx: CanvasRenderingContext2D, r: TouchRect, pressed: boolean)
 /** Pixel-art arrow: a stepped triangle built from 1-px strips, centred in the disc. */
 function drawArrow(
   ctx: CanvasRenderingContext2D,
-  direction: Direction,
+  direction: ArrowKey,
   x: number,
   y: number,
   size: number,
@@ -383,10 +383,6 @@ export class TouchControls {
     this.relayout();
   }
 
-  get buttonList(): readonly TouchButton[] {
-    return this.placed?.buttons ?? [];
-  }
-
   /** Whether restart and pause are there: with the direction buttons, or on any touch screen. */
   get systemShown(): boolean {
     return this.enabled || this.viewport.isCoarsePointer;
@@ -420,10 +416,6 @@ export class TouchControls {
 
   release(pointerId: number): void {
     this.pressed.delete(pointerId);
-  }
-
-  releaseAll(): void {
-    this.pressed.clear();
   }
 
   isPressed(hit: TouchHit): boolean {

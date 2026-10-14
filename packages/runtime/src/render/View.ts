@@ -15,13 +15,13 @@ export interface CameraPos {
   y: number;
 }
 
+/** World units per logical pixel (a tile is 1024 units and 32 pixels). */
+export const UNITS_PER_PX = 32;
+
 /** World units → screen pixels relative to the camera (`(n - cam) * 32 >> 10`). */
 export function toScreen(units: number, cam: number): number {
   return ((units - cam) * 32) >> 10;
 }
-
-/** Units per pixel shift: `px = units >> UNIT_SHIFT`. */
-export const UNIT_SHIFT = 5;
 
 /**
  * Screen pixels per logical pixel where `ctx` draws now (the viewport's scale, times any zoom of

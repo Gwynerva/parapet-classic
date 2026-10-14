@@ -10,7 +10,7 @@ the game:
 
 The original's twelve rival recordings (05 §Rivals) are the only human input the jar holds.
 Every entry is a single press on a single step: `UP`, `DOWN`, or an arrow already resolved to
-FORWARD or BACK. There is no held key and no two keys at once. A run has 30 to 65 presses, half
+FORWARD or BACK. There is no held key and no two keys at once. A run has 21 to 65 presses, half
 of them a second or more apart (median gap 35 steps); the closest pairs are 1 to 3 steps
 apart. The runner does most of the work itself: a press starts a move that plays out on its
 own.

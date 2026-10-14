@@ -40,7 +40,7 @@ Background objects have 1, 3 or 5 frames that encode mission state: frame pairs 
 
 ## Character animation
 
-- The character is the single object of `k0`: 463 keyframes, pivot (50, 76), 134×142, 19 body-part sprites (see 01).
+- The character is the single object of `k0`: 463 keyframes, pivot (50, 76), 134×142, 19 layers of sprites using 65 sprite ids; a keyframe may put any sprite in any layer (see 01 and [findings 08](../findings/08-one-vector-runner/)).
 - **Clips** (`short_h`, blob 17): at an offset, `count` followed by `count` keyframe indices.
 - Move table fields [6] (clip offset) and [7] (mode); flags 0x200 / 0x400 select 15 / 10 fps; 0x20 disables blending.
 - Per-entity visual state is class `g` (set at line 5702, advanced at line 5786); mode `d` picks the frame index `b`:
@@ -63,7 +63,7 @@ Background objects have 1, 3 or 5 frames that encode mission state: frame pairs 
 
 - Character 0 is Blaise and uses the default heads 25–29.
 - Character c ≥ 1 swaps those heads for `82 + 5(c−1) … +4`.
-- Male characters (1, 2, 4, 7, 9) also swap body parts 34–38 → 127–131 and 57–61 → 132–136, and hide sprites 13–16 (Blaise's ponytail).
+- Every character but Blaise hides sprites 13–16 (Blaise's ponytail); the male characters (1, 2, 4, 7, 9) also swap body parts 34–38 → 127–131 and 57–61 → 132–136.
 - Ghosts (earlier hot-seat players) replace every body part with the 8×8 sprite 80 (line 3348).
   Parapet Classic does not use the dots: rivals and the ghosts of recorded runs are drawn as
   "echoes" (`packages/runtime/src/render/EchoRenderer.ts`), a recoloured hologram of the same

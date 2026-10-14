@@ -4,7 +4,8 @@
  * their own rule (`bosses.ts`).
  */
 import { completedMissions, type Progress } from '@parapet/runtime/storage/profile.ts';
-import type { GameContent } from '../assets/content.ts';
+import type { GameContent } from '@parapet/runtime/content/types.ts';
+import type { Skin } from './Context.ts';
 
 /** Characters open from the start: Blaise (0) and Playman (1). */
 export const STARTER_CHARACTERS: readonly number[] = [0, 1];
@@ -32,4 +33,9 @@ export function isCharacterOpen(
       (id) => completedMissions(progress, id) >= (content.missions.levels[id]?.missionCount ?? 0),
     )
   );
+}
+
+/** The name of one of the original's characters ('' for one the skins do not list). */
+export function skinName(skins: readonly Skin[], character: number): string {
+  return skins.find((s) => s.character === character)?.name ?? '';
 }

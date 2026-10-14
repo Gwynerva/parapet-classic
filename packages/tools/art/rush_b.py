@@ -20,7 +20,6 @@ from tricks import tricks
 
 import rb_looks  # noqa: F401  (the looks)
 from rb_looks import LOOK_IDS
-from rb_kit import _hash
 
 
 class FxPalette:

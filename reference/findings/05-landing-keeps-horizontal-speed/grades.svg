@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="686" height="524" viewBox="0 0 686 524" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" style="font-variant-numeric: tabular-nums">
+<title id="t">A landing is judged by the vertical speed alone</title>
+<desc id="d">The runner runs off a roof and falls 1 to 20 tiles onto flat ground (horizontal speed 3400 every time)</desc>
+<rect x="0.5" y="0.5" width="685" height="523" rx="10" fill="#161b22" stroke="#30363d"/>
+<text x="20" y="30" font-size="16" font-weight="600" fill="#e6edf3">A landing is judged by the vertical speed alone</text>
+<text x="20" y="48" font-size="12" fill="#8b949e">The runner runs off a roof and falls 1 to 20 tiles onto flat ground (horizontal speed 3400 every time)</text>
+<line x1="76" y1="272" x2="596" y2="272" stroke="#30363d" stroke-width="1"/>
+<text x="68" y="276" font-size="11" fill="#8b949e" text-anchor="end">0</text>
+<line x1="76" y1="238.7" x2="596" y2="238.7" stroke="#30363d" stroke-width="1"/>
+<text x="68" y="242.7" font-size="11" fill="#8b949e" text-anchor="end">3000</text>
+<line x1="76" y1="205.3" x2="596" y2="205.3" stroke="#30363d" stroke-width="1"/>
+<text x="68" y="209.3" font-size="11" fill="#8b949e" text-anchor="end">6000</text>
+<line x1="76" y1="172" x2="596" y2="172" stroke="#30363d" stroke-width="1"/>
+<text x="68" y="176" font-size="11" fill="#8b949e" text-anchor="end">9000</text>
+<line x1="76" y1="138.7" x2="596" y2="138.7" stroke="#30363d" stroke-width="1"/>
+<text x="68" y="142.7" font-size="11" fill="#8b949e" text-anchor="end">12000</text>
+<line x1="76" y1="105.3" x2="596" y2="105.3" stroke="#30363d" stroke-width="1"/>
+<text x="68" y="109.3" font-size="11" fill="#8b949e" text-anchor="end">15000</text>
+<line x1="76" y1="72" x2="596" y2="72" stroke="#30363d" stroke-width="1"/>
+<text x="68" y="76" font-size="11" fill="#8b949e" text-anchor="end">18000</text>
+<line x1="76" y1="197" x2="596" y2="197" stroke="#d95926" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="602" y="201" font-size="11" fill="#d95926">6750 stumble</text>
+<line x1="76" y1="166.4" x2="596" y2="166.4" stroke="#3987e5" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="602" y="170.4" font-size="11" fill="#3987e5">9500 roll</text>
+<line x1="76" y1="158.7" x2="596" y2="158.7" stroke="#d95926" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="602" y="158.4" font-size="11" fill="#d95926">10200 crash</text>
+<line x1="76" y1="105.3" x2="596" y2="105.3" stroke="#3987e5" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="602" y="109.3" font-size="11" fill="#3987e5">15000 crash</text>
+<circle cx="89" cy="217.7" r="4" fill="#e6edf3"><title>1 tiles: 4883 at touchdown</title></circle>
+<circle cx="115" cy="200.6" r="4" fill="#e6edf3"><title>2 tiles: 6425 at touchdown</title></circle>
+<circle cx="141" cy="186.3" r="4" fill="#e6edf3"><title>3 tiles: 7710 at touchdown</title></circle>
+<circle cx="167" cy="172.1" r="4" fill="#e6edf3"><title>4 tiles: 8995 at touchdown</title></circle>
+<circle cx="193" cy="163.5" r="4" fill="#e6edf3"><title>5 tiles: 9766 at touchdown</title></circle>
+<circle cx="219" cy="152.1" r="4" fill="#e6edf3"><title>6 tiles: 10794 at touchdown</title></circle>
+<circle cx="245" cy="143.5" r="4" fill="#e6edf3"><title>7 tiles: 11565 at touchdown</title></circle>
+<circle cx="271" cy="134.9" r="4" fill="#e6edf3"><title>8 tiles: 12336 at touchdown</title></circle>
+<circle cx="297" cy="126.4" r="4" fill="#e6edf3"><title>9 tiles: 13107 at touchdown</title></circle>
+<circle cx="323" cy="120.7" r="4" fill="#e6edf3"><title>10 tiles: 13621 at touchdown</title></circle>
+<circle cx="349" cy="112.1" r="4" fill="#e6edf3"><title>11 tiles: 14392 at touchdown</title></circle>
+<circle cx="375" cy="106.4" r="4" fill="#e6edf3"><title>12 tiles: 14906 at touchdown</title></circle>
+<circle cx="401" cy="100.7" r="4" fill="#e6edf3"><title>13 tiles: 15420 at touchdown</title></circle>
+<circle cx="427" cy="92.1" r="4" fill="#e6edf3"><title>14 tiles: 16191 at touchdown</title></circle>
+<circle cx="453" cy="86.4" r="4" fill="#e6edf3"><title>15 tiles: 16705 at touchdown</title></circle>
+<circle cx="479" cy="80.7" r="4" fill="#e6edf3"><title>16 tiles: 17219 at touchdown</title></circle>
+<circle cx="505" cy="79.8" r="4" fill="#e6edf3"><title>17 tiles: 17300 at touchdown</title></circle>
+<circle cx="531" cy="79.8" r="4" fill="#e6edf3"><title>18 tiles: 17300 at touchdown</title></circle>
+<circle cx="557" cy="79.8" r="4" fill="#e6edf3"><title>19 tiles: 17300 at touchdown</title></circle>
+<circle cx="583" cy="79.8" r="4" fill="#e6edf3"><title>20 tiles: 17300 at touchdown</title></circle>
+<text x="20" y="172" font-size="11" fill="#8b949e" text-anchor="middle" transform="rotate(-90 20 172)">vertical speed at touchdown</text>
+<text x="68" y="325" font-size="11" fill="#d95926" text-anchor="end">no key</text>
+<rect x="77" y="312" width="24" height="18" fill="#199e70" rx="3"><title>1 tiles, no key: lands and runs on</title></rect>
+<rect x="103" y="312" width="24" height="18" fill="#199e70" rx="3"><title>2 tiles, no key: lands and runs on</title></rect>
+<rect x="129" y="312" width="24" height="18" fill="#c98500" rx="3"><title>3 tiles, no key: stumble (82): a fail, speed halved</title></rect>
+<rect x="155" y="312" width="24" height="18" fill="#c98500" rx="3"><title>4 tiles, no key: stumble (82): a fail, speed halved</title></rect>
+<rect x="181" y="312" width="24" height="18" fill="#c98500" rx="3"><title>5 tiles, no key: stumble (82): a fail, speed halved</title></rect>
+<rect x="207" y="312" width="24" height="18" fill="#e66767" rx="3"><title>6 tiles, no key: crash (84): a fail, about 4 s to get up</title></rect>
+<rect x="233" y="312" width="24" height="18" fill="#e66767" rx="3"><title>7 tiles, no key: crash (84): a fail, about 4 s to get up</title></rect>
+<rect x="259" y="312" width="24" height="18" fill="#e66767" rx="3"><title>8 tiles, no key: crash (84): a fail, about 4 s to get up</title></rect>
+<rect x="285" y="312" width="24" height="18" fill="#e66767" rx="3"><title>9 tiles, no key: crash (84): a fail, about 4 s to get up</title></rect>
+<rect x="311" y="312" width="24" height="18" fill="#e66767" rx="3"><title>10 tiles, no key: crash (84): a fail, about 4 s to get up</title></rect>
+<rect x="337" y="312" width="24" height="18" fill="#e66767" rx="3"><title>11 tiles, no key: crash (84): a fail, about 4 s to get up</title></rect>
+<rect x="363" y="312" width="24" height="18" fill="#e66767" rx="3"><title>12 tiles, no key: crash (84): a fail, about 4 s to get up</title></rect>
+<rect x="389" y="312" width="24" height="18" fill="#e66767" rx="3"><title>13 tiles, no key: crash (84): a fail, about 4 s to get up</title></rect>
+<rect x="415" y="312" width="24" height="18" fill="#e66767" rx="3"><title>14 tiles, no key: crash (84): a fail, about 4 s to get up</title></rect>
+<rect x="441" y="312" width="24" height="18" fill="#e66767" rx="3"><title>15 tiles, no key: crash (84): a fail, about 4 s to get up</title></rect>
+<rect x="467" y="312" width="24" height="18" fill="#e66767" rx="3"><title>16 tiles, no key: crash (84): a fail, about 4 s to get up</title></rect>
+<rect x="493" y="312" width="24" height="18" fill="#e66767" rx="3"><title>17 tiles, no key: crash (84): a fail, about 4 s to get up</title></rect>
+<rect x="519" y="312" width="24" height="18" fill="#e66767" rx="3"><title>18 tiles, no key: crash (84): a fail, about 4 s to get up</title></rect>
+<rect x="545" y="312" width="24" height="18" fill="#e66767" rx="3"><title>19 tiles, no key: crash (84): a fail, about 4 s to get up</title></rect>
+<rect x="571" y="312" width="24" height="18" fill="#e66767" rx="3"><title>20 tiles, no key: crash (84): a fail, about 4 s to get up</title></rect>
+<text x="68" y="347" font-size="11" fill="#3987e5" text-anchor="end">DOWN</text>
+<rect x="77" y="334" width="24" height="18" fill="#199e70" rx="3"><title>1 tiles, DOWN: lands and runs on (with DOWN: state 25, 25 points)</title></rect>
+<rect x="103" y="334" width="24" height="18" fill="#199e70" rx="3"><title>2 tiles, DOWN: lands and runs on (with DOWN: state 25, 25 points)</title></rect>
+<rect x="129" y="334" width="24" height="18" fill="#199e70" rx="3"><title>3 tiles, DOWN: lands and runs on (with DOWN: state 25, 25 points)</title></rect>
+<rect x="155" y="334" width="24" height="18" fill="#199e70" rx="3"><title>4 tiles, DOWN: lands and runs on (with DOWN: state 25, 25 points)</title></rect>
+<rect x="181" y="334" width="24" height="18" fill="#3987e5" rx="3"><title>5 tiles, DOWN: landing roll (24, then 21: 70 points)</title></rect>
+<rect x="207" y="334" width="24" height="18" fill="#3987e5" rx="3"><title>6 tiles, DOWN: landing roll (24, then 21: 70 points)</title></rect>
+<rect x="233" y="334" width="24" height="18" fill="#3987e5" rx="3"><title>7 tiles, DOWN: landing roll (24, then 21: 70 points)</title></rect>
+<rect x="259" y="334" width="24" height="18" fill="#3987e5" rx="3"><title>8 tiles, DOWN: landing roll (24, then 21: 70 points)</title></rect>
+<rect x="285" y="334" width="24" height="18" fill="#3987e5" rx="3"><title>9 tiles, DOWN: landing roll (24, then 21: 70 points)</title></rect>
+<rect x="311" y="334" width="24" height="18" fill="#3987e5" rx="3"><title>10 tiles, DOWN: landing roll (24, then 21: 70 points)</title></rect>
+<rect x="337" y="334" width="24" height="18" fill="#3987e5" rx="3"><title>11 tiles, DOWN: landing roll (24, then 21: 70 points)</title></rect>
+<rect x="363" y="334" width="24" height="18" fill="#3987e5" rx="3"><title>12 tiles, DOWN: landing roll (24, then 21: 70 points)</title></rect>
+<rect x="389" y="334" width="24" height="18" fill="#e66767" rx="3"><title>13 tiles, DOWN: crash (84): a fail, about 4 s to get up</title></rect>
+<rect x="415" y="334" width="24" height="18" fill="#e66767" rx="3"><title>14 tiles, DOWN: crash (84): a fail, about 4 s to get up</title></rect>
+<rect x="441" y="334" width="24" height="18" fill="#e66767" rx="3"><title>15 tiles, DOWN: crash (84): a fail, about 4 s to get up</title></rect>
+<rect x="467" y="334" width="24" height="18" fill="#e66767" rx="3"><title>16 tiles, DOWN: crash (84): a fail, about 4 s to get up</title></rect>
+<rect x="493" y="334" width="24" height="18" fill="#e66767" rx="3"><title>17 tiles, DOWN: crash (84): a fail, about 4 s to get up</title></rect>
+<rect x="519" y="334" width="24" height="18" fill="#e66767" rx="3"><title>18 tiles, DOWN: crash (84): a fail, about 4 s to get up</title></rect>
+<rect x="545" y="334" width="24" height="18" fill="#e66767" rx="3"><title>19 tiles, DOWN: crash (84): a fail, about 4 s to get up</title></rect>
+<rect x="571" y="334" width="24" height="18" fill="#e66767" rx="3"><title>20 tiles, DOWN: crash (84): a fail, about 4 s to get up</title></rect>
+<text x="89" y="368" font-size="11" fill="#8b949e" text-anchor="middle">1</text>
+<text x="115" y="368" font-size="11" fill="#8b949e" text-anchor="middle">2</text>
+<text x="167" y="368" font-size="11" fill="#8b949e" text-anchor="middle">4</text>
+<text x="219" y="368" font-size="11" fill="#8b949e" text-anchor="middle">6</text>
+<text x="271" y="368" font-size="11" fill="#8b949e" text-anchor="middle">8</text>
+<text x="323" y="368" font-size="11" fill="#8b949e" text-anchor="middle">10</text>
+<text x="375" y="368" font-size="11" fill="#8b949e" text-anchor="middle">12</text>
+<text x="427" y="368" font-size="11" fill="#8b949e" text-anchor="middle">14</text>
+<text x="479" y="368" font-size="11" fill="#8b949e" text-anchor="middle">16</text>
+<text x="531" y="368" font-size="11" fill="#8b949e" text-anchor="middle">18</text>
+<text x="583" y="368" font-size="11" fill="#8b949e" text-anchor="middle">20</text>
+<text x="336" y="382" font-size="11" fill="#8b949e" text-anchor="middle">drop, in tiles</text>
+<rect x="20" y="383" width="10" height="10" fill="#c98500" rx="2"></rect>
+<text x="35" y="392" font-size="12" fill="#e6edf3">stumble (82): a fail, speed halved</text>
+<rect x="20" y="403" width="10" height="10" fill="#e66767" rx="2"></rect>
+<text x="35" y="412" font-size="12" fill="#e6edf3">crash (84): a fail, about 4 s to get up</text>
+<rect x="20" y="423" width="10" height="10" fill="#199e70" rx="2"></rect>
+<text x="35" y="432" font-size="12" fill="#e6edf3">lands and runs on (with DOWN: state 25, 25 points)</text>
+<rect x="20" y="443" width="10" height="10" fill="#3987e5" rx="2"></rect>
+<text x="35" y="452" font-size="12" fill="#e6edf3">landing roll (24, then 21: 70 points)</text>
+<line x1="20" y1="468" x2="30" y2="468" stroke="#d95926" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="35" y="472" font-size="12" fill="#e6edf3">thresholds without a key (conditions 56, 57)</text>
+<line x1="20" y1="488" x2="30" y2="488" stroke="#3987e5" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="35" y="492" font-size="12" fill="#e6edf3">thresholds with DOWN (58, 59)</text>
+</svg>

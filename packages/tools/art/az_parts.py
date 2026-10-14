@@ -15,6 +15,7 @@ Every picture is text with a legend of semantic characters, shared by the looks:
 
 Pictures face right (the toe, the bust); upright limbs lie along y (legs) or x (arms: the
 shoulder or the elbow on the left)."""
+from lookgen import check_pictures
 
 # --------------------------------------------------------------------------------------------
 # Scholar (Mass Effect 1): the sage-green dress-coat, the asymmetric light yoke edged with thick
@@ -815,19 +816,4 @@ ILLIUM_1 = [
     '.yuyuyuy',
 ]
 
-def check(name, rows):
-    w = len(rows[0])
-    bad = [(i, len(r)) for i, r in enumerate(rows) if len(r) != w]
-    if bad:
-        raise ValueError(f'{name}: rows {bad} not {w} wide')
-    return rows
-
-
-def shift(rows, mapping):
-    """A picture with its characters shifted (the far limb a tone darker)."""
-    return [''.join(mapping.get(c, c) for c in r) for r in rows]
-
-
-for _n, _v in list(globals().items()):
-    if _n.isupper() and isinstance(_v, list) and _v and isinstance(_v[0], str):
-        check(_n, _v)
+check_pictures(globals())

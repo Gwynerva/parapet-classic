@@ -42,11 +42,6 @@ def slim_hand(pic):
     return pic
 
 
-def enc(rows, legend, pal):
-    """Text rows in a picture legend → rows in the look's palette ('.' and '+' kept)."""
-    return [''.join(c if c in '.+' else pal.char(legend[c]) for c in r) for r in rows]
-
-
 SKIN = {k: H.SKIN[k] for k in 'WSstTD'}
 
 
@@ -65,14 +60,14 @@ def body(cut, legend_far=None, arms='bare'):
     far = legend_far or P.FAR
     arm, plate, fore = P.ARM_5, P.PLATE_5, P.FORE_1_RIGHT
     if arms != 'bare':
-        arm, fore = P.shift(arm, arms), P.shift(fore, arms)
-        plate = P.shift(plate, {k: v for k, v in arms.items() if k in 'StT' or k == 's'})
+        arm, fore = shift(arm, arms), shift(fore, arms)
+        plate = shift(plate, {k: v for k, v in arms.items() if k in 'StT' or k == 's'})
     pics = {
         '57': cut['57'], '61': cut['61'], '34': cut['34'], '38': cut['38'],
-        '5:right': arm, '9:right': P.shift(arm, far), '5:left': plate, '9:left': P.shift(plate, far),
+        '5:right': arm, '9:right': shift(arm, far), '5:left': plate, '9:left': shift(plate, far),
         '1:right': fore, '1:left': P.FORE_1_LEFT,
-        '53': cut['53'], '49': P.shift(cut['53'], far), '62': cut['62'], '30': cut['30'],
-        '39': cut['39'], '43': P.shift(cut['39'], far), '47': cut['47'], '48': cut['48'],
+        '53': cut['53'], '49': shift(cut['53'], far), '62': cut['62'], '30': cut['30'],
+        '39': cut['39'], '43': shift(cut['39'], far), '47': cut['47'], '48': cut['48'],
     }
     return pics
 
@@ -165,14 +160,14 @@ NOIRE = {
 }
 NOIRE_GLOVE = ['#5c5a68', '#3c3a46', '#28262f', '#1a1820', '#0c0b10']
 NOIRE_CUT = {'57': P.NOIRE_57, '61': P.NOIRE_61, '34': P.NOIRE_34, '38': P.NOIRE_38,
-             '53': P.shift(P.THIGH_53, P.NOIRE_LEG), '62': P.NOIRE_62, '30': P.NOIRE_30, '39': P.NOIRE_39,
+             '53': shift(P.THIGH_53, P.NOIRE_LEG), '62': P.NOIRE_62, '30': P.NOIRE_30, '39': P.NOIRE_39,
              '47': P.NOIRE_47, '48': P.NOIRE_48}
 
 
 def noire():
     pics = body(NOIRE_CUT, arms=P.NOIRE_ARM)
-    pics['5:left'] = P.shift(P.PLATE_5, P.NOIRE_PLATE)
-    pics['9:left'] = P.shift(pics['5:left'], P.FAR)
+    pics['5:left'] = shift(P.PLATE_5, P.NOIRE_PLATE)
+    pics['9:left'] = shift(pics['5:left'], P.FAR)
     return make('noire', NOIRE, pics, NOIRE_GLOVE, '#e8304e', head='noire',
                 attachments={'rifle': ('back', RIFLE)}, turn=['rifle@57'])
 
@@ -206,8 +201,8 @@ ODILE_FAR = {**P.FAR, 'k': 'x'}
 
 def odile():
     pics = body(ODILE_CUT, legend_far=ODILE_FAR)
-    pics['5:left'] = P.shift(P.PLATE_5, ODILE_PLATE)
-    pics['9:left'] = P.shift(pics['5:left'], P.FAR)
+    pics['5:left'] = shift(P.PLATE_5, ODILE_PLATE)
+    pics['9:left'] = shift(pics['5:left'], P.FAR)
     return make('odile', ODILE, pics, ODILE_GLOVE, '#4cc0b0', head='odile',
                 attachments={'rifle': ('back', RIFLE), 'tutu': ('hips', {'34': P.TUTU_34, '38': P.TUTU_38})},
                 turn=['rifle@57', 'tutu@34'])

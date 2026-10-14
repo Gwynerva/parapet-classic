@@ -5,8 +5,8 @@
  * decorative birds (type 2) that replaced tile 63 and fly off when the player comes close.
  */
 import { approxLength, idiv, type Level, type Point, type WorldEvent } from '@parapet/sim';
-import { ANCHOR_BOTTOM_CENTER, ANCHOR_CENTER, type SpriteSheet } from './SpriteSheet.ts';
-import { toScreen, type CameraPos, type ViewSize } from './View.ts';
+import { ANCHOR_BOTTOM_CENTER, ANCHOR_CENTER, Transform, type SpriteSheet } from './SpriteSheet.ts';
+import { toScreen, type CameraPos } from './View.ts';
 
 export const SLOT_COUNT = 40;
 const TYPE_NONE = 0;
@@ -172,13 +172,7 @@ export class Particles {
    * `void_r(int)`: draw the background (`foreground = false`) or foreground pass.
    * `clock` is the game clock in ms (bird wing flaps).
    */
-  draw(
-    ctx: CanvasRenderingContext2D,
-    cam: CameraPos,
-    _view: ViewSize,
-    clock: number,
-    foreground = false,
-  ): void {
+  draw(ctx: CanvasRenderingContext2D, cam: CameraPos, clock: number, foreground = false): void {
     const pass = foreground ? FOREGROUND : 0;
     for (let i = 0; i < SLOT_COUNT; i++) {
       const flags = this.type[i]!;
@@ -201,7 +195,7 @@ export class Particles {
           this.sheet.drawSprite(ctx, BIRD_RESTING, sx, sy, 0, ANCHOR_BOTTOM_CENTER);
         } else {
           const frame = (clock >> 7) & 1;
-          const transform = (i & 1) === 1 ? 0 : 4;
+          const transform = (i & 1) === 1 ? Transform.NONE : Transform.MIRROR;
           this.sheet.drawSprite(ctx, BIRD_FLYING + frame, sx, sy, transform, ANCHOR_BOTTOM_CENTER);
         }
       }

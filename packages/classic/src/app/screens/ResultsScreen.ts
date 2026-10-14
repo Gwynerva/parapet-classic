@@ -15,13 +15,14 @@ import {
   isRankedMode,
   LEVEL_COUNT,
   MAX_REPLAY_NAME_LENGTH,
-  missionSlot,
-  rankingSort,
   type MissionOutcome,
+  missionSlot,
+  modeForMissionType,
+  rankingSort,
   type Replay,
   type RunMode,
 } from '@parapet/sim';
-import { formatTime, Theme, type GameContext } from '../Context.ts';
+import { formatResult, formatTime, Theme, type GameContext } from '../Context.ts';
 import { countEvent } from '../analytics.ts';
 import type { Screen, UiGesture, UiKey, UiPointer, UiWheel } from '@parapet/runtime/app/Screen.ts';
 import { Menu, type MenuItem } from '@parapet/runtime/ui/Menu.ts';
@@ -132,7 +133,7 @@ export class ResultsScreen implements Screen {
   constructor(ctx: GameContext, play: PlayScreen) {
     this.ctx = ctx;
     this.play = play;
-    this.menu = new Menu(ctx.fonts.text, ctx.fonts.small);
+    this.menu = new Menu(ctx.fonts.text);
     const world = play.session.world;
     const mission = ctx.content.missions.levels[play.setup.levelId]!;
     const result = world.rules.result;
@@ -284,7 +285,7 @@ export class ResultsScreen implements Screen {
     const { i18n } = this.ctx;
     const theirs = ghost.outcome;
     const byScore = this.sort === 'score';
-    const value = byScore ? String(theirs.score) : formatTime(theirs.time);
+    const value = formatResult(this.play.setup.mode, this.play.setup.levelId, theirs);
     const comparable = byScore || (this.finished && theirs.finished);
     const margin = !comparable
       ? ''
@@ -297,7 +298,7 @@ export class ResultsScreen implements Screen {
         i18n.t(`ghost.verdict.best.${this.race}`, { margin }),
       ];
     }
-    const name = ghost.replay.playerName || i18n.t('player.name');
+    const name = runnerName(this.ctx, ghost.replay);
     return [
       i18n.t('ghost.result.challenger', { name, value }),
       i18n.t(`ghost.verdict.challenger.${this.race}`, { name, margin }),
@@ -400,7 +401,7 @@ export class ResultsScreen implements Screen {
     for (let i = 1; i < count; i++) {
       const m = (slot + i) % count;
       if (isMissionCompleted(progress, setup.levelId, m)) continue;
-      const mode = modeOf(level.missionTypes[m]!);
+      const mode = modeForMissionType(level.missionTypes[m]!);
       if (mode) return { levelId: setup.levelId, mode };
     }
     const next = setup.levelId + 1;
@@ -408,7 +409,7 @@ export class ResultsScreen implements Screen {
       const nextLevel = missions[next]!;
       for (let m = 0; m < nextLevel.missionTypes.length; m++) {
         if (isMissionCompleted(progress, next, m)) continue;
-        const mode = modeOf(nextLevel.missionTypes[m]!);
+        const mode = modeForMissionType(nextLevel.missionTypes[m]!);
         if (mode) return { levelId: next, mode };
       }
     }
@@ -544,7 +545,7 @@ export class ResultsScreen implements Screen {
     this.ctx.player.name = name;
     savePlayer(this.ctx.player);
     const record = loadRecord(setup.levelId, setup.mode);
-    if (record && record.date && this.newRecord) {
+    if (record && this.newRecord) {
       record.playerName = name;
       saveRecord(setup.levelId, setup.mode, record);
     }
@@ -569,14 +570,7 @@ export class ResultsScreen implements Screen {
     });
     const { text, menu } = this.box;
     this.parts = this.measure(text.w);
-    Object.assign(this.menu.layout, {
-      x: menu.x,
-      y: menu.y,
-      width: menu.w,
-      rowHeight: row,
-      align: 'center',
-    });
-    this.menu.fit(menu.h);
+    this.menu.place(menu, row);
     this.nameRect = {
       x: text.x + 8,
       y: text.y + this.parts.nameField,
@@ -788,22 +782,3 @@ const QUOTE_MARK: readonly (readonly [number, number])[] = [
   [1, 3],
   [2, 3],
 ];
-
-function modeOf(type: number): RunMode | null {
-  switch (type) {
-    case 0:
-      return 'sprint';
-    case 1:
-      return 'flags';
-    case 2:
-      return 'score';
-    case 3:
-      return 'challenge';
-    case 4:
-      return 'warmup1';
-    case 5:
-      return 'warmup2';
-    default:
-      return null;
-  }
-}

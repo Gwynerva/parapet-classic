@@ -1,0 +1,353 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="696" height="574" viewBox="0 0 696 574" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" style="font-variant-numeric: tabular-nums">
+<title id="t">The parkour as a table: 135 states</title>
+<desc id="d">Every state of the original’s move table; the transitions of a state are tried first, then its shared list’s</desc>
+<rect x="0.5" y="0.5" width="695" height="573" rx="10" fill="#161b22" stroke="#30363d"/>
+<text x="20" y="30" font-size="16" font-weight="600" fill="#e6edf3">The parkour as a table: 135 states</text>
+<text x="20" y="48" font-size="12" fill="#8b949e">Every state of the original’s move table; the transitions of a state are tried first, then its shared list’s</text>
+<rect x="20" y="68" width="40" height="34" fill="#3987e5" rx="4" opacity="0.4"><title>State 0, 900 time units, then 2, 2 transitions of its own, then list 1</title></rect>
+<text x="40" y="85" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">0</text>
+<rect x="64.5" y="68.5" width="39" height="33" fill="none" rx="4" stroke="#8b949e"><title>State 1, 0 time units, 15 transitions of its own</title></rect>
+<text x="84" y="85" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">1</text>
+<rect x="108" y="68" width="40" height="34" fill="#3987e5" rx="4" opacity="0.4"><title>State 2, 0 time units, 4 transitions of its own, then list 1</title></rect>
+<text x="128" y="85" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">2</text>
+<rect x="152" y="68" width="40" height="34" fill="#3987e5" rx="4" opacity="0.4"><title>State 3, 0 time units, 3 transitions of its own, then list 1</title></rect>
+<text x="172" y="85" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">3</text>
+<rect x="196" y="68" width="40" height="34" fill="#3987e5" rx="4" opacity="0.4"><title>State 4, 0 time units, 4 transitions of its own, then list 1</title></rect>
+<text x="216" y="85" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">4</text>
+<rect x="240" y="68" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 5, 0 time units, 2 transitions of its own</title></rect>
+<rect x="241.5" y="69.5" width="37" height="31" fill="none" rx="3" stroke="#e66767"></rect>
+<text x="260" y="85" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">5</text>
+<rect x="284" y="68" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 6, 600 time units, then 2, 0 transitions of its own</title></rect>
+<text x="304" y="85" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">6</text>
+<rect x="328" y="68" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 7, 400 time units, then 2, 0 transitions of its own</title></rect>
+<text x="348" y="85" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">7</text>
+<rect x="372" y="68" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 8, 390 time units, then 2, 0 transitions of its own</title></rect>
+<text x="392" y="85" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">8</text>
+<rect x="416.5" y="68.5" width="39" height="33" fill="none" rx="4" stroke="#8b949e"><title>State 9, 0 time units, 22 transitions of its own</title></rect>
+<text x="436" y="85" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">9</text>
+<rect x="460.5" y="68.5" width="39" height="33" fill="none" rx="4" stroke="#8b949e"><title>State 10, 0 time units, 12 transitions of its own, then list 9</title></rect>
+<text x="480" y="85" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">10</text>
+<rect x="504" y="68" width="40" height="34" fill="#199e70" rx="4" opacity="0.4"><title>State 11, 510 time units, then 12, 0 transitions of its own, then list 10</title></rect>
+<text x="524" y="85" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">11</text>
+<rect x="548" y="68" width="40" height="34" fill="#199e70" rx="4" opacity="0.4"><title>State 12, 600 time units, then 16, 0 transitions of its own, then list 10</title></rect>
+<text x="568" y="85" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">12</text>
+<rect x="592" y="68" width="40" height="34" fill="#199e70" rx="4" opacity="0.4"><title>State 13, 210 time units, then 14, 3 transitions of its own, then list 9</title></rect>
+<text x="612" y="85" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">13</text>
+<rect x="636" y="68" width="40" height="34" fill="#199e70" rx="4" opacity="0.4"><title>State 14, 600 time units, then 11, 3 transitions of its own, then list 9</title></rect>
+<text x="656" y="85" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">14</text>
+<rect x="20" y="106" width="40" height="34" fill="#199e70" rx="4" opacity="0.4"><title>State 15, 0 time units, 0 transitions of its own, then list 10</title></rect>
+<text x="40" y="123" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">15</text>
+<rect x="64" y="106" width="40" height="34" fill="#199e70" rx="4" opacity="0.4"><title>State 16, 210 time units, then 15, 0 transitions of its own, then list 10</title></rect>
+<text x="84" y="123" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">16</text>
+<rect x="108" y="106" width="40" height="34" fill="#199e70" rx="4" opacity="0.4"><title>State 17, 0 time units, 0 transitions of its own, then list 10</title></rect>
+<text x="128" y="123" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">17</text>
+<rect x="152" y="106" width="40" height="34" fill="#199e70" rx="4" opacity="0.4"><title>State 18, 600 time units, then 12, 0 transitions of its own, then list 10</title></rect>
+<text x="172" y="123" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">18</text>
+<rect x="196" y="106" width="40" height="34" fill="#199e70" rx="4" opacity="0.4"><title>State 19, 600 time units, then 11, 0 transitions of its own, then list 10</title></rect>
+<text x="216" y="123" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">19</text>
+<rect x="240" y="106" width="40" height="34" fill="#199e70" rx="4" opacity="0.4"><title>State 20, 600 time units, then 17, 0 transitions of its own, then list 10</title></rect>
+<text x="260" y="123" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">20</text>
+<rect x="284" y="106" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 21, 850 time units, then 2, 2 transitions of its own, 20 points</title></rect>
+<text x="304" y="123" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">21</text>
+<text x="304" y="135" font-size="9" fill="#8b949e" text-anchor="middle">+20</text>
+<rect x="328" y="106" width="40" height="34" fill="#199e70" rx="4" opacity="0.4"><title>State 22, 210 time units, then 23, 0 transitions of its own, then list 23</title></rect>
+<text x="348" y="123" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">22</text>
+<rect x="372" y="106" width="40" height="34" fill="#199e70" rx="4" opacity="0.4"><title>State 23, 0 time units, 7 transitions of its own, then list 9</title></rect>
+<text x="392" y="123" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">23</text>
+<rect x="416" y="106" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 24, 210 time units, then 21, 0 transitions of its own, 50 points</title></rect>
+<text x="436" y="123" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">24</text>
+<text x="436" y="135" font-size="9" fill="#8b949e" text-anchor="middle">+50</text>
+<rect x="460" y="106" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 25, 210 time units, then 2, 0 transitions of its own, 25 points</title></rect>
+<text x="480" y="123" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">25</text>
+<text x="480" y="135" font-size="9" fill="#8b949e" text-anchor="middle">+25</text>
+<rect x="504" y="106" width="40" height="34" fill="#199e70" rx="4" opacity="0.4"><title>State 26, 90 time units, then 16, 0 transitions of its own, then list 10</title></rect>
+<text x="524" y="123" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">26</text>
+<rect x="548" y="106" width="40" height="34" fill="#199e70" rx="4" opacity="0.4"><title>State 27, 360 time units, then 16, 0 transitions of its own, then list 10</title></rect>
+<text x="568" y="123" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">27</text>
+<rect x="592" y="106" width="40" height="34" fill="#199e70" rx="4" opacity="0.4"><title>State 28, 0 time units, 4 transitions of its own, then list 9</title></rect>
+<text x="612" y="123" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">28</text>
+<rect x="636" y="106" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 29, 0 time units, then 20, 0 transitions of its own, 50 points, instant</title></rect>
+<text x="656" y="123" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">29</text>
+<text x="656" y="135" font-size="9" fill="#8b949e" text-anchor="middle">+50</text>
+<circle cx="670" cy="112" r="2.5" fill="#c98500"></circle>
+<rect x="20" y="144" width="40" height="34" fill="#199e70" rx="4" opacity="0.4"><title>State 30, 0 time units, 3 transitions of its own, then list 9</title></rect>
+<text x="40" y="161" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">30</text>
+<rect x="64" y="144" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 31, 600 time units, then 32, 5 transitions of its own, 50 points</title></rect>
+<text x="84" y="161" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">31</text>
+<text x="84" y="173" font-size="9" fill="#8b949e" text-anchor="middle">+50</text>
+<rect x="108" y="144" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 32, 0 time units, 1 transitions of its own</title></rect>
+<text x="128" y="161" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">32</text>
+<rect x="152" y="144" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 33, 600 time units, then 14, 7 transitions of its own, 2 points</title></rect>
+<text x="172" y="161" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">33</text>
+<text x="172" y="173" font-size="9" fill="#8b949e" text-anchor="middle">+2</text>
+<rect x="196" y="144" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 34, 0 time units, 1 transitions of its own</title></rect>
+<text x="216" y="161" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">34</text>
+<rect x="240" y="144" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 35, 0 time units, 1 transitions of its own</title></rect>
+<text x="260" y="161" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">35</text>
+<rect x="284" y="144" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 36, 600 time units, then 14, 7 transitions of its own, 2 points</title></rect>
+<text x="304" y="161" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">36</text>
+<text x="304" y="173" font-size="9" fill="#8b949e" text-anchor="middle">+2</text>
+<rect x="328" y="144" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 37, 600 time units, then 14, 5 transitions of its own, 2 points</title></rect>
+<text x="348" y="161" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">37</text>
+<text x="348" y="173" font-size="9" fill="#8b949e" text-anchor="middle">+2</text>
+<rect x="372" y="144" width="40" height="34" fill="#3987e5" rx="4" opacity="0.4"><title>State 38, 390 time units, then 2, 3 transitions of its own, then list 1</title></rect>
+<text x="392" y="161" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">38</text>
+<rect x="416" y="144" width="40" height="34" fill="#3987e5" rx="4" opacity="0.4"><title>State 39, 390 time units, then 2, 2 transitions of its own, then list 1, 50 points</title></rect>
+<text x="436" y="161" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">39</text>
+<text x="436" y="173" font-size="9" fill="#8b949e" text-anchor="middle">+50</text>
+<rect x="460" y="144" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 40, 910 time units, then 2, 0 transitions of its own</title></rect>
+<text x="480" y="161" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">40</text>
+<rect x="504" y="144" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 41, 710 time units, then 2, 0 transitions of its own</title></rect>
+<text x="524" y="161" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">41</text>
+<rect x="548" y="144" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 42, 0 time units, then 45, 0 transitions of its own, instant</title></rect>
+<text x="568" y="161" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">42</text>
+<circle cx="582" cy="150" r="2.5" fill="#c98500"></circle>
+<rect x="592" y="144" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 43, 0 time units, then 44, 0 transitions of its own, instant</title></rect>
+<text x="612" y="161" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">43</text>
+<circle cx="626" cy="150" r="2.5" fill="#c98500"></circle>
+<rect x="636" y="144" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 44, 600 time units, then 46, 0 transitions of its own</title></rect>
+<text x="656" y="161" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">44</text>
+<rect x="20" y="182" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 45, 910 time units, then 46, 0 transitions of its own</title></rect>
+<text x="40" y="199" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">45</text>
+<rect x="64" y="182" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 46, 0 time units, then 2, 0 transitions of its own, instant</title></rect>
+<text x="84" y="199" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">46</text>
+<circle cx="98" cy="188" r="2.5" fill="#c98500"></circle>
+<rect x="108" y="182" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 47, 0 time units, 3 transitions of its own</title></rect>
+<text x="128" y="199" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">47</text>
+<rect x="152" y="182" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 48, 750 time units, then 49, 1 transitions of its own, 250 points</title></rect>
+<text x="172" y="199" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">48</text>
+<text x="172" y="211" font-size="9" fill="#8b949e" text-anchor="middle">+250</text>
+<rect x="196" y="182" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 49, 210 time units, then 52, 4 transitions of its own</title></rect>
+<text x="216" y="199" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">49</text>
+<rect x="240" y="182" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 50, 90 time units, then 7, 1 transitions of its own</title></rect>
+<text x="260" y="199" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">50</text>
+<rect x="284" y="182" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 51, 690 time units, then 7, 1 transitions of its own, 100 points</title></rect>
+<text x="304" y="199" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">51</text>
+<text x="304" y="211" font-size="9" fill="#8b949e" text-anchor="middle">+100</text>
+<rect x="328" y="182" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 52, 0 time units, 4 transitions of its own</title></rect>
+<text x="348" y="199" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">52</text>
+<rect x="372" y="182" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 53, 0 time units, 2 transitions of its own</title></rect>
+<text x="392" y="199" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">53</text>
+<rect x="416" y="182" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 54, 390 time units, then 75, 0 transitions of its own</title></rect>
+<text x="436" y="199" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">54</text>
+<rect x="460.5" y="182.5" width="39" height="33" fill="none" rx="4" stroke="#8b949e"><title>State 55, 0 time units, 7 transitions of its own</title></rect>
+<text x="480" y="199" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">55</text>
+<rect x="504" y="182" width="40" height="34" fill="#d55181" rx="4" opacity="0.4"><title>State 56, 510 time units, then 57, 2 transitions of its own, then list 55, 100 points</title></rect>
+<text x="524" y="199" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">56</text>
+<text x="524" y="211" font-size="9" fill="#8b949e" text-anchor="middle">+100</text>
+<rect x="548" y="182" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 57, 0 time units, then 61, 1 transitions of its own, instant</title></rect>
+<text x="568" y="199" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">57</text>
+<circle cx="582" cy="188" r="2.5" fill="#c98500"></circle>
+<rect x="592" y="182" width="40" height="34" fill="#d55181" rx="4" opacity="0.4"><title>State 58, 390 time units, then 59, 5 transitions of its own, then list 55</title></rect>
+<text x="612" y="199" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">58</text>
+<rect x="636" y="182" width="40" height="34" fill="#d55181" rx="4" opacity="0.4"><title>State 59, 0 time units, then 60, 0 transitions of its own, then list 21, instant</title></rect>
+<text x="656" y="199" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">59</text>
+<circle cx="670" cy="188" r="2.5" fill="#c98500"></circle>
+<rect x="20" y="220" width="40" height="34" fill="#d55181" rx="4" opacity="0.4"><title>State 60, 600 time units, then 2, 0 transitions of its own, then list 21</title></rect>
+<text x="40" y="237" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">60</text>
+<rect x="64" y="220" width="40" height="34" fill="#199e70" rx="4" opacity="0.4"><title>State 61, 390 time units, then 15, 0 transitions of its own, then list 9</title></rect>
+<text x="84" y="237" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">61</text>
+<rect x="108" y="220" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 62, 510 time units, then 11, 0 transitions of its own, 200 points</title></rect>
+<text x="128" y="237" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">62</text>
+<text x="128" y="249" font-size="9" fill="#8b949e" text-anchor="middle">+200</text>
+<rect x="152" y="220" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 63, 640 time units, then 65, 2 transitions of its own, 100 points</title></rect>
+<text x="172" y="237" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">63</text>
+<text x="172" y="249" font-size="9" fill="#8b949e" text-anchor="middle">+100</text>
+<rect x="196" y="220" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 64, 750 time units, then 65, 2 transitions of its own, 150 points</title></rect>
+<text x="216" y="237" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">64</text>
+<text x="216" y="249" font-size="9" fill="#8b949e" text-anchor="middle">+150</text>
+<rect x="240" y="220" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 65, 0 time units, then 15, 2 transitions of its own, instant</title></rect>
+<text x="260" y="237" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">65</text>
+<circle cx="274" cy="226" r="2.5" fill="#c98500"></circle>
+<rect x="284" y="220" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 66, 0 time units, then 67, 0 transitions of its own, instant</title></rect>
+<text x="304" y="237" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">66</text>
+<circle cx="318" cy="226" r="2.5" fill="#c98500"></circle>
+<rect x="328" y="220" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 67, 690 time units, then 70, 0 transitions of its own, 250 points</title></rect>
+<text x="348" y="237" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">67</text>
+<text x="348" y="249" font-size="9" fill="#8b949e" text-anchor="middle">+250</text>
+<rect x="372" y="220" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 68, 0 time units, then 69, 0 transitions of its own, instant</title></rect>
+<text x="392" y="237" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">68</text>
+<circle cx="406" cy="226" r="2.5" fill="#c98500"></circle>
+<rect x="416" y="220" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 69, 650 time units, then 70, 0 transitions of its own, 250 points</title></rect>
+<text x="436" y="237" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">69</text>
+<text x="436" y="249" font-size="9" fill="#8b949e" text-anchor="middle">+250</text>
+<rect x="460" y="220" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 70, 0 time units, then 2, 0 transitions of its own, instant</title></rect>
+<text x="480" y="237" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">70</text>
+<circle cx="494" cy="226" r="2.5" fill="#c98500"></circle>
+<rect x="504" y="220" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 71, 0 time units, then 72, 0 transitions of its own, instant</title></rect>
+<text x="524" y="237" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">71</text>
+<circle cx="538" cy="226" r="2.5" fill="#c98500"></circle>
+<rect x="548" y="220" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 72, 810 time units, then 74, 0 transitions of its own</title></rect>
+<text x="568" y="237" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">72</text>
+<rect x="592" y="220" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 73, 810 time units, then 74, 0 transitions of its own</title></rect>
+<text x="612" y="237" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">73</text>
+<rect x="636" y="220" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 74, 0 time units, then 75, 0 transitions of its own, instant</title></rect>
+<text x="656" y="237" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">74</text>
+<circle cx="670" cy="226" r="2.5" fill="#c98500"></circle>
+<rect x="20" y="258" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 75, 0 time units, 3 transitions of its own</title></rect>
+<text x="40" y="275" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">75</text>
+<rect x="64" y="258" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 76, 250 time units, then 77, 0 transitions of its own</title></rect>
+<text x="84" y="275" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">76</text>
+<rect x="108" y="258" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 77, duration from the speed, then 79, 0 transitions of its own</title></rect>
+<text x="128" y="275" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">77</text>
+<rect x="152" y="258" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 78, 0 time units, then 74, 0 transitions of its own, instant</title></rect>
+<text x="172" y="275" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">78</text>
+<circle cx="186" cy="264" r="2.5" fill="#c98500"></circle>
+<rect x="196" y="258" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 79, 810 time units, then 80, 0 transitions of its own</title></rect>
+<text x="216" y="275" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">79</text>
+<rect x="240" y="258" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 80, 0 time units, 2 transitions of its own</title></rect>
+<text x="260" y="275" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">80</text>
+<rect x="284" y="258" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 81, 0 time units, then 82, 0 transitions of its own, instant</title></rect>
+<text x="304" y="275" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">81</text>
+<circle cx="318" cy="264" r="2.5" fill="#c98500"></circle>
+<rect x="328" y="258" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 82, 810 time units, then 2, 3 transitions of its own</title></rect>
+<text x="348" y="275" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">82</text>
+<rect x="372" y="258" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 83, 0 time units, then 86, 0 transitions of its own, instant</title></rect>
+<text x="392" y="275" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">83</text>
+<circle cx="406" cy="264" r="2.5" fill="#c98500"></circle>
+<rect x="416" y="258" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 84, 0 time units, then 86, 0 transitions of its own, instant</title></rect>
+<text x="436" y="275" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">84</text>
+<circle cx="450" cy="264" r="2.5" fill="#c98500"></circle>
+<rect x="460" y="258" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 85, 510 time units, then 88, 0 transitions of its own</title></rect>
+<text x="480" y="275" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">85</text>
+<rect x="504" y="258" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 86, 510 time units, then 88, 0 transitions of its own</title></rect>
+<text x="524" y="275" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">86</text>
+<rect x="548" y="258" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 87, 0 time units, then 88, 0 transitions of its own, instant</title></rect>
+<text x="568" y="275" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">87</text>
+<circle cx="582" cy="264" r="2.5" fill="#c98500"></circle>
+<rect x="592" y="258" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 88, 0 time units, 2 transitions of its own</title></rect>
+<text x="612" y="275" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">88</text>
+<rect x="636" y="258" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 89, 390 time units, then 90, 0 transitions of its own</title></rect>
+<text x="656" y="275" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">89</text>
+<rect x="20" y="296" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 90, duration from the speed, then 91, 0 transitions of its own</title></rect>
+<text x="40" y="313" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">90</text>
+<rect x="64" y="296" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 91, 0 time units, 2 transitions of its own</title></rect>
+<text x="84" y="313" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">91</text>
+<rect x="108" y="296" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 92, 990 time units, then 2, 0 transitions of its own</title></rect>
+<text x="128" y="313" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">92</text>
+<rect x="152" y="296" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 93, 990 time units, then 2, 0 transitions of its own</title></rect>
+<text x="172" y="313" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">93</text>
+<rect x="196" y="296" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 94, 450 time units, then 95, 0 transitions of its own, 100 points</title></rect>
+<text x="216" y="313" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">94</text>
+<text x="216" y="325" font-size="9" fill="#8b949e" text-anchor="middle">+100</text>
+<rect x="240" y="296" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 95, 0 time units, then 22, 0 transitions of its own, 100 points, instant</title></rect>
+<text x="260" y="313" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">95</text>
+<text x="260" y="325" font-size="9" fill="#8b949e" text-anchor="middle">+100</text>
+<circle cx="274" cy="302" r="2.5" fill="#c98500"></circle>
+<rect x="284" y="296" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 96, 510 time units, then 97, 0 transitions of its own</title></rect>
+<text x="304" y="313" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">96</text>
+<rect x="328" y="296" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 97, 200 time units, then 98, 0 transitions of its own</title></rect>
+<text x="348" y="313" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">97</text>
+<rect x="372" y="296" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 98, 510 time units, then 112, 0 transitions of its own</title></rect>
+<text x="392" y="313" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">98</text>
+<rect x="416" y="296" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 99, 60 time units, then 110, 0 transitions of its own</title></rect>
+<text x="436" y="313" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">99</text>
+<rect x="460" y="296" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 100, 0 time units, then 112, 0 transitions of its own, 50 points, instant</title></rect>
+<text x="480" y="313" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">100</text>
+<text x="480" y="325" font-size="9" fill="#8b949e" text-anchor="middle">+50</text>
+<circle cx="494" cy="302" r="2.5" fill="#c98500"></circle>
+<rect x="504" y="296" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 101, 0 time units, then 111, 0 transitions of its own, instant</title></rect>
+<text x="524" y="313" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">101</text>
+<circle cx="538" cy="302" r="2.5" fill="#c98500"></circle>
+<rect x="548" y="296" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 102, 60 time units, then 112, 0 transitions of its own, 100 points</title></rect>
+<text x="568" y="313" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">102</text>
+<text x="568" y="325" font-size="9" fill="#8b949e" text-anchor="middle">+100</text>
+<rect x="592" y="296" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 103, 0 time units, then 112, 0 transitions of its own, 50 points, instant</title></rect>
+<text x="612" y="313" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">103</text>
+<text x="612" y="325" font-size="9" fill="#8b949e" text-anchor="middle">+50</text>
+<circle cx="626" cy="302" r="2.5" fill="#c98500"></circle>
+<rect x="636" y="296" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 104, 0 time units, then 111, 0 transitions of its own, instant</title></rect>
+<text x="656" y="313" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">104</text>
+<circle cx="670" cy="302" r="2.5" fill="#c98500"></circle>
+<rect x="20" y="334" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 105, 0 time units, then 112, 0 transitions of its own, instant</title></rect>
+<text x="40" y="351" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">105</text>
+<circle cx="54" cy="340" r="2.5" fill="#c98500"></circle>
+<rect x="64" y="334" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 106, 0 time units, then 119, 0 transitions of its own, instant</title></rect>
+<text x="84" y="351" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">106</text>
+<circle cx="98" cy="340" r="2.5" fill="#c98500"></circle>
+<rect x="108" y="334" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 107, 60 time units, then 112, 0 transitions of its own</title></rect>
+<text x="128" y="351" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">107</text>
+<rect x="152" y="334" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 108, 0 time units, then 112, 0 transitions of its own, instant</title></rect>
+<text x="172" y="351" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">108</text>
+<circle cx="186" cy="340" r="2.5" fill="#c98500"></circle>
+<rect x="196" y="334" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 109, 0 time units, 2 transitions of its own</title></rect>
+<text x="216" y="351" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">109</text>
+<rect x="240" y="334" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 110, 510 time units, then 112, 0 transitions of its own</title></rect>
+<text x="260" y="351" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">110</text>
+<rect x="284" y="334" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 111, 510 time units, then 109, 0 transitions of its own</title></rect>
+<text x="304" y="351" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">111</text>
+<rect x="328" y="334" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 112, 3990 time units, then 111, 7 transitions of its own</title></rect>
+<text x="348" y="351" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">112</text>
+<rect x="372" y="334" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 113, 0 time units, then 112, 0 transitions of its own, instant</title></rect>
+<text x="392" y="351" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">113</text>
+<circle cx="406" cy="340" r="2.5" fill="#c98500"></circle>
+<rect x="416" y="334" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 114, 990 time units, then 113, 0 transitions of its own</title></rect>
+<text x="436" y="351" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">114</text>
+<rect x="460" y="334" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 115, 750 time units, then 116, 0 transitions of its own</title></rect>
+<text x="480" y="351" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">115</text>
+<rect x="504" y="334" width="40" height="34" fill="#3987e5" rx="4" opacity="0.4"><title>State 116, 900 time units, then 2, 0 transitions of its own, then list 1</title></rect>
+<text x="524" y="351" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">116</text>
+<rect x="548" y="334" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 117, 300 time units, then 15, 0 transitions of its own</title></rect>
+<text x="568" y="351" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">117</text>
+<rect x="592" y="334" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 118, 0 time units, then 119, 0 transitions of its own, instant</title></rect>
+<text x="612" y="351" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">118</text>
+<circle cx="626" cy="340" r="2.5" fill="#c98500"></circle>
+<rect x="636" y="334" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 119, 0 time units, 4 transitions of its own, 2 points</title></rect>
+<text x="656" y="351" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">119</text>
+<text x="656" y="363" font-size="9" fill="#8b949e" text-anchor="middle">+2</text>
+<rect x="20" y="372" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 120, 0 time units, 4 transitions of its own, 2 points</title></rect>
+<text x="40" y="389" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">120</text>
+<text x="40" y="401" font-size="9" fill="#8b949e" text-anchor="middle">+2</text>
+<rect x="64" y="372" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 121, 510 time units, then 11, 0 transitions of its own</title></rect>
+<text x="84" y="389" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">121</text>
+<rect x="108" y="372" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 122, 0 time units, 3 transitions of its own</title></rect>
+<text x="128" y="389" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">122</text>
+<rect x="152" y="372" width="40" height="34" fill="#199e70" rx="4" opacity="0.4"><title>State 123, 600 time units, then 15, 0 transitions of its own, then list 9, 50 points</title></rect>
+<text x="172" y="389" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">123</text>
+<text x="172" y="401" font-size="9" fill="#8b949e" text-anchor="middle">+50</text>
+<rect x="196" y="372" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 124, 0 time units, 3 transitions of its own</title></rect>
+<text x="216" y="389" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">124</text>
+<rect x="240" y="372" width="40" height="34" fill="#199e70" rx="4" opacity="0.4"><title>State 125, 390 time units, then 15, 0 transitions of its own, then list 9, 50 points</title></rect>
+<text x="260" y="389" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">125</text>
+<text x="260" y="401" font-size="9" fill="#8b949e" text-anchor="middle">+50</text>
+<rect x="284" y="372" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 126, 0 time units, 6 transitions of its own</title></rect>
+<text x="304" y="389" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">126</text>
+<rect x="328" y="372" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 127, 0 time units, 5 transitions of its own, 2 points</title></rect>
+<text x="348" y="389" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">127</text>
+<text x="348" y="401" font-size="9" fill="#8b949e" text-anchor="middle">+2</text>
+<rect x="372" y="372" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 128, 0 time units, then 129, 0 transitions of its own, instant</title></rect>
+<text x="392" y="389" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">128</text>
+<circle cx="406" cy="378" r="2.5" fill="#c98500"></circle>
+<rect x="416" y="372" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 129, 0 time units, 8 transitions of its own, 2 points</title></rect>
+<text x="436" y="389" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">129</text>
+<text x="436" y="401" font-size="9" fill="#8b949e" text-anchor="middle">+2</text>
+<rect x="460" y="372" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 130, 210 time units, then 128, 0 transitions of its own</title></rect>
+<text x="480" y="389" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">130</text>
+<rect x="504" y="372" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 131, 90 time units, then 16, 0 transitions of its own, 50 points</title></rect>
+<text x="524" y="389" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">131</text>
+<text x="524" y="401" font-size="9" fill="#8b949e" text-anchor="middle">+50</text>
+<rect x="548" y="372" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 132, 0 time units, then 133, 0 transitions of its own, 50 points, instant</title></rect>
+<text x="568" y="389" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">132</text>
+<text x="568" y="401" font-size="9" fill="#8b949e" text-anchor="middle">+50</text>
+<circle cx="582" cy="378" r="2.5" fill="#c98500"></circle>
+<rect x="592" y="372" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 133, 0 time units, 3 transitions of its own, 2 points</title></rect>
+<text x="612" y="389" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">133</text>
+<text x="612" y="401" font-size="9" fill="#8b949e" text-anchor="middle">+2</text>
+<rect x="636" y="372" width="40" height="34" fill="#8b949e" rx="4" opacity="0.22"><title>State 134, 210 time units, then 132, 0 transitions of its own</title></rect>
+<text x="656" y="389" font-size="13" fill="#e6edf3" text-anchor="middle" font-weight="600">134</text>
+<rect x="20" y="417" width="10" height="10" fill="#3987e5" rx="2" opacity="1"></rect>
+<text x="35" y="426" font-size="12" fill="#e6edf3">falls back on the ground list (1)</text>
+<rect x="20" y="437" width="10" height="10" fill="#199e70" rx="2" opacity="1"></rect>
+<text x="35" y="446" font-size="12" fill="#e6edf3">falls back on the air lists (10, then 9)</text>
+<rect x="20" y="457" width="10" height="10" fill="#d55181" rx="2" opacity="1"></rect>
+<text x="35" y="466" font-size="12" fill="#e6edf3">falls back on another shared list (21 or 55)</text>
+<rect x="20" y="477" width="10" height="10" fill="#8b949e" rx="2" opacity="0.5"></rect>
+<text x="35" y="486" font-size="12" fill="#e6edf3">its own list only</text>
+<rect x="20" y="497" width="10" height="10" fill="none" rx="2" stroke="#8b949e"></rect>
+<text x="35" y="506" font-size="12" fill="#e6edf3">only a shared list: never entered</text>
+<circle cx="25" cy="522" r="2.5" fill="#c98500"></circle>
+<text x="35" y="526" font-size="12" fill="#e6edf3">instant: no time of its own, the next state follows in the same step</text>
+<rect x="20" y="537" width="10" height="10" fill="none" rx="2" stroke="#e66767"></rect>
+<text x="35" y="546" font-size="12" fill="#e6edf3">reached by no transition from the start</text>
+<text x="676" y="546" font-size="12" fill="#8b949e" text-anchor="end">+n: points</text>
+</svg>

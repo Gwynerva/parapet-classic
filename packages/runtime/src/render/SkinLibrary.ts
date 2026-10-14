@@ -5,11 +5,12 @@
  * layer of its own pictures over the base atlas, built the first time it is drawn. A character
  * a client does not know (a replay from a newer version) is drawn as Blaise.
  */
-import { skinSwap } from './CharacterRenderer.ts';
 import type { ResolvedLook } from './Look.ts';
 import { buildLookLayer, lookSwap, type LookLayer } from './LookSheet.ts';
 import type { SceneRenderer, SpriteSwap } from './SceneRenderer.ts';
 import { SpriteSheet } from './SpriteSheet.ts';
+import { readPixels, rgbaToCanvas } from './canvas.ts';
+import { skinSwap } from './Rig.ts';
 
 /** Characters 0..9 are the original's (`skins.json`). */
 export const ORIGINAL_CHARACTERS = 10;
@@ -20,19 +21,6 @@ export interface CharacterSkins {
   sceneFor(character: number, outfit?: number): SceneRenderer;
   /** The body-part swap of a character this frame (`face`: the face sprite, or -1). */
   swapFor(character: number, face?: number, outfit?: number): SpriteSwap;
-}
-
-/** Reads the RGBA pixels of an image through a canvas (null without a 2D context). */
-export function readPixels(
-  image: CanvasImageSource & { width: number; height: number },
-): ImageData | null {
-  const canvas = document.createElement('canvas');
-  canvas.width = image.width;
-  canvas.height = image.height;
-  const ctx = canvas.getContext('2d', { willReadFrequently: true });
-  if (!ctx) return null;
-  ctx.drawImage(image, 0, 0);
-  return ctx.getImageData(0, 0, canvas.width, canvas.height);
 }
 
 /** A built look: its layer and the renderer drawing from it. */
@@ -96,11 +84,6 @@ export class SkinLibrary implements CharacterSkins {
     return look ? this.build(look).scene : this.base;
   }
 
-  /** The layer of a look, built if needed (null without a canvas). */
-  layerOf(look: ResolvedLook): LookLayer | null {
-    return this.build(look).layer;
-  }
-
   private build(look: ResolvedLook): Built {
     let built = this.built.get(look.id);
     if (built) return built;
@@ -118,14 +101,8 @@ export class SkinLibrary implements CharacterSkins {
       look,
     );
     for (const p of layer.problems) console.warn(`look ${look.id}: ${p}`);
-    const canvas = document.createElement('canvas');
-    canvas.width = layer.width;
-    canvas.height = layer.height;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return built;
-    const data = ctx.createImageData(layer.width, layer.height);
-    data.data.set(layer.data);
-    ctx.putImageData(data, 0, 0);
+    const canvas = rgbaToCanvas(layer.width, layer.height, layer.data);
+    if (!canvas) return built;
     built.layer = layer;
     built.scene = this.base.withSheet(new SpriteSheet(canvas, layer.frames, this.base.sheet));
     return built;

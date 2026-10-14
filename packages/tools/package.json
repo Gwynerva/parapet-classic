@@ -1,6 +1,6 @@
 {
   "name": "@parapet/tools",
-  "version": "0.5.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,10 +10,12 @@
     "i18n": "node src/i18nCli.ts",
     "look": "node src/lookCli.ts",
     "icons": "node src/iconCli.ts",
-    "demo": "node src/demoCli.ts"
+    "demo": "node src/demoCli.ts",
+    "findings": "node src/findings/cli.ts"
   },
   "dependencies": {
     "@parapet/sim": "*",
-    "@parapet/runtime": "*"
+    "@parapet/runtime": "*",
+    "@parapet/lab": "*"
   }
 }

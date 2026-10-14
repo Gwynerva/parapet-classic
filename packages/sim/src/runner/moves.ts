@@ -78,6 +78,12 @@ export const MoveFlag = {
   ANIM_10FPS: 0x400,
   /** Face against the velocity. */
   FACE_AGAINST_VELOCITY: 0x800,
+  /** Animation: drawn mirrored while the facing is the one the clip was set with (line 5891). */
+  ANIM_MIRROR_UNTIL_TURN: 0x1000,
+  /** Animation: forget the previous keyframe on entry. */
+  ANIM_FORGET_PREVIOUS: 0x2000,
+  /** Animation: forget the previous keyframe on entry when the anchor mode changed. */
+  ANIM_FORGET_ON_ANCHOR_CHANGE: 0x4000,
   /** Store the vertical speed on entry (`w = v`). */
   STORE_SPEED: 0x8000,
 } as const;
@@ -91,7 +97,6 @@ export const MoveId = {
   STOP: 5,
   TURN: 6,
   TURN_FAST: 8,
-  PIT: 11,
   FALL: 15,
   JUMP: 18,
   JUMP_STEEP: 19,
@@ -105,7 +110,9 @@ export const MoveId = {
   WALL_FLIP_ARMED: 47,
   WALL_FLIP: 48,
   TIGER_JUMP: 56,
+  SPIDER_JUMP: 67,
   MONKEY_VAULT: 62,
+  MONKEY_FLIP: 69,
   FRONT_FLIP: 63,
   BACK_FLIP: 64,
   /** Slow bounce off a wall approached without BACK (the warm-up hint about tic-tacs). */

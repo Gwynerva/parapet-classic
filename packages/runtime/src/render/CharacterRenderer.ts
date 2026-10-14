@@ -8,40 +8,12 @@
  * position (or the hands point while a move anchors there) is passed as the pivot position.
  */
 import type { MoveTable, RunnerState, WorldEvent } from '@parapet/sim';
-import { Animator, HEAD_SPRITE } from '../anim/Animator.ts';
+import { Animator } from '../anim/Animator.ts';
+import { identitySwap, skinSwap } from './Rig.ts';
 import { CHARACTER_OBJECT, type SceneRenderer, type SpriteSwap } from './SceneRenderer.ts';
 import type { CharacterSkins } from './SkinLibrary.ts';
 import { objectGrid, screenPixels, toScreen, type CameraPos } from './View.ts';
-
-/** Male characters get the male torso/arm parts (`a(int,int[])`: n2 ∈ {0, 1, 3, 6, 8}). */
-const MALE_CHARACTERS = new Set([1, 2, 4, 7, 9]);
-
-/**
- * Body-part swap of original character `character` (0 = Blaise with the default heads 25–29;
- * anything outside 1..9 counts as Blaise). `face` is the face sprite replacing the head this
- * frame, or -1; it only applies to Blaise because the other characters replace the head before
- * the face check can keep it.
- */
-export function skinSwap(character: number, face = -1): SpriteSwap {
-  if (character <= 0 || character > 9) {
-    if (face < 0) return identitySwap;
-    return (id, transform) =>
-      id === HEAD_SPRITE && (transform === 0 || transform === 4) ? face : id;
-  }
-  const c = character - 1;
-  const male = MALE_CHARACTERS.has(character);
-  return (id) => {
-    if (id >= 13 && id <= 16) return -1;
-    if (id >= 25 && id <= 29) return 82 + c * 5 + (id - 25);
-    if (male) {
-      if (id >= 34 && id <= 38) return 127 + (id - 34);
-      if (id >= 57 && id <= 61) return 132 + (id - 57);
-    }
-    return id;
-  };
-}
-
-const identitySwap: SpriteSwap = (id) => id;
+import { offscreenLayer } from './canvas.ts';
 
 /** A runner's draw origin (world units) and keyframe tween for one frame. */
 export interface CharacterPose {
@@ -326,18 +298,6 @@ export class CharacterRenderer {
     return npc;
   }
 
-  detachNpc(id: string): void {
-    this.npcs.delete(id);
-  }
-
-  getNpc(id: string): NpcVisual | undefined {
-    return this.npcs.get(id);
-  }
-
-  clearNpcs(): void {
-    this.npcs.clear();
-  }
-
   /** Draw the NPCs; `nowMs` is real time (`u` in the original), which drives the talk loop. */
   drawNpcs(ctx: CanvasRenderingContext2D, cam: CameraPos, nowMs: number): void {
     const per = screenPixels(ctx);
@@ -422,11 +382,7 @@ export class CharacterRenderer {
     const scale = ctx.getTransform().a || 1;
     const w = Math.ceil(ctx.canvas.width / scale) + 1;
     const h = Math.ceil(ctx.canvas.height / scale) + 1;
-    if (!this.layer) this.layer = document.createElement('canvas');
-    if (this.layer.width !== w) this.layer.width = w;
-    if (this.layer.height !== h) this.layer.height = h;
-    const lctx = this.layer.getContext('2d');
-    if (lctx) lctx.imageSmoothingEnabled = false;
+    this.layer = offscreenLayer(this.layer, w, h);
     return this.layer;
   }
 }
