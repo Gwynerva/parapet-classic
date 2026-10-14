@@ -193,14 +193,52 @@ instead:
   the logo (`/dev/art.html`). `/dev/showcase.html` runs a boss's outfit through its world or
   any move, every flourish on demand.
 
+## 8. Bosses with style (0.5.0)
+
+- **Bosses with style.** Every boss now races a stylish run: the showiest found within 15 % of
+  the fastest human run, with flips, wall flips, monkey vaults and spider jumps on the way (and
+  its effect on them), never a stumble (`tools/src/tas/style.ts`; the bosses are 8 to 17 %
+  slower than before). The search learnt a style objective: a cell per place and level of
+  style, a time cap, no fails.
+- **No frame-perfect press in any record.** The search, its polish, the rule that keeps a run
+  and `publish` all turn down a run with a press that works on its exact step only; the eleven
+  records that had one or two were searched again, and seven came out faster without.
+- **What tricks cost.** Every contest searched for its fastest human run and its showiest
+  within 5 % and 15 %: the fast tricks (the tiger jump, tic-tacs, poles) cost nothing and are
+  in every fastest run; flips cost 0.15 to 0.2 s each, a monkey vault or a spider jump half a
+  second, a wall flip almost a second, and nothing in a timed mission pays for them. Some
+  fastest runs stumble on purpose (`reference/notes/09-tas.md`).
+- **Footage.** `/dev/reel.html` renders a boss's record among hundreds of pale attempts gone
+  wrong into a 4K video, frame by frame (`docs/TAS-REEL.md`).
+- **Offline play.** The build writes a service worker that keeps every file the game needs (the
+  music and the name field's font too, though they load only when wanted), so the site, once
+  opened, starts with no connection, the installed app as well as a challenge link. A new
+  build comes on the next launch; a page already open plays on with its own files.
+- **The mission menu.** A row's tile is part of the row (pressing the icon starts the run); the
+  free run has an icon, the game's own (the runner leaping off the parapet) inked like the
+  original's card sketches; the rival and record-ghost switches sit under a line, from the
+  left edge.
+- **The bosses' rows** in their colours, the tile showing the boss: a hologram in its colour
+  until its record there is beaten, then as it is, a pennant or a stopwatch in a corner.
+- **The level's news where it matters.** Completing a level no longer covers the run's results
+  with a box: Next leads to the level's menu, where the news (who opened, the next level, the
+  boss) shows over the list, the cursor already on the boss's row; a warm-up done last goes
+  back there too, and so does any other way into the level's menu first.
+- **Results side by side** on a short wide screen (a phone on its side): the text left, the
+  actions right (`resultsLayout`); the name label no longer runs into the status line.
+- **Softer menu music.** The menu track's long chords play on mellow patches of their own
+  (`TRACK_PATCHES`: triangles under a low-pass, swelling in and settling) and stay 35 % down
+  the volume scale below the measured common level (`trackTrim`), whatever the volume.
+- **Signs at the screen's edge**, one kind for everything off screen (`drawEdgeSign`: a pale
+  picture, a grey chevron pointing the way, a label if any) in place of the coloured arrows:
+  the ghost's head as a hologram in its colour with the gap, the rival's head, the boss's head
+  in its outfit of the run with its time, and a small finish flag (a leaning pole, a chequered
+  cloth in the game's oranges, waving) towards the finish all through a score run, and once the
+  flags are taken where the finish comes after them (the sprint after its fifth checkpoint, as
+  the original's arrow did, the challenges with a flag, the warm-ups).
+
 ## Next
 
-- **Contests** re-searched with longer budgets to remove the last frame-perfect moments.
-
-- **Offline play.** A service worker caching the build makes the site playable without a
-  connection (it already installs as an app); nothing in the game needs the network.
-- **Hot-seat.** The original's multiplayer (players take turns, earlier players run as
-  ghosts) is now cheap: every turn is a replay and every earlier player a ghost world.
 - **Readable Java reconstruction.** A deobfuscated, commented reconstruction of the original
   source, buildable against the oracle stubs so the oracle can prove it faithful. It is derived
   from the proprietary code, so it belongs in a private repository, never in this one.
