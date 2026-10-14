@@ -45,9 +45,17 @@ The runs come from a tool-assisted search (`packages/tools/src/tas`) under human
 
 - single presses of the four direction keys, like a keyboard (no held keys, no chords), at
   least 3 steps (≈ 100 ms) apart;
-- no frame-perfect presses: a press that also works one step early or late (the presses after
-  it unchanged, or moved along) loses at most 300 ms. Where no run without one was found, a
-  record may have one or two such moments; `npm run tas -- report` lists them.
+- no frame-perfect presses: every press also works one step early or late (the presses after
+  it unchanged, or moved along), losing at most 300 ms. A run with such a press is never kept
+  over one without and never published (`verify` and `publish` turn it down).
+
+Since 0.5.0 a boss races its **stylish** run: the showiest found within 15 % of the fastest
+human run (`style: { capPct: 15 }` in the file). Style is a trick's points in the original's
+Score mode, each repeat of a kind worth half the one before (the tiger jump next to nothing),
+and a stylish run never stumbles, crashes or falls (`packages/tools/src/tas/style.ts`). So the
+bosses do their flips, wall flips, monkey vaults and spider jumps on the way, and their effects
+come with them. What that costs them, and what tricks cost anyone, is in
+`reference/notes/09-tas.md`.
 
 Nobody keeps every press within a step of its place for a whole run, so a boss races slower than
 its found run: the game stretches the time and every split by an allowance (`CONTEST_ALLOWANCE`
@@ -63,9 +71,22 @@ how the records were found.
 ```bash
 npm run tas -- run              # search all 24 records (about 15 min on 12 cores)
 npm run tas -- run --resume     # continue from the stored runs, e.g. with another --seed
-npm run tas -- verify           # re-simulate the stored runs, compare with both files
-npm run tas -- publish          # write contests.json and glimpses.json
+npm run tas -- run --fragile --resume --seed 1-3 --budget 500M  # only where a run is missing,
+                                # outdated or has a frame-perfect press; three seeds each
 npm run tas -- report           # the times next to the original's records
+```
+
+The optimal runs are kept in `tas-out/`, the stylish ones in `tas-out/style-05/`, `style-15/`…
+(each measured against the optimal run stored when it was found). The 15 % ones are published;
+they also make the footage ([`docs/TAS-REEL.md`](../../../docs/TAS-REEL.md), `run=style-15`).
+
+```bash
+npm run tas -- run --style 15 --resume --seed 1-2 --budget 400M  # the showiest within +15 %
+npm run tas -- verify --style 15   # re-simulate them, compare with both files
+npm run tas -- publish --style 15  # write contests.json and glimpses.json from them
+npm run tas -- analyze          # what tricks cost: tas-out/analysis/report.md
+npm run tas -- campaign         # every search of the study in a row, then analyze; it keeps a
+                                # job log (tas-out/jobs.jsonl) and goes on where it stopped
 ```
 
 ## `glimpses.json` — the route hints

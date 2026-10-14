@@ -13,12 +13,32 @@
  *
  * Everything is seeded, and the budget is counted in simulation steps, so the same parameters
  * always give the same result.
+ *
+ * With a style objective (`SearchParams.style`, the stylish records) the search looks for the
+ * showiest run within a time cap instead of the fastest: cells also carry the tricks done so
+ * far (`style.ts`) and a cell is kept per place and per level of style, a state after a fail is
+ * dropped, the cap prunes instead of the best time, picking favours style, and finished runs
+ * rank by style, then time.
  */
 import { isOnSurface, type RunContent, type World, type WorldState } from '@parapet/sim';
 import { LowerBound } from './bound.ts';
 import type { FragileCount } from './constraints.ts';
 import { keyBits, type ContestMode, type KeyCode, type Press } from './model.ts';
+import { failStates, MAX_STYLE, styleScore, styleStep } from './style.ts';
 import { newWorld, MAX_RUN_CLOCK } from './timeline.ts';
+
+/** The stylish search's goal: the most style within a time cap. */
+export interface StyleObjective {
+  /** Finish time a run must not exceed (ms). */
+  capMs: number;
+  /** Style points per level of style a cell is kept for. */
+  tierPoints: number;
+  /** How much a style point counts when picking a cell, in ms of clock. */
+  weightMs: number;
+}
+
+/** Levels of style a cell is kept for at most. */
+const STYLE_TIERS = 16;
 
 export interface SearchParams {
   seed: number;
@@ -50,6 +70,8 @@ export interface SearchParams {
    * exact landing step.
    */
   windowSteps: number;
+  /** Look for style within a cap instead of speed (the stylish records). */
+  style?: StyleObjective;
 }
 
 export const DEFAULT_SEARCH: Readonly<Omit<SearchParams, 'seed' | 'budgetSteps' | 'minGap'>> = {
@@ -109,18 +131,25 @@ interface Cell {
   presses: PressNode | null;
   lastPress: number;
   picks: number;
+  /** Tricks done on the way (packed, `style.ts`); 0 without a style objective. */
+  style: number;
 }
 
 export interface FinalRun {
   time: number;
   presses: Press[];
+  /** Style score (with a style objective; 0 otherwise). */
+  style: number;
 }
 
 export interface SearchProgress {
   steps: number;
   iterations: number;
   cells: number;
+  /** Time of the best finished run (the showiest with a style objective), or null. */
   best: number | null;
+  /** Its style score (with a style objective). */
+  style: number;
   /** Finished runs turned down for frame-perfect presses. */
   rejected: number;
 }
@@ -155,8 +184,9 @@ export class Search {
   private readonly random: () => number;
   private readonly fragility: (presses: readonly Press[], limit: number) => FragileCount;
   private epoch = 0;
-  private readonly banned: PressNode[] = [];
-  private allowed = 0;
+  /** Tricks of the path being played (packed). */
+  private styleNow = 0;
+  private readonly fails: Uint8Array;
   private readonly cells = new Map<number, Cell>();
   private readonly list: Cell[] = [];
   private readonly finals: FinalRun[] = [];
@@ -167,10 +197,9 @@ export class Search {
 
   /**
    * `fragility` counts the frame-perfect presses of a finished run that would be the new best,
-   * up to a limit. Runs with more than allowed neither count nor lower the target, so the
-   * search goes on until it finds runs a human can repeat. None are allowed in the first half
-   * of the budget, one after that and two in the last quarter, for levels where every fast
-   * route has a precise moment.
+   * up to a limit. A run with one neither counts nor lowers the target, so the search goes on
+   * until it finds runs a human can repeat. (The first records allowed one such press after
+   * half the budget and two in its last quarter; eleven of them kept one or two.)
    *
    * A turned-down run also bans its frame-perfect press: every cell reached through it is
    * tainted, picked no more and replaced by the next arrival that does without it. Otherwise
@@ -189,6 +218,8 @@ export class Search {
     this.mode = mode;
     this.params = params;
     this.fragility = fragility;
+    this.fails = failStates(content.moves);
+    if (params.style) this.best = params.style.capMs;
     this.world = newWorld(content, mode);
     this.bound = new LowerBound(this.world, mode);
     this.random = rng(params.seed);
@@ -200,7 +231,8 @@ export class Search {
       steps: this.steps,
       iterations: this.iterations,
       cells: this.list.length,
-      best: this.finals.length > 0 ? this.best : null,
+      best: this.finals[0]?.time ?? null,
+      style: this.finals[0]?.style ?? 0,
       rejected: this.rejected,
     };
   }
@@ -209,6 +241,7 @@ export class Search {
   seed(presses: readonly Press[]): void {
     const world = this.world;
     world.restoreState(this.list[0]!.state);
+    this.styleNow = 0;
     let node: PressNode | null = null;
     let last = -Infinity;
     let i = 0;
@@ -252,9 +285,15 @@ export class Search {
     const group = p.handsAnchored ? 2 : isOnSurface(p) ? 0 : 1;
     const speed = Math.abs(p.vx);
     const sb = speed < 1500 ? 0 : speed < 3000 ? 1 : 2;
-    return (
-      ((((progress * 256 + cx) * 128 + cy) * 3 + group) * 2 + (p.facingRight ? 1 : 0)) * 3 + sb
+    const place =
+      ((((progress * 256 + cx) * 128 + cy) * 3 + group) * 2 + (p.facingRight ? 1 : 0)) * 3 + sb;
+    const style = this.params.style;
+    if (!style) return place;
+    const tier = Math.min(
+      STYLE_TIERS - 1,
+      Math.floor(styleScore(this.styleNow) / style.tierPoints),
     );
+    return place * STYLE_TIERS + tier;
   }
 
   /** Stores the current state in its cell if it got there first. */
@@ -270,6 +309,7 @@ export class Search {
       cell.state = world.saveState(false);
       cell.presses = presses;
       cell.lastPress = lastPress;
+      cell.style = this.styleNow;
       return;
     }
     if (this.list.length >= this.params.maxCells) return;
@@ -280,6 +320,7 @@ export class Search {
       presses,
       lastPress,
       picks: 0,
+      style: this.styleNow,
     };
     this.cells.set(key, fresh);
     this.list.push(fresh);
@@ -295,6 +336,12 @@ export class Search {
     const world = this.world;
     this.steps++;
     const going = world.step(bits);
+    if (this.params.style) {
+      // A stylish run never fails: a state after a stumble, a crash or a pit is dropped.
+      const next = styleStep(this.styleNow, world.events, world.player, this.fails);
+      if (next < 0) return false;
+      this.styleNow = next;
+    }
     if (!going) {
       const result = world.rules.result;
       if (result?.finished) this.finish(result.time, presses);
@@ -306,31 +353,37 @@ export class Search {
     return true;
   }
 
+  /** Whether finished run `a` ranks before `b`: faster, or with a style objective showier. */
+  private ranksBefore(a: { time: number; style: number }, b: FinalRun): boolean {
+    if (this.params.style && a.style !== b.style) return a.style > b.style;
+    return a.time < b.time;
+  }
+
   private finish(time: number, presses: PressNode | null): void {
     const finals = this.finals;
-    if (finals.length >= this.params.keepFinals && time >= finals[finals.length - 1]!.time) return;
-    const run: FinalRun = { time, presses: toArray(presses) };
+    const style = this.params.style ? styleScore(this.styleNow) : 0;
+    if (this.params.style && time > this.params.style.capMs) return;
+    const worst = finals[finals.length - 1];
+    if (
+      finals.length >= this.params.keepFinals &&
+      worst &&
+      !this.ranksBefore({ time, style }, worst)
+    )
+      return;
+    const run: FinalRun = { time, presses: toArray(presses), style };
     const signature = JSON.stringify(run.presses);
     if (finals.some((f) => f.time === time && JSON.stringify(f.presses) === signature)) return;
-    const budget = this.params.budgetSteps;
-    const allowed = this.steps < budget * 0.5 ? 0 : this.steps < budget * 0.75 ? 1 : 2;
-    if (allowed !== this.allowed) {
-      // A precise moment may now be part of the run: the bans start over.
-      this.allowed = allowed;
-      for (const node of this.banned) node.banned = false;
-      this.banned.length = 0;
-      this.epoch++;
-    }
-    const fragile = this.fragility(run.presses, allowed);
-    if (fragile.count > allowed) {
+    const fragile = this.fragility(run.presses, 0);
+    if (fragile.count > 0) {
       this.rejected++;
       this.ban(presses, run.presses.length - 1 - fragile.index);
       return;
     }
     finals.push(run);
-    finals.sort((a, b) => a.time - b.time);
+    finals.sort((a, b) => (this.ranksBefore(a, b) ? -1 : this.ranksBefore(b, a) ? 1 : 0));
     if (finals.length > this.params.keepFinals) finals.length = this.params.keepFinals;
-    this.best = Math.min(this.best, time);
+    // With a style objective the cap stays the limit: a slower run may still be showier.
+    if (!this.params.style) this.best = Math.min(this.best, time);
   }
 
   /** Bans the press `back` places before the newest of `node`'s list. */
@@ -339,7 +392,6 @@ export class Search {
     for (let i = 0; i < back && n; i++) n = n.prev;
     if (!n || n.banned) return;
     n.banned = true;
-    this.banned.push(n);
     this.epoch++;
   }
 
@@ -363,14 +415,18 @@ export class Search {
 
   private pick(greed: number): Cell | null {
     const { list } = this;
-    const { tournament, novelty } = this.params;
+    const { tournament, novelty, style } = this.params;
+    // Style lowers a cell's score; the offset keeps every score positive for the novelty factor.
+    const styleMs = style ? style.weightMs : 0;
+    const offset = styleMs * MAX_STYLE;
     for (let attempt = 0; attempt < 40; attempt++) {
       let chosen: Cell | null = null;
       let chosenScore = Infinity;
       for (let i = 0; i < tournament; i++) {
         const cell = list[Math.floor(this.random() * list.length)]!;
         if (cell.clock + cell.bound >= this.best || this.tainted(cell.presses)) continue;
-        const score = (cell.clock + greed * cell.bound) * (1 + novelty * Math.log2(1 + cell.picks));
+        const value = cell.clock + greed * cell.bound + offset - styleMs * styleScore(cell.style);
+        const score = value * (1 + novelty * Math.log2(1 + cell.picks));
         if (score < chosenScore) {
           chosen = cell;
           chosenScore = score;
@@ -388,6 +444,7 @@ export class Search {
     const world = this.world;
     const { minGap, meanWait, maxWait, pressesPerRollout } = this.params;
     world.restoreState(cell.state);
+    this.styleNow = cell.style;
     let presses = cell.presses;
     let last = cell.lastPress;
     for (let n = 0; n < pressesPerRollout; n++) {

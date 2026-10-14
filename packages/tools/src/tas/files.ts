@@ -11,7 +11,7 @@
  *   input.
  */
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   RULESET_ID,
@@ -47,9 +47,18 @@ export interface TasRunFile {
   /** Flag or checkpoint indices in the order taken. */
   order: number[];
   steps: number;
-  /** Presses whose one-step jitter breaks the run (should be empty). */
+  /**
+   * Presses whose one-step jitter breaks the run: a run with one is never kept over one
+   * without, and never published.
+   */
   fragile: number[];
   worstLossMs: number;
+  /** A stylish record's folder (`style-05`), the cap it was searched with and the optimal time. */
+  variant?: string;
+  capPct?: number;
+  optimalMs?: number;
+  /** Its tricks (`style.ts`), and whether it fails anywhere (older files have none). */
+  style?: { score: number; tricks: Record<string, number>; failed: boolean };
   /** `step:K` pairs, K one of U D R L. */
   presses: string;
   /** The run as a replay code (`encodeReplay`), for watching it on the dev server. */
@@ -74,22 +83,64 @@ export interface ContestsFile {
   simVersion: string;
   rulesetId: string;
   constraints: Constraints;
+  /** When the records are stylish runs: their cap over the optimal ones, in percent. */
+  style?: { capPct: number };
   levels: ContestLevel[];
 }
 
-export function runPath(levelId: number, mode: ContestMode): string {
-  return join(TAS_OUT_DIR, `${levelId}-${mode}.json`);
+/** A run's file: the optimal one in `tas-out`, a stylish one in its variant's folder. */
+export function runPath(levelId: number, mode: ContestMode, variant = ''): string {
+  return join(TAS_OUT_DIR, variant, `${levelId}-${mode}.json`);
 }
 
-export function readRun(levelId: number, mode: ContestMode): TasRunFile | null {
-  const path = runPath(levelId, mode);
+export function readRun(levelId: number, mode: ContestMode, variant = ''): TasRunFile | null {
+  const path = runPath(levelId, mode, variant);
   if (!existsSync(path)) return null;
   return JSON.parse(readFileSync(path, 'utf8')) as TasRunFile;
 }
 
 export function writeRun(run: TasRunFile): void {
+  const path = runPath(run.levelId, run.mode, run.variant);
+  mkdirSync(join(path, '..'), { recursive: true });
+  writeFileSync(path, JSON.stringify(run, null, 2) + '\n');
+}
+
+/** The finished jobs of `run` (`tas-out/jobs.jsonl`), so a campaign can go on where it stopped. */
+export const JOBS_FILE = join(TAS_OUT_DIR, 'jobs.jsonl');
+
+export interface JobRecord {
+  /** '' for the optimal runs, the folder of a stylish one. */
+  variant: string;
+  levelId: number;
+  mode: ContestMode;
+  seed: number;
+  budgetSteps: number;
+  /** The cap of a stylish job (ms), else 0. */
+  capMs: number;
+  /** The run it found, or null. */
+  timeMs: number | null;
+  style: number | null;
+  at: string;
+}
+
+/** The key a job is found by in the log. */
+export function jobKey(
+  j: Pick<JobRecord, 'variant' | 'levelId' | 'mode' | 'seed' | 'budgetSteps' | 'capMs'>,
+): string {
+  return `${j.variant}|${j.levelId}|${j.mode}|${j.seed}|${j.budgetSteps}|${j.capMs}`;
+}
+
+export function readJobLog(): JobRecord[] {
+  if (!existsSync(JOBS_FILE)) return [];
+  return readFileSync(JOBS_FILE, 'utf8')
+    .split('\n')
+    .filter((l) => l.trim() !== '')
+    .map((l) => JSON.parse(l) as JobRecord);
+}
+
+export function logJob(record: JobRecord): void {
   mkdirSync(TAS_OUT_DIR, { recursive: true });
-  writeFileSync(runPath(run.levelId, run.mode), JSON.stringify(run, null, 2) + '\n');
+  appendFileSync(JOBS_FILE, JSON.stringify(record) + '\n');
 }
 
 export function readContests(): ContestsFile | null {
