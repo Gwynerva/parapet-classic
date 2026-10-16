@@ -19,6 +19,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "decompile": "node scripts/decompile.mjs",
+    "emulator": "node reference/emulator/run.mjs",
     "check": "npm run format:check && npm run typecheck && npm test",
     "build-font": "npm run build-font -w @parapet/tools",
     "tas": "npm run tas -w @parapet/tools --",

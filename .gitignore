@@ -7,6 +7,9 @@ Thumbs.db
 reference/decompiled/
 reference/cfr.jar
 reference/oracle/build/
+# the emulator footage tool's downloads, recordings and videos
+reference/emulator/build/
+reference/emulator/out/
 # intermediate extraction (unpacked jar)
 packages/tools/.work/
 # TAS runs: the input of Gwynerva's records stays local (only times are published)
