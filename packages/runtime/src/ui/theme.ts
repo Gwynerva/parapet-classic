@@ -14,11 +14,13 @@ export const Theme = {
   overlay: 'rgba(0, 0, 0, 0.6)',
 } as const;
 
-/** Format a game-clock time in ms as `m:ss.hh`. */
+/** Format a game-clock time in ms as `m:ss.hh`, from an hour on as `h:mm:ss.hh`. */
 export function formatTime(ms: number): string {
   const total = Math.max(0, ms | 0);
-  const minutes = Math.floor(total / 60000);
+  const hours = Math.floor(total / 3600000);
+  const minutes = Math.floor((total % 3600000) / 60000);
   const seconds = Math.floor((total % 60000) / 1000);
   const hundredths = Math.floor((total % 1000) / 10);
-  return `${minutes}:${String(seconds).padStart(2, '0')}.${String(hundredths).padStart(2, '0')}`;
+  const tail = `${String(seconds).padStart(2, '0')}.${String(hundredths).padStart(2, '0')}`;
+  return hours > 0 ? `${hours}:${String(minutes).padStart(2, '0')}:${tail}` : `${minutes}:${tail}`;
 }

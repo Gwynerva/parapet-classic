@@ -66,6 +66,8 @@ export interface RunSetup {
   autopilot?: InputRun[];
   /** A recorded run to race. */
   ghost?: GhostSetup;
+  /** The replay a `script` plays back, checked, so it can be raced after it was watched. */
+  watched?: GhostSetup;
   /** A record to beat (the bosses' contests). */
   contest?: ContestSetup;
 }
@@ -91,6 +93,8 @@ export class RunSession {
   /** Wall-clock milliseconds spent in the run (for display only). */
   elapsedMs = 0;
   paused = false;
+  /** The input bits the latest step ran with (the pressed keys, for showing them). */
+  lastBits = 0;
 
   constructor(setup: RunSetup, data: RunContent) {
     this.setup = setup;
@@ -138,21 +142,28 @@ export class RunSession {
   advance(dtMs: number): number {
     if (this.paused || this.finished) return 0;
     this.elapsedMs += dtMs;
-    return this.clock.advance(dtMs, {
-      step: () => {
-        let bits = this.pendingBits;
-        this.pendingBits = 0;
-        if (this.script) {
-          const scripted = this.script.next();
-          bits = scripted === NO_INPUT ? 0 : scripted;
-        }
-        const running = this.world.step(bits);
-        for (const e of this.world.events) if (isSplitEvent(e)) this.splits.push(this.world.clock);
-        this.stepGhost();
-        for (const l of this.listeners) l(this.world.events, this.world);
-        return running;
-      },
-    });
+    return this.clock.advance(dtMs, { step: () => this.step() });
+  }
+
+  /** Runs exactly one simulation step, paused or not (frame by frame through a replay). */
+  stepOnce(): void {
+    if (this.finished) return;
+    this.step();
+  }
+
+  private step(): boolean {
+    let bits = this.pendingBits;
+    this.pendingBits = 0;
+    if (this.script) {
+      const scripted = this.script.next();
+      bits = scripted === NO_INPUT ? 0 : scripted;
+    }
+    this.lastBits = bits;
+    const running = this.world.step(bits);
+    for (const e of this.world.events) if (isSplitEvent(e)) this.splits.push(this.world.clock);
+    this.stepGhost();
+    for (const l of this.listeners) l(this.world.events, this.world);
+    return running;
   }
 
   private stepGhost(): void {

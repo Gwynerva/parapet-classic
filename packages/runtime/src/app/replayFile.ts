@@ -14,8 +14,16 @@
 export const REPLAY_FILE_FORMAT = 'parapet-classic-replay';
 export const REPLAY_FILE_VERSION = 1;
 export const REPLAY_FILE_EXTENSION = '.parapet-replay';
+/** The file names a replay may come in. */
+const REPLAY_FILE_NAMES = [REPLAY_FILE_EXTENSION, '.json', '.txt'];
 /** What the file dialog offers. */
-export const REPLAY_FILE_ACCEPT = `${REPLAY_FILE_EXTENSION},application/json,.json,.txt`;
+export const REPLAY_FILE_ACCEPT = [...REPLAY_FILE_NAMES, 'application/json'].join(',');
+
+/** Whether a file may hold a replay, by its name (a pasted picture does not). */
+export function mayBeReplayFile(name: string): boolean {
+  const lower = name.toLowerCase();
+  return REPLAY_FILE_NAMES.some((ext) => lower.endsWith(ext));
+}
 
 /** A challenge link: `…/r/?<code>`. */
 const RACE_LINK = /\/r\/\?([A-Za-z0-9_-]{12,})/;

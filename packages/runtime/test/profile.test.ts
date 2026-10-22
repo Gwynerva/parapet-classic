@@ -1,17 +1,28 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  addFullGameTime,
+  clearFullGameTimer,
   clearRecords,
   completeMission,
+  finishFullGame,
   isBetterRecord,
   isContestBeaten,
   isLevelComplete,
   isLevelUnlocked,
   loadContestProgress,
   loadContestRecord,
+  loadFullGameBest,
+  loadFullGameRun,
   loadOptions,
+  loadPlayer,
   loadProgress,
+  loadRecord,
   markContestBeaten,
+  resetProgress,
   saveOptions,
+  savePlayer,
+  saveRecord,
+  splitFullGame,
   updateContestRecord,
   type RecordEntry,
   wantsFullscreen,
@@ -147,5 +158,52 @@ describe('profile', () => {
     completeMission(2, 1);
     expect(open(2)).toBe(false);
     expect(isLevelComplete(loadProgress(), levels, 1)).toBe(false);
+  });
+
+  it('resets the game for a speedrun but keeps the options, the name and the timer best', () => {
+    saveOptions({ locale: 'ru', musicLevel: 10 });
+    savePlayer({ name: 'Kirba', character: 3 });
+    saveRecord(0, 'sprint', entry({}));
+    updateContestRecord(1, 'flags', entry({}));
+    markContestBeaten(1, 'flags');
+    completeMission(0, 0);
+    addFullGameTime(5000);
+    finishFullGame();
+    addFullGameTime(1000);
+    resetProgress();
+    expect(loadRecord(0, 'sprint')).toBeNull();
+    expect(loadContestRecord(1, 'flags')).toBeNull();
+    expect(isContestBeaten(loadContestProgress(), 1, 'flags')).toBe(false);
+    expect(loadProgress().completed).toEqual([]);
+    expect(loadFullGameRun().totalMs).toBe(0);
+    expect(loadFullGameBest()?.totalMs).toBe(5000);
+    expect(loadOptions()).toMatchObject({ locale: 'ru', musicLevel: 10 });
+    expect(loadPlayer()).toEqual({ name: 'Kirba', character: 3 });
+  });
+
+  it('adds up the attempts of a full-game run, splits per level and keeps the best', () => {
+    expect(loadOptions().fullGameTimer).toBe(false);
+    addFullGameTime(12000);
+    addFullGameTime(3030);
+    expect(splitFullGame(0).splits).toEqual([{ levelId: 0, totalMs: 15030 }]);
+    // A level splits once.
+    addFullGameTime(970);
+    expect(splitFullGame(0).splits).toHaveLength(1);
+    const first = finishFullGame();
+    expect(first).toMatchObject({ newBest: true, previousBest: null });
+    expect(first?.run.finishedMs).toBe(16000);
+    // A finished run stands still and does not finish twice.
+    expect(addFullGameTime(500).totalMs).toBe(16000);
+    expect(finishFullGame()).toBeNull();
+    resetProgress();
+    addFullGameTime(17000);
+    expect(finishFullGame()).toMatchObject({ newBest: false });
+    expect(loadFullGameBest()).toEqual({
+      totalMs: 16000,
+      splits: [{ levelId: 0, totalMs: 15030 }],
+    });
+    clearFullGameTimer();
+    expect(loadFullGameBest()).toBeNull();
+    expect(loadFullGameRun()).toEqual({ totalMs: 0, splits: [], finishedMs: null });
   });
 });

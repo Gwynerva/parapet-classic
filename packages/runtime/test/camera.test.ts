@@ -86,6 +86,7 @@ describe.skipIf(!hasContent())('camera against the oracle traces', () => {
             : [],
       });
       const camera = new Camera(240, 320);
+      camera.original = true;
       camera.reset(world.player, world.level);
       const first = steps[0]!;
       if (first.cam) {
@@ -180,5 +181,44 @@ describe('camera keeping the runner above the touch buttons', () => {
     camera.setFrame(null);
     expect(camera.frameH).toBe(camera.viewH);
     expect(cameraMaxY(17 << 10, 539 << 5)).toBe((17 << 10) - (539 << 5));
+  });
+});
+
+describe.skipIf(!hasContent())('camera smoothing (the game, not the original)', () => {
+  /** Camera heights over the golden tiger jump on flat ground (level 0, 240×320). */
+  function tigerJump(original: boolean): number[] {
+    const lines = readGolden(join(GOLDEN_DIR, 'l0-tigerjump.jsonl.gz'))
+      .split('\n')
+      .filter((l) => l.length > 0);
+    const meta = (JSON.parse(lines[0]!) as { meta: TraceMeta }).meta;
+    const steps = lines.slice(1).map((l) => JSON.parse(l) as TraceStep);
+    const world = new World({
+      level: loadLevel(0),
+      moves: loadMoves(),
+      tables: loadTables(),
+      rules: { missionType: meta.missionType },
+      levelId: 0,
+    });
+    const camera = new Camera(240, 320);
+    camera.original = original;
+    camera.reset(world.player, world.level);
+    const ys: number[] = [];
+    for (const step of steps.slice(1, 80)) {
+      world.step(step.input ?? 0);
+      camera.update(world.player, world.level);
+      ys.push(camera.y);
+    }
+    return ys;
+  }
+
+  it('rises little for a tiger jump and comes down without a lurch', () => {
+    const rise = (ys: number[]) => ys[18]! - Math.min(...ys.slice(18));
+    const lurch = (ys: number[]) => Math.max(...ys.slice(1).map((y, i) => Math.abs(y - ys[i]!)));
+    const original = tigerJump(true);
+    const smooth = tigerJump(false);
+    // The original aims ahead of the launch speed: up by almost two tiles.
+    expect(rise(original)).toBeGreaterThan(1500);
+    expect(rise(smooth)).toBeLessThan(800);
+    expect(lurch(smooth)).toBeLessThan(64);
   });
 });

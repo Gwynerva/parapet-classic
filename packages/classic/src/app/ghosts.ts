@@ -2,8 +2,8 @@
  * Ghost races: a recorded run (someone's shared replay or the player's own record) re-run
  * next to the player's, on the same level and mode. Replays arrive as links, files, drops
  * and pastes; this module checks them, re-runs them headlessly for their verified result and
- * starts the race. It also sends the player's own runs out again (link to the clipboard,
- * file download).
+ * shows them on a card, from which they are watched or raced. It also sends the player's own
+ * runs out again (link to the clipboard, file download).
  */
 import {
   cleanReplayName,
@@ -27,6 +27,7 @@ import type { GhostKind, GhostSetup, RunSetup } from '@parapet/runtime/app/RunSe
 import {
   codeFromQuery,
   extractReplayCode,
+  mayBeReplayFile,
   REPLAY_FILE_ACCEPT,
   replayFileName,
   replayFileText,
@@ -36,7 +37,7 @@ import { copyText } from '@parapet/runtime/platform/clipboard.ts';
 import {
   downloadText,
   onFileDrop,
-  onPasteText,
+  onPaste,
   pickFile,
   readText,
 } from '@parapet/runtime/platform/files.ts';
@@ -50,6 +51,7 @@ import { MessageBox } from '@parapet/runtime/ui/MessageBox.ts';
 import { formatTime, type GameContext } from './Context.ts';
 import { contestCharacter, contestRecord, FIRST_BOSS_CHARACTER } from './bosses.ts';
 import { CopyLinkScreen } from './screens/CopyLinkScreen.ts';
+import { OpenReplayScreen } from './screens/OpenReplayScreen.ts';
 import { PlayScreen } from './screens/PlayScreen.ts';
 import { countEvent } from './analytics.ts';
 import { describeRace, keepOutOfSearch } from './racePage.ts';
@@ -243,25 +245,35 @@ export function checkReplayText(ctx: GameContext, text: string): ReplayCheck {
 
 /** Starts the race against a checked replay. */
 export function startRace(ctx: GameContext, ghost: GhostSetup): void {
-  ctx.input.clear();
   countEvent('race/link');
-  // A screen that only led here (the one for opening a replay) gives way to the race.
+  openRun(ctx, raceSetup(ctx, ghost));
+}
+
+/** Plays a checked replay back as its runner ran it; the results then offer to race it. */
+export function startWatch(ctx: GameContext, ghost: GhostSetup): void {
+  openRun(ctx, { ...watchSetup(ghost.replay), watched: ghost });
+}
+
+function openRun(ctx: GameContext, setup: RunSetup): void {
+  ctx.input.clear();
+  // A screen that only led here (the one for opening a replay) gives way to the run.
   while ((ctx.screens.top as { closesOnReplay?: boolean } | undefined)?.closesOnReplay) {
     ctx.screens.pop();
   }
-  ctx.screens.push(new PlayScreen(ctx, raceSetup(ctx, ghost)));
-}
-
-/** Starts a race against the replay in a file's text, a link or a bare code, or says why not. */
-export function openReplayText(ctx: GameContext, text: string): void {
-  const check = checkReplayText(ctx, text);
-  if (check.kind === 'ok') startRace(ctx, check.ghost);
-  else showProblem(ctx, check.kind === 'problem' ? check.problem : 'invalid');
+  ctx.screens.push(new PlayScreen(ctx, setup));
 }
 
 /**
- * Starts a race against the replay of the page's challenge link, which then describes that
- * race to search engines; or says why it cannot run, and keeps the page out of their index.
+ * Shows the replay in a file's text, a link or a bare code on its card (or what is wrong);
+ * `check` when the text was checked already (a replay is re-run to check it).
+ */
+export function openReplayText(ctx: GameContext, text: string, check?: ReplayCheck): void {
+  ctx.screens.push(new OpenReplayScreen(ctx, text, check));
+}
+
+/**
+ * Shows the replay of the page's challenge link on its card, to watch or race, and describes
+ * that race to search engines; or says why it cannot run, and keeps the page out of their index.
  */
 export function openReplayCode(ctx: GameContext, code: string): void {
   const check = checkReplayText(ctx, code);
@@ -279,11 +291,10 @@ export function openReplayCode(ctx: GameContext, code: string): void {
       i18n.t('race.page.title', args),
       i18n.t('race.page.description', args),
     );
-    startRace(ctx, check.ghost);
-    return;
+  } else {
+    keepOutOfSearch();
   }
-  keepOutOfSearch();
-  showProblem(ctx, check.kind === 'problem' ? check.problem : 'invalid');
+  openReplayText(ctx, code, check);
 }
 
 function showProblem(ctx: GameContext, problem: GhostProblem): void {
@@ -355,8 +366,8 @@ interface ReplayTaker {
 }
 
 /**
- * Replays dropped onto the window or pasted (Ctrl+V) start a race from any menu; during a run
- * they are ignored. (A challenge link opens a page of its own: `takeReplayFromLocation`.)
+ * Replays dropped onto the window or pasted (Ctrl+V) open their card from any menu; during a
+ * run they are ignored. (A challenge link opens a page of its own: `takeReplayFromLocation`.)
  */
 export function installReplayInputs(ctx: GameContext): void {
   const accepting = (): boolean => !(ctx.screens.top instanceof PlayScreen);
@@ -365,15 +376,26 @@ export function installReplayInputs(ctx: GameContext): void {
     if (taker?.takeReplayText) taker.takeReplayText(text);
     else openReplayText(ctx, text);
   };
-  onFileDrop((file) => {
+  const takeFile = (file: File): void => {
     if (!accepting()) return;
     void readText(file).then((text) => {
       if (text === null) showProblem(ctx, 'invalid');
       else take(text);
     });
-  });
-  onPasteText((text) => {
-    if (accepting() && extractReplayCode(text)) take(text);
+  };
+  onFileDrop(takeFile);
+  // A link or a code pasted as text; else a replay file copied in the file manager, as a drop.
+  onPaste({
+    onText: (text) => {
+      if (!accepting() || !extractReplayCode(text)) return false;
+      take(text);
+      return true;
+    },
+    onFile: (file) => {
+      if (!mayBeReplayFile(file.name)) return false;
+      takeFile(file);
+      return true;
+    },
   });
 }
 

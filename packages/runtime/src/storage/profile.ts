@@ -34,6 +34,10 @@ export interface Options {
   /** Race the ghost of the local record when starting a mission that has one. */
   bestGhost: boolean;
   fullscreen: FullscreenSetting;
+  /** Show the full-game timer (it counts while hidden, too). */
+  fullGameTimer: boolean;
+  /** Show the pressed keys during a run (always shown while watching a replay). */
+  inputDisplay: boolean;
 }
 
 export const DEFAULT_OPTIONS: Readonly<Options> = {
@@ -45,6 +49,8 @@ export const DEFAULT_OPTIONS: Readonly<Options> = {
   touchLayout: 'move-left',
   bestGhost: true,
   fullscreen: 'auto',
+  fullGameTimer: false,
+  inputDisplay: false,
 };
 
 export interface RecordEntry {
@@ -141,6 +147,8 @@ function validateOptions(raw: unknown): Partial<Options> | null {
   }
   if (isTouchLayout(raw['touchLayout'])) out.touchLayout = raw['touchLayout'];
   if (typeof raw['bestGhost'] === 'boolean') out.bestGhost = raw['bestGhost'];
+  if (typeof raw['fullGameTimer'] === 'boolean') out.fullGameTimer = raw['fullGameTimer'];
+  if (typeof raw['inputDisplay'] === 'boolean') out.inputDisplay = raw['inputDisplay'];
   return out;
 }
 
@@ -359,6 +367,27 @@ export function clearRecords(): void {
   }
 }
 
+function remove(key: string): void {
+  // The timer's cache reads its entries again.
+  fullGameCache = null;
+  try {
+    storage()?.removeItem(STORAGE_PREFIX + key);
+  } catch {
+    // nothing to do
+  }
+}
+
+/**
+ * A fresh game, as a speedrun starts it: records, missions done, bosses beaten and the
+ * full-game timer's run are gone. The options, the player's name and the timer's best stay.
+ */
+export function resetProgress(): void {
+  clearRecords();
+  remove(PROGRESS_KEY);
+  remove(CONTEST_KEY);
+  remove(FULL_GAME_RUN_KEY);
+}
+
 // ---------------------------------------------------------------------------------------------
 // Contests with the bosses (not part of the original's progress)
 // ---------------------------------------------------------------------------------------------
@@ -418,4 +447,147 @@ export function updateContestRecord(
 ): boolean {
   if (!isBetterRecord(kind, entry, loadContestRecord(levelId, kind), levelId)) return false;
   return write(contestRecordKey(levelId, kind), entry);
+}
+
+// ---------------------------------------------------------------------------------------------
+// The full-game timer (for speedruns; not part of the original)
+// ---------------------------------------------------------------------------------------------
+
+/** The timer's total when a level turned complete. */
+export interface FullGameSplit {
+  levelId: number;
+  totalMs: number;
+}
+
+/**
+ * The game clock of every attempt of a run added up: only play counts, never the menus,
+ * briefings or pauses. `finishedMs` is set once the credits were reached.
+ */
+export interface FullGameRun {
+  totalMs: number;
+  splits: FullGameSplit[];
+  finishedMs: number | null;
+}
+
+/** The fastest finished run. */
+export interface FullGameBest {
+  totalMs: number;
+  splits: FullGameSplit[];
+}
+
+const FULL_GAME_RUN_KEY = 'speedrun.run';
+const FULL_GAME_BEST_KEY = 'speedrun.best';
+
+function isMs(v: unknown): v is number {
+  return typeof v === 'number' && Number.isInteger(v) && v >= 0;
+}
+
+function validateSplits(raw: unknown): FullGameSplit[] | null {
+  if (!Array.isArray(raw)) return null;
+  const out: FullGameSplit[] = [];
+  for (const split of raw) {
+    if (!isRecordObject(split) || !isMs(split['levelId']) || !isMs(split['totalMs'])) return null;
+    out.push({ levelId: split['levelId'], totalMs: split['totalMs'] });
+  }
+  return out;
+}
+
+function validateFullGameRun(raw: unknown): FullGameRun | null {
+  if (!isRecordObject(raw) || !isMs(raw['totalMs'])) return null;
+  const splits = validateSplits(raw['splits']);
+  if (!splits) return null;
+  const finishedMs = isMs(raw['finishedMs']) ? raw['finishedMs'] : null;
+  return { totalMs: raw['totalMs'], splits, finishedMs };
+}
+
+function validateFullGameBest(raw: unknown): FullGameBest | null {
+  if (!isRecordObject(raw) || !isMs(raw['totalMs'])) return null;
+  const splits = validateSplits(raw['splits']);
+  return splits ? { totalMs: raw['totalMs'], splits } : null;
+}
+
+/**
+ * The timer's entries as last read or written, kept for the storage they live in: the timer is
+ * drawn every frame and should not parse them every frame. (Another tab writing them is not
+ * seen until a reload.)
+ */
+let fullGameCache: { store: Storage | null; run: FullGameRun; best: FullGameBest | null } | null =
+  null;
+
+function fullGame(): { run: FullGameRun; best: FullGameBest | null } {
+  const store = storage();
+  if (fullGameCache?.store !== store) {
+    fullGameCache = {
+      store,
+      run: read(FULL_GAME_RUN_KEY, validateFullGameRun) ?? {
+        totalMs: 0,
+        splits: [],
+        finishedMs: null,
+      },
+      best: read(FULL_GAME_BEST_KEY, validateFullGameBest),
+    };
+  }
+  return fullGameCache;
+}
+
+function saveRun(run: FullGameRun): FullGameRun {
+  fullGame().run = run;
+  write(FULL_GAME_RUN_KEY, run);
+  return run;
+}
+
+/** The run (a copy: change it through the functions below). */
+export function loadFullGameRun(): FullGameRun {
+  const { run } = fullGame();
+  return { ...run, splits: [...run.splits] };
+}
+
+export function loadFullGameBest(): FullGameBest | null {
+  return fullGame().best;
+}
+
+/** Adds an attempt's game clock to the run (nothing once the run is finished). */
+export function addFullGameTime(ms: number): FullGameRun {
+  const run = loadFullGameRun();
+  if (run.finishedMs !== null || ms <= 0) return run;
+  run.totalMs += Math.round(ms);
+  return saveRun(run);
+}
+
+/** Notes the run's total when a level turned complete (once per level). */
+export function splitFullGame(levelId: number): FullGameRun {
+  const run = loadFullGameRun();
+  if (run.finishedMs !== null || run.splits.some((s) => s.levelId === levelId)) return run;
+  run.splits.push({ levelId, totalMs: run.totalMs });
+  return saveRun(run);
+}
+
+export interface FullGameFinish {
+  run: FullGameRun;
+  /** The best before this run (null when there was none). */
+  previousBest: FullGameBest | null;
+  /** This run is the new best. */
+  newBest: boolean;
+}
+
+/** Stops the run and keeps it as the best when it is faster; null if it was stopped already. */
+export function finishFullGame(): FullGameFinish | null {
+  const run = loadFullGameRun();
+  if (run.finishedMs !== null || run.totalMs <= 0) return null;
+  run.finishedMs = run.totalMs;
+  saveRun(run);
+  const previousBest = loadFullGameBest();
+  const newBest = previousBest === null || run.totalMs < previousBest.totalMs;
+  if (newBest) {
+    const best = { totalMs: run.totalMs, splits: run.splits };
+    fullGame().best = best;
+    write(FULL_GAME_BEST_KEY, best);
+  }
+  return { run, previousBest, newBest };
+}
+
+/** Zeroes the full-game timer: its run and its best. */
+export function clearFullGameTimer(): void {
+  remove(FULL_GAME_RUN_KEY);
+  remove(FULL_GAME_BEST_KEY);
 }

@@ -3,16 +3,17 @@
  * code into (so the system's own paste works on phones, where there is no Ctrl+V), the
  * clipboard read at a press where the browser allows it, and the file dialog. Whatever comes in
  * is re-run at once and shown as a card: who challenges, on which level and mission, as which
- * character, with what time (the result this device computed, not one the link claims). The
- * race starts from the card; this screen then gives way to it (`closesOnReplay`). Replays
- * dropped or pasted onto the window while it is up land here too (`takeReplayText`).
+ * character, with what time (the result this device computed, not one the link claims). From
+ * the card the run is watched, as its runner ran it, or raced; this screen then gives way to it
+ * (`closesOnReplay`). Challenge links, and replays dropped or pasted onto the window, land here
+ * too (`takeReplayText`).
  */
 import { IDLE_CLIP_OFFSET } from '@parapet/runtime/anim/Animator.ts';
 import type { Screen, UiGesture, UiKey, UiPointer, UiWheel } from '@parapet/runtime/app/Screen.ts';
 import { drawPose } from '@parapet/runtime/render/CharacterRenderer.ts';
 import { Menu, type MenuItem } from '@parapet/runtime/ui/Menu.ts';
 import { heading, panel } from '@parapet/runtime/ui/draw.ts';
-import { rowHeight, type Rect } from '@parapet/runtime/ui/layout.ts';
+import { contains, rowHeight, type Rect } from '@parapet/runtime/ui/layout.ts';
 import { TextInputOverlay } from '@parapet/runtime/ui/TextInputOverlay.ts';
 import { Theme, type GameContext } from '../Context.ts';
 import { bossName, bossOfCharacter } from '../bosses.ts';
@@ -22,6 +23,7 @@ import {
   replayResultText,
   runnerName,
   startRace,
+  startWatch,
   type ReplayCheck,
 } from '../ghosts.ts';
 import { dialogLayout } from '../layouts.ts';
@@ -51,32 +53,49 @@ export class OpenReplayScreen implements Screen {
   private fieldRect: Rect = { x: 0, y: 0, w: 0, h: 0 };
   private cardRect: Rect = { x: 0, y: 0, w: 0, h: 0 };
 
-  constructor(ctx: GameContext) {
+  /**
+   * The field stays closed (no keyboard popping up) until tapped once a whole replay is in it,
+   * however it came: with the screen (a link), pasted, typed, dropped, picked or read from the
+   * clipboard.
+   */
+  private fieldIdle = false;
+
+  /**
+   * `text`: a link, code or file text that came in (shown on the card at once), and its `check`
+   * when it was checked already.
+   */
+  constructor(ctx: GameContext, text?: string, check?: ReplayCheck) {
     this.ctx = ctx;
     this.menu = new Menu(ctx.fonts.text);
-    this.buildMenu();
+    if (text !== undefined) this.takeReplayText(text, check);
+    else this.buildMenu();
     this.onResize();
   }
 
   private buildMenu(): void {
     const { i18n } = this.ctx;
-    const items: MenuItem[] = [
-      {
-        label: i18n.t('replayOpen.race'),
-        disabled: this.check().kind !== 'ok',
-        onSelect: () => this.race(),
-      },
-    ];
+    const ready = this.check().kind === 'ok';
+    // With a replay on the card: watch it or race it. Without one: ways to bring one.
+    const items: MenuItem[] = ready
+      ? [
+          { label: i18n.t('replayOpen.watch'), onSelect: () => this.watch() },
+          { label: i18n.t('replayOpen.race'), onSelect: () => this.race() },
+        ]
+      : [];
     // Reading the clipboard needs the browser's leave, asked at the press; not everywhere.
-    if (typeof navigator !== 'undefined' && typeof navigator.clipboard?.readText === 'function') {
+    if (
+      !ready &&
+      typeof navigator !== 'undefined' &&
+      typeof navigator.clipboard?.readText === 'function'
+    ) {
       items.push({
         label: i18n.t('replayOpen.paste'),
         gesture: true,
         onSelect: () => this.paste(),
       });
     }
-    items.push(
-      {
+    if (!ready) {
+      items.push({
         label: i18n.t('replayOpen.file'),
         gesture: true,
         onSelect: () =>
@@ -84,12 +103,15 @@ export class OpenReplayScreen implements Screen {
             if (text === null) this.show('', { kind: 'problem', problem: 'invalid' });
             else this.takeReplayText(text);
           }),
-      },
-      { label: i18n.t('menu.back'), onSelect: () => this.close() },
-    );
+      });
+    }
+    items.push({ label: i18n.t('menu.back'), onSelect: () => this.close() });
     const cursor = this.menu.cursor;
+    const rows = this.menu.items.length;
     this.menu.setItems(items);
     this.menu.setCursor(Math.min(cursor, items.length - 1));
+    // The panel is as tall as its rows.
+    if (items.length !== rows) this.onResize();
   }
 
   enter(): void {
@@ -103,8 +125,11 @@ export class OpenReplayScreen implements Screen {
   }
 
   /** A replay dropped, pasted, picked or read from the clipboard: into the field and the card. */
-  takeReplayText(text: string): void {
-    const check = checkReplayText(this.ctx, text);
+  takeReplayText(text: string, checked?: ReplayCheck): void {
+    // Checking re-runs the replay: once per text.
+    const check =
+      checked ??
+      (this.checked?.text === text ? this.checked.check : checkReplayText(this.ctx, text));
     // A file's whole text is not for the field: its code is.
     this.show(check.kind === 'ok' ? check.code : text.trim(), check);
   }
@@ -115,8 +140,9 @@ export class OpenReplayScreen implements Screen {
     this.field = null;
     this.text = text;
     this.checked = { text, check };
+    this.fieldIdle = check.kind === 'ok';
     this.buildMenu();
-    // The race is the obvious next step once there is one.
+    // Watching is the first step once there is a replay; a wrong text stays open to fix.
     if (check.kind === 'ok') this.menu.setCursor(0);
     if (this.ctx.screens.top === this) this.openField();
   }
@@ -132,6 +158,7 @@ export class OpenReplayScreen implements Screen {
 
   /** A fresh field holding `this.text` (an overlay keeps the text it was made with). */
   private openField(): void {
+    if (this.fieldIdle) return;
     this.field?.close();
     this.field = new TextInputOverlay(this.ctx.viewport, {
       maxLength: MAX_TEXT,
@@ -141,13 +168,15 @@ export class OpenReplayScreen implements Screen {
       onInput: (value) => {
         this.text = value;
         this.clipboardRefused = false;
-        this.check();
-        this.buildMenu();
+        // A whole replay pasted or typed into the field: taken as if dropped (after the event).
+        const check = this.check();
+        if (check.kind === 'ok') queueMicrotask(() => this.takeReplayText(value, check));
+        else this.buildMenu();
       },
+      // Enter: the card for a replay (as if pasted), the field again for anything else.
       onCommit: (value) => {
         this.field = null;
-        this.text = value;
-        if (!this.race()) this.openField();
+        this.takeReplayText(value);
       },
       onCancel: () => {
         this.field = null;
@@ -157,12 +186,16 @@ export class OpenReplayScreen implements Screen {
     this.field.open(this.fieldRect);
   }
 
-  /** Starts the race on the card; false when there is none. */
-  private race(): boolean {
+  /** Plays the card's replay back. */
+  private watch(): void {
     const check = this.check();
-    if (check.kind !== 'ok') return false;
-    startRace(this.ctx, check.ghost);
-    return true;
+    if (check.kind === 'ok') startWatch(this.ctx, check.ghost);
+  }
+
+  /** Starts the race on the card. */
+  private race(): void {
+    const check = this.check();
+    if (check.kind === 'ok') startRace(this.ctx, check.ghost);
   }
 
   /** Called from a gesture: browsers ask for (or show) their paste permission only there. */
@@ -224,6 +257,12 @@ export class OpenReplayScreen implements Screen {
   }
 
   onPointer(p: UiPointer): void {
+    // A tap on the closed field opens it for another replay.
+    if (this.fieldIdle && p.type === 'down' && contains(this.fieldRect, p.x, p.y)) {
+      this.fieldIdle = false;
+      this.openField();
+      return;
+    }
     this.menu.onPointer(p);
   }
 

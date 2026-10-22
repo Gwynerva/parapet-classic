@@ -67,6 +67,8 @@ export function followRun(
   },
 ): CameraRun {
   const cam = new Camera(SCREEN_W, SCREEN_H);
+  // The original's camera, not the game's smoothed one.
+  cam.original = true;
   cam.reset(runner, world.level);
   const snap = (): CameraStep => {
     const wanted = Math.max(-LOOK_MAX, Math.min(LOOK_MAX, Math.trunc((runner.vx * 3840) / 4143)));

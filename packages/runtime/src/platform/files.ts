@@ -75,23 +75,26 @@ export function onFileDrop(onDrop: (file: File) => void): () => void {
 }
 
 /**
- * Calls `onPaste` with text pasted anywhere outside an editable field (those keep their own
- * paste); returns the unsubscribe.
+ * Pasted text outside an editable field (those keep their own paste) goes to `onText` first;
+ * when it does not take it (returns false), a pasted file (copied in the system's file manager;
+ * no field takes a file) goes to `onFile`, which returns whether it took it. Returns the
+ * unsubscribe.
  */
-export function onPasteText(onPaste: (text: string) => void): () => void {
+export function onPaste(handlers: {
+  onText: (text: string) => boolean;
+  onFile: (file: File) => boolean;
+}): () => void {
   const paste = (event: ClipboardEvent): void => {
     const target = event.target;
-    if (
+    const editable =
       target instanceof HTMLInputElement ||
       target instanceof HTMLTextAreaElement ||
-      (target instanceof HTMLElement && target.isContentEditable)
-    ) {
-      return;
-    }
+      (target instanceof HTMLElement && target.isContentEditable);
     const text = event.clipboardData?.getData('text/plain') ?? '';
-    if (!text) return;
-    event.preventDefault();
-    onPaste(text);
+    const file = event.clipboardData?.files[0];
+    if ((!editable && text && handlers.onText(text)) || (file && handlers.onFile(file))) {
+      event.preventDefault();
+    }
   };
   document.addEventListener('paste', paste);
   return () => document.removeEventListener('paste', paste);

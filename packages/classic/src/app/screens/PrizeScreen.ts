@@ -1,10 +1,11 @@
 /**
  * The Prize ending (state 11, d.java line 5485): Playman and Blaise on the rooftops of Pine
  * Island, the birds taking off, fireworks, the camera rising into the sky, then the
- * congratulations and the credits. Confirm leaves.
+ * congratulations and the credits. Confirm leaves. A full-game run of the speedrun timer that
+ * ended with the last mission has its time under the title.
  */
 import { Level, tileCentre } from '@parapet/sim';
-import { Theme, type GameContext } from '../Context.ts';
+import { formatTime, Theme, type GameContext } from '../Context.ts';
 import type { Screen, UiKey, UiPointer } from '@parapet/runtime/app/Screen.ts';
 import { Camera } from '@parapet/runtime/render/Camera.ts';
 import { CharacterRenderer } from '@parapet/runtime/render/CharacterRenderer.ts';
@@ -19,6 +20,7 @@ import { markPrizeSeen } from '@parapet/runtime/storage/profile.ts';
 import { hash } from '@parapet/runtime/render/Particles.ts';
 import { COACH_TALK_CLIP } from '../ui/sprites.ts';
 import { TitleScreen } from './TitleScreen.ts';
+import { finishedFullGame } from '../speedrun.ts';
 
 const PRIZE_LEVEL = 11;
 /** Cells of the pair (`x(11)`): Playman at (53, 4), Blaise at (51, 4). */
@@ -39,6 +41,8 @@ export class PrizeScreen implements Screen {
   private nextVolley = 14000;
   private baseY = 0;
   private readonly theme = themeOfLevel(PRIZE_LEVEL);
+  /** The full-game run that ended with the last mission, or null. */
+  private readonly fullGame = finishedFullGame();
 
   constructor(ctx: GameContext) {
     this.ctx = ctx;
@@ -167,6 +171,7 @@ export class PrizeScreen implements Screen {
         align: 'center',
         color: Theme.accent,
       });
+      this.drawFullGame(c, safe.x + (safe.w >> 1), safe.y + 24 + fonts.title.lineHeight + 4);
     }
     if (this.elapsed >= 19000) {
       const text = i18n.t('prize.text');
@@ -177,5 +182,26 @@ export class PrizeScreen implements Screen {
       panel(c, box.x, box.y, box.w, box.h);
       fonts.small.draw(c, lines.join('\n'), box.x + 8, box.y + 8, { color: Theme.text });
     }
+  }
+
+  /** The full-game time and how it stands against the best, when the timer is shown. */
+  private drawFullGame(c: CanvasRenderingContext2D, x: number, y: number): void {
+    const { fonts, i18n, options } = this.ctx;
+    const done = this.fullGame;
+    if (!done || !options.fullGameTimer) return;
+    const time = formatTime(done.timeMs);
+    outlined(c, fonts.text, i18n.t('prize.fullGame', { time }), x, y, {
+      align: 'center',
+      color: Theme.text,
+      tabular: true,
+    });
+    const best = done.newBest
+      ? i18n.t('prize.fullGame.newBest')
+      : i18n.t('prize.fullGame.best', { time: formatTime(done.bestMs) });
+    outlined(c, fonts.small, best, x, y + fonts.text.lineHeight + 2, {
+      align: 'center',
+      color: done.newBest ? Theme.success : Theme.muted,
+      tabular: true,
+    });
   }
 }

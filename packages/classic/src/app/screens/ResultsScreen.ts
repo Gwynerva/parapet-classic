@@ -49,9 +49,12 @@ import {
   missionSetup,
   runnerName,
   saveReplayFile,
-  watchSetup,
+  startRace,
+  startWatch,
 } from '../ghosts.ts';
 import { formatGap } from '../ui/GhostOverlay.ts';
+import { splitIfLevelDone } from '../speedrun.ts';
+import { BUILD_VERSION } from '../version.ts';
 import {
   bossCharacterFor,
   bossOfCharacter,
@@ -322,6 +325,7 @@ export class ResultsScreen implements Screen {
     if (slot < 0) return;
     const { firstTime, total, progress } = completeMission(setup.levelId, slot);
     if (!firstTime) return;
+    splitIfLevelDone(this.ctx, setup.levelId, progress);
     countEvent(`level/${setup.levelId + 1}`);
     const completion = levelCompletion(this.ctx.content, setup.levelId, before, progress);
     if (completion) {
@@ -478,7 +482,19 @@ export class ResultsScreen implements Screen {
         onSelect: () =>
           this.leave(() => {
             screens.pop();
-            screens.push(new PlayScreen(this.ctx, watchSetup(ghost.replay)));
+            startWatch(this.ctx, ghost);
+          }),
+      });
+    }
+    // A replay watched can be raced next.
+    const watched = setup.watched;
+    if (watched) {
+      items.push({
+        label: i18n.t('replayOpen.race'),
+        onSelect: () =>
+          this.leave(() => {
+            screens.pop();
+            startRace(this.ctx, watched);
           }),
       });
     }
@@ -764,6 +780,14 @@ export class ResultsScreen implements Screen {
       }
     }
     this.menu.draw(c);
+    // The build, for a speedrun's submission (bottom left: the full-game timer is right).
+    fonts.small.draw(
+      c,
+      BUILD_VERSION,
+      4 + viewport.safeArea.left,
+      viewport.height - 2 - fonts.small.lineHeight - viewport.safeArea.bottom,
+      { color: Theme.muted },
+    );
   }
 }
 

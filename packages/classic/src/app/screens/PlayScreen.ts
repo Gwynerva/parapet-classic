@@ -60,6 +60,8 @@ import { BossContest } from './play/BossContest.ts';
 import { GhostRace } from './play/GhostRace.ts';
 import { FINISH_SIGN, headSign } from './play/signs.ts';
 import { ResultsScreen } from './ResultsScreen.ts';
+import { FullGameAttempt, runPresses, splitIfLevelDone } from '../speedrun.ts';
+import { WatchControls, type WatchHost } from './play/WatchControls.ts';
 
 /** Time the "get ready" banner is shown before the first step, in ms. */
 const READY_MS = 1200;
@@ -80,7 +82,7 @@ const SPLIT_SHOW_MS = 2500;
  */
 const RIVAL_MIRROR_OPACITY = 0.55;
 
-export class PlayScreen implements Screen {
+export class PlayScreen implements Screen, WatchHost {
   private readonly ctx: GameContext;
   readonly setup: RunSetup;
   session!: RunSession;
@@ -125,6 +127,12 @@ export class PlayScreen implements Screen {
   private readonly missionIndex: number;
   /** The run was started over with the restart button: straight to "get ready". */
   private quickStart = false;
+  /** This attempt's share of the full-game timer. */
+  private attempt: FullGameAttempt | null = null;
+  /** Speed, pause and steps while a replay plays back; null in a run of the player's. */
+  private readonly watch: WatchControls | null;
+  /** A replay is being run to another moment: no popups for the presses passed. */
+  private seeking = false;
 
   constructor(ctx: GameContext, setup: RunSetup) {
     this.ctx = ctx;
@@ -140,6 +148,7 @@ export class PlayScreen implements Screen {
       warmUp || (setup.mode === 'challenge' && PULSING_CHALLENGE_LEVELS.has(setup.levelId));
     this.artFrames = [0, 1];
     this.ghost = setup.ghost ? new GhostRace(ctx, setup.ghost) : null;
+    this.watch = setup.script ? new WatchControls(ctx, setup.script, this) : null;
     this.flow = new MissionFlow({
       tutorialPages: warmUp && !setup.script ? 3 : 0,
       briefing: !warmUp && setup.mode !== 'free' && !setup.script,
@@ -163,6 +172,9 @@ export class PlayScreen implements Screen {
     const mission = content.missions.levels[this.setup.levelId];
     const data = runContent(this.ctx, this.setup.levelId);
     if (!mission || !data) throw new Error(`level ${this.setup.levelId} is missing`);
+    // The attempt started over still counts for the full-game timer.
+    if (this.attempt) this.attempt.bank(this.session.world.clock);
+    this.attempt = new FullGameAttempt(!this.setup.script && !this.setup.autopilot);
     this.session = new RunSession(this.setup, data);
     const world = this.session.world;
     this.camera = new Camera(this.view.width, this.view.height);
@@ -190,6 +202,7 @@ export class PlayScreen implements Screen {
       this.onGhostStep(events, w),
     );
     this.splitFlash = null;
+    runPresses.clear();
     this.coach = null;
     const npc = world.level.npc;
     const warmUp = world.rules.missionType >= MissionType.WARM_UP_1;
@@ -249,6 +262,13 @@ export class PlayScreen implements Screen {
 
   private onStep(events: readonly WorldEvent[]): void {
     const world = this.session.world;
+    // The keys pop out: over a replay's play head, or by the timer in the player's run.
+    const bits = this.session.lastBits;
+    if (bits && this.watch) {
+      if (!this.seeking) this.watch.pressed(bits);
+    } else if (bits && this.ctx.options.inputDisplay) {
+      runPresses.pressed(bits);
+    }
     this.characters.onEvents(events);
     this.particles.onEvents(events);
     for (const ev of events) {
@@ -257,7 +277,8 @@ export class PlayScreen implements Screen {
         // The tutorial arrows switch to the way back once the flag is taken (level 5 never does).
         if (this.pulsing && ev.index === 0 && this.setup.levelId !== 5) this.artFrames = [2, 3];
       }
-      if ((ev.type === 'fail' || ev.type === 'pit') && ev.runner === world.player) {
+      // A replay watched does not shake the phone.
+      if ((ev.type === 'fail' || ev.type === 'pit') && ev.runner === world.player && !this.watch) {
         vibrate(FAIL_VIBRATION_MS);
       }
       if (ev.type === 'move' && ev.runner === world.player) this.checkHint(ev.to);
@@ -560,6 +581,7 @@ export class PlayScreen implements Screen {
   }
 
   exit(): void {
+    this.attempt?.leave(this.session.world.clock);
     // Menus and dialogs on top get every tap, and no longer press with this runner's facing.
     this.ctx.touch.shown = false;
     this.ctx.facingRight = () => true;
@@ -577,6 +599,7 @@ export class PlayScreen implements Screen {
     this.tour?.resize(this.camera.viewW, this.camera.viewH, this.camera.frameH);
     this.camera.refocus(this.level);
     this.snapAim = true;
+    this.watch?.place();
   }
 
   // -------------------------------------------------------------------------------------------
@@ -589,8 +612,11 @@ export class PlayScreen implements Screen {
     const level = world.level;
     // Game-time units of this frame (used outside the step loop).
     const units = this.frameUnits.take(dt);
+    const ticking = this.flow.phase === 'play' && !this.session.paused && !this.covered;
+    this.attempt?.frame(world.clock, ticking && !this.session.finished);
+    // A replay plays by itself: its own buttons take the touch buttons' place.
     this.ctx.touch.shown =
-      !this.covered && (this.flow.phase === 'play' || this.flow.phase === 'ready');
+      !this.watch && !this.covered && (this.flow.phase === 'play' || this.flow.phase === 'ready');
     switch (this.flow.phase) {
       case 'tutorial':
       case 'briefing':
@@ -643,9 +669,26 @@ export class PlayScreen implements Screen {
     }
     const bits = input.consume();
     if (bits !== 0) this.session.queueInput(bits);
-    this.session.advance(dt);
-    if (this.session.finished && !this.resultsShown) {
+    const watch = this.watch;
+    if (!watch) {
+      this.session.advance(dt);
+    } else {
+      // A drag on the timeline sets the frame, once a frame however fast the finger moves.
+      const target = watch.takeSeek();
+      if (target !== null) this.seek(target);
+      if (watch.scrubbing) {
+        // The replay waits for the finger.
+      } else if (!watch.paused) {
+        this.session.advance(dt * watch.speed);
+      } else {
+        for (let n = watch.takeSteps(); n > 0; n--) this.session.stepOnce();
+      }
+    }
+    // A drag to the end shows the results once the finger is up, not under it.
+    if (this.session.finished && !this.resultsShown && !watch?.scrubbing) {
       this.resultsShown = true;
+      // A seek may have started the run over: the session's own world, not the one above.
+      this.attempt?.bank(this.session.world.clock);
       this.flow.finish();
       this.onFinished();
     }
@@ -662,8 +705,11 @@ export class PlayScreen implements Screen {
       let completion: LevelCompletion | null = null;
       if (this.missionIndex >= 0) {
         const before = loadProgress();
-        const { progress } = completeMission(this.setup.levelId, this.missionIndex);
+        const { progress, firstTime } = completeMission(this.setup.levelId, this.missionIndex);
         completion = levelCompletion(this.ctx.content, this.setup.levelId, before, progress);
+        if (firstTime && !this.setup.script) {
+          splitIfLevelDone(this.ctx, this.setup.levelId, progress);
+        }
       }
       this.aimAtCoach();
       this.pushBox({
@@ -689,6 +735,9 @@ export class PlayScreen implements Screen {
         return;
       case 'ready':
       case 'play':
+        if (this.flow.phase === 'play' && !this.covered && this.watch?.onKey(key, this.stepsRun)) {
+          return;
+        }
         if (key.action === 'pause' || key.action === 'back') this.pause();
         else if (key.action === 'restart' && !this.covered && !this.session.finished) {
           this.restart({ quick: true });
@@ -699,6 +748,29 @@ export class PlayScreen implements Screen {
     }
   }
 
+  /** The steps the run has made. */
+  private get stepsRun(): number {
+    return this.session.world.stepCount;
+  }
+
+  /** Runs a replay to `step`: on from here, or from the start again for a moment passed. */
+  seek(step: number): void {
+    if (!this.watch || this.covered) return;
+    if (step < this.stepsRun) {
+      this.restart({ quick: true });
+      // Straight on with the replay, without "get ready".
+      this.flow.skipToPlay();
+    }
+    this.seeking = true;
+    while (this.stepsRun < step && !this.session.finished) this.session.stepOnce();
+    this.seeking = false;
+    this.watch.jumped();
+  }
+
+  openMenu(): void {
+    this.pause();
+  }
+
   private pause(): void {
     if (this.session.finished || this.covered) return;
     this.ctx.screens.push(new PauseScreen(this.ctx, this));
@@ -707,6 +779,7 @@ export class PlayScreen implements Screen {
   onPointer(p: UiPointer): void {
     // The touch buttons for pause and restart arrive as `pause` and `restart` keys.
     if (p.type === 'down' && this.flow.phase === 'flyover') this.advancePhase();
+    else if (this.flow.phase === 'play' && !this.covered) this.watch?.onPointer(p);
   }
 
   private hudOptions(): HudOptions {
@@ -780,7 +853,8 @@ export class PlayScreen implements Screen {
     const { render, viewport, touch, fonts, i18n } = this.ctx;
     const world = this.session.world;
     const playing = this.flow.playing;
-    const alpha = playing ? this.session.alpha : 1;
+    // Paused frame by frame, the step just run is shown as it is.
+    const alpha = playing && !this.watch?.paused ? this.session.alpha : 1;
     const exact = { x: this.camera.renderX(alpha), y: this.camera.renderY(alpha) };
     const now = performance.now();
     c.imageSmoothingEnabled = false;
@@ -820,6 +894,10 @@ export class PlayScreen implements Screen {
     if (!this.covered && this.flow.phase !== 'tutorial' && this.flow.phase !== 'briefing') {
       this.hud.draw(c, world, viewport, this.hudOptions());
       if (playing) this.drawEdgeSigns(c, cam, alpha);
+      // A replay's own bar (gone under a menu and at the end).
+      if (this.watch && this.ctx.screens.top === this && !this.session.finished) {
+        this.watch.draw(c, this.stepsRun);
+      }
     }
     const cx = viewport.width >> 1;
     const cy = viewport.height >> 1;

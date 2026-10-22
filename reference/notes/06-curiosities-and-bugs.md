@@ -14,6 +14,7 @@ A running list of how the 2007 developers did things, and where they slipped. Ap
 - **Instant states chain.** States with duration 0 and a next state run back to back inside one step, each with its own physics pass.
 - **Landing keeps only horizontal speed.** The floor response takes the previous horizontal velocity as the new tangential speed and discards the vertical part entirely; the landing grades read the vertical speed alone. ([05](../findings/05-landing-keeps-horizontal-speed/))
 - **Camera look-ahead is velocity-based** with a spring and a hard ±60/80 px leash, and it is cancelled when a wall is less than 4 tiles ahead. At running speed it aims 98 px ahead and the leash stops it at 60. ([10](../findings/10-the-camera/))
+- **A tiger jump on flat ground lifts the camera by almost two tiles.** The launch speed (vy = −4706, more than a plain jump's −4325) aims the camera 180 px up in a single step, far above the 1.2 tiles the body actually rises. The camera then hangs at the top while the target swings down, and it sinks for over a second after the landing, when the move folds the hands offset back into the feet (the feet drop 1248 units in one step). The remake's game camera leaves out the upward look-ahead and follows the lower of feet and hands (`Camera.original` keeps the original for the traces and the Lab): the same jump lifts it by 0.7 tile, at most 52 units a step.
 
 ## Bugs and oddities
 

@@ -1,6 +1,7 @@
 /**
  * Options: language, scale, music volume (a slider), full screen, vibration, the touch
- * buttons and clearing the records. Every change is saved at once.
+ * buttons, the speedrun aids (the full-game timer, the pressed keys) and the resets: of the
+ * timer, and of the whole game for a fresh run. Every change is saved at once.
  */
 import type { GameContext } from '../Context.ts';
 import type { Screen, UiGesture, UiKey, UiPointer, UiWheel } from '@parapet/runtime/app/Screen.ts';
@@ -9,26 +10,36 @@ import { MessageBox } from '@parapet/runtime/ui/MessageBox.ts';
 import { fitWidth, rowHeight } from '@parapet/runtime/ui/layout.ts';
 import { AVAILABLE_LOCALES, localeName } from '../../i18n/locales.ts';
 import {
-  clearRecords,
+  clearFullGameTimer,
+  DEFAULT_PLAYER,
+  loadProgress,
+  resetProgress,
   saveOptions,
+  savePlayer,
   type Options,
   type TouchControlsSetting,
 } from '@parapet/runtime/storage/profile.ts';
 import { isScaleMode, type ScaleMode } from '@parapet/runtime/render/Viewport.ts';
 import { isVibrationSupported, setVibrationEnabled } from '@parapet/runtime/input/InputManager.ts';
 import { ScreenFrame } from '../ui/ScreenFrame.ts';
+import { isCharacterOpen } from '../characters.ts';
+import { forgetLevelNews } from './LevelCompleteScreen.ts';
 
 const SCALE_MODES: ScaleMode[] = ['auto', 1, 2, 3, 4, 5, 6, 7, 8];
 const TOUCH_SETTINGS: TouchControlsSetting[] = ['auto', 'on', 'off'];
 const VOLUME_STEP = 5;
+
+/** The rows that ask before they erase: pressed once they ask, twice they erase. */
+type Erase = 'timer' | 'all';
 
 export class OptionsScreen implements Screen {
   readonly chrome = { fullscreenButton: true };
   private readonly ctx: GameContext;
   private readonly frame: ScreenFrame;
   private readonly menu: Menu;
-  private confirmClear = false;
-  private cleared = false;
+  /** The erasing row waiting for its second press. */
+  private confirming: Erase | null = null;
+  private readonly erased = new Set<Erase>();
   private unsubscribe: (() => void) | null = null;
 
   constructor(ctx: GameContext) {
@@ -156,27 +167,59 @@ export class OptionsScreen implements Screen {
         },
       },
       {
-        label: this.cleared
-          ? i18n.t('options.clearRecords.done')
-          : this.confirmClear
-            ? i18n.t('options.clearRecords.confirm')
-            : i18n.t('options.clearRecords'),
-        onSelect: () => {
-          if (this.cleared) return;
-          if (!this.confirmClear) {
-            this.confirmClear = true;
-          } else {
-            clearRecords();
-            this.cleared = true;
-          }
-          this.rebuild();
-        },
+        label: i18n.t('options.inputDisplay'),
+        value: onOff(options.inputDisplay),
+        onAdjust: () => this.apply({ inputDisplay: !options.inputDisplay }),
+      },
+      {
+        label: i18n.t('options.fullGameTimer'),
+        value: i18n.t(options.fullGameTimer ? 'options.shown' : 'options.hidden'),
+        onAdjust: () => this.apply({ fullGameTimer: !options.fullGameTimer }),
       },
     );
+    // The timer is reset only where it is seen.
+    if (options.fullGameTimer) {
+      items.push(this.eraseRow('timer', 'options.resetTimer', () => clearFullGameTimer()));
+    }
+    items.push(this.eraseRow('all', 'options.resetAll', () => this.resetAll()));
     const cursor = this.menu.cursor;
     this.menu.setItems(items);
     this.menu.setCursor(Math.min(cursor, items.length - 1));
     this.onResize();
+  }
+
+  /** A row that asks once (`<key>.confirm`) and then erases, saying so (`<key>.done`). */
+  private eraseRow(kind: Erase, key: string, erase: () => void): MenuItem {
+    const { i18n } = this.ctx;
+    const state = this.erased.has(kind) ? '.done' : this.confirming === kind ? '.confirm' : '';
+    return {
+      label: i18n.t(key + state),
+      onSelect: () => {
+        if (this.erased.has(kind)) return;
+        if (this.confirming !== kind) {
+          this.confirming = kind;
+        } else {
+          erase();
+          this.confirming = null;
+          this.erased.add(kind);
+        }
+        this.rebuild();
+      },
+    };
+  }
+
+  /**
+   * A fresh game: no records, missions or bosses. A character won along the way (a level's
+   * rival, or a boss: neither is open without the wins) goes back to the first one.
+   */
+  private resetAll(): void {
+    resetProgress();
+    forgetLevelNews();
+    const { ctx } = this;
+    if (!isCharacterOpen(ctx.content, loadProgress(), ctx.player.character)) {
+      ctx.player.character = DEFAULT_PLAYER.character;
+      savePlayer(ctx.player);
+    }
   }
 
   private showHomeScreenHint(): void {

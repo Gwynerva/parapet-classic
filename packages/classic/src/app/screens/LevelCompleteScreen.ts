@@ -72,6 +72,11 @@ export function holdLevelNews(completion: LevelCompletion): void {
   waiting.set(completion.levelId, completion);
 }
 
+/** Forgets the news waiting (the game was reset: the levels are not complete any more). */
+export function forgetLevelNews(): void {
+  waiting.clear();
+}
+
 /** The news waiting for level `levelId`'s menu, taken (it shows once), or null. */
 export function takeLevelNews(levelId: number): LevelCompletion | null {
   const news = waiting.get(levelId) ?? null;

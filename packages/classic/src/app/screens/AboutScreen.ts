@@ -10,6 +10,7 @@ import { fitWidth, rowHeight, type Rect } from '@parapet/runtime/ui/layout.ts';
 import { TextScroller, type TextBlock } from '@parapet/runtime/ui/TextScroller.ts';
 import { ScreenFrame } from '../ui/ScreenFrame.ts';
 import { labUrl, SOURCE_URL } from '../links.ts';
+import { BUILD_VERSION } from '../version.ts';
 
 const TABS = ['game', 'howTo', 'credits'] as const;
 type Tab = (typeof TABS)[number];
@@ -141,6 +142,8 @@ export class AboutScreen implements Screen {
           para(i18n.t('about.remake', { name: i18n.t('gwynerva.name') }), 4),
           head(i18n.t('about.fonts.title')),
           para(i18n.t('about.fonts'), 4),
+          head(i18n.t('about.version.title')),
+          para(BUILD_VERSION, 4),
         ];
     }
   }

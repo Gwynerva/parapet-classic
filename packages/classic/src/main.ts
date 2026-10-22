@@ -14,6 +14,7 @@ import { createPlatform, FullscreenCorner } from './app/platform.ts';
 import { countVisit } from './app/analytics.ts';
 import { registerOffline } from './app/offline.ts';
 import { MenuBackdrop } from './app/ui/MenuBackdrop.ts';
+import { drawSpeedrunOverlay } from './app/speedrun.ts';
 import { PlayScreen } from './app/screens/PlayScreen.ts';
 import type { RunMode } from '@parapet/sim';
 import { Viewport } from '@parapet/runtime/render/Viewport.ts';
@@ -164,7 +165,7 @@ async function main(): Promise<void> {
   countVisit();
   registerOffline();
   installReplayInputs(ctx);
-  // A challenge link (`r/?<code>`) goes straight into the race, over the title screen.
+  // A challenge link (`r/?<code>`) opens its card over the title screen: watch it or race it.
   const shared = takeReplayFromLocation();
   if (shared) openReplayCode(ctx, shared);
   else keepOutOfSearch();
@@ -182,6 +183,7 @@ async function main(): Promise<void> {
     screens.update(dt);
     screens.render(viewport.ctx, 0);
     corner.draw(viewport.ctx);
+    drawSpeedrunOverlay(ctx, viewport.ctx);
     ctx.platform.toast.draw(viewport.ctx, fonts.small, viewport);
   });
   loop.start();

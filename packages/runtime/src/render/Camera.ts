@@ -14,6 +14,12 @@
  *   (player − half height − height/20)
  * - clamp x to [0, levelW − viewW], y ≤ levelH − viewH; the camera may go above the map.
  *
+ * Two smoothings of our own, off with `original` (the traces check the original's camera): the
+ * vertical look-ahead is kept for falls only and eases in and out instead of jumping with the
+ * speed (a tiger jump's launch aimed the camera 180 px up in one step), and a runner on its
+ * hands is followed by the lower of feet and hands (a tiger jump lifts the feet while the body
+ * skims the ground, and folds them back at the landing: the camera rose and then sank at once).
+ *
  * The vertical rules work on a frame: the whole view (as on the original screen, which the
  * traces check), or its upper part (`setFrame`). The game frames the runner above the place of
  * the touch buttons: the level's bottom edge then stops at the top of the buttons instead of
@@ -39,6 +45,9 @@ export interface CameraTarget {
   /** Velocity (`q`, `r`). */
   vx: number;
   vy: number;
+  /** The body hangs from its hands (`m`, `n` offset them from the feet); the smoothing uses it. */
+  handsAnchored?: boolean;
+  renderHandsDy?: number;
 }
 
 /** Tiles that face a runner moving with velocity `vx` (`boolean_b(int,int)`, line 9154). */
@@ -63,6 +72,15 @@ export function tileFacesRunner(vx: number, tile: number): boolean {
 /** Per-step camera displacement treated as a cut rather than a pan (see `update`). */
 export const CAMERA_CUT_UNITS = 900;
 
+/** The look-ahead moves 1/2^n of the way to its new value per step (the smoothing). */
+const LOOK_EASE_SHIFT = 3;
+
+/** The lower of feet and hands (y grows downward): what the smoothed camera follows. */
+function bodyBottom(player: CameraTarget): number {
+  if (!player.handsAnchored || player.renderHandsDy === undefined) return player.renderY;
+  return Math.max(player.renderY, player.renderY + player.renderHandsDy);
+}
+
 export class Camera {
   /** Top-left corner in units (`bD`, `bE`). */
   x = 0;
@@ -84,6 +102,10 @@ export class Camera {
   private framePx: number | null = null;
   /** The point `aimAtPoint` holds at screen fractions, re-aimed at after a resize (`refocus`). */
   private focus: { x: number; y: number; fx: number; fy: number } | null = null;
+  /** The original's camera exactly, without the smoothing (see above). */
+  original = false;
+  /** The eased vertical look-ahead (units). */
+  private lookY = 0;
 
   constructor(viewWidthPx = 240, viewHeightPx = 320) {
     this.setViewport(viewWidthPx, viewHeightPx);
@@ -111,6 +133,7 @@ export class Camera {
     this.y = this.targetY = player.y - (this.frameH >> 1);
     this.velX = 0;
     this.velY = 0;
+    this.lookY = 0;
     this.clampToLevel(level);
     this.targetX = this.x;
     this.targetY = this.y;
@@ -194,11 +217,17 @@ export class Camera {
     // 5888 + ((p * 10240 / (H << 10) - 5120) * 256 >> 10) on the original screen.
     const baseY = Math.trunc((frameH * 23) / 40);
     const levelH = level.height << 10;
-    const n = baseY + (((Math.trunc((player.renderY * frameH) / levelH) - halfH) * 256) >> 10);
+    const followY = this.original ? player.renderY : bodyBottom(player);
+    const n = baseY + (((Math.trunc((followY * frameH) / levelH) - halfH) * 256) >> 10);
     let lookX = Math.trunc((player.vx * 3840) / 4143);
     let lookY = Math.trunc((player.vy * 5120) / 4143);
     lookX = clamp(lookX, -halfW, halfW);
     lookY = clamp(lookY, -n, n);
+    if (!this.original) {
+      // Only a fall is looked ahead of: a jump is followed as it rises, not anticipated.
+      this.lookY += (Math.max(0, lookY) - this.lookY) >> LOOK_EASE_SHIFT;
+      lookY = this.lookY;
+    }
     const dir = player.vx > 0 ? 1 : -1;
     const cx = player.renderX >> 10;
     const cy = player.renderY >> 10;
@@ -211,7 +240,7 @@ export class Camera {
         lookX = 0;
       }
     }
-    this.setTarget(player.renderX - halfW + lookX, player.renderY - n + lookY, level);
+    this.setTarget(player.renderX - halfW + lookX, followY - n + lookY, level);
   }
 
   /** `l(int,int)`: clamp and store the target. */

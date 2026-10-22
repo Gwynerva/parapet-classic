@@ -4,6 +4,35 @@ Parapet Classic is a preservation project: the original game, playable in a brow
 every movement, with its workings documented in `reference/`. Improvements are welcome where they
 make the game more comfortable to play and never where they would change how it plays.
 
+## 1.1.0 (2026-10-22)
+
+**For speedruns.** What runners and the moderators of the speedrun.com board need, told in
+[`docs/SPEEDRUN.md`](docs/SPEEDRUN.md):
+
+- **Reset all data** (Options) replaces "Clear records": records, missions done and bosses
+  beaten go, as on a first launch. The language, the controls and the player's name stay.
+- **The full-game timer** (Options, hidden by default) adds up the game clock of every attempt,
+  restarts and failures included. It stands still in the menus, briefings and pauses, survives
+  a reload, splits per level against the best, and stops with the last mission (the credits
+  show it). It shows at the top centre during a run.
+- **A replay link opens a card**, and so does a replay file dropped onto the window or copied in
+  the file manager and pasted (Ctrl+V), or a link or a code pasted: watch the run as its runner
+  played it, or race it. Watching shows a bar like a video player's: the run's timeline with
+  every press marked on it as a chevron pointing its way, a drag that takes the game along frame
+  by frame, presses popping up as they play, speeds from ¼× to 4×, a pause, and steps of one
+  frame forward and back.
+- **Show pressed keys** (Options): each press flies out to the left of the full-game timer as a
+  chevron pointing its way (down from the top centre while the timer is hidden), for run videos;
+  the gap at the last split stands to the timer's right.
+- The version (`Parapet 1.1.0 · parapet-sim@0.2.0`) stands on the results screen and in
+  About → Credits.
+
+**A calmer camera.** It no longer looks ahead of a jump upwards, and it follows the lower of the
+runner's feet and hands. The original aimed almost two tiles above a tiger jump on flat ground
+and sank back for over a second after the landing; now the same jump lifts it by 0.7 tile, with
+no lurch. The camera never touches the run; the original's camera is kept for the traces and
+the Lab.
+
 ## 1.0.0 (2026-10-14)
 
 **The original, taken apart.** Fifteen findings about how Playman Extreme Running works, each a

@@ -44,6 +44,11 @@ export class MissionFlow {
     else this.enter(this.afterBriefing());
   }
 
+  /** Straight into play, past every phase before it (a replay run again to a moment of it). */
+  skipToPlay(): void {
+    this.enter('play');
+  }
+
   get playing(): boolean {
     return this.phase === 'play';
   }

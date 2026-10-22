@@ -1,0 +1,8 @@
+/**
+ * The build a run was played on, for speedrun submissions: the game's release and the version
+ * of the simulation that replays are checked against (a replay runs only on its own).
+ */
+import { SIM_VERSION } from '@parapet/sim';
+import { version } from '../../../../package.json';
+
+export const BUILD_VERSION = `Parapet ${version} · ${SIM_VERSION}`;
