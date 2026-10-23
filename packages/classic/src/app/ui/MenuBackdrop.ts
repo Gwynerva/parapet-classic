@@ -96,6 +96,8 @@ export class MenuBackdrop {
   /** A cut is due: the camera jumps in the middle of the dip. */
   private cutPending = false;
   private lastLevel = -1;
+  /** Without the veil, in full brightness (`?backdrop=1`, for demonstrations). */
+  bright = false;
 
   constructor(ctx: GameContext) {
     this.ctx = ctx;
@@ -151,8 +153,10 @@ export class MenuBackdrop {
     show.characters.drawAll(c, cam, alpha, show.clock);
     show.fx.drawFront(c, cam);
     c.restore();
-    c.fillStyle = VEIL;
-    c.fillRect(0, 0, view.width, view.height);
+    if (!this.bright) {
+      c.fillStyle = VEIL;
+      c.fillRect(0, 0, view.width, view.height);
+    }
     // Fades: into a show, out of it, and a short dip on a camera cut.
     let fade = Math.max(0, 1 - this.age / FADE_MS);
     if (this.leaving >= 0) fade = Math.max(fade, 1 - this.leaving / FADE_MS);

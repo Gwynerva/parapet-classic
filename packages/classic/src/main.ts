@@ -138,6 +138,9 @@ async function main(): Promise<void> {
   };
   ctx.input = new InputManager({ viewport, facingRight: () => ctx.facingRight(), touch });
   ctx.backdrop = new MenuBackdrop(ctx);
+  // `?backdrop=1` shows only the menus' backdrop, bright and without any menu (demonstrations).
+  const backdropOnly = new URLSearchParams(location.search).get('backdrop') === '1';
+  ctx.backdrop.bright = backdropOnly;
   ctx.platform = createPlatform(ctx, {
     isAtRoot: () => screens.size === 1 && screens.top instanceof TitleScreen,
     back: () => ctx.input.action('back', 'system'),
@@ -175,11 +178,16 @@ async function main(): Promise<void> {
     viewport.sync();
     ctx.input.pollGamepads();
     for (const ev of ctx.input.consumeUi()) {
+      if (backdropOnly) continue;
       if (ev.type === 'key') screens.onKey(ev.key);
       else if (ev.type === 'wheel') screens.onWheel(ev.wheel);
       else screens.onPointer(ev.pointer);
     }
     ctx.backdrop.frame(dt);
+    if (backdropOnly) {
+      ctx.backdrop.draw(viewport.ctx);
+      return;
+    }
     screens.update(dt);
     screens.render(viewport.ctx, 0);
     corner.draw(viewport.ctx);
@@ -189,7 +197,8 @@ async function main(): Promise<void> {
   loop.start();
   // Development: a run straight from the address. The title screen is up already, so a run
   // that cannot start leaves the game as it is.
-  if (!shared) await startFromQuery(ctx).catch((err: unknown) => console.error(err));
+  if (!shared && !backdropOnly)
+    await startFromQuery(ctx).catch((err: unknown) => console.error(err));
 }
 
 /**
