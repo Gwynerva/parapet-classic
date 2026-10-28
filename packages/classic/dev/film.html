@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>TAS film</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #000;
+        overflow: hidden;
+      }
+      canvas {
+        display: block;
+        width: 100vw;
+        height: 100vh;
+        object-fit: contain;
+      }
+      #status {
+        position: fixed;
+        left: 12px;
+        bottom: 12px;
+        max-width: 60vw;
+        padding: 6px 10px;
+        color: #ddd;
+        background: rgba(0, 0, 0, 0.7);
+        font: 13px monospace;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="view"></canvas>
+    <div id="status">loading…</div>
+    <!-- The dev server's client first: it sets the build's constants (TAS_OUT) for the page. -->
+    <script type="module" src="/@vite/client"></script>
+    <script type="module" src="./film.ts"></script>
+  </body>
+</html>
