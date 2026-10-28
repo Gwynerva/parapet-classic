@@ -180,7 +180,7 @@ async function main(): Promise<void> {
     image('blaze.png'),
     image('parapet-icon.png'),
     image('parapet-logo.png'),
-    image('avatar.png'),
+    image('avatar-card.png'),
   ]);
   const { sheet, scene, sine, level: levels, skins, echo, clips, moves } = createRenderers(content);
 
@@ -672,7 +672,7 @@ async function main(): Promise<void> {
       step: cityRand() < 0.4,
       lit: Array.from({ length: 40 }, () => cityRand() < 0.32),
     }));
-  const farTowers = skyline(13, 90, 200);
+  const farTowers = skyline(13, 130, 240);
   const nearTowers = skyline(10, 50, 140);
   const stars = Array.from({ length: 40 }, () => ({
     x: cityRand() * PANEL,
@@ -748,7 +748,7 @@ async function main(): Promise<void> {
         c.fillRect(cl.x + 12, cl.y - 8, cl.w * 0.5, 10);
       }
     }
-    towersAt(farTowers, ROOF - 30, look.far, look.farWindows);
+    towersAt(farTowers, ROOF, look.far, look.farWindows);
     if (look.fog) {
       c.fillStyle = look.fog;
       c.fillRect(0, ROOF - 140, PANEL, 140);
@@ -781,14 +781,7 @@ async function main(): Promise<void> {
         rect(x, BOARD.y + BOARD.h, 4, 4, '#ffe9a8');
       }
     }
-    c.save();
-    c.setTransform(k, 0, 0, k, 0, 0);
-    c.beginPath();
-    c.arc(BOARD.x + 52, BOARD.y + 53, 40, 0, Math.PI * 2);
-    c.fillStyle = look.frame;
-    c.fill();
-    c.restore();
-    picture(avatar, BOARD.x + 15, BOARD.y + 16, 74);
+    picture(avatar, BOARD.x + 12, BOARD.y + 12, 82);
     text(fontD16, 'Petra Radko', BOARD.x + 106, BOARD.y + 10, 2, look.name);
     c.save();
     c.setTransform(k, 0, 0, k, 0, 0);
@@ -807,10 +800,8 @@ async function main(): Promise<void> {
     c.fill();
     c.restore();
     // The handle, smaller than the name and bolded by a second pass a pixel to the right.
-    text(fontT12, '@Gwynerva', BOARD.x + 146, BOARD.y + 49, 2, look.handle);
-    text(fontT12, '@Gwynerva', BOARD.x + 148, BOARD.y + 49, 2, look.handle);
-    const hw = fontT12.measure('@Gwynerva') * 2;
-    githubMark(BOARD.x + 148 + hw + 12, BOARD.y + 50, 22, look.handle);
+    const hw = spaced('@Gwynerva', BOARD.x + 154, BOARD.y + 49, 3, look.handle);
+    githubMark(BOARD.x + 154 + hw + 10, BOARD.y + 50, 22, look.handle);
     text(fontT12, 'TAS · OCTOBER 28, 2026', BOARD.x + 108, BOARD.y + 80, 2, look.date);
     drawAirCon(ms);
     drawJumper(ms);
@@ -1077,6 +1068,17 @@ async function main(): Promise<void> {
   };
   const drawBanner = (ms: number): void => drawRoofScene(ms);
 
+  /** Small bold text with `gap` design px between letters; returns its width. */
+  function spaced(str: string, x: number, y: number, gap: number, color: string): number {
+    let at = x;
+    for (const ch of str) {
+      text(fontT12, ch, at, y, 2, color);
+      text(fontT12, ch, at + 2, y, 2, color);
+      at += fontT12.measure(ch) * 2 + 2 + gap;
+    }
+    return at - x - gap;
+  }
+
   /** GitHub's mark (the Octocat in a circle, its 16-unit path) at (x, y), `size` across. */
   const GITHUB = new Path2D(
     'M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z',
@@ -1096,49 +1098,27 @@ async function main(): Promise<void> {
     [
       's278.png',
       's300.png',
-      's305.png',
       's304.png',
-      's285.png',
       's283.png',
-      's295.png',
-      's291.png',
       's296.png',
       's297.png',
+      's298.png',
+      's68.png',
+      's69.png',
       's301.png',
-      's308.png',
-      's284.png',
     ].map(sprite),
   );
   const sp = (i: number): ImageBitmap => streetSprites[i]!;
-  const [
-    cop,
-    bush,
-    tree,
-    bin,
-    bench,
-    lampHead,
-    lampPole,
-    sign,
-    pigeon,
-    pigeon2,
-    bollard,
-    walker,
-    dryBush,
-  ] = [
-    sp(0),
-    sp(1),
-    sp(2),
-    sp(3),
-    sp(4),
-    sp(5),
-    sp(6),
-    sp(7),
-    sp(8),
-    sp(9),
-    sp(10),
-    sp(11),
-    sp(12),
-  ];
+  const cop = sp(0);
+  const bush = sp(1);
+  const bin = sp(2);
+  const lampHead = sp(3);
+  const pigeon = sp(4);
+  const pigeonFly = sp(5);
+  const pigeonFly2 = sp(6);
+  const tagSpike = sp(7);
+  const tagTrix = sp(8);
+  const bollard = sp(9);
   /** A game sprite standing on the pavement: its bottom centre at x, `px` design px a pixel. */
   const stand = (img: ImageBitmap, x: number, px = 1, y = STREET_GROUND, flip = false): void => {
     const w = img.width * px;
@@ -1162,54 +1142,81 @@ async function main(): Promise<void> {
     if (t < 8200) return 1 - (t - 7800) / 400;
     return 0;
   };
-  const copBehindBush = (x: number, ms: number): void => {
+  const copBehindBush = (x: number, ms: number, px: number): void => {
     // The cop stands behind the bush, hidden; he rises to peek over it.
     const rise = copRise(ms);
-    const hidden = 30;
-    stand(cop, x + 4, 1, STREET_GROUND + hidden - Math.round(rise * 26), ms % 2400 < 1200);
-    stand(bush, x, 1);
+    const hidden = Math.round(34 * px);
+    c.save();
+    c.beginPath();
+    c.setTransform(k, 0, 0, k, 0, 0);
+    c.rect(0, 0, PANEL, STREET_GROUND);
+    c.clip();
+    stand(cop, x, px, STREET_GROUND + hidden - Math.round(rise * 30 * px), ms % 2400 < 1200);
+    c.restore();
+    stand(bush, x, px);
   };
+  /** A park bench: green slats on a cast-iron frame, `x` its left end. */
+  const drawParkBench = (x: number): void => {
+    const g = STREET_GROUND;
+    const iron = '#2b2e33';
+    const slat = '#3f7a4a';
+    const slatLight = '#5b9a63';
+    rect(x + 4, g - 40, 6, 40, iron);
+    rect(x + 80, g - 40, 6, 40, iron);
+    rect(x + 2, g - 20, 86, 3, iron);
+    for (const y of [g - 40, g - 33]) {
+      rect(x, y, 90, 5, slat);
+      rect(x, y, 90, 1, slatLight);
+    }
+    rect(x - 4, g - 22, 98, 6, slat);
+    rect(x - 4, g - 22, 98, 1, slatLight);
+    rect(x, g - 16, 4, 16, iron);
+    rect(x + 86, g - 16, 4, 16, iron);
+  };
+  /** The flying pigeon: from the pavement up to the total's clock, every 8 s. */
+  const PIGEON_FROM = { x: 240, y: STREET_GROUND - 2 };
+  const PIGEON_TO = { x: 470, y: 948 };
   const drawStreet = (ms: number): void => {
     // The pavement and its curb, a warm wash from the sunset low on the wall.
     rect(0, STREET_GROUND, PANEL, 1080 - STREET_GROUND, '#2a2120');
     rect(0, STREET_GROUND - 3, PANEL, 3, '#8a6250');
     c.save();
     c.setTransform(k, 0, 0, k, 0, 0);
-    const g = c.createLinearGradient(0, STREET_GROUND - 70, 0, STREET_GROUND);
+    const g = c.createLinearGradient(0, STREET_GROUND - 80, 0, STREET_GROUND);
     g.addColorStop(0, 'rgba(255,150,90,0)');
-    g.addColorStop(1, 'rgba(255,150,90,0.12)');
+    g.addColorStop(1, 'rgba(255,150,90,0.14)');
     c.fillStyle = g;
-    c.fillRect(0, STREET_GROUND - 70, PANEL, 70);
+    c.fillRect(0, STREET_GROUND - 80, PANEL, 80);
     c.restore();
-    const peck = Math.floor(ms / 500) % 4 === 0;
-    if (options.street === 1) {
-      // Patrol: a lamp, a bench with a pigeon, a bin, the policeman behind a bush.
-      stand(lampPole, 46, 1);
-      stand(lampHead, 46, 1, STREET_GROUND - 54);
-      stand(bench, 170, 1);
-      stand(peck ? pigeon2 : pigeon, 196, 1, STREET_GROUND - 18);
-      stand(bin, 268, 1);
-      copBehindBush(420, ms);
-      stand(bollard, 500, 1);
-    } else if (options.street === 2) {
-      // Park: a bare tree over a bench, pigeons below, the policeman behind a bush.
-      stand(tree, 300, 1, STREET_GROUND, false);
-      stand(bench, 360, 1);
-      stand(pigeon, 420, 1);
-      stand(peck ? pigeon2 : pigeon, 446, 1, STREET_GROUND, true);
-      copBehindBush(100, ms);
-      stand(dryBush, 200, 1);
-      stand(bin, 500, 1);
+    // Graffiti on the wall behind.
+    c.save();
+    c.globalAlpha = 0.72;
+    stand(tagSpike, 186, 1, STREET_GROUND - 44);
+    stand(tagTrix, 330, 1, STREET_GROUND - 30);
+    c.restore();
+    // A lamp at the curb, the bench under it, the bin, the policeman behind a bush, a bollard.
+    rect(33, STREET_GROUND - 92, 4, 92, '#3d4146');
+    rect(33, STREET_GROUND - 92, 1, 92, '#5c6168');
+    stand(lampHead, 35, 1.5, STREET_GROUND - 90);
+    drawParkBench(92);
+    stand(bin, 298, 1.5);
+    copBehindBush(400, ms, 1.5);
+    stand(bollard, 500, 2);
+    // Pigeons: one pecking on the pavement, one flying up towards the total's clock.
+    const peck = Math.floor(ms / 450) % 3 === 0;
+    stand(pigeon, 208, 2.5, STREET_GROUND + (peck ? 2 : 0));
+    const t = (ms % 8000) / 2600;
+    if (t < 1) {
+      const e = t * t * (3 - 2 * t);
+      const x = PIGEON_FROM.x + (PIGEON_TO.x - PIGEON_FROM.x) * e;
+      const y = PIGEON_FROM.y + (PIGEON_TO.y - PIGEON_FROM.y) * e - Math.sin(t * Math.PI) * 24;
+      const flap = Math.floor(ms / 110) % 2 === 0 ? pigeonFly : pigeonFly2;
+      c.save();
+      c.globalAlpha = Math.min(1, (1 - t) * 6);
+      stand(flap, x, 2.5, y);
+      c.restore();
     } else {
-      // Corner: a no-parking sign, bollards, a passer-by walking along, the policeman.
-      stand(sign, 40, 1, STREET_GROUND - 34);
-      rect(39, STREET_GROUND - 34, 2, 34, '#5c6168');
-      stand(bollard, 90, 1);
-      stand(bollard, 120, 1);
-      stand(bin, 170, 1);
-      const walk = ((ms / 16) % (PANEL + 60)) - 30;
-      stand(walker, walk, 1, STREET_GROUND, true);
-      copBehindBush(440, ms);
+      stand(pigeon, PIGEON_FROM.x, 2.5, PIGEON_FROM.y + 2, true);
     }
   };
 
