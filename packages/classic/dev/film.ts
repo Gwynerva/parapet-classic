@@ -117,6 +117,8 @@ interface Options {
   name: string;
   /** The banner's look (1…4). */
   banner: number;
+  /** The street at the foot of the wall (1…3). */
+  street: number;
   /** Draw one frame this many ms into the first run and stop (for comparing looks). */
   at: number;
 }
@@ -144,6 +146,7 @@ function readOptions(): Options {
     mbps: Number(q.get('mbps')) || 40,
     name: /^[\w-]+$/.test(q.get('name') ?? '') ? q.get('name')! : 'tas-film',
     banner: Number(q.get('banner')) || 1,
+    street: Number(q.get('street')) || 1,
     at: Number(q.get('at')) || 0,
   };
 }
@@ -533,10 +536,10 @@ async function main(): Promise<void> {
   // The left panel is a building: on its roof (under the sky and the skyline) the banner on posts
   // under lamps and an air conditioner Petra vaults; below the roof's ledge its wall carries the
   // table of the levels.
-  const ROOF = 440;
+  const ROOF = 420;
   const LEDGE = 12;
   const GROUND = ROOF;
-  const BOARD = { x: 76, y: 262, w: 388, h: 106 };
+  const BOARD = { x: 76, y: 232, w: 388, h: 106 };
   const POLES = [124, 416];
   const LAMPS = [160, 270, 380];
   const BENCH_X = 236;
@@ -575,9 +578,9 @@ async function main(): Promise<void> {
       farWindows: null,
       nearWindows: '#ffcf70',
       roof: '#2a2226',
-      ledge: '#8a6e62',
-      wall: 'brick',
-      wallColor: '#4e3129',
+      ledge: '#b07a5e',
+      wall: 'stone',
+      wallColor: '#6a4334',
       frame: '#c9a63f',
       face: '#16213a',
       name: '#ffffff',
@@ -803,7 +806,11 @@ async function main(): Promise<void> {
     c.closePath();
     c.fill();
     c.restore();
-    text(fontD16, '@Gwynerva', BOARD.x + 148, BOARD.y + 45, 2, look.handle);
+    // The handle, smaller than the name and bolded by a second pass a pixel to the right.
+    text(fontT12, '@Gwynerva', BOARD.x + 146, BOARD.y + 49, 2, look.handle);
+    text(fontT12, '@Gwynerva', BOARD.x + 148, BOARD.y + 49, 2, look.handle);
+    const hw = fontT12.measure('@Gwynerva') * 2;
+    githubMark(BOARD.x + 148 + hw + 12, BOARD.y + 50, 22, look.handle);
     text(fontT12, 'TAS · OCTOBER 28, 2026', BOARD.x + 108, BOARD.y + 80, 2, look.date);
     drawAirCon(ms);
     drawJumper(ms);
@@ -929,8 +936,8 @@ async function main(): Promise<void> {
   };
 
   // ------------------------------------------------------------------ the table on the wall
-  const ROW_Y = ROOF + LEDGE + 42;
-  const ROW_H = 42;
+  const ROW_Y = ROOF + LEDGE + 38;
+  const ROW_H = 38;
   const COL = { num: 22, name: 70, flags: 258, sprint: 362, pips: 466 };
   const drawWall = (): void => {
     const top = ROOF;
@@ -985,7 +992,7 @@ async function main(): Promise<void> {
       rect(0, ROW_Y + i * ROW_H, PANEL, 2, 'rgba(0,0,0,0.4)');
     }
     rect(0, ROW_Y + 12 * ROW_H, PANEL, 2, 'rgba(0,0,0,0.4)');
-    const hy = ROW_Y - 28;
+    const hy = ROW_Y - 26;
     text(fontT12, 'LEVEL', COL.name, hy, 2, COLORS.muted);
     text(fontT12, 'FLAGS', COL.flags + 46, hy, 2, COLORS.muted, 'center');
     text(fontT12, 'SPRINT', COL.sprint + 46, hy, 2, COLORS.muted, 'center');
@@ -1010,7 +1017,7 @@ async function main(): Promise<void> {
         fontD16,
         String(i + 1).padStart(2, '0'),
         COL.num + 18,
-        y + 5,
+        y + 3,
         2,
         COLORS.hazard,
         'center',
@@ -1020,7 +1027,7 @@ async function main(): Promise<void> {
         fontT12,
         LEVEL_NAMES[i]!,
         COL.name,
-        y + 9,
+        y + 7,
         2,
         isCur ? COLORS.hazard : COLORS.paper,
         'left',
@@ -1037,13 +1044,13 @@ async function main(): Promise<void> {
           c.translate(x + 46, y + ROW_H / 2);
           c.rotate(-0.017);
           c.fillStyle = COLORS.ink;
-          c.fillRect(-46 + 3, -13 + 3, 92, 26);
+          c.fillRect(-46 + 3, -12 + 3, 92, 24);
           c.fillStyle = running ? COLORS.hazard : COLORS.paper;
-          c.fillRect(-46, -13, 92, 26);
+          c.fillRect(-46, -12, 92, 24);
           c.restore();
-          text(fontT12, fmt(value), x + 46, y + 9, 2, COLORS.ink, 'center');
+          text(fontT12, fmt(value), x + 46, y + 7, 2, COLORS.ink, 'center');
         } else {
-          text(fontT12, '-:--.--', x + 46, y + 9, 2, COLORS.paper, 'center', alpha * 0.9);
+          text(fontT12, '-:--.--', x + 46, y + 7, 2, COLORS.paper, 'center', alpha * 0.9);
         }
       }
       let lit = 0;
@@ -1052,7 +1059,7 @@ async function main(): Promise<void> {
       for (let n = 0; n < 5; n++) {
         rect(
           COL.pips + n * 11,
-          y + 11,
+          y + 9,
           7,
           20,
           n < lit ? COLORS.hazard : 'rgba(255,255,255,0.14)',
@@ -1060,14 +1067,151 @@ async function main(): Promise<void> {
         );
       }
     }
-    const ty = ROW_Y + 12 * ROW_H + 12;
+    const ty = ROW_Y + 12 * ROW_H + 10;
     let total = 0;
     for (const t of times) for (const v of t) total += v ?? 0;
     if (world && endedAt < 0 && runMs >= RUN_START) total += world.clock;
     text(fontT12, 'TOTAL', COL.name, ty, 2, COLORS.paper);
     text(fontD16, fmt(total), PANEL - 22, ty - 4, 2, COLORS.hazard, 'right');
+    drawStreet(pageMs);
   };
   const drawBanner = (ms: number): void => drawRoofScene(ms);
+
+  /** GitHub's mark (the Octocat in a circle, its 16-unit path) at (x, y), `size` across. */
+  const GITHUB = new Path2D(
+    'M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z',
+  );
+  function githubMark(x: number, y: number, size: number, color: string): void {
+    c.save();
+    c.setTransform(k * (size / 16), 0, 0, k * (size / 16), x * k, y * k);
+    c.fillStyle = color;
+    c.fill(GITHUB);
+    c.restore();
+  }
+
+  // ------------------------------------------------------------------ the street at the foot
+  const STREET_GROUND = 1066;
+  const sprite = (name: string): Promise<ImageBitmap> => image(name);
+  const streetSprites = await Promise.all(
+    [
+      's278.png',
+      's300.png',
+      's305.png',
+      's304.png',
+      's285.png',
+      's283.png',
+      's295.png',
+      's291.png',
+      's296.png',
+      's297.png',
+      's301.png',
+      's308.png',
+      's284.png',
+    ].map(sprite),
+  );
+  const sp = (i: number): ImageBitmap => streetSprites[i]!;
+  const [
+    cop,
+    bush,
+    tree,
+    bin,
+    bench,
+    lampHead,
+    lampPole,
+    sign,
+    pigeon,
+    pigeon2,
+    bollard,
+    walker,
+    dryBush,
+  ] = [
+    sp(0),
+    sp(1),
+    sp(2),
+    sp(3),
+    sp(4),
+    sp(5),
+    sp(6),
+    sp(7),
+    sp(8),
+    sp(9),
+    sp(10),
+    sp(11),
+    sp(12),
+  ];
+  /** A game sprite standing on the pavement: its bottom centre at x, `px` design px a pixel. */
+  const stand = (img: ImageBitmap, x: number, px = 1, y = STREET_GROUND, flip = false): void => {
+    const w = img.width * px;
+    const h = img.height * px;
+    c.save();
+    c.setTransform(k, 0, 0, k, 0, 0);
+    c.imageSmoothingEnabled = false;
+    if (flip) {
+      c.translate(x + w / 2, y - h);
+      c.scale(-1, 1);
+      c.drawImage(img, 0, 0, w, h);
+    } else c.drawImage(img, Math.round(x - w / 2), Math.round(y - h), w, h);
+    c.restore();
+  };
+  /** The policeman behind the bush: up, a look round, down again, every 9 s. */
+  const copRise = (ms: number): number => {
+    const t = (ms + 3000) % 9000;
+    if (t < 5600) return 0;
+    if (t < 6000) return (t - 5600) / 400;
+    if (t < 7800) return 1;
+    if (t < 8200) return 1 - (t - 7800) / 400;
+    return 0;
+  };
+  const copBehindBush = (x: number, ms: number): void => {
+    // The cop stands behind the bush, hidden; he rises to peek over it.
+    const rise = copRise(ms);
+    const hidden = 30;
+    stand(cop, x + 4, 1, STREET_GROUND + hidden - Math.round(rise * 26), ms % 2400 < 1200);
+    stand(bush, x, 1);
+  };
+  const drawStreet = (ms: number): void => {
+    // The pavement and its curb, a warm wash from the sunset low on the wall.
+    rect(0, STREET_GROUND, PANEL, 1080 - STREET_GROUND, '#2a2120');
+    rect(0, STREET_GROUND - 3, PANEL, 3, '#8a6250');
+    c.save();
+    c.setTransform(k, 0, 0, k, 0, 0);
+    const g = c.createLinearGradient(0, STREET_GROUND - 70, 0, STREET_GROUND);
+    g.addColorStop(0, 'rgba(255,150,90,0)');
+    g.addColorStop(1, 'rgba(255,150,90,0.12)');
+    c.fillStyle = g;
+    c.fillRect(0, STREET_GROUND - 70, PANEL, 70);
+    c.restore();
+    const peck = Math.floor(ms / 500) % 4 === 0;
+    if (options.street === 1) {
+      // Patrol: a lamp, a bench with a pigeon, a bin, the policeman behind a bush.
+      stand(lampPole, 46, 1);
+      stand(lampHead, 46, 1, STREET_GROUND - 54);
+      stand(bench, 170, 1);
+      stand(peck ? pigeon2 : pigeon, 196, 1, STREET_GROUND - 18);
+      stand(bin, 268, 1);
+      copBehindBush(420, ms);
+      stand(bollard, 500, 1);
+    } else if (options.street === 2) {
+      // Park: a bare tree over a bench, pigeons below, the policeman behind a bush.
+      stand(tree, 300, 1, STREET_GROUND, false);
+      stand(bench, 360, 1);
+      stand(pigeon, 420, 1);
+      stand(peck ? pigeon2 : pigeon, 446, 1, STREET_GROUND, true);
+      copBehindBush(100, ms);
+      stand(dryBush, 200, 1);
+      stand(bin, 500, 1);
+    } else {
+      // Corner: a no-parking sign, bollards, a passer-by walking along, the policeman.
+      stand(sign, 40, 1, STREET_GROUND - 34);
+      rect(39, STREET_GROUND - 34, 2, 34, '#5c6168');
+      stand(bollard, 90, 1);
+      stand(bollard, 120, 1);
+      stand(bin, 170, 1);
+      const walk = ((ms / 16) % (PANEL + 60)) - 30;
+      stand(walker, walk, 1, STREET_GROUND, true);
+      copBehindBush(440, ms);
+    }
+  };
 
   // Petra vaulting the bench: the Moves screen's demos, in her outfits, fading in and out.
   const DEMOS = ['monkeyVault', 'tigerJump', 'monkeyFlip', 'spiderJump']
