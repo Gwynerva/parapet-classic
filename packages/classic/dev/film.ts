@@ -66,6 +66,8 @@ const VIEW_H = 440;
 const FADE_MS = 450;
 const HOLD_IN_MS = 1000;
 const HOLD_OUT_MS = 1000;
+/** The thank-you on the dark game window after the last run. */
+const OUTRO_MS = 10_000;
 
 const LEVEL_NAMES = [
   'Mill Brook',
@@ -121,6 +123,8 @@ interface Options {
   street: number;
   /** Draw one frame this many ms into the first run and stop (for comparing looks). */
   at: number;
+  /** With `at`: play the runs out and draw the outro this many ms in instead. */
+  outro: number;
 }
 
 function readOptions(): Options {
@@ -148,6 +152,7 @@ function readOptions(): Options {
     banner: Number(q.get('banner')) || 1,
     street: Number(q.get('street')) || 1,
     at: Number(q.get('at')) || 0,
+    outro: Number(q.get('outro')) || 0,
   };
 }
 
@@ -1341,6 +1346,70 @@ async function main(): Promise<void> {
     rect(xs(now) - 2, BAR.y + 38, 4, 22, '#ffffff', fade);
   };
 
+  // ------------------------------------------------------------------ the outro
+  /** Time into the outro, or -1 while runs play. */
+  let outroMs = -1;
+  const THANKS = 'THANK YOU!';
+  const QUESTION = 'Can you do better?';
+  const drawOutro = (): void => {
+    if (outroMs < 0) return;
+    const t = outroMs;
+    const cx = GAME.x + GAME.w / 2;
+    const cy = GAME.y + GAME.h / 2;
+    rect(GAME.x, GAME.y, GAME.w, GAME.h, '#000');
+    // THANK YOU! drops in letter by letter, an orange shadow under the yellow.
+    const size = 5;
+    const width = fontD24.measure(THANKS) * size;
+    const top = cy - 120;
+    for (let i = 0; i < THANKS.length; i++) {
+      const at = (t - 300 - i * 70) / 380;
+      if (at <= 0) continue;
+      const e = Math.min(1, at);
+      const drop = -60 * (1 - e) ** 2;
+      const x = cx - width / 2 + fontD24.measure(THANKS.slice(0, i)) * size;
+      const ch = THANKS[i]!;
+      text(fontD24, ch, x + 5, top + drop + 5, size, COLORS.orange, 'left', Math.min(1, at * 2));
+      text(fontD24, ch, x, top + drop, size, COLORS.hazard, 'left', Math.min(1, at * 2));
+    }
+    // A strip of marking tape runs out from the middle under it.
+    const tape = Math.min(1, Math.max(0, (t - 1100) / 600));
+    if (tape > 0) {
+      const tw = (width + 120) * (1 - (1 - tape) ** 3);
+      const ty = top + 24 * size + 34;
+      c.save();
+      c.setTransform(k, 0, 0, k, 0, 0);
+      c.beginPath();
+      c.rect(cx - tw / 2, ty, tw, 14);
+      c.clip();
+      c.fillStyle = COLORS.hazard;
+      c.fillRect(cx - tw / 2, ty, tw, 14);
+      c.fillStyle = COLORS.hazardDark;
+      for (let x = cx - width; x < cx + width; x += 28) {
+        c.beginPath();
+        c.moveTo(x, ty + 14);
+        c.lineTo(x + 14, ty);
+        c.lineTo(x + 28, ty);
+        c.lineTo(x + 14, ty + 14);
+        c.fill();
+      }
+      c.restore();
+    }
+    // The question, then a blinking cursor after it.
+    const q = Math.min(1, Math.max(0, (t - 1900) / 700));
+    if (q > 0) {
+      const qy = top + 24 * size + 92;
+      const qw = fontD16.measure(QUESTION) * 3;
+      text(fontD16, QUESTION, cx, qy, 3, COLORS.paper, 'center', q);
+      if (q >= 1 && Math.floor((t - 2600) / 500) % 2 === 0)
+        rect(cx + qw / 2 + 10, qy + 6, 18, 40, COLORS.paper);
+    }
+  };
+  /** The whole frame goes to black over the outro's last second. */
+  const drawEnd = (): void => {
+    if (outroMs < OUTRO_MS - 1000) return;
+    rect(0, 0, DW, 1080, '#000', Math.min(1, (outroMs - (OUTRO_MS - 1000)) / 1000));
+  };
+
   // ------------------------------------------------------------------ frame
   let pageMs = 0;
   const draw = (): void => {
@@ -1351,10 +1420,13 @@ async function main(): Promise<void> {
     drawTable();
     drawBanner(pageMs);
     drawBar();
+    drawOutro();
     drawBand();
+    drawEnd();
   };
   const advance = (dt: number): void => {
     pageMs += dt;
+    if (outroMs >= 0) outroMs += dt;
     advanceRun(dt);
     advanceJumper(pageMs, dt);
   };
@@ -1362,7 +1434,11 @@ async function main(): Promise<void> {
   // ------------------------------------------------------------------ rendering
   if (options.at > 0) {
     await loadRun();
-    for (let t = 0; t < options.at; t += 1000 / FPS) advance(1000 / FPS);
+    if (options.outro > 0) {
+      while (!runOver()) advance(1000 / FPS);
+      outroMs = 0;
+      for (let t = 0; t < options.outro; t += 1000 / FPS) advance(1000 / FPS);
+    } else for (let t = 0; t < options.at; t += 1000 / FPS) advance(1000 / FPS);
     draw();
     status('');
     statusBox.style.display = 'none';
@@ -1378,7 +1454,7 @@ async function main(): Promise<void> {
       if (runOver() && runIndex + 1 < options.runs.length) {
         runIndex++;
         await loadRun();
-      }
+      } else if (runOver() && outroMs < 0) outroMs = 0;
       draw();
       requestAnimationFrame(() => void loop());
     };
@@ -1444,24 +1520,31 @@ async function main(): Promise<void> {
   };
   const frameUs = 1e6 / FPS;
   let frame = 0;
+  const encodeFrame = async (): Promise<void> => {
+    if (failure) throw failure;
+    advance(1000 / FPS);
+    draw();
+    const img = new VideoFrame(canvas, { timestamp: frame * frameUs, duration: frameUs });
+    encoder.encode(img, { keyFrame: frame % (FPS * 2) === 0 });
+    img.close();
+    frame++;
+    if (encoder.encodeQueueSize > 4)
+      await new Promise((done) => encoder.addEventListener('dequeue', done, { once: true }));
+    if (bytes > 8e6) await send();
+  };
   for (runIndex = 0; runIndex < options.runs.length; runIndex++) {
     await loadRun();
     for (;;) {
-      if (failure) throw failure;
-      advance(1000 / FPS);
-      draw();
-      const img = new VideoFrame(canvas, { timestamp: frame * frameUs, duration: frameUs });
-      encoder.encode(img, { keyFrame: frame % (FPS * 2) === 0 });
-      img.close();
-      frame++;
-      if (encoder.encodeQueueSize > 4)
-        await new Promise((done) => encoder.addEventListener('dequeue', done, { once: true }));
-      if (bytes > 8e6) await send();
+      await encodeFrame();
       if (frame % FPS === 0)
         status(`rendering ${name}: run ${runIndex + 1}/${options.runs.length}, ${frame / FPS} s`);
       if (runOver()) break;
     }
   }
+  // The outro, after the last run (which stays loaded behind it).
+  runIndex = options.runs.length - 1;
+  outroMs = 0;
+  while (outroMs < OUTRO_MS) await encodeFrame();
   await encoder.flush();
   encoder.close();
   await send();
