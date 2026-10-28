@@ -87,6 +87,8 @@ interface Options {
   run: string;
   outfit: number;
   plain: boolean;
+  /** Stop the record on this step (0: at its finish), for runs that never finish. */
+  until: number;
 }
 
 function readOptions(): Options {
@@ -109,7 +111,7 @@ function readOptions(): Options {
     width,
     height,
     scale: Number(q.get('scale')) || Math.max(1, Math.floor(height / 360)),
-    batch: Number(q.get('n')) || 80,
+    batch: q.get('n') !== null && Number.isFinite(Number(q.get('n'))) ? Number(q.get('n')) : 80,
     hud: q.get('hud') === '1',
     record: q.get('record') === '1',
     render: q.get('render') === '1',
@@ -117,6 +119,7 @@ function readOptions(): Options {
     run: /^[\w-]+$/.test(q.get('run') ?? '') && q.get('run') !== 'optimal' ? q.get('run')! : '',
     outfit: Number(q.get('outfit')) || 0,
     plain: q.get('plain') === '1',
+    until: Number(q.get('until')) || 0,
   };
 }
 
@@ -258,6 +261,7 @@ function makePlan(
   presses: Press[],
   perBatch: number,
   status: (text: string) => void,
+  until = 0,
 ): Plan {
   const world = content.world();
   const xs = [world.player.x];
@@ -271,7 +275,7 @@ function makePlan(
     const going = world.step(bitsAt(world, presses, cursor));
     xs.push(world.player.x);
     ys.push(world.player.y);
-    if (!going) break;
+    if (!going || (until > 0 && world.stepCount >= until)) break;
     const now = progressOf(world, mode);
     if (now !== progress) {
       progress = now;
@@ -467,8 +471,14 @@ async function main(): Promise<void> {
     // Let the status show before the attempts are worked out.
     await new Promise((done) => setTimeout(done, 30));
     const started = performance.now();
-    plan = makePlan(local, options.mode, levelId, parsePresses(run.presses), options.batch, (t) =>
-      status(t, true),
+    plan = makePlan(
+      local,
+      options.mode,
+      levelId,
+      parsePresses(run.presses),
+      options.batch,
+      (t) => status(t, true),
+      options.until,
     );
     const total = plan.batches.reduce((n, b) => n + b.attempts.length, 0);
     status(
@@ -518,7 +528,7 @@ async function main(): Promise<void> {
       const going = world.step(bitsAt(world, p.presses, leaderCursor));
       characters.onEvents(world.events);
       particles.onEvents(world.events);
-      if (!going) {
+      if (!going || (options.until > 0 && world.stepCount >= options.until)) {
         endedAt = pageMs;
         retire();
       }

@@ -16,8 +16,11 @@ const mode = process.argv[3] as ContestMode;
 const what = process.argv[4]!;
 const last = Number(process.argv[5] ?? 40);
 let presses: string;
-if (what.endsWith('.json')) presses = readJson<{ presses: string }>(what).presses;
-else {
+if (what.endsWith('.json')) {
+  const f = readJson<{ presses: string; steps?: number }>(what);
+  presses = f.presses;
+  (globalThis as { steps?: number }).steps = f.steps;
+} else {
   const [kind, move] = what.split('/');
   const hunt = readJson<{
     findings: { kind: string; move: number; presses: string; steps: number }[];

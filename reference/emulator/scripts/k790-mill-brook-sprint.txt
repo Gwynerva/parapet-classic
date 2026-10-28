@@ -1,0 +1,28 @@
+# The 1.0.4 build (Sony Ericsson K790, the speedrun.com download) plays the remake's fastest
+# Mill Brook sprint route: does it finish on the same frame as the original kept here (1.0.8)?
+set jar packages/content/playman/original/PER_K790_1.0.4.jar
+set frame-method s
+set layout side
+boot 2
+wait 2.5
+press soft2      # the "turn sound on?" prompt
+wait 2.8
+press select     # skip the publisher's splash
+wait 2.6
+press select     # main menu: single game
+wait 2.2
+press select     # character: Playman
+wait 2.2
+press select     # level: Mill Brook
+wait 2.0
+press right      # missions: warm-up 2
+wait 0.6
+press right      # missions: sprint
+wait 0.8
+press select     # the briefing
+wait 2.5
+press select     # the flyover over the checkpoints
+wait 3.0
+press 5          # go
+route packages/tools/tas-out/0-sprint.json
+tail 4

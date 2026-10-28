@@ -152,8 +152,8 @@ function segment(
   last: boolean,
 ): SegmentResult | null {
   const mark = total;
-  const firstStep = Math.min(...frontier.steps);
-  const lastSource = Math.max(...frontier.steps);
+  const firstStep = frontier.steps.reduce((a, b) => Math.min(a, b), Infinity);
+  const lastSource = frontier.steps.reduce((a, b) => Math.max(a, b), -Infinity);
   const bySourceStep = new Map<number, number[]>();
   frontier.steps.forEach((s, k) => {
     const list = bySourceStep.get(s) ?? [];
@@ -227,7 +227,7 @@ for (let seg = 0; seg < targets.length; seg++) {
   const target = targets[seg]!;
   const last = seg === targets.length - 1;
   const recordTime = recordSplits[seg]! - (seg > 0 ? recordSplits[seg - 1]! : 0);
-  const from = Math.min(...frontier.steps);
+  const from = frontier.steps.reduce((a, b) => Math.min(a, b), Infinity);
   let budget = from + recordTime + (last ? 0 : delta);
   let res: SegmentResult | null = null;
   for (let tries = 0; tries < 12 && !res; tries++, budget += 3) {
