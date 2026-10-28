@@ -796,7 +796,7 @@ async function main(): Promise<void> {
     // The handle, smaller than the name and bolded by a second pass a pixel to the right.
     const hw = spaced('@Gwynerva', BOARD.x + 154, BOARD.y + 49, 3, look.handle);
     githubMark(BOARD.x + 154 + hw + 10, BOARD.y + 50, 22, look.handle);
-    text(fontT12, 'TAS · OCTOBER 28, 2026', BOARD.x + 108, BOARD.y + 80, 2, look.date);
+    text(fontT12, 'TAS · OCTOBER 29, 2026', BOARD.x + 108, BOARD.y + 80, 2, look.date);
     drawAirCon(ms);
     drawJumper(ms);
     drawLight(ms);
