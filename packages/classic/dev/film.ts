@@ -529,33 +529,478 @@ async function main(): Promise<void> {
     picture(icon, px - 86, 28, 72);
   };
 
-  // ------------------------------------------------------------------ the table
-  const ROW_Y = 176;
-  const ROW_H = 50;
-  const COL = { num: 22, name: 70, flags: 258, sprint: 362, pips: 466 };
-  const drawTable = (): void => {
-    rect(0, BAND, PANEL, 1080 - BAND, COLORS.concrete);
-    // Row bands line up with the rows.
-    for (let i = 0; i < 12; i++) {
-      if (i % 2 === 0) rect(0, ROW_Y + i * ROW_H, PANEL, ROW_H, COLORS.concreteLight);
-      rect(0, ROW_Y + i * ROW_H, PANEL, 2, COLORS.rule);
+  // ------------------------------------------------------------------ the panel: a rooftop over a wall
+  // The left panel is a building: on its roof (under the sky and the skyline) the banner on posts
+  // under lamps and an air conditioner Petra vaults; below the roof's ledge its wall carries the
+  // table of the levels.
+  const ROOF = 440;
+  const LEDGE = 12;
+  const GROUND = ROOF;
+  const BOARD = { x: 76, y: 262, w: 388, h: 106 };
+  const POLES = [124, 416];
+  const LAMPS = [160, 270, 380];
+  const BENCH_X = 236;
+  interface PanelLook {
+    sky: [string, string];
+    sun: { x: number; y: number; r: number; color: string } | null;
+    stars: boolean;
+    clouds: boolean;
+    fog: string | null;
+    far: string;
+    near: string;
+    farWindows: string | null;
+    nearWindows: string | null;
+    roof: string;
+    ledge: string;
+    wall: 'brick' | 'concrete' | 'stone' | 'glass';
+    wallColor: string;
+    frame: string;
+    face: string;
+    name: string;
+    handle: string;
+    date: string;
+    night: number;
+    bulbs: boolean;
+    lampsOn: boolean;
+  }
+  const LOOKS: Record<number, PanelLook> = {
+    1: {
+      sky: ['#2a1a3d', '#f28c4e'],
+      sun: { x: 48, y: 214, r: 28, color: '#ffcf6a' },
+      stars: false,
+      clouds: false,
+      fog: null,
+      far: '#6b3c56',
+      near: '#30203a',
+      farWindows: null,
+      nearWindows: '#ffcf70',
+      roof: '#2a2226',
+      ledge: '#8a6e62',
+      wall: 'brick',
+      wallColor: '#4e3129',
+      frame: '#c9a63f',
+      face: '#16213a',
+      name: '#ffffff',
+      handle: '#ffffff',
+      date: '#ffd35c',
+      night: 0.22,
+      bulbs: false,
+      lampsOn: true,
+    },
+    2: {
+      sky: ['#060a1a', '#1f2c56'],
+      sun: { x: 500, y: 170, r: 14, color: '#e9edf5' },
+      stars: true,
+      clouds: false,
+      fog: null,
+      far: '#18233f',
+      near: '#0c1226',
+      farWindows: '#3d5a8a',
+      nearWindows: '#ffd36b',
+      roof: '#15171d',
+      ledge: '#4a505c',
+      wall: 'concrete',
+      wallColor: '#33363d',
+      frame: '#e8501a',
+      face: '#f7f3ea',
+      name: '#111111',
+      handle: '#111111',
+      date: '#e8501a',
+      night: 0.42,
+      bulbs: true,
+      lampsOn: true,
+    },
+    3: {
+      sky: ['#6fb0e6', '#d9eef9'],
+      sun: null,
+      stars: false,
+      clouds: true,
+      fog: null,
+      far: '#b3c6d4',
+      near: '#8297aa',
+      farWindows: '#c9d8e3',
+      nearWindows: '#a9bccb',
+      roof: '#4f5257',
+      ledge: '#9aa0a6',
+      wall: 'stone',
+      wallColor: '#4a4441',
+      frame: '#111111',
+      face: '#ffd23a',
+      name: '#111111',
+      handle: '#111111',
+      date: '#a8321a',
+      night: 0,
+      bulbs: false,
+      lampsOn: false,
+    },
+    4: {
+      sky: ['#2d4354', '#a7b8bb'],
+      sun: null,
+      stars: false,
+      clouds: false,
+      fog: 'rgba(200,214,216,0.35)',
+      far: '#71868f',
+      near: '#3a4f5e',
+      farWindows: null,
+      nearWindows: '#ffe08a',
+      roof: '#2a3038',
+      ledge: '#7d8890',
+      wall: 'glass',
+      wallColor: '#28323b',
+      frame: '#f2ede4',
+      face: '#1d2329',
+      name: '#ffffff',
+      handle: '#ffffff',
+      date: '#ffd35c',
+      night: 0.26,
+      bulbs: false,
+      lampsOn: true,
+    },
+  };
+  const look = LOOKS[options.banner] ?? LOOKS[1]!;
+  /** A fixed skyline: far and near towers, with antennas and windows (the same every frame). */
+  const cityRand = rng(4242);
+  const skyline = (n: number, minH: number, maxH: number) =>
+    Array.from({ length: n }, (_, i) => ({
+      x: Math.floor((i * PANEL) / n + cityRand() * 20 - 14),
+      w: 30 + Math.floor(cityRand() * 34),
+      h: minH + Math.floor(cityRand() * (maxH - minH)),
+      antenna: cityRand() < 0.35,
+      step: cityRand() < 0.4,
+      lit: Array.from({ length: 40 }, () => cityRand() < 0.32),
+    }));
+  const farTowers = skyline(13, 90, 200);
+  const nearTowers = skyline(10, 50, 140);
+  const stars = Array.from({ length: 40 }, () => ({
+    x: cityRand() * PANEL,
+    y: BAND + cityRand() * 150,
+    b: cityRand(),
+  }));
+  const clouds = Array.from({ length: 4 }, (_, i) => ({
+    x: i * 150 + cityRand() * 60,
+    y: BAND + 20 + cityRand() * 70,
+    w: 70 + cityRand() * 60,
+  }));
+
+  /** The flickering lamp: brightness at page time `ms`. */
+  const lampOn = (i: number, ms: number): number => {
+    if (!look.lampsOn) return 0;
+    if (i !== 2) return 1;
+    const t = ms % 7300;
+    if (t < 5600) return 1;
+    const f = Math.floor((t - 5600) / 70);
+    return [0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 1][f % 12] ?? 1;
+  };
+
+  const towersAt = (
+    towers: typeof farTowers,
+    base: number,
+    color: string,
+    windows: string | null,
+  ): void => {
+    for (const t of towers) {
+      const top = base - t.h;
+      c.fillStyle = color;
+      c.fillRect(t.x, top, t.w, t.h);
+      if (t.step) c.fillRect(t.x + 6, top - 14, t.w - 12, 14);
+      if (t.antenna) c.fillRect(t.x + Math.floor(t.w / 2) - 1, top - (t.step ? 34 : 22), 2, 22);
+      if (!windows) continue;
+      c.fillStyle = windows;
+      let n = 0;
+      for (let wy = top + 8; wy < base - 4; wy += 11) {
+        for (let wx = t.x + 5; wx < t.x + t.w - 5; wx += 9) {
+          if (t.lit[n++ % t.lit.length]) c.fillRect(wx, wy, 4, 5);
+        }
+      }
     }
-    rect(0, ROW_Y + 12 * ROW_H, PANEL, 2, COLORS.rule);
-    text(fontT12, 'LEVEL', COL.name, 146, 2, COLORS.muted);
-    text(fontT12, 'FLAGS', COL.flags + 46, 146, 2, COLORS.muted, 'center');
-    text(fontT12, 'SPRINT', COL.sprint + 46, 146, 2, COLORS.muted, 'center');
+  };
+
+  const drawRoofScene = (ms: number): void => {
+    c.save();
+    c.setTransform(k, 0, 0, k, 0, 0);
+    c.beginPath();
+    c.rect(0, BAND, PANEL, ROOF - BAND + LEDGE);
+    c.clip();
+    const sky = c.createLinearGradient(0, BAND, 0, ROOF);
+    sky.addColorStop(0, look.sky[0]);
+    sky.addColorStop(1, look.sky[1]);
+    c.fillStyle = sky;
+    c.fillRect(0, BAND, PANEL, ROOF - BAND);
+    if (look.stars) {
+      for (const s of stars) {
+        c.fillStyle = `rgba(255,255,255,${0.35 + 0.5 * s.b})`;
+        c.fillRect(Math.floor(s.x), Math.floor(s.y), 2, 2);
+      }
+    }
+    if (look.sun) {
+      c.fillStyle = look.sun.color;
+      c.beginPath();
+      c.arc(look.sun.x, look.sun.y, look.sun.r, 0, Math.PI * 2);
+      c.fill();
+    }
+    if (look.clouds) {
+      c.fillStyle = 'rgba(255,255,255,0.85)';
+      for (const cl of clouds) {
+        c.fillRect(cl.x, cl.y, cl.w, 10);
+        c.fillRect(cl.x + 12, cl.y - 8, cl.w * 0.5, 10);
+      }
+    }
+    towersAt(farTowers, ROOF - 30, look.far, look.farWindows);
+    if (look.fog) {
+      c.fillStyle = look.fog;
+      c.fillRect(0, ROOF - 140, PANEL, 140);
+    }
+    towersAt(nearTowers, ROOF - 10, look.near, look.nearWindows);
+    // The roof itself.
+    c.fillStyle = look.roof;
+    c.fillRect(0, ROOF - 10, PANEL, 10);
+    c.restore();
+    // Posts, the lamps' rail and the board.
+    for (const x of POLES) groundShadow(x + 10, 26, ms);
+    groundShadow(BENCH_X + 32, 46, ms);
+    if (jumper) {
+      const p = jumper.run.world.player;
+      groundShadow(BENCH_X + (p.x - 12 * 1024) / 32, 20, ms);
+    }
+    for (const x of POLES) {
+      rect(x - 6, BOARD.y + BOARD.h, 12, ROOF - BOARD.y - BOARD.h, COLORS.iron);
+      rect(x - 6, BOARD.y + BOARD.h, 4, ROOF - BOARD.y - BOARD.h, COLORS.ironLight);
+      rect(x - 12, ROOF - 6, 24, 6, COLORS.iron);
+    }
+    rect(BOARD.x + 10, BOARD.y - 40, BOARD.w - 20, 6, COLORS.iron);
+    for (const x of LAMPS) rect(x - 3, BOARD.y - 34, 6, 14, COLORS.iron);
+    rect(BOARD.x - 6, BOARD.y - 6, BOARD.w + 12, BOARD.h + 12, look.frame);
+    rect(BOARD.x, BOARD.y, BOARD.w, BOARD.h, look.face);
+    rect(BOARD.x, BOARD.y + BOARD.h - 6, BOARD.w, 6, 'rgba(0,0,0,0.12)');
+    if (look.bulbs) {
+      for (let x = BOARD.x + 4; x < BOARD.x + BOARD.w; x += 18) {
+        rect(x, BOARD.y - 4, 4, 4, '#ffe9a8');
+        rect(x, BOARD.y + BOARD.h, 4, 4, '#ffe9a8');
+      }
+    }
+    c.save();
+    c.setTransform(k, 0, 0, k, 0, 0);
+    c.beginPath();
+    c.arc(BOARD.x + 52, BOARD.y + 53, 40, 0, Math.PI * 2);
+    c.fillStyle = look.frame;
+    c.fill();
+    c.restore();
+    picture(avatar, BOARD.x + 15, BOARD.y + 16, 74);
+    text(fontD16, 'Petra Radko', BOARD.x + 106, BOARD.y + 10, 2, look.name);
+    c.save();
+    c.setTransform(k, 0, 0, k, 0, 0);
+    const yx = BOARD.x + 108;
+    const yy = BOARD.y + 50;
+    c.fillStyle = '#ff0000';
+    c.beginPath();
+    c.roundRect(yx, yy, 30, 21, 6);
+    c.fill();
+    c.fillStyle = '#ffffff';
+    c.beginPath();
+    c.moveTo(yx + 12, yy + 6);
+    c.lineTo(yx + 21, yy + 10.5);
+    c.lineTo(yx + 12, yy + 15);
+    c.closePath();
+    c.fill();
+    c.restore();
+    text(fontD16, '@Gwynerva', BOARD.x + 148, BOARD.y + 45, 2, look.handle);
+    text(fontT12, 'TAS · OCTOBER 28, 2026', BOARD.x + 108, BOARD.y + 80, 2, look.date);
+    drawAirCon(ms);
+    drawJumper(ms);
+    drawLight(ms);
+    LAMPS.forEach((x, i) => {
+      const on = lampOn(i, ms);
+      rect(x - 14, BOARD.y - 22, 28, 10, COLORS.ironLight);
+      rect(x - 14, BOARD.y - 22, 28, 2, '#7a8088');
+      rect(x - 10, BOARD.y - 12, 20, 4, on ? '#fff4c8' : '#4a443c');
+    });
+  };
+
+  /** An air conditioner on the roof, its fan turning. */
+  const drawAirCon = (ms: number): void => {
+    const x = BENCH_X - 2;
+    const w = 68;
+    const h = 34;
+    const y = ROOF - h;
+    rect(x, y, w, h, '#8d9399');
+    rect(x, y, w, 3, '#b3b9bf');
+    rect(x + w - 3, y, 3, h, '#6b7177');
+    rect(x + 4, y + h, 6, 2, '#3a3d40');
+    rect(x + w - 10, y + h, 6, 2, '#3a3d40');
+    for (let gy = y + 8; gy < y + h - 4; gy += 4) rect(x + 40, gy, 22, 2, '#6b7177');
+    const cx = x + 20;
+    const cy = y + 18;
+    c.save();
+    c.setTransform(k, 0, 0, k, 0, 0);
+    c.fillStyle = '#3a3f44';
+    c.beginPath();
+    c.arc(cx, cy, 13, 0, Math.PI * 2);
+    c.fill();
+    c.translate(cx, cy);
+    c.rotate((ms / 1000) * Math.PI * 4);
+    c.fillStyle = '#c3c8cd';
+    for (let b = 0; b < 4; b++) {
+      c.rotate(Math.PI / 2);
+      c.beginPath();
+      c.ellipse(6, 0, 6, 2.6, 0.35, 0, Math.PI * 2);
+      c.fill();
+    }
+    c.fillStyle = '#1e2124';
+    c.beginPath();
+    c.arc(0, 0, 2.5, 0, Math.PI * 2);
+    c.fill();
+    c.restore();
+    rect(cx - 13, cy - 1, 26, 2, 'rgba(30,33,36,0.5)');
+    rect(cx - 1, cy - 13, 2, 26, 'rgba(30,33,36,0.5)');
+  };
+
+  /** Darkness over the roof with each lit lamp's cone cut out of it, then a warm glow. */
+  const light = document.createElement('canvas');
+  const drawLight = (ms: number): void => {
+    if (look.night <= 0) return;
+    const w = Math.ceil(PANEL * k);
+    const h = Math.ceil((ROOF + LEDGE - BAND) * k);
+    if (light.width !== w || light.height !== h) {
+      light.width = w;
+      light.height = h;
+    }
+    const l = light.getContext('2d')!;
+    l.setTransform(1, 0, 0, 1, 0, 0);
+    l.clearRect(0, 0, w, h);
+    l.setTransform(k, 0, 0, k, 0, -BAND * k);
+    l.globalCompositeOperation = 'source-over';
+    l.fillStyle = `rgba(4,4,12,${look.night})`;
+    l.fillRect(0, BOARD.y - 46, PANEL, ROOF + LEDGE - (BOARD.y - 46));
+    l.globalCompositeOperation = 'destination-out';
+    LAMPS.forEach((x, i) => {
+      if (!lampOn(i, ms)) return;
+      const top = BOARD.y - 8;
+      const g = l.createRadialGradient(x, top, 4, x, top + 40, 260);
+      g.addColorStop(0, 'rgba(0,0,0,0.95)');
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      l.fillStyle = g;
+      l.beginPath();
+      l.moveTo(x - 9, top);
+      l.lineTo(x + 9, top);
+      l.lineTo(x + 96, ROOF + 4);
+      l.lineTo(x - 96, ROOF + 4);
+      l.closePath();
+      l.fill();
+    });
+    c.save();
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    c.drawImage(light, 0, Math.round(BAND * k));
+    c.restore();
+    c.save();
+    c.setTransform(k, 0, 0, k, 0, 0);
+    c.globalCompositeOperation = 'lighter';
+    LAMPS.forEach((x, i) => {
+      if (!lampOn(i, ms)) return;
+      const top = BOARD.y - 8;
+      const g = c.createRadialGradient(x, top, 2, x, top + 30, 160);
+      g.addColorStop(0, 'rgba(255,214,140,0.26)');
+      g.addColorStop(1, 'rgba(255,214,140,0)');
+      c.fillStyle = g;
+      c.beginPath();
+      c.moveTo(x - 9, top);
+      c.lineTo(x + 9, top);
+      c.lineTo(x + 80, ROOF);
+      c.lineTo(x - 80, ROOF);
+      c.closePath();
+      c.fill();
+    });
+    c.restore();
+  };
+
+  /** A soft shadow on the roof under something at x (width w), weaker for each dark lamp. */
+  const groundShadow = (x: number, w: number, ms: number): void => {
+    const lit = look.lampsOn ? LAMPS.reduce((n, _x, i) => n + lampOn(i, ms), 0) : 2;
+    c.save();
+    c.setTransform(k, 0, 0, k, 0, 0);
+    const g = c.createRadialGradient(x, GROUND + 1, 1, x, GROUND + 1, w);
+    g.addColorStop(0, `rgba(0,0,0,${0.18 + 0.12 * lit})`);
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    c.fillStyle = g;
+    c.scale(1, 0.22);
+    c.beginPath();
+    c.arc(x, (GROUND + 1) / 0.22, w, 0, Math.PI * 2);
+    c.fill();
+    c.restore();
+  };
+
+  // ------------------------------------------------------------------ the table on the wall
+  const ROW_Y = ROOF + LEDGE + 42;
+  const ROW_H = 42;
+  const COL = { num: 22, name: 70, flags: 258, sprint: 362, pips: 466 };
+  const drawWall = (): void => {
+    const top = ROOF;
+    rect(0, top, PANEL, 1080 - top, look.wallColor);
+    c.save();
+    c.setTransform(k, 0, 0, k, 0, 0);
+    c.beginPath();
+    c.rect(0, top + LEDGE, PANEL, 1080 - top - LEDGE);
+    c.clip();
+    if (look.wall === 'brick') {
+      c.fillStyle = 'rgba(0,0,0,0.22)';
+      for (let y = top + LEDGE, row = 0; y < 1080; y += 9, row++) {
+        c.fillRect(0, y, PANEL, 1);
+        for (let x = row % 2 ? 0 : 13; x < PANEL; x += 26) c.fillRect(x, y, 1, 9);
+      }
+    } else if (look.wall === 'concrete') {
+      c.fillStyle = 'rgba(0,0,0,0.2)';
+      for (let x = 0; x < PANEL; x += 135) c.fillRect(x, top, 2, 1080 - top);
+      for (let i = 0; i <= 12; i += 3) c.fillRect(0, ROW_Y + i * ROW_H, PANEL, 2);
+    } else if (look.wall === 'stone') {
+      c.fillStyle = 'rgba(255,255,255,0.05)';
+      for (let y = top + LEDGE, row = 0; y < 1080; y += 23, row++) {
+        for (let x = row % 2 ? -30 : 0; x < PANEL; x += 60) c.fillRect(x + 1, y + 1, 58, 21);
+      }
+    } else {
+      // Dark glass: a curtain wall's mullions and a sheen.
+      c.fillStyle = 'rgba(255,255,255,0.06)';
+      for (let x = 0; x < PANEL; x += 54) c.fillRect(x, top, 2, 1080 - top);
+      const g = c.createLinearGradient(0, top, PANEL, 1080);
+      g.addColorStop(0, 'rgba(255,255,255,0.08)');
+      g.addColorStop(0.5, 'rgba(255,255,255,0)');
+      c.fillStyle = g;
+      c.fillRect(0, top, PANEL, 1080 - top);
+    }
+    c.restore();
+    // The ledge under the roof, and its shadow on the wall.
+    rect(0, top, PANEL, LEDGE, look.ledge);
+    rect(0, top, PANEL, 2, 'rgba(255,255,255,0.25)');
+    rect(0, top + LEDGE, PANEL, 6, 'rgba(0,0,0,0.3)');
+  };
+  const drawTable = (): void => {
+    drawWall();
+    // Rows: a darker band behind each, edges in line with the rows.
+    for (let i = 0; i < 12; i++) {
+      rect(
+        0,
+        ROW_Y + i * ROW_H,
+        PANEL,
+        ROW_H,
+        i % 2 === 0 ? 'rgba(0,0,0,0.34)' : 'rgba(0,0,0,0.24)',
+      );
+      rect(0, ROW_Y + i * ROW_H, PANEL, 2, 'rgba(0,0,0,0.4)');
+    }
+    rect(0, ROW_Y + 12 * ROW_H, PANEL, 2, 'rgba(0,0,0,0.4)');
+    const hy = ROW_Y - 28;
+    text(fontT12, 'LEVEL', COL.name, hy, 2, COLORS.muted);
+    text(fontT12, 'FLAGS', COL.flags + 46, hy, 2, COLORS.muted, 'center');
+    text(fontT12, 'SPRINT', COL.sprint + 46, hy, 2, COLORS.muted, 'center');
     const cur = spec();
     const world = leader;
     for (let i = 0; i < 12; i++) {
       const y = ROW_Y + i * ROW_H;
       const isCur = i === cur.levelId;
       const done = times[i]![0] !== null || times[i]![1] !== null || isCur;
-      const alpha = done ? 1 : 0.28;
+      const alpha = done ? 1 : 0.3;
       if (isCur) {
         c.save();
         c.setTransform(k, 0, 0, k, 0, 0);
         const g = c.createLinearGradient(0, 0, PANEL, 0);
-        g.addColorStop(0, 'rgba(201,166,63,0.22)');
+        g.addColorStop(0, 'rgba(201,166,63,0.3)');
         g.addColorStop(1, 'rgba(201,166,63,0)');
         c.fillStyle = g;
         c.fillRect(0, y + 2, PANEL, ROW_H - 2);
@@ -565,7 +1010,7 @@ async function main(): Promise<void> {
         fontD16,
         String(i + 1).padStart(2, '0'),
         COL.num + 18,
-        y + 9,
+        y + 5,
         2,
         COLORS.hazard,
         'center',
@@ -575,7 +1020,7 @@ async function main(): Promise<void> {
         fontT12,
         LEVEL_NAMES[i]!,
         COL.name,
-        y + 13,
+        y + 9,
         2,
         isCur ? COLORS.hazard : COLORS.paper,
         'left',
@@ -592,386 +1037,37 @@ async function main(): Promise<void> {
           c.translate(x + 46, y + ROW_H / 2);
           c.rotate(-0.017);
           c.fillStyle = COLORS.ink;
-          c.fillRect(-46 + 3, -15 + 3, 92, 30);
+          c.fillRect(-46 + 3, -13 + 3, 92, 26);
           c.fillStyle = running ? COLORS.hazard : COLORS.paper;
-          c.fillRect(-46, -15, 92, 30);
+          c.fillRect(-46, -13, 92, 26);
           c.restore();
-          text(fontT12, fmt(value), x + 46, y + 13, 2, COLORS.ink, 'center');
+          text(fontT12, fmt(value), x + 46, y + 9, 2, COLORS.ink, 'center');
         } else {
-          text(fontT12, '-:--.--', x + 46, y + 13, 2, COLORS.paper, 'center', alpha * 0.9);
+          text(fontT12, '-:--.--', x + 46, y + 9, 2, COLORS.paper, 'center', alpha * 0.9);
         }
       }
-      // Progress: five marks, the flags or checkpoints of the run on now, all lit once done.
       let lit = 0;
       if (times[i]![1] !== null) lit = 5;
       else if (isCur && world) lit = Math.min(5, progressOf(world, cur.mode));
       for (let n = 0; n < 5; n++) {
-        rect(COL.pips + n * 11, y + 15, 7, 20, n < lit ? COLORS.hazard : '#4c4441', alpha);
+        rect(
+          COL.pips + n * 11,
+          y + 11,
+          7,
+          20,
+          n < lit ? COLORS.hazard : 'rgba(255,255,255,0.14)',
+          alpha,
+        );
       }
     }
-    // The total so far.
-    const ty = ROW_Y + 12 * ROW_H + 14;
+    const ty = ROW_Y + 12 * ROW_H + 12;
     let total = 0;
     for (const t of times) for (const v of t) total += v ?? 0;
     if (world && endedAt < 0 && runMs >= RUN_START) total += world.clock;
     text(fontT12, 'TOTAL', COL.name, ty, 2, COLORS.paper);
     text(fontD16, fmt(total), PANEL - 22, ty - 4, 2, COLORS.hazard, 'right');
   };
-
-  // ------------------------------------------------------------------ the banner, lamps, bench
-  const GROUND = 1068;
-  const SCENE_TOP = 826;
-  const BOARD = { x: 56, y: 872, w: 428, h: 118 };
-  const POLES = [104, 424];
-  const LAMPS = [148, 270, 392];
-  interface BannerLook {
-    /** Sky (top to bottom), the far city's colour and its windows. */
-    sky: [string, string];
-    city: string;
-    windows: string;
-    /** The wall or fence behind the posts, and the pavement. */
-    wall: 'brick' | 'fence' | 'concrete' | 'parapet';
-    wallColor: string;
-    ground: string;
-    curb: string;
-    /** Board: frame, face, the name, the handle, the date; how dark the night is. */
-    frame: string;
-    face: string;
-    name: string;
-    handle: string;
-    date: string;
-    night: number;
-    bulbs: boolean;
-  }
-  const LOOKS: Record<number, BannerLook> = {
-    1: {
-      sky: ['#15142a', '#3a2f55'],
-      city: '#221f38',
-      windows: '#e8c25a',
-      wall: 'brick',
-      wallColor: '#4a2f2a',
-      ground: '#262323',
-      curb: '#56504c',
-      frame: '#2b2f35',
-      face: '#f2ede4',
-      name: '#111111',
-      handle: '#111111',
-      date: '#e8501a',
-      night: 0.4,
-      bulbs: false,
-    },
-    2: {
-      sky: ['#2b1d3a', '#e0794a'],
-      city: '#3a2638',
-      windows: '#ffd36b',
-      wall: 'fence',
-      wallColor: '#5d6266',
-      ground: '#2c2826',
-      curb: '#6a625c',
-      frame: '#c9a63f',
-      face: '#16213a',
-      name: '#ffffff',
-      handle: '#ffffff',
-      date: '#ffd35c',
-      night: 0.28,
-      bulbs: false,
-    },
-    3: {
-      sky: ['#1b1a24', '#2e2b36'],
-      city: '#26232c',
-      windows: '#d9b65a',
-      wall: 'concrete',
-      wallColor: '#55504c',
-      ground: '#2a2725',
-      curb: '#5e5853',
-      frame: '#111111',
-      face: '#ffd23a',
-      name: '#111111',
-      handle: '#111111',
-      date: '#a8321a',
-      night: 0.34,
-      bulbs: false,
-    },
-    4: {
-      sky: ['#0f1b33', '#24406a'],
-      city: '#162741',
-      windows: '#9fd0ff',
-      wall: 'parapet',
-      wallColor: '#3b4b5c',
-      ground: '#1f2630',
-      curb: '#4c5a6a',
-      frame: '#e8501a',
-      face: '#f7f3ea',
-      name: '#111111',
-      handle: '#111111',
-      date: '#e8501a',
-      night: 0.38,
-      bulbs: true,
-    },
-  };
-  const look = LOOKS[options.banner] ?? LOOKS[1]!;
-  const tagNames = ['s66.png', 's67.png', 's68.png', 's69.png', 's71.png', 's72.png'];
-  const tags = look.wall === 'concrete' ? await Promise.all(tagNames.map((n) => image(n))) : [];
-  /** A fixed scatter of the far city's windows (the same every frame). */
-  const cityRand = rng(4242);
-  const towers = Array.from({ length: 14 }, (_, i) => ({
-    x: i * 40 - 10 + Math.floor(cityRand() * 14),
-    w: 26 + Math.floor(cityRand() * 22),
-    h: 40 + Math.floor(cityRand() * 70),
-    lit: Array.from({ length: 24 }, () => cityRand() < 0.35),
-  }));
-
-  /** The flickering lamp: brightness at page time `ms`. */
-  const lampOn = (i: number, ms: number): number => {
-    if (i !== 2) return 1;
-    const t = ms % 7300;
-    if (t < 5600) return 1;
-    const f = Math.floor((t - 5600) / 70);
-    return [0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 1][f % 12] ?? 1;
-  };
-
-  const drawBackdrop = (): void => {
-    c.save();
-    c.setTransform(k, 0, 0, k, 0, 0);
-    c.beginPath();
-    c.rect(0, SCENE_TOP, PANEL, 1080 - SCENE_TOP);
-    c.clip();
-    const sky = c.createLinearGradient(0, SCENE_TOP, 0, 1000);
-    sky.addColorStop(0, look.sky[0]);
-    sky.addColorStop(1, look.sky[1]);
-    c.fillStyle = sky;
-    c.fillRect(0, SCENE_TOP, PANEL, 1080 - SCENE_TOP);
-    // The far city.
-    for (const t of towers) {
-      const top = 1010 - t.h;
-      c.fillStyle = look.city;
-      c.fillRect(t.x, top, t.w, t.h);
-      c.fillStyle = look.windows;
-      let n = 0;
-      for (let wy = top + 6; wy < 1000; wy += 10) {
-        for (let wx = t.x + 4; wx < t.x + t.w - 4; wx += 8) {
-          if (t.lit[n++ % t.lit.length]) c.fillRect(wx, wy, 3, 4);
-        }
-      }
-    }
-    // What stands behind the posts.
-    if (look.wall === 'brick') {
-      c.fillStyle = look.wallColor;
-      c.fillRect(0, 1004, PANEL, GROUND - 1004);
-      c.fillStyle = 'rgba(0,0,0,0.25)';
-      for (let y = 1004, row = 0; y < GROUND; y += 8, row++) {
-        c.fillRect(0, y, PANEL, 1);
-        for (let x = row % 2 ? 0 : 12; x < PANEL; x += 24) c.fillRect(x, y, 1, 8);
-      }
-      c.fillStyle = '#5c3d36';
-      c.fillRect(0, 1000, PANEL, 4);
-    } else if (look.wall === 'fence') {
-      c.strokeStyle = look.wallColor;
-      c.lineWidth = 1;
-      c.globalAlpha = 0.8;
-      for (let x = -40; x < PANEL + 40; x += 10) {
-        c.beginPath();
-        c.moveTo(x, 1012);
-        c.lineTo(x + 40, GROUND);
-        c.moveTo(x + 40, 1012);
-        c.lineTo(x, GROUND);
-        c.stroke();
-      }
-      c.globalAlpha = 1;
-      c.fillStyle = look.wallColor;
-      c.fillRect(0, 1008, PANEL, 4);
-      for (let x = 20; x < PANEL; x += 120) c.fillRect(x, 1008, 4, GROUND - 1008);
-    } else if (look.wall === 'concrete') {
-      c.fillStyle = look.wallColor;
-      c.fillRect(0, 960, PANEL, GROUND - 960);
-      c.fillStyle = 'rgba(0,0,0,0.18)';
-      for (let x = 0; x < PANEL; x += 90) c.fillRect(x, 960, 2, GROUND - 960);
-      c.fillRect(0, 960, PANEL, 3);
-      c.imageSmoothingEnabled = false;
-      c.globalAlpha = 0.75;
-      const spots = [
-        [6, 1000],
-        [150, 1012],
-        [300, 996],
-        [420, 1010],
-        [480, 970],
-        [210, 968],
-      ];
-      tags.forEach((img, i) => {
-        const [tx, ty] = spots[i % spots.length]!;
-        c.drawImage(img, tx!, ty!, img.width * 0.75, img.height * 0.75);
-      });
-      c.globalAlpha = 1;
-    } else {
-      // A rooftop parapet with a water tank.
-      c.fillStyle = look.wallColor;
-      c.fillRect(0, 1030, PANEL, GROUND - 1030);
-      c.fillStyle = '#4c5f72';
-      c.fillRect(0, 1026, PANEL, 6);
-      c.fillStyle = '#2a3542';
-      c.fillRect(500, 940, 34, 70);
-      c.fillRect(496, 932, 42, 10);
-      c.fillRect(506, 1010, 4, 20);
-      c.fillRect(524, 1010, 4, 20);
-    }
-    // The pavement and its curb.
-    c.fillStyle = look.curb;
-    c.fillRect(0, GROUND - 4, PANEL, 4);
-    c.fillStyle = look.ground;
-    c.fillRect(0, GROUND, PANEL, 1080 - GROUND);
-    c.restore();
-  };
-
-  /** Darkness over the scene with each lit lamp's cone cut out of it, then a warm glow. */
-  const light = document.createElement('canvas');
-  const drawLight = (ms: number): void => {
-    const w = Math.ceil(PANEL * k);
-    const h = Math.ceil((1080 - SCENE_TOP) * k);
-    if (light.width !== w || light.height !== h) {
-      light.width = w;
-      light.height = h;
-    }
-    const l = light.getContext('2d')!;
-    l.setTransform(1, 0, 0, 1, 0, 0);
-    l.clearRect(0, 0, w, h);
-    l.setTransform(k, 0, 0, k, 0, -SCENE_TOP * k);
-    l.globalCompositeOperation = 'source-over';
-    l.fillStyle = `rgba(4,4,12,${look.night})`;
-    l.fillRect(0, SCENE_TOP, PANEL, 1080 - SCENE_TOP);
-    const cone = (x: number, strength: number): void => {
-      const top = BOARD.y - 8;
-      const bottom = GROUND + 12;
-      const g = l.createRadialGradient(x, top, 4, x, top + 40, 300);
-      g.addColorStop(0, `rgba(0,0,0,${strength})`);
-      g.addColorStop(1, 'rgba(0,0,0,0)');
-      l.fillStyle = g;
-      l.beginPath();
-      l.moveTo(x - 9, top);
-      l.lineTo(x + 9, top);
-      l.lineTo(x + 104, bottom);
-      l.lineTo(x - 104, bottom);
-      l.closePath();
-      l.fill();
-    };
-    l.globalCompositeOperation = 'destination-out';
-    LAMPS.forEach((x, i) => {
-      const on = lampOn(i, ms);
-      if (on) cone(x, 0.95);
-    });
-    c.save();
-    c.setTransform(1, 0, 0, 1, 0, 0);
-    c.drawImage(light, 0, Math.round(SCENE_TOP * k));
-    c.restore();
-    // The glow of the light itself, added on top.
-    c.save();
-    c.setTransform(k, 0, 0, k, 0, 0);
-    c.globalCompositeOperation = 'lighter';
-    LAMPS.forEach((x, i) => {
-      if (!lampOn(i, ms)) return;
-      const top = BOARD.y - 8;
-      const g = c.createRadialGradient(x, top, 2, x, top + 30, 170);
-      g.addColorStop(0, 'rgba(255,214,140,0.28)');
-      g.addColorStop(1, 'rgba(255,214,140,0)');
-      c.fillStyle = g;
-      c.beginPath();
-      c.moveTo(x - 9, top);
-      c.lineTo(x + 9, top);
-      c.lineTo(x + 80, GROUND);
-      c.lineTo(x - 80, GROUND);
-      c.closePath();
-      c.fill();
-    });
-    c.restore();
-  };
-
-  /** A soft shadow on the pavement under something at x (width w), weaker for each dark lamp. */
-  const groundShadow = (x: number, w: number, ms: number): void => {
-    const lit = LAMPS.reduce((n, _x, i) => n + lampOn(i, ms), 0);
-    c.save();
-    c.setTransform(k, 0, 0, k, 0, 0);
-    const g = c.createRadialGradient(x, GROUND + 2, 1, x, GROUND + 2, w);
-    g.addColorStop(0, `rgba(0,0,0,${0.18 + 0.12 * lit})`);
-    g.addColorStop(1, 'rgba(0,0,0,0)');
-    c.fillStyle = g;
-    c.scale(1, 0.22);
-    c.beginPath();
-    c.arc(x, (GROUND + 2) / 0.22, w, 0, Math.PI * 2);
-    c.fill();
-    c.restore();
-  };
-
-  const drawBanner = (ms: number): void => {
-    drawBackdrop();
-    for (const x of POLES) groundShadow(x + 10, 26, ms);
-    groundShadow(BENCH_X + 32, 50, ms);
-    if (jumper) {
-      const p = jumper.run.world.player;
-      const sx = BENCH_X + (p.x - 12 * 1024) / 32;
-      groundShadow(sx, 20, ms);
-    }
-    for (const x of POLES) {
-      rect(x - 6, BOARD.y + BOARD.h, 12, GROUND - BOARD.y - BOARD.h, COLORS.iron);
-      rect(x - 6, BOARD.y + BOARD.h, 4, GROUND - BOARD.y - BOARD.h, COLORS.ironLight);
-      rect(x - 12, GROUND - 6, 24, 6, COLORS.iron);
-    }
-    rect(BOARD.x + 10, BOARD.y - 40, BOARD.w - 20, 6, COLORS.iron);
-    for (const x of LAMPS) rect(x - 3, BOARD.y - 34, 6, 14, COLORS.iron);
-    // The board.
-    rect(BOARD.x - 6, BOARD.y - 6, BOARD.w + 12, BOARD.h + 12, look.frame);
-    rect(BOARD.x, BOARD.y, BOARD.w, BOARD.h, look.face);
-    rect(BOARD.x, BOARD.y + BOARD.h - 6, BOARD.w, 6, 'rgba(0,0,0,0.12)');
-    if (look.bulbs) {
-      for (let x = BOARD.x + 4; x < BOARD.x + BOARD.w; x += 18) {
-        rect(x, BOARD.y - 4, 4, 4, '#ffe9a8');
-        rect(x, BOARD.y + BOARD.h, 4, 4, '#ffe9a8');
-      }
-    }
-    c.save();
-    c.setTransform(k, 0, 0, k, 0, 0);
-    c.beginPath();
-    c.arc(BOARD.x + 54, BOARD.y + 59, 42, 0, Math.PI * 2);
-    c.fillStyle = look.frame === '#c9a63f' ? '#c9a63f' : COLORS.ink;
-    c.fill();
-    c.restore();
-    picture(avatar, BOARD.x + 14, BOARD.y + 19, 80);
-    text(fontD16, 'Petra Radko', BOARD.x + 110, BOARD.y + 12, 2, look.name);
-    c.save();
-    c.setTransform(k, 0, 0, k, 0, 0);
-    const yx = BOARD.x + 112;
-    const yy = BOARD.y + 55;
-    c.fillStyle = '#ff0000';
-    c.beginPath();
-    c.roundRect(yx, yy, 30, 21, 6);
-    c.fill();
-    c.fillStyle = '#ffffff';
-    c.beginPath();
-    c.moveTo(yx + 12, yy + 6);
-    c.lineTo(yx + 21, yy + 10.5);
-    c.lineTo(yx + 12, yy + 15);
-    c.closePath();
-    c.fill();
-    c.restore();
-    text(fontD16, '@Gwynerva', BOARD.x + 152, BOARD.y + 50, 2, look.handle);
-    text(fontT12, 'TAS · OCTOBER 28, 2026', BOARD.x + 112, BOARD.y + 88, 2, look.date);
-    drawBench();
-    drawJumper(ms);
-    drawLight(ms);
-    // Lamp heads on top of the light.
-    LAMPS.forEach((x, i) => {
-      const on = lampOn(i, ms);
-      rect(x - 14, BOARD.y - 22, 28, 10, COLORS.ironLight);
-      rect(x - 14, BOARD.y - 22, 28, 2, '#7a8088');
-      rect(x - 10, BOARD.y - 12, 20, 4, on ? '#fff4c8' : '#4a443c');
-    });
-  };
-  const BENCH_X = 236;
-  const drawBench = (): void => {
-    rect(BENCH_X - 6, GROUND - 22, 76, 6, '#7a5a3a');
-    rect(BENCH_X - 6, GROUND - 22, 76, 2, '#9b7650');
-    rect(BENCH_X - 6, GROUND - 34, 76, 5, '#7a5a3a');
-    rect(BENCH_X, GROUND - 16, 6, 16, COLORS.iron);
-    rect(BENCH_X + 58, GROUND - 16, 6, 16, COLORS.iron);
-  };
+  const drawBanner = (ms: number): void => drawRoofScene(ms);
 
   // Petra vaulting the bench: the Moves screen's demos, in her outfits, fading in and out.
   const DEMOS = ['monkeyVault', 'tigerJump', 'monkeyFlip', 'spiderJump']
