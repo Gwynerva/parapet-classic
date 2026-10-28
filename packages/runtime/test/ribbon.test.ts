@@ -140,4 +140,31 @@ describe('cloth', () => {
     // Mostly below the root, a little behind.
     expect(tip.y - root.y).toBeGreaterThan(Math.abs(tip.x - root.x));
   });
+
+  /** The cloth's farthest point from the anchor, in pixels. */
+  function reach(r: Ribbon, x: number, y: number): number {
+    return Math.max(...r.points().map((p) => Math.hypot(p.x - x, p.y - y) / UNITS));
+  }
+
+  it('stays on a runner whose replay is run on without frames', () => {
+    const r = cape();
+    run(r, 20, 200);
+    // A replay sought ahead: hundreds of steps with no frame drawn, then a frame.
+    let x = 0;
+    for (let s = 0; s < 300; s++) {
+      x += (200 * UNITS * STEP_MS) / 1000;
+      r.follow(x, 0, true);
+    }
+    r.update(16);
+    expect(reach(r, x, 0)).toBeLessThan(30);
+  });
+
+  it('is hung afresh where a runner is put down far away', () => {
+    const r = cape();
+    run(r, 60, 250);
+    // A boss shown anew, a replay started over: the anchor lands somewhere else.
+    r.follow(-4000 * UNITS, 300 * UNITS, true);
+    for (let f = 0; f < 3; f++) r.update(10);
+    expect(reach(r, -4000 * UNITS, 300 * UNITS)).toBeLessThan(30);
+  });
 });

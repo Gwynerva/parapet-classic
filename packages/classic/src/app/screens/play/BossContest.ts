@@ -69,6 +69,8 @@ export class BossContest {
   private bannerUntil = 0;
   /** The boss's head on its sign at the screen's edge. */
   private readonly sign: EdgePicture;
+  /** Which of its outfits the boss wears. */
+  readonly outfit: number;
 
   constructor(
     ctx: GameContext,
@@ -76,6 +78,8 @@ export class BossContest {
     mode: RunMode,
     levelId: number,
     world: World,
+    /** The boss's outfit: picked at random, or kept from the run started over (a replay sought). */
+    outfit = pickOutfit(contest.character),
   ) {
     this.ctx = ctx;
     this.contest = contest;
@@ -83,7 +87,7 @@ export class BossContest {
     this.levelId = levelId;
     const found = contestOfCharacter(contest.character);
     this.tracks = found ? contestGlimpses(found.levelId, found.kind) : null;
-    const outfit = pickOutfit(contest.character);
+    this.outfit = outfit;
     const { render } = ctx;
     const boss = bossOfLevel(levelId);
     const look = isDrawn(boss) ? render.skins.lookOf(contest.character, outfit) : undefined;

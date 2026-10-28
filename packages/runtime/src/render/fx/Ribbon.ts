@@ -53,6 +53,8 @@ const WAVE_SPEED = 260;
  */
 const CONE_UP = -Math.asin(0.45);
 const CONE_DOWN = Math.acos(-0.25);
+/** An anchor moving further than this in one step jumped (world units; `TELEPORT_UNITS`'s). */
+const JUMP_UNITS = 600;
 /** Largest textured ribbon on screen, in pixels each way (bigger ones are clipped). */
 const SCRATCH = 160;
 
@@ -155,6 +157,8 @@ export class Ribbon {
   private rootVy = 0;
   private time = 0;
   private behind = -1;
+  /** Whether the cloth has been simulated since the anchor last moved. */
+  private drawnSinceFollow = true;
 
   /** `color` resolves the spec's colours (palette characters, tokens) to CSS. */
   constructor(spec: LookRibbon, color: (token: string) => string) {
@@ -190,7 +194,21 @@ export class Ribbon {
       this.layOut();
       return;
     }
+    if (Math.abs(x - this.toX) > JUMP_UNITS || Math.abs(y - this.toY) > JUMP_UNITS) {
+      // Not a move but a jump (a replay sought, a runner put somewhere new): hung afresh there.
+      this.placed = false;
+      this.follow(anchorX, anchorY, facingRight);
+      return;
+    }
     if (behind !== this.behind) this.turn(behind);
+    if (!this.drawnSinceFollow) {
+      // Steps without a frame between them (a replay run on to a moment): the root is where the
+      // body was, at once, with no glide and no jolt from a stale start.
+      this.fromX = this.rootX = this.toX;
+      this.fromY = this.rootY = this.toY;
+      this.layOut();
+    }
+    this.drawnSinceFollow = false;
     const s = 1000 / FOLLOW_MS / UNITS_PER_PX;
     let vx = (x - this.toX) * s;
     let vy = (y - this.toY) * s;
@@ -234,6 +252,7 @@ export class Ribbon {
   /** Simulates `dtMs` of real time. */
   update(dtMs: number): void {
     if (!this.placed || dtMs <= 0) return;
+    this.drawnSinceFollow = true;
     const gravity = this.spec.gravity ?? 220;
     const drag = this.spec.drag ?? 2.5;
     const stiff = Math.min(1, Math.max(0, this.spec.stiffness ?? 0));

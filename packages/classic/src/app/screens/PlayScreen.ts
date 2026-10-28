@@ -165,9 +165,10 @@ export class PlayScreen implements Screen, WatchHost {
   /**
    * Start the run from scratch (also used by the pause and results screens). `quick` (the
    * restart button, R) goes straight to "get ready": no pages, briefing or flyover again, and
-   * the music plays on.
+   * the music plays on. `same` (a replay sought back to an earlier moment) keeps the outfits:
+   * the same run, not a new one.
    */
-  restart(opts: { quick?: boolean } = {}): void {
+  restart(opts: { quick?: boolean; same?: boolean } = {}): void {
     const { content, render } = this.ctx;
     const mission = content.missions.levels[this.setup.levelId];
     const data = runContent(this.ctx, this.setup.levelId);
@@ -181,7 +182,7 @@ export class PlayScreen implements Screen, WatchHost {
     this.characters = new CharacterRenderer(render.scene, render.moves, render.clips, render.skins);
     this.echo = new EchoRenderer(this.characters, render.echo);
     this.fx = new CharacterFx(render.echo, { reducedMotion: prefersReducedMotion() });
-    this.outfit = pickOutfit(this.setup.character);
+    if (!opts.same) this.outfit = pickOutfit(this.setup.character);
     world.runners.forEach((runner, i) => {
       const isPlayer = runner === world.player;
       const character = isPlayer ? this.setup.character : mission.rivalCharacter;
@@ -217,7 +218,14 @@ export class PlayScreen implements Screen, WatchHost {
       });
     }
     this.contest = this.setup.contest
-      ? new BossContest(this.ctx, this.setup.contest, this.setup.mode, this.setup.levelId, world)
+      ? new BossContest(
+          this.ctx,
+          this.setup.contest,
+          this.setup.mode,
+          this.setup.levelId,
+          world,
+          opts.same ? this.contest?.outfit : undefined,
+        )
       : null;
     this.particles = new Particles(render.sheet, render.sine);
     this.particles.setLevel(world.level);
@@ -758,7 +766,7 @@ export class PlayScreen implements Screen, WatchHost {
   seek(step: number): void {
     if (!this.watch || this.covered) return;
     if (step < this.stepsRun) {
-      this.restart({ quick: true });
+      this.restart({ quick: true, same: true });
       // Straight on with the replay, without "get ready".
       this.flow.skipToPlay();
     }
