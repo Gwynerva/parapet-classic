@@ -141,7 +141,7 @@ function readOptions(): Options {
     runs,
     width,
     height,
-    batch: q.get('n') !== null ? Number(q.get('n')) : 6,
+    batch: q.get('n') !== null ? Number(q.get('n')) : 0,
     render: q.get('render') === '1',
     mbps: Number(q.get('mbps')) || 40,
     name: /^[\w-]+$/.test(q.get('name') ?? '') ? q.get('name')! : 'tas-film',
@@ -245,7 +245,6 @@ async function main(): Promise<void> {
   let acc = 0;
   let endedAt = -1;
   let tick = 0;
-  let splits: number[] = [];
   let totalSteps = 1;
   let fadeRand = rng(1);
 
@@ -304,20 +303,10 @@ async function main(): Promise<void> {
     const make = worldOf(levelId, mode);
     const local: Content = { world: make, moves };
     plan = makePlan(local, mode, levelId, parsePresses(run.presses), options.batch, () => {});
-    // The record's splits (flags or checkpoints, and the finish) for the bar.
+    // The record's length, for the bar.
     const probe = make();
     const cursor = { next: 0 };
-    let progress = 0;
-    splits = [];
-    for (;;) {
-      const going = probe.step(bitsAt(probe, plan.presses, cursor));
-      const now = progressOf(probe, mode);
-      if (now !== progress) {
-        progress = now;
-        splits.push(probe.stepCount);
-      }
-      if (!going) break;
-    }
+    while (probe.step(bitsAt(probe, plan.presses, cursor)));
     totalSteps = probe.stepCount;
     for (const a of live) release(a);
     live = [];
@@ -1133,13 +1122,35 @@ async function main(): Promise<void> {
     } else c.drawImage(img, Math.round(x - w / 2), Math.round(y - h), w, h);
     c.restore();
   };
-  /** The policeman behind the bush: up, a look round, down again, every 9 s. */
+  /** A repeatable 0…1 noise for event `n` of stream `salt`. */
+  const noise = (n: number, salt: number): number => {
+    const v = Math.sin(n * 12.9898 + salt * 78.233) * 43758.5453;
+    return v - Math.floor(v);
+  };
+  /** Start times of a rare, irregular event: gaps between `min` and `max` ms. */
+  const schedule = (salt: number, first: number, min: number, max: number): number[] => {
+    const times: number[] = [];
+    for (let t = first, n = 0; t < 40 * 60_000; n++) {
+      times.push(t);
+      t += min + noise(n, salt) * (max - min);
+    }
+    return times;
+  };
+  /** The latest event at or before `ms`: its index and how long ago it started. */
+  const lastOf = (times: number[], ms: number): { n: number; age: number } => {
+    let n = -1;
+    while (n + 1 < times.length && times[n + 1]! <= ms) n++;
+    return { n, age: n < 0 ? Infinity : ms - times[n]! };
+  };
+  const COP_PEEKS = schedule(1, 7000, 13_000, 31_000);
+  const PIGEON_FLIGHTS = schedule(2, 12_000, 17_000, 43_000);
+  /** The policeman behind the bush: up, a look round of 1.2…3 s, down again. */
   const copRise = (ms: number): number => {
-    const t = (ms + 3000) % 9000;
-    if (t < 5600) return 0;
-    if (t < 6000) return (t - 5600) / 400;
-    if (t < 7800) return 1;
-    if (t < 8200) return 1 - (t - 7800) / 400;
+    const { n, age } = lastOf(COP_PEEKS, ms);
+    const stay = 1200 + noise(n, 3) * 1800;
+    if (age < 400) return age / 400;
+    if (age < 400 + stay) return 1;
+    if (age < 800 + stay) return 1 - (age - 400 - stay) / 400;
     return 0;
   };
   const copBehindBush = (x: number, ms: number, px: number): void => {
@@ -1203,9 +1214,12 @@ async function main(): Promise<void> {
     copBehindBush(400, ms, 1.5);
     stand(bollard, 500, 2);
     // Pigeons: one pecking on the pavement, one flying up towards the total's clock.
-    const peck = Math.floor(ms / 450) % 3 === 0;
+    const peck = noise(Math.floor(ms / 300), 4) < 0.3;
     stand(pigeon, 208, 2.5, STREET_GROUND + (peck ? 2 : 0));
-    const t = (ms % 8000) / 2600;
+    // The other flies off now and then and comes back some seconds later.
+    const flight = lastOf(PIGEON_FLIGHTS, ms);
+    const t = flight.age / 2600;
+    const back = 2600 + 4000 + noise(flight.n, 5) * 5000;
     if (t < 1) {
       const e = t * t * (3 - 2 * t);
       const x = PIGEON_FROM.x + (PIGEON_TO.x - PIGEON_FROM.x) * e;
@@ -1215,8 +1229,11 @@ async function main(): Promise<void> {
       c.globalAlpha = Math.min(1, (1 - t) * 6);
       stand(flap, x, 2.5, y);
       c.restore();
-    } else {
+    } else if (flight.age >= back) {
+      c.save();
+      c.globalAlpha = Math.min(1, (flight.age - back) / 400);
       stand(pigeon, PIGEON_FROM.x, 2.5, PIGEON_FROM.y + 2, true);
+      c.restore();
     }
   };
 
@@ -1227,7 +1244,7 @@ async function main(): Promise<void> {
   const jumpChars = new CharacterRenderer(scene, moves, clips, skins);
   let jumper: { run: DemoRun; born: number; acc: number } | null = null;
   let jumperCount = 0;
-  let nextJump = 2500;
+  let nextJump = 5000;
   const startJumper = (ms: number): void => {
     const data = DEMOS[jumperCount % DEMOS.length]!;
     const run = new DemoRun(data, { moves: content.moves, tables: content.tables });
@@ -1252,7 +1269,7 @@ async function main(): Promise<void> {
     if (jumper.run.done) {
       jumpChars.detach(jumper.run.world.player);
       jumper = null;
-      nextJump = ms + 3500;
+      nextJump = ms + 9000 + noise(jumperCount, 6) * 16_000;
     }
   };
   const drawJumper = (ms: number): void => {
@@ -1291,7 +1308,6 @@ async function main(): Promise<void> {
     const now = world.stepCount;
     rect(x0, BAR.y + 46, w, 6, '#3b3634', fade);
     rect(x0, BAR.y + 46, xs(now) - x0, 6, COLORS.hazard, fade);
-    for (const s of splits) rect(xs(s) - 1, BAR.y + 42, 2, 14, COLORS.muted, fade);
     c.save();
     c.setTransform(k, 0, 0, k, 0, 0);
     c.lineWidth = 3;
