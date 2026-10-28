@@ -142,10 +142,16 @@ export class CharacterRenderer {
     return this.skins.sceneFor(character, outfit);
   }
 
-  /** Start tracking a runner; it shows the idle loop until its first move change. */
+  /**
+   * Start tracking a runner. A runner at its start shows the idle loop until its first move
+   * change; one already on its way (a world restored mid-run, a demo played on before it was
+   * attached) takes the clip of the move it is in, instead of sliding along standing.
+   */
   attach(runner: RunnerState, options: RunnerVisualOptions = {}): RunnerVisual {
     const animator = new Animator(this.clips, options.seed ?? this.visuals.size + 1);
     animator.setIdle(runner);
+    if (runner.moveId !== 0)
+      animator.setMove(this.moves.get(runner.moveId), runner.moveTimer, runner);
     const p = animator.drawParams(runner);
     const visual: RunnerVisual = {
       runner,

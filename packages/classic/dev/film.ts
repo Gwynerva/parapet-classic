@@ -115,6 +115,10 @@ interface Options {
   render: boolean;
   mbps: number;
   name: string;
+  /** The banner's look (1…4). */
+  banner: number;
+  /** Draw one frame this many ms into the first run and stop (for comparing looks). */
+  at: number;
 }
 
 function readOptions(): Options {
@@ -139,6 +143,8 @@ function readOptions(): Options {
     render: q.get('render') === '1',
     mbps: Number(q.get('mbps')) || 40,
     name: /^[\w-]+$/.test(q.get('name') ?? '') ? q.get('name')! : 'tas-film',
+    banner: Number(q.get('banner')) || 1,
+    at: Number(q.get('at')) || 0,
   };
 }
 
@@ -607,15 +613,114 @@ async function main(): Promise<void> {
     const ty = ROW_Y + 12 * ROW_H + 14;
     let total = 0;
     for (const t of times) for (const v of t) total += v ?? 0;
+    if (world && endedAt < 0 && runMs >= RUN_START) total += world.clock;
     text(fontT12, 'TOTAL', COL.name, ty, 2, COLORS.paper);
     text(fontD16, fmt(total), PANEL - 22, ty - 4, 2, COLORS.hazard, 'right');
   };
 
   // ------------------------------------------------------------------ the banner, lamps, bench
   const GROUND = 1068;
+  const SCENE_TOP = 826;
   const BOARD = { x: 56, y: 872, w: 428, h: 118 };
   const POLES = [104, 424];
   const LAMPS = [148, 270, 392];
+  interface BannerLook {
+    /** Sky (top to bottom), the far city's colour and its windows. */
+    sky: [string, string];
+    city: string;
+    windows: string;
+    /** The wall or fence behind the posts, and the pavement. */
+    wall: 'brick' | 'fence' | 'concrete' | 'parapet';
+    wallColor: string;
+    ground: string;
+    curb: string;
+    /** Board: frame, face, the name, the handle, the date; how dark the night is. */
+    frame: string;
+    face: string;
+    name: string;
+    handle: string;
+    date: string;
+    night: number;
+    bulbs: boolean;
+  }
+  const LOOKS: Record<number, BannerLook> = {
+    1: {
+      sky: ['#15142a', '#3a2f55'],
+      city: '#221f38',
+      windows: '#e8c25a',
+      wall: 'brick',
+      wallColor: '#4a2f2a',
+      ground: '#262323',
+      curb: '#56504c',
+      frame: '#2b2f35',
+      face: '#f2ede4',
+      name: '#111111',
+      handle: '#111111',
+      date: '#e8501a',
+      night: 0.4,
+      bulbs: false,
+    },
+    2: {
+      sky: ['#2b1d3a', '#e0794a'],
+      city: '#3a2638',
+      windows: '#ffd36b',
+      wall: 'fence',
+      wallColor: '#5d6266',
+      ground: '#2c2826',
+      curb: '#6a625c',
+      frame: '#c9a63f',
+      face: '#16213a',
+      name: '#ffffff',
+      handle: '#ffffff',
+      date: '#ffd35c',
+      night: 0.28,
+      bulbs: false,
+    },
+    3: {
+      sky: ['#1b1a24', '#2e2b36'],
+      city: '#26232c',
+      windows: '#d9b65a',
+      wall: 'concrete',
+      wallColor: '#55504c',
+      ground: '#2a2725',
+      curb: '#5e5853',
+      frame: '#111111',
+      face: '#ffd23a',
+      name: '#111111',
+      handle: '#111111',
+      date: '#a8321a',
+      night: 0.34,
+      bulbs: false,
+    },
+    4: {
+      sky: ['#0f1b33', '#24406a'],
+      city: '#162741',
+      windows: '#9fd0ff',
+      wall: 'parapet',
+      wallColor: '#3b4b5c',
+      ground: '#1f2630',
+      curb: '#4c5a6a',
+      frame: '#e8501a',
+      face: '#f7f3ea',
+      name: '#111111',
+      handle: '#111111',
+      date: '#e8501a',
+      night: 0.38,
+      bulbs: true,
+    },
+  };
+  const look = LOOKS[options.banner] ?? LOOKS[1]!;
+  const tagNames = ['s66.png', 's67.png', 's68.png', 's69.png', 's71.png', 's72.png'];
+  const tags = look.wall === 'concrete' ? await Promise.all(tagNames.map((n) => image(n))) : [];
+  /** A fixed scatter of the far city's windows (the same every frame). */
+  const cityRand = rng(4242);
+  const towers = Array.from({ length: 14 }, (_, i) => ({
+    x: i * 40 - 10 + Math.floor(cityRand() * 14),
+    w: 26 + Math.floor(cityRand() * 22),
+    h: 40 + Math.floor(cityRand() * 70),
+    lit: Array.from({ length: 24 }, () => cityRand() < 0.35),
+  }));
+
   /** The flickering lamp: brightness at page time `ms`. */
   const lampOn = (i: number, ms: number): number => {
     if (i !== 2) return 1;
@@ -624,59 +729,216 @@ async function main(): Promise<void> {
     const f = Math.floor((t - 5600) / 70);
     return [0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 1][f % 12] ?? 1;
   };
+
+  const drawBackdrop = (): void => {
+    c.save();
+    c.setTransform(k, 0, 0, k, 0, 0);
+    c.beginPath();
+    c.rect(0, SCENE_TOP, PANEL, 1080 - SCENE_TOP);
+    c.clip();
+    const sky = c.createLinearGradient(0, SCENE_TOP, 0, 1000);
+    sky.addColorStop(0, look.sky[0]);
+    sky.addColorStop(1, look.sky[1]);
+    c.fillStyle = sky;
+    c.fillRect(0, SCENE_TOP, PANEL, 1080 - SCENE_TOP);
+    // The far city.
+    for (const t of towers) {
+      const top = 1010 - t.h;
+      c.fillStyle = look.city;
+      c.fillRect(t.x, top, t.w, t.h);
+      c.fillStyle = look.windows;
+      let n = 0;
+      for (let wy = top + 6; wy < 1000; wy += 10) {
+        for (let wx = t.x + 4; wx < t.x + t.w - 4; wx += 8) {
+          if (t.lit[n++ % t.lit.length]) c.fillRect(wx, wy, 3, 4);
+        }
+      }
+    }
+    // What stands behind the posts.
+    if (look.wall === 'brick') {
+      c.fillStyle = look.wallColor;
+      c.fillRect(0, 1004, PANEL, GROUND - 1004);
+      c.fillStyle = 'rgba(0,0,0,0.25)';
+      for (let y = 1004, row = 0; y < GROUND; y += 8, row++) {
+        c.fillRect(0, y, PANEL, 1);
+        for (let x = row % 2 ? 0 : 12; x < PANEL; x += 24) c.fillRect(x, y, 1, 8);
+      }
+      c.fillStyle = '#5c3d36';
+      c.fillRect(0, 1000, PANEL, 4);
+    } else if (look.wall === 'fence') {
+      c.strokeStyle = look.wallColor;
+      c.lineWidth = 1;
+      c.globalAlpha = 0.8;
+      for (let x = -40; x < PANEL + 40; x += 10) {
+        c.beginPath();
+        c.moveTo(x, 1012);
+        c.lineTo(x + 40, GROUND);
+        c.moveTo(x + 40, 1012);
+        c.lineTo(x, GROUND);
+        c.stroke();
+      }
+      c.globalAlpha = 1;
+      c.fillStyle = look.wallColor;
+      c.fillRect(0, 1008, PANEL, 4);
+      for (let x = 20; x < PANEL; x += 120) c.fillRect(x, 1008, 4, GROUND - 1008);
+    } else if (look.wall === 'concrete') {
+      c.fillStyle = look.wallColor;
+      c.fillRect(0, 960, PANEL, GROUND - 960);
+      c.fillStyle = 'rgba(0,0,0,0.18)';
+      for (let x = 0; x < PANEL; x += 90) c.fillRect(x, 960, 2, GROUND - 960);
+      c.fillRect(0, 960, PANEL, 3);
+      c.imageSmoothingEnabled = false;
+      c.globalAlpha = 0.75;
+      const spots = [
+        [6, 1000],
+        [150, 1012],
+        [300, 996],
+        [420, 1010],
+        [480, 970],
+        [210, 968],
+      ];
+      tags.forEach((img, i) => {
+        const [tx, ty] = spots[i % spots.length]!;
+        c.drawImage(img, tx!, ty!, img.width * 0.75, img.height * 0.75);
+      });
+      c.globalAlpha = 1;
+    } else {
+      // A rooftop parapet with a water tank.
+      c.fillStyle = look.wallColor;
+      c.fillRect(0, 1030, PANEL, GROUND - 1030);
+      c.fillStyle = '#4c5f72';
+      c.fillRect(0, 1026, PANEL, 6);
+      c.fillStyle = '#2a3542';
+      c.fillRect(500, 940, 34, 70);
+      c.fillRect(496, 932, 42, 10);
+      c.fillRect(506, 1010, 4, 20);
+      c.fillRect(524, 1010, 4, 20);
+    }
+    // The pavement and its curb.
+    c.fillStyle = look.curb;
+    c.fillRect(0, GROUND - 4, PANEL, 4);
+    c.fillStyle = look.ground;
+    c.fillRect(0, GROUND, PANEL, 1080 - GROUND);
+    c.restore();
+  };
+
+  /** Darkness over the scene with each lit lamp's cone cut out of it, then a warm glow. */
+  const light = document.createElement('canvas');
+  const drawLight = (ms: number): void => {
+    const w = Math.ceil(PANEL * k);
+    const h = Math.ceil((1080 - SCENE_TOP) * k);
+    if (light.width !== w || light.height !== h) {
+      light.width = w;
+      light.height = h;
+    }
+    const l = light.getContext('2d')!;
+    l.setTransform(1, 0, 0, 1, 0, 0);
+    l.clearRect(0, 0, w, h);
+    l.setTransform(k, 0, 0, k, 0, -SCENE_TOP * k);
+    l.globalCompositeOperation = 'source-over';
+    l.fillStyle = `rgba(4,4,12,${look.night})`;
+    l.fillRect(0, SCENE_TOP, PANEL, 1080 - SCENE_TOP);
+    const cone = (x: number, strength: number): void => {
+      const top = BOARD.y - 8;
+      const bottom = GROUND + 12;
+      const g = l.createRadialGradient(x, top, 4, x, top + 40, 300);
+      g.addColorStop(0, `rgba(0,0,0,${strength})`);
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      l.fillStyle = g;
+      l.beginPath();
+      l.moveTo(x - 9, top);
+      l.lineTo(x + 9, top);
+      l.lineTo(x + 104, bottom);
+      l.lineTo(x - 104, bottom);
+      l.closePath();
+      l.fill();
+    };
+    l.globalCompositeOperation = 'destination-out';
+    LAMPS.forEach((x, i) => {
+      const on = lampOn(i, ms);
+      if (on) cone(x, 0.95);
+    });
+    c.save();
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    c.drawImage(light, 0, Math.round(SCENE_TOP * k));
+    c.restore();
+    // The glow of the light itself, added on top.
+    c.save();
+    c.setTransform(k, 0, 0, k, 0, 0);
+    c.globalCompositeOperation = 'lighter';
+    LAMPS.forEach((x, i) => {
+      if (!lampOn(i, ms)) return;
+      const top = BOARD.y - 8;
+      const g = c.createRadialGradient(x, top, 2, x, top + 30, 170);
+      g.addColorStop(0, 'rgba(255,214,140,0.28)');
+      g.addColorStop(1, 'rgba(255,214,140,0)');
+      c.fillStyle = g;
+      c.beginPath();
+      c.moveTo(x - 9, top);
+      c.lineTo(x + 9, top);
+      c.lineTo(x + 80, GROUND);
+      c.lineTo(x - 80, GROUND);
+      c.closePath();
+      c.fill();
+    });
+    c.restore();
+  };
+
+  /** A soft shadow on the pavement under something at x (width w), weaker for each dark lamp. */
+  const groundShadow = (x: number, w: number, ms: number): void => {
+    const lit = LAMPS.reduce((n, _x, i) => n + lampOn(i, ms), 0);
+    c.save();
+    c.setTransform(k, 0, 0, k, 0, 0);
+    const g = c.createRadialGradient(x, GROUND + 2, 1, x, GROUND + 2, w);
+    g.addColorStop(0, `rgba(0,0,0,${0.18 + 0.12 * lit})`);
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    c.fillStyle = g;
+    c.scale(1, 0.22);
+    c.beginPath();
+    c.arc(x, (GROUND + 2) / 0.22, w, 0, Math.PI * 2);
+    c.fill();
+    c.restore();
+  };
+
   const drawBanner = (ms: number): void => {
-    rect(0, GROUND, PANEL, 1080 - GROUND, '#1a1716');
+    drawBackdrop();
+    for (const x of POLES) groundShadow(x + 10, 26, ms);
+    groundShadow(BENCH_X + 32, 50, ms);
+    if (jumper) {
+      const p = jumper.run.world.player;
+      const sx = BENCH_X + (p.x - 12 * 1024) / 32;
+      groundShadow(sx, 20, ms);
+    }
     for (const x of POLES) {
       rect(x - 6, BOARD.y + BOARD.h, 12, GROUND - BOARD.y - BOARD.h, COLORS.iron);
       rect(x - 6, BOARD.y + BOARD.h, 4, GROUND - BOARD.y - BOARD.h, COLORS.ironLight);
       rect(x - 12, GROUND - 6, 24, 6, COLORS.iron);
     }
-    // Lamp arms on a rail above the board, and their light on it.
     rect(BOARD.x + 10, BOARD.y - 40, BOARD.w - 20, 6, COLORS.iron);
-    LAMPS.forEach((x, i) => {
-      const on = lampOn(i, ms);
-      rect(x - 3, BOARD.y - 34, 6, 14, COLORS.iron);
-      rect(x - 14, BOARD.y - 22, 28, 10, COLORS.ironLight);
-      rect(x - 10, BOARD.y - 12, 20, 4, on ? '#fff4c8' : '#5a5246');
-    });
-    // The board: an iron frame, a paper face lit by the lamps.
-    rect(BOARD.x - 6, BOARD.y - 6, BOARD.w + 12, BOARD.h + 12, COLORS.iron);
-    rect(BOARD.x, BOARD.y, BOARD.w, BOARD.h, '#e4ddd0');
-    LAMPS.forEach((x, i) => {
-      const on = lampOn(i, ms);
-      if (on) {
-        c.save();
-        c.setTransform(k, 0, 0, k, 0, 0);
-        const g = c.createRadialGradient(x, BOARD.y - 8, 2, x, BOARD.y + 40, 90);
-        g.addColorStop(0, 'rgba(255,248,220,0.75)');
-        g.addColorStop(1, 'rgba(255,248,220,0)');
-        c.fillStyle = g;
-        c.beginPath();
-        c.moveTo(x - 10, BOARD.y - 8);
-        c.lineTo(x + 10, BOARD.y - 8);
-        c.lineTo(x + 70, BOARD.y + BOARD.h);
-        c.lineTo(x - 70, BOARD.y + BOARD.h);
-        c.closePath();
-        c.fill();
-        c.restore();
+    for (const x of LAMPS) rect(x - 3, BOARD.y - 34, 6, 14, COLORS.iron);
+    // The board.
+    rect(BOARD.x - 6, BOARD.y - 6, BOARD.w + 12, BOARD.h + 12, look.frame);
+    rect(BOARD.x, BOARD.y, BOARD.w, BOARD.h, look.face);
+    rect(BOARD.x, BOARD.y + BOARD.h - 6, BOARD.w, 6, 'rgba(0,0,0,0.12)');
+    if (look.bulbs) {
+      for (let x = BOARD.x + 4; x < BOARD.x + BOARD.w; x += 18) {
+        rect(x, BOARD.y - 4, 4, 4, '#ffe9a8');
+        rect(x, BOARD.y + BOARD.h, 4, 4, '#ffe9a8');
       }
-    });
-    const dim = 1 - (1 - lampOn(2, ms)) * 0.22;
-    if (dim < 1) rect(BOARD.x + BOARD.w * 0.62, BOARD.y, BOARD.w * 0.38, BOARD.h, '#000', 1 - dim);
+    }
     c.save();
     c.setTransform(k, 0, 0, k, 0, 0);
     c.beginPath();
     c.arc(BOARD.x + 54, BOARD.y + 59, 42, 0, Math.PI * 2);
-    c.fillStyle = COLORS.ink;
+    c.fillStyle = look.frame === '#c9a63f' ? '#c9a63f' : COLORS.ink;
     c.fill();
     c.restore();
     picture(avatar, BOARD.x + 14, BOARD.y + 19, 80);
-    text(fontD16, 'Petra Radko', BOARD.x + 110, BOARD.y + 14, 2, COLORS.ink);
-    // The YouTube mark: a red rounded box with a white play triangle.
+    text(fontD16, 'Petra Radko', BOARD.x + 110, BOARD.y + 12, 2, look.name);
     c.save();
     c.setTransform(k, 0, 0, k, 0, 0);
     const yx = BOARD.x + 112;
-    const yy = BOARD.y + 54;
+    const yy = BOARD.y + 55;
     c.fillStyle = '#ff0000';
     c.beginPath();
     c.roundRect(yx, yy, 30, 21, 6);
@@ -689,10 +951,18 @@ async function main(): Promise<void> {
     c.closePath();
     c.fill();
     c.restore();
-    text(fontT12, '@Gwynerva', BOARD.x + 150, BOARD.y + 54, 2, COLORS.ink);
-    text(fontT12, 'TAS · OCTOBER 28, 2026', BOARD.x + 112, BOARD.y + 86, 2, COLORS.orange);
+    text(fontD16, '@Gwynerva', BOARD.x + 152, BOARD.y + 50, 2, look.handle);
+    text(fontT12, 'TAS · OCTOBER 28, 2026', BOARD.x + 112, BOARD.y + 88, 2, look.date);
     drawBench();
     drawJumper(ms);
+    drawLight(ms);
+    // Lamp heads on top of the light.
+    LAMPS.forEach((x, i) => {
+      const on = lampOn(i, ms);
+      rect(x - 14, BOARD.y - 22, 28, 10, COLORS.ironLight);
+      rect(x - 14, BOARD.y - 22, 28, 2, '#7a8088');
+      rect(x - 10, BOARD.y - 12, 20, 4, on ? '#fff4c8' : '#4a443c');
+    });
   };
   const BENCH_X = 236;
   const drawBench = (): void => {
@@ -827,6 +1097,14 @@ async function main(): Promise<void> {
   };
 
   // ------------------------------------------------------------------ rendering
+  if (options.at > 0) {
+    await loadRun();
+    for (let t = 0; t < options.at; t += 1000 / FPS) advance(1000 / FPS);
+    draw();
+    status('');
+    statusBox.style.display = 'none';
+    return;
+  }
   if (!options.render) {
     await loadRun();
     let last = performance.now();
