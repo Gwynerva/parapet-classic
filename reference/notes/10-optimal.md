@@ -61,9 +61,8 @@ Breadth-first search from the start of Mill Brook's flag hunt, all 16 presses ea
 |   36 |     338,761 |                   33,638 |                                                     9,814 |             5,159 |
 |   44 |   2,997,763 |                        – |                                                         – |                 – |
 
-Merging on the physical situation alone (an underestimate of the exact count): 1,812 states at
-step 10, 17,805 at 20, 100,597 at 30, 1,018,041 at 40, 163,670 at 50 with the stricter key,
-906,392 at 60.
+Merging on the physical situation alone (an underestimate of the exact count) still gives
+163,670 states at step 50 and 906,392 at step 60.
 
 Of the 16 presses, a step usually cannot tell most apart: 1.4 to 1.9 simulations per state
 suffice, giving 5.4 to 5.8 distinct successors.
