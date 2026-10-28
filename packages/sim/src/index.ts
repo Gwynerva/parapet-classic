@@ -30,6 +30,7 @@ export {
   Input,
   pressBits,
   evalCondition,
+  inputReads,
   tileRelative,
   lookaheadRay,
   isOnSurface,

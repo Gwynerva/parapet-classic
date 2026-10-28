@@ -154,6 +154,13 @@ export function isOnSurface(r: RunnerState): boolean {
   );
 }
 
+/**
+ * Which input conditions (6–13, bit `id - 6`) were evaluated since `mask` was last cleared.
+ * Search tools read it to tell which presses could have changed a step; the physics never
+ * does.
+ */
+export const inputReads = { mask: 0 };
+
 /** `boolean_g(int)`: buffered press that has not been superseded by a new press this step. */
 function bufferedPress(r: RunnerState, mask: number): boolean {
   return (r.inputBuffer & mask) !== 0 && r.pressedBits === 0;
@@ -184,20 +191,28 @@ export function evalCondition(r: RunnerState, ctx: ConditionContext, id: number)
     case 5:
       return !feet.hit;
     case 6:
+      inputReads.mask |= 1;
       return (r.pressedBits & Input.BACK) !== 0;
     case 7:
+      inputReads.mask |= 2;
       return (r.pressedBits & Input.FORWARD) !== 0;
     case 8:
+      inputReads.mask |= 4;
       return (r.pressedBits & Input.UP) !== 0;
     case 9:
+      inputReads.mask |= 8;
       return (r.pressedBits & Input.DOWN) !== 0;
     case 10:
+      inputReads.mask |= 16;
       return bufferedPress(r, Input.BACK);
     case 11:
+      inputReads.mask |= 32;
       return bufferedPress(r, Input.FORWARD);
     case 12:
+      inputReads.mask |= 64;
       return bufferedPress(r, Input.UP);
     case 13:
+      inputReads.mask |= 128;
       return bufferedPress(r, Input.DOWN);
     case 14:
       return (
