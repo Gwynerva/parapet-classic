@@ -18,6 +18,9 @@ A running list of how the 2007 developers did things, and where they slipped. Ap
 
 ## Bugs and oddities
 
+- **The air run.** Ground moves can carry on in the air (a tiger jump's landing roll over an edge ends in a run, 60 → 2; so can running off onto a lower roof, a roll, a turn); a jump from such a run takes the length of the whole velocity, fall included, and leaves at up to 10,055 units of horizontal speed. Turning in mid-air first makes the runner fall straight down and throws it back the other way. ([10](10-optimal.md))
+- **The sky lift.** The pit check lifts a runner to two tiles above its column's lowest floor, which is the top of the map in the floorless edge columns of six levels and beyond the map: rolled under an edge wall, the runner is thrown above the map and drifts off it for ever. ([10](10-optimal.md))
+- **Through the floor and back.** In the air-run's landing grip (45) the body can sink below a roof and is snapped back onto it, up to 4.6 tiles in one step. ([10](10-optimal.md))
 - The crash combo penalty (`f.g`, computed in `aF`) is **never subtracted** from the score: the score never decreases. ([13](../findings/13-the-score-never-drops/))
 - The jump-power regeneration timer `O` is never decreased, so the "scale jump by `O`" in z-type 0 is a no-op.
 - One UP press at the start of a wall run stays buffered (state 33 keeps `Q`), so **one press yields two kicks**, but only when it starts the wall run on contact: pressed earlier it arms state 30, which has no `0x40`, and the press is spent; that wall run kicks once. ([03](../findings/03-one-press-two-kicks/))
