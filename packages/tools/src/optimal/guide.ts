@@ -30,6 +30,8 @@ export class Guide {
   private readonly tour: Float64Array;
   /** Sprint: steps from target k through the rest of the chain to the finish. */
   private readonly chain: Float64Array;
+  /** Each target's upper cell (where a run arrives at it). */
+  private readonly targetCells: number[];
 
   constructor(level: Level, mode: ContestMode, speeds: GuideSpeeds = DEFAULT_SPEEDS) {
     this.w = level.width;
@@ -44,6 +46,7 @@ export class Guide {
       goals.push([f.y * this.w + f.x, (f.y - 1) * this.w + f.x]);
     }
     this.n = goals.length;
+    this.targetCells = goals.map((g) => g[1]!);
     this.fields = goals.map((g) => this.dijkstra(level, g, speeds));
     const at = (from: number, to: number): number =>
       Math.min(...goals[from]!.map((c) => this.fields[to]![c]!));
@@ -135,6 +138,18 @@ export class Guide {
       }
     }
     return dist;
+  }
+
+  /** Steps the guide expects from cell (tx, ty) through the targets in `order`. */
+  orderSteps(tx: number, ty: number, order: readonly number[]): number {
+    let cell = ty * this.w + tx;
+    let total = 0;
+    for (const t of order) {
+      total += this.fields[t]![cell]!;
+      const p = this.targetCells[t]!;
+      cell = p;
+    }
+    return total;
   }
 
   /** Steps the guide expects from a body centre at (cx, cy) in units with `mask` left. */

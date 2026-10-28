@@ -80,7 +80,8 @@ if (mode === 'sprint') {
   order.push(-1);
   splits.push(world.stepCount);
 }
-const from = seg === 0 ? 0 : splits[seg - 1]!;
+// START=<step> starts later in the segment, from the record's own state then.
+const from = process.env.START ? Number(process.env.START) : seg === 0 ? 0 : splits[seg - 1]!;
 const target = order[seg]!;
 const budget = splits[seg]! - 1; // look for strictly faster
 const tx = target === -1 ? lvl.finish!.x : lvl.checkpoints[target]!.x;

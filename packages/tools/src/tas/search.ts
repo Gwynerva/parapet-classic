@@ -72,6 +72,8 @@ export interface SearchParams {
   windowSteps: number;
   /** Look for style within a cap instead of speed (the stylish records). */
   style?: StyleObjective;
+  /** Flag hunt only: the order the flags must be taken in (states that stray are dropped). */
+  order?: readonly number[];
 }
 
 export const DEFAULT_SEARCH: Readonly<Omit<SearchParams, 'seed' | 'budgetSteps' | 'minGap'>> = {
@@ -191,6 +193,8 @@ export class Search {
   private readonly list: Cell[] = [];
   private readonly finals: FinalRun[] = [];
   private best = MAX_RUN_CLOCK;
+  /** Flag sets a forced order allows (its prefixes), or null. */
+  private readonly allowed: Set<number> | null;
   private steps = 0;
   private iterations = 0;
   private rejected = 0;
@@ -220,6 +224,14 @@ export class Search {
     this.fragility = fragility;
     this.fails = failStates(content.moves);
     if (params.style) this.best = params.style.capMs;
+    this.allowed =
+      mode === 'flags' && params.order
+        ? new Set(
+            params.order
+              .map((_, k) => params.order!.slice(0, k + 1).reduce((m, f) => m | (1 << f), 0))
+              .concat(0),
+          )
+        : null;
     this.world = newWorld(content, mode);
     this.bound = new LowerBound(this.world, mode);
     this.random = rng(params.seed);
@@ -348,6 +360,7 @@ export class Search {
       return false;
     }
     if (world.clock >= MAX_RUN_CLOCK) return false;
+    if (this.allowed && !this.allowed.has(~world.rules.remainingMask & 31)) return false;
     if (prune && world.clock + this.bound.ms(world) >= this.best) return false;
     this.record(presses, lastPress);
     return true;
