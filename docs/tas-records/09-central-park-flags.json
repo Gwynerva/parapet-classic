@@ -1,0 +1,31 @@
+{
+  "format": 1,
+  "levelId": 8,
+  "mode": "flags",
+  "simVersion": "parapet-sim@0.2.0",
+  "rulesetId": "classic",
+  "contentHash": {
+    "level": 302581296,
+    "moves": 3534806784,
+    "tables": 1193975815
+  },
+  "constraints": {
+    "minGap": 3,
+    "toleranceMs": 300
+  },
+  "search": {
+    "seed": 1,
+    "budgetSteps": 150000000,
+    "steps": 150000018,
+    "iterations": 3285593,
+    "cells": 8808
+  },
+  "timeMs": 27630,
+  "splitsMs": [3090, 9750, 19020, 23010, 27630],
+  "order": [0, 1, 2, 4, 3],
+  "steps": 921,
+  "fragile": [],
+  "worstLossMs": 30,
+  "presses": "0:U 6:D 67:L 104:U 114:U 130:U 158:U 195:U 224:L 257:D 278:L 332:L 381:L 441:L 494:L 548:L 603:L 658:D 687:U 746:L 796:L 845:L 895:U 899:R 920:R",
+  "replay": "AnUaqG2mNIQaCEd3eW5lcnZhIAEh14hggHBoQw3h-CeKmJ-LWKeGmGuGsDYc4YYX4YAFwTo"
+}

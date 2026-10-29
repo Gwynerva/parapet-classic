@@ -1,0 +1,31 @@
+{
+  "format": 1,
+  "levelId": 10,
+  "mode": "sprint",
+  "simVersion": "parapet-sim@0.2.0",
+  "rulesetId": "classic",
+  "contentHash": {
+    "level": 3160659897,
+    "moves": 3534806784,
+    "tables": 1193975815
+  },
+  "constraints": {
+    "minGap": 3,
+    "toleranceMs": 300
+  },
+  "search": {
+    "seed": 4,
+    "budgetSteps": 500000000,
+    "steps": 500000034,
+    "iterations": 9087749,
+    "cells": 38740
+  },
+  "timeMs": 66030,
+  "splitsMs": [15420, 19200, 32280, 41970, 55620],
+  "order": [0, 1, 2, 3, 4],
+  "steps": 2201,
+  "fragile": [],
+  "worstLossMs": 30,
+  "presses": "0:U 42:R 99:U 117:L 149:U 241:U 270:U 297:R 320:U 434:L 450:U 468:R 488:U 515:L 544:L 596:R 641:U 673:U 688:D 727:R 780:R 831:R 885:R 938:L 1007:D 1030:R 1066:R 1101:R 1155:U 1214:U 1224:D 1245:U 1270:U 1276:U 1304:U 1345:R 1384:D 1409:R 1479:R 1571:R 1628:R 1696:U 1701:R 1739:R 1803:U 1826:R 1864:R 1907:U 1986:R 2029:U 2065:R 2113:R 2156:U 2181:R",
+  "replay": "AnUayM7jHqIfCEd3eW5lcnZhPYkUrgh4PCaBsGeCosPA4EOCQM-DeGXCsHgNglozoxo0oz8QcCvCKiGjQOQIgTBcBAaCeiWBekJSao3pBAHRJR8CtElFIjaKQiouopBehIA"
+}
