@@ -1,0 +1,17 @@
+# The original's Moves menu: the move demos one after another, each a few keyframes of the
+# runner tweened in empty space (the remake's Moves menu redraws every one of them).
+
+boot 2
+wait 2.5
+press soft2      # the "turn sound on?" prompt
+wait 2.8
+press select     # skip the publisher's splash
+wait 2.6
+press down
+wait 0.6
+press down
+wait 0.6
+press select     # main menu: Moves
+wait 3.0
+repeat 12 2.6 right
+tail 2.5

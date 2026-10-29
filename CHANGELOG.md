@@ -4,6 +4,74 @@ Parapet Classic is a preservation project: the original game, playable in a brow
 every movement, with its workings documented in `reference/`. Improvements are welcome where they
 make the game more comfortable to play and never where they would change how it plays.
 
+## 1.2.0 (2026-10-29)
+
+**Music of our own.** The ten chiptune scores written for the videos about the game
+([the story of how it was made](https://youtu.be/OMVIEZjs5S4), [the TAS](https://youtu.be/c0hCbcx41Ds),
+[the OST](https://youtu.be/Lg_kdO6bmiw)) play live
+on the game's synthesiser (`packages/content/music`, `packages/runtime/src/audio/LiveScore.ts`),
+the way the videos' music was made: synthesised, not recorded.
+
+- A run with a boss (a contest, a boss played, a boss's replay watched) loops a random score's
+  energetic sections (build-up, peak, wind-down, the A variants then the B ones), every layer:
+  another score every run, the same one when the run is started over. Every other run keeps the
+  original's track, the warm-ups the original's menu track and the Prize its own, as before.
+- The main menus play a random score's opening and middle sections, every layer but softer,
+  kept while the menus last.
+- The tracks' effects run as Web Audio nodes (`TrackEffects.ts`): drive, filter sweeps across
+  sections, feedback and ping-pong delays, a plate reverb as a convolution, ducks and mutes; the
+  videos' tape stops, reversed slices, stutters and fast-forwards become notes. The synthesiser
+  gained the patch fields the scores were written with (filter and pitch sweeps, vibrato,
+  noise), a voice pool per channel and a route of a channel into its track's effects.
+- `/dev/live.html` renders the scores as the game plays them, measures them and saves
+  `packages/content/audio/live-loudness.json`, which a test checks like the original tracks'
+  table; [`packages/content/music/README.md`](packages/content/music/README.md) tells how to
+  write a score. The 0.x contest theme (`theme.json`) and its track are gone.
+
+**The perfect run.** Is there a run of a contest no player and no machine can beat, and can it
+be found? [`reference/notes/10-optimal.md`](reference/notes/10-optimal.md) works it out: one
+exists, enumerating every state is out of reach (the distinct situations grow 1.2 times a
+step), searching between flags to the end buys frames and not seconds, and the records are
+close to the limit of their routes. On the way, three glitches of the original nobody had
+found (the air run, the sky lift, through the floor and back), checked on the original classes
+and on another build of the jar, and now in the curiosities.
+
+- The tools: [`packages/tools/src/optimal`](packages/tools/src/optimal/README.md) (exact state
+  rows, layer search with every state merged, segment search, beam search, a glitch hunt with
+  human recipes) and `packages/tools/native`, a bit-exact C port of the step with a differential
+  test against the TypeScript engine. The TAS search can be held to a flag order
+  (`packages/tools/src/tas/orderSearch.ts`), and the simulation tells the search tools which
+  input conditions a step read (`ConditionContext.inputReads`; the physics is unchanged, and so
+  is the simulation's version).
+- [`docs/tas-records`](docs/tas-records/README.md): the 24 machine records of the game (every
+  level, Flag hunt and Sprint, 13:31.74 in all) with their inputs and a link to watch each one
+  (and [the TAS video](https://youtu.be/c0hCbcx41Ds), all of them in one run);
+  `npm test` re-runs them.
+- The emulator plays another build of the jar (`jar`, `frame-method`) and opens every level
+  (`unlock`); takes of the glitches, of the Moves menu, and of a record on the records' files.
+
+**Replays.**
+
+- Fixed: seeking back in a replay started the run over and picked the outfits of the runner
+  and the boss again, and a boss's cloth (Max's bag, chains, capes) and effects flew far off its
+  runner. A replay is the same run however it is started over, so it keeps its outfits, and
+  the cloth is hung afresh where its runner is.
+- The presses popping up over the timeline rise from where they happened on it instead of
+  following the play head.
+- A saved replay file carries a key of the run in its name
+  (`parapet-l3-sprint-blaise-1k2x9q.parapet-replay`), so saving another run of the same level
+  never overwrites an earlier file or gets a browser's "(1)".
+- The version reads `Parapet 1.2.0 · sim 0.2.0`: the simulation is the same as in 1.0.0. The
+  hint for opening a replay no longer names a key of one system.
+
+**Smaller.** A runner attached in the middle of its run (a Moves demo, a replay restored
+mid-run) shows its move instead of sliding along standing. The dev pages were tidied: the pages
+left are the ones that make or check something the repository keeps, and the tools made for
+the videos (the infographics, the offline music renderer) stay out. On the dev server
+`?backdrop=1` shows the menus' backdrop alone, bright, for pictures; the reel takes `n=0` (no
+attempts), `pace=live`, a `tag` for the file name and portrait sizes, and `PARAPET_FOOTAGE`
+sends its videos elsewhere; the showcase zooms to 15× for 4K.
+
 ## 1.1.0 (2026-10-22)
 
 **For speedruns.** What runners and the moderators of the speedrun.com board need, told in

@@ -1,6 +1,6 @@
 {
   "name": "@parapet/lab",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "description": "The original taken apart: experiments on the real simulation, drawn into RGBA frames and SVG charts, for the findings pages and the site's Lab",

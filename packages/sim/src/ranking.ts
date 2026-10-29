@@ -8,6 +8,36 @@ import type { RunMode } from './run.ts';
 /** Number of levels in the original game (`levels/0.json` .. `levels/11.json`). */
 export const LEVEL_COUNT = 12;
 
+/**
+ * The modes the bosses are raced in (and the TAS searched): the two timed races. A level's
+ * boss has two characters, one per mode: with its effect (`flags`, both records beaten) and
+ * plain (`sprint`, one of them). The numbers follow the original's ten characters and keep the
+ * contest they once belonged to, because recorded runs name them.
+ */
+export const CONTEST_MODES = ['flags', 'sprint'] as const satisfies readonly RunMode[];
+export type ContestMode = (typeof CONTEST_MODES)[number];
+
+export function isContestMode(mode: string): mode is ContestMode {
+  return (CONTEST_MODES as readonly string[]).includes(mode);
+}
+
+/** First character number of the bosses (the original's are 0..9). */
+export const FIRST_BOSS_CHARACTER = 10;
+
+/** The character of a level's boss for a contest mode. */
+export function contestCharacter(levelId: number, mode: ContestMode): number {
+  return FIRST_BOSS_CHARACTER + 2 * levelId + (mode === 'sprint' ? 1 : 0);
+}
+
+/** The contest behind a boss character, or null for the original's characters. */
+export function contestOfCharacter(
+  character: number,
+): { levelId: number; mode: ContestMode } | null {
+  const i = character - FIRST_BOSS_CHARACTER;
+  if (!Number.isInteger(i) || i < 0 || i >= 2 * LEVEL_COUNT) return null;
+  return { levelId: i >> 1, mode: (i & 1) === 0 ? 'flags' : 'sprint' };
+}
+
 /** Levels whose challenge is judged on the score (the others on time with required moves). */
 export const SCORE_CHALLENGE_LEVELS: readonly number[] = [8, 10, 11];
 

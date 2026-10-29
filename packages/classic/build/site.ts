@@ -5,6 +5,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { Plugin } from 'vite';
+import { RACE_FOLDER } from '../../runtime/src/app/replayFile.ts';
 
 /** Where the game is published (links in the page: canonical, previews), with its `/`. */
 export const DEFAULT_SITE_URL = 'https://gwynerva.github.io/parapet-classic/';
@@ -24,15 +25,15 @@ export function sitePlugin(site: string, counter: string): Plugin {
     configureServer(server) {
       // The challenge page is the game itself (the build writes it from index.html).
       server.middlewares.use((req, _res, next) => {
-        if (req.url?.startsWith('/r/')) req.url = req.url.slice('/r'.length);
+        if (req.url?.startsWith(`/${RACE_FOLDER}`)) req.url = req.url.slice(RACE_FOLDER.length);
         next();
       });
     },
     async writeBundle() {
       const page = join(outDir, 'index.html');
-      await mkdir(join(outDir, 'r'), { recursive: true });
+      await mkdir(join(outDir, RACE_FOLDER), { recursive: true });
       await writeFile(
-        join(outDir, 'r', 'index.html'),
+        join(outDir, RACE_FOLDER, 'index.html'),
         racePage(await readFile(page, 'utf8'), site),
       );
     },

@@ -192,7 +192,7 @@ export class MusicPlayer {
   /** Starts `song` at `positionMs` with a fade in. */
   private begin(song: MidiSong, loop: boolean, positionMs: number): void {
     const ctx = this.ctx!;
-    // The measured level the loader set (packages/content/audio/loudness.json).
+    // The measured level the loader set (packages/content/audio: loudness.json, live-loudness.json).
     const level = song.gain ?? 1;
     const songGain = ctx.createGain();
     songGain.connect(this.master!);
@@ -242,13 +242,13 @@ export class MusicPlayer {
     gain.linearRampToValueAtTime(0, now + seconds);
     const end = now + seconds + 0.02;
     for (const bus of playback.buses) bus.synth.silence(end);
-    setTimeout(
-      () => {
-        playback.songGain.disconnect();
-        for (const bus of playback.buses) bus.fx?.dispose();
-      },
-      (seconds + 0.2) * 1000,
-    );
+    setTimeout(() => this.free(playback), (seconds + 0.2) * 1000);
+  }
+
+  /** Lets go of a playback's nodes once nothing of it sounds any more. */
+  private free(playback: Playback): void {
+    playback.songGain.disconnect();
+    for (const bus of playback.buses) bus.fx?.dispose();
   }
 
   pause(): void {
@@ -301,9 +301,11 @@ export class MusicPlayer {
       else if (d.control) bus.synth.controlAt(d.control, d.at);
     }
     if (!alive) {
+      // The song is over (it did not loop): its last notes ring out, then its nodes go.
       if (this.timer !== null) clearInterval(this.timer);
       this.timer = null;
       this.playback = null;
+      setTimeout(() => this.free(playback), (LOOKAHEAD_S + LOOP_TAIL_S) * 1000);
     }
   }
 }

@@ -1,6 +1,6 @@
 # The original from the very start: the sound prompt, the menus, the sprint on Mill Brook with
 # its briefing and flyover, then the fastest route the remake's TAS search found for that
-# sprint (packages/tools/tas-out/0-sprint.json, kept locally) played on the jar, to the results
+# sprint (docs/tas-records/01-mill-brook-sprint.json) played on the jar, to the results
 # screen. The menus go by the joystick; the race is played on the digits, as phones mostly
 # were: 5 starts it, 2 8 4 6 are up, down, left and right.
 # Keys: soft1 soft2 select up down left right 0-9 star pound (aliases: ok, fire, lsoft, rsoft).
@@ -26,5 +26,5 @@ wait 2.5
 press select     # the flyover over the checkpoints
 wait 3.0
 press 5          # go
-route packages/tools/tas-out/0-sprint.json
+route docs/tas-records/01-mill-brook-sprint.json
 tail 4

@@ -26,7 +26,7 @@ import {
   bossName,
   bossOfLevel,
   bossTint,
-  CONTEST_KINDS,
+  CONTEST_MODES,
   contestRecord,
 } from '../bosses.ts';
 import { isCharacterOpen, skinName } from '../characters.ts';
@@ -85,8 +85,8 @@ export function takeLevelNews(levelId: number): LevelCompletion | null {
 }
 
 /** The contest a level's boss offers: the first not won yet (in the mission menu's order). */
-export function offeredContest(levelId: number, progress: ContestProgress): ContestKind | null {
-  const kinds = CONTEST_KINDS.filter((kind) => contestRecord(levelId, kind) !== null);
+function offeredContest(levelId: number, progress: ContestProgress): ContestKind | null {
+  const kinds = CONTEST_MODES.filter((kind) => contestRecord(levelId, kind) !== null);
   return kinds.find((kind) => !isContestBeaten(progress, levelId, kind)) ?? kinds[0] ?? null;
 }
 

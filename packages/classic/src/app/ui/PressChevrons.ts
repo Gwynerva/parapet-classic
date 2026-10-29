@@ -2,7 +2,8 @@
  * The pressed keys as chevrons: two strokes pointing the key's way, in the key's colour, drawn
  * at the screen's own resolution so they stay thin and sharp however big a logical pixel is.
  * The replay's timeline marks every press with one; a press as it happens pops one out that
- * drifts away and fades (over the replay's play head, and beside the full-game timer in a run).
+ * drifts away and fades (up from its place on the replay's timeline, and beside the full-game
+ * timer in a run).
  */
 import { Input } from '@parapet/sim';
 import { screenPixels } from '@parapet/runtime/render/View.ts';
@@ -59,14 +60,18 @@ export function chevron(
 
 /** Chevrons popping out at each press, drifting away and fading. */
 export class PressPopups {
-  private readonly popups: { key: number; born: number; order: number }[] = [];
+  private readonly popups: { key: number; born: number; order: number; at: number | null }[] = [];
 
-  /** A step ran with these bits: one chevron per key pressed. */
-  pressed(bits: number): void {
+  /**
+   * A step ran with these bits: one chevron per key pressed. With `at` (the step), the popup
+   * is born over that step's place on a timeline (`draw` maps it), so it rises from where the
+   * press happened and not from the play head as it moves on.
+   */
+  pressed(bits: number, at: number | null = null): void {
     const now = performance.now();
     let order = 0;
     PRESS_KEYS.forEach((key, i) => {
-      if (bits & key.bit) this.popups.push({ key: i, born: now, order: order++ });
+      if (bits & key.bit) this.popups.push({ key: i, born: now, order: order++, at });
     });
   }
 
@@ -75,17 +80,25 @@ export class PressPopups {
   }
 
   /**
-   * Born at (x, y), they drift by (dx, dy) over their life; keys pressed together stand apart
-   * across the drift.
+   * Born at (x, y), or at (`xOf(step)`, y) for a popup with a step, they drift by (dx, dy)
+   * over their life; keys pressed together stand apart across the drift.
    */
-  draw(c: CanvasRenderingContext2D, x: number, y: number, dx: number, dy: number): void {
+  draw(
+    c: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    dx: number,
+    dy: number,
+    xOf?: (step: number) => number,
+  ): void {
     const now = performance.now();
     while (this.popups.length > 0 && now - this.popups[0]!.born > POPUP_MS) this.popups.shift();
     const apart = 2 * POPUP_W + 3;
     for (const popup of this.popups) {
       const k = (now - popup.born) / POPUP_MS;
       const key = PRESS_KEYS[popup.key]!;
-      const px = x + dx * k + (dy !== 0 ? popup.order * apart : 0);
+      const born = popup.at !== null && xOf ? xOf(popup.at) : x;
+      const px = born + dx * k + (dy !== 0 ? popup.order * apart : 0);
       const py = y + dy * k + (dy === 0 ? popup.order * apart : 0);
       c.save();
       c.globalAlpha = 1 - k * k;

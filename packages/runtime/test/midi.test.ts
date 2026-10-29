@@ -5,7 +5,7 @@ import { parseMidi, songEvents, stripEndMarker, type MidiSong } from '../src/aud
 import { drumFor, PATCH_COUNT, patchFor, songPatch } from '../src/audio/Instruments.ts';
 import { SongCursor, type DueEvent } from '../src/audio/MusicPlayer.ts';
 import {
-  LIVE_CONTEST,
+  LIVE_BOSS,
   LIVE_MENU,
   LIVE_SCORES,
   MENU_TRACK,
@@ -261,10 +261,10 @@ describe('MusicDirector', () => {
     expect(director.current).toBe(5);
   });
 
-  it('keeps one live score through the menus and picks another for every contest', async () => {
+  it('keeps one score through the menus and picks another for every run with a boss', async () => {
     const player = fakePlayer();
     const requested: number[] = [];
-    const rolls = [0.45, 0.45, 0.45, 0.99];
+    const rolls = [0.45, 0.45, 0.05, 0.45, 0.05, 0.99];
     const director = new MusicDirector({
       player,
       loadTrack: (id) => {
@@ -277,16 +277,52 @@ describe('MusicDirector', () => {
     await Promise.resolve();
     director.menu();
     expect(requested).toEqual([LIVE_MENU + 4]);
-    director.contest();
-    director.contest();
-    director.contest();
-    // Never the same score twice in a row: the second roll skips over the first's.
-    expect(requested.slice(1)).toEqual([LIVE_CONTEST + 4, LIVE_CONTEST + 5, LIVE_CONTEST + 9]);
+    director.boss();
+    await Promise.resolve();
+    // A run started over keeps its score; a new run (the menus between) gets another.
+    director.boss();
+    expect(requested.slice(1)).toEqual([LIVE_BOSS + 4]);
     director.menu();
-    expect(director.current).toBe(LIVE_MENU + 0);
+    director.boss();
+    director.menu();
+    director.boss();
+    // Never the same score twice in a row: a roll skips over the last score's number.
+    expect(requested.filter((id) => id >= LIVE_BOSS)).toEqual([
+      LIVE_BOSS + 4,
+      LIVE_BOSS + 5,
+      LIVE_BOSS + 9,
+    ]);
+    expect(requested.filter((id) => id >= LIVE_MENU && id < LIVE_BOSS)).toEqual([
+      LIVE_MENU + 4,
+      LIVE_MENU + 0,
+      LIVE_MENU + 1,
+    ]);
     expect(trackTrim(LIVE_MENU + 3)).toBe(trackTrim(MENU_TRACK));
-    expect(trackTrim(LIVE_CONTEST + 3)).toBe(1);
-    expect(LIVE_SCORES).toHaveLength(10);
+    expect(trackTrim(LIVE_BOSS + 3)).toBe(1);
+  });
+
+  it('can pick the last score when the roll is 1, and never one past the end', () => {
+    const player = fakePlayer();
+    const requested: number[] = [];
+    // Every choice rolls 1, the menus' too (they take a roll each in between).
+    const rolls = [1, 1, 1, 1, 1, 1];
+    const director = new MusicDirector({
+      player,
+      loadTrack: (id) => {
+        requested.push(id);
+        return Promise.resolve(parseMidi(tinyMidi()));
+      },
+      random: () => rolls.shift() ?? 0,
+    });
+    const n = LIVE_SCORES.length;
+    const chosen: (number | null)[] = [];
+    for (let i = 0; i < 3; i++) {
+      director.boss();
+      chosen.push(director.current);
+      director.menu();
+    }
+    expect(chosen).toEqual([LIVE_BOSS + n - 1, LIVE_BOSS + n - 2, LIVE_BOSS + n - 1]);
+    expect(requested.every((id) => id < LIVE_BOSS + n)).toBe(true);
   });
 
   it('stops at volume zero and restarts when the volume comes back', async () => {

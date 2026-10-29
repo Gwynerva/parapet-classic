@@ -1,0 +1,30 @@
+# 1.0.4 (the K790 build from speedrun.com): the sky lift on Bird Bay: a roll under the edge wall into the last column, where a pit throws the runner above the map
+set jar packages/content/playman/original/PER_K790_1.0.4.jar
+set frame-method s
+set unlock true
+set layout side
+set scale 1
+set zoom 3
+set pad 0
+set frame 1920x1080
+boot 2
+wait 2.5
+press soft2      # the "turn sound on?" prompt
+wait 2.8
+press select     # skip the publisher's splash
+wait 2.6
+press select     # main menu: single game
+wait 2.2
+press select     # character: Playman
+wait 2.2
+repeat 9 0.6 right    # levels 2 … 10
+wait 1.0
+press select     # the level
+wait 2.0
+press right           # missions: flag hunt
+wait 0.8
+press select     # the briefing
+wait 2.5
+press select     # go: a flag hunt has no flyover, this press starts the race
+route packages/tools/tas-out/routes/sky-lift-9-flags-simple.json 1   # the jar reads a route one frame later than the remake
+tail 8

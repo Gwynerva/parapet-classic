@@ -1,7 +1,7 @@
 /**
- * Music written as text: a small tracker-like score (`content/bosses/theme.json`) turned into
- * the same `MidiSong` the original's MIDI files become, so it plays through the same
- * synthesiser and loudness normalisation.
+ * Music written as text: a small tracker-like score (our scores in `content/music`, see
+ * `LiveScore.ts`) turned into the same `MidiSong` the original's MIDI files become, so it plays
+ * through the same synthesiser and loudness normalisation.
  *
  * - The grid is `stepsPerBar` steps per bar (16: sixteenth notes), at `bpm` beats per minute
  *   of four steps.

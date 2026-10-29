@@ -1,12 +1,6 @@
-/** Scores written as text (`audio/Score.ts`) and the contests' theme. */
-import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+/** Scores written as text (`audio/Score.ts`). */
 import { describe, expect, it } from 'vitest';
 import { noteNumber, scoreProblems, scoreToSong, type Score } from '../src/audio/Score.ts';
-
-const here = dirname(fileURLToPath(import.meta.url));
-const THEME = join(here, '..', '..', 'content', 'bosses', 'theme.json');
 
 function score(patch: Partial<Score>): Score {
   return {
@@ -78,19 +72,5 @@ describe('scores', () => {
       }),
     );
     expect(song.notes.filter((n) => n.channel === 9)).toEqual([]);
-  });
-
-  it('the contest theme is sound and loops after its last note', () => {
-    const theme = JSON.parse(readFileSync(THEME, 'utf8')) as Score;
-    expect(scoreProblems(theme)).toEqual([]);
-    const song = scoreToSong(theme);
-    expect(song.durationMs / 1000).toBeGreaterThan(40);
-    expect(song.durationMs / 1000).toBeLessThan(60);
-    const lastEnd = Math.max(...song.notes.map((n) => n.time + n.duration));
-    expect(lastEnd).toBeLessThanOrEqual(song.durationMs + 1e-6);
-    // Never more voices at once than the synthesiser has (32).
-    const starts = new Map<number, number>();
-    for (const n of song.notes) starts.set(n.time, (starts.get(n.time) ?? 0) + 1);
-    expect(Math.max(...starts.values())).toBeLessThanOrEqual(32);
   });
 });

@@ -2,7 +2,7 @@
  * Watching a replay, like a video: a bar across the bottom of the screen with the whole run as
  * a timeline, every press marked on it where it happens (the four keys in their colours,
  * overlapping where presses crowd), the place reached so far, and the time. A press pops up
- * over the play head as it plays and fades away. A tap or a drag on the timeline goes to that
+ * from its place on the timeline as it plays, rises and fades away. A tap or a drag on the timeline goes to that
  * moment (the run is deterministic: going back re-runs it from the start); below it, the way
  * to the pause menu (a phone has no other while the touch buttons are away), the speed (¼× to
  * 4×), a pause and frame-by-frame steps.
@@ -100,9 +100,15 @@ export class WatchControls {
     return n;
   }
 
-  /** A step played with these bits: its keys pop up over the play head. */
-  pressed(bits: number): void {
-    this.popups.pressed(bits);
+  /** Step `step` played with these bits: its keys pop up from its place on the timeline. */
+  pressed(bits: number, step: number): void {
+    this.popups.pressed(bits, step);
+  }
+
+  /** Where a step stands on the timeline. */
+  private xOf(step: number): number {
+    const t = this.track;
+    return t.x + Math.round((Math.min(step, this.total) / this.total) * t.w);
   }
 
   /** The replay jumped in time: the popups and the steps asked for belong to before. */
@@ -241,8 +247,7 @@ export class WatchControls {
     c.fillRect(0, this.top, viewport.width, viewport.height - this.top);
     // The timeline: the played part, the presses, the play head (or where a drag points).
     const t = this.track;
-    const xOf = (s: number): number =>
-      t.x + Math.round((Math.min(s, this.total) / this.total) * t.w);
+    const xOf = (s: number): number => this.xOf(s);
     framedBox(c, t, Theme.panel, Theme.panelBorder);
     const head = xOf(this.dragStep ?? step);
     // The part played, faint: the presses on it stay in sight.
@@ -260,8 +265,8 @@ export class WatchControls {
     }
     c.fillStyle = Theme.text;
     c.fillRect(head - 1, t.y - 3, 2, t.h + 6);
-    // The keys just pressed rise from the play head and fade.
-    this.popups.draw(c, head, t.y - 6, 0, -POPUP_RISE);
+    // The keys just pressed rise from their place on the timeline and fade.
+    this.popups.draw(c, head, t.y - 6, 0, -POPUP_RISE, xOf);
     // The controls and the time.
     const labels: Record<Control, string> = {
       menu: '×',

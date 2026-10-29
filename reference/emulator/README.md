@@ -4,7 +4,7 @@ Records the **original** Playman Extreme Running jar running in a J2ME emulator 
 recording into a painted Nokia 6300, the kind of phone the game was made for (Series 40, a
 240 × 320 screen). A short script of key presses drives the game; every key lights up on the
 phone exactly while it is held, so the footage shows what was pressed and what it did. A script
-can also play a route of the remake's TAS (`packages/tools/tas-out/`) on the jar, step for step.
+can also play a route of the remake's TAS (`docs/tas-records/`) on the jar, step for step.
 
 It is for videos about the remake (the "this is how you had to play it" shots), not part of the
 game or its tests.
@@ -31,8 +31,8 @@ with `mill-brook-sprint.json` beside it: the video's size and length, where the 
 screens are in the frame, the parts of the take it shows and when each key is held, in seconds
 of the video (handy for cutting or for a voice-over). The example goes from the sound prompt
 through the menus to the sprint on Mill Brook and plays the fastest route the remake's TAS
-search found for it to the results screen: "Выполнено!", 0:28.02 (the route's 27.99 s plus one
-frame, see Routes).
+search found for it to the results screen: "Done!" (this build is Russian), 0:28.02 (the
+route's 27.99 s plus one frame, see Routes).
 
 A take is kept per script in `build/sessions/<script>/`. `--reuse` composes it again with
 other settings (another layout, size, cut, colour) without recording; it refuses when the
@@ -55,41 +55,44 @@ Every option can be given in three places, each overriding the one before:
 3. the command line: `--<option> <value>`, `--<option>=<value>`; booleans also as `--keys`
    and `--no-keys`.
 
-| Option          | Default     | Meaning                                                                                                    |
-| --------------- | ----------- | ---------------------------------------------------------------------------------------------------------- |
-| **The take**    |             | _changing these needs a new recording_                                                                     |
-| `fps`           | `60`        | frames a second of the recording and of the video                                                          |
-| `game-frame`    | `35`        | how long the game's frames last, ms (35 ≈ 28.6 a second, one physics step a frame; routes need 35)         |
-| `boot`          | `2`         | seconds the emulator gets to start before recording (also the script command `boot <s>`)                   |
-| `tail`          | `1.5`       | seconds recorded after the last command (also `tail <s>`)                                                  |
-| **The picture** |             |                                                                                                            |
-| `layout`        | `phone`     | `phone`: the phone alone; `side`: the phone with its screen enlarged beside it; `screen`: the screen alone |
-| `scale`         | `3`         | pixels per pixel of the phone and of the game on its screen (1: a 335 × 825 phone)                         |
-| `zoom`          | `3`         | pixels per game pixel of the enlarged screen (layouts `side` and `screen`)                                 |
-| `screen-side`   | `right`     | where the enlarged screen stands in layout `side`: `right` or `left`                                       |
-| `gap`           | `120`       | space between the phone and the enlarged screen                                                            |
-| `border`        | `6`         | width of the frame around the enlarged screen (0: none)                                                    |
-| `border-color`  | `#2a313b`   | colour of that frame                                                                                       |
-| `pad`           | `48`        | space around the picture                                                                                   |
-| `bg`            | `#0b0e13`   | the background                                                                                             |
-| `frame`         | `none`      | put the picture in the middle of a frame of that size (`1920x1080`), made smaller only if it does not fit  |
-| `glow`          | `#8fd3ff`   | the colour a pressed key lights up in                                                                      |
-| `glow-tail`     | `0.08`      | seconds a key stays lit after its release, so that a tap shows                                             |
-| `keys`          | `true`      | light up the pressed keys                                                                                  |
-| `glass`         | `true`      | the reflection on the phone's glass                                                                        |
-| **The edit**    |             |                                                                                                            |
-| `cut`           | `none`      | the parts of the take to keep, in seconds of the take: `1.2-9.6,14.6-31,52.8-` (the last may stay open)    |
-| `xfade`         | `0.4`       | crossfade between the parts, seconds (0: hard cuts)                                                        |
-| `fade-in`       | `0`         | fade in from the background at the start, seconds                                                          |
-| `fade-out`      | `0`         | fade out to the background at the end, seconds                                                             |
-| `speed`         | `1`         | playback speed; `1.0254` (35 / 34.133) runs the game at the remake's pace, for side-by-side shots          |
-| **The file**    |             |                                                                                                            |
-| `out`           | `out/…mp4`  | the video; the `.json` goes beside it                                                                      |
-| `crf`           | `14`        | x264 quality: lower is better and bigger, 0 is lossless                                                    |
-| `preset`        | `slow`      | x264 speed against size, `ultrafast` … `veryslow`                                                          |
-| `tune`          | `animation` | x264 tuning (`none`, `animation`, `film`, `grain`, `stillimage`); `animation` suits pixel art              |
-| `pix-fmt`       | `yuv420p`   | `yuv420p` plays everywhere; `yuv444p` keeps colour edges sharp, for masters to edit                        |
-| `reuse`         | `false`     | compose the script's last take again instead of recording anew                                             |
+| Option          | Default      | Meaning                                                                                                      |
+| --------------- | ------------ | ------------------------------------------------------------------------------------------------------------ |
+| **The take**    |              | _changing these needs a new recording_                                                                       |
+| `fps`           | `60`         | frames a second of the recording and of the video                                                            |
+| `game-frame`    | `35`         | how long the game's frames last, ms (35 ≈ 28.6 a second, one physics step a frame; routes need 35)           |
+| `boot`          | `2`          | seconds the emulator gets to start before recording (also the script command `boot <s>`)                     |
+| `tail`          | `1.5`        | seconds recorded after the last command (also `tail <s>`)                                                    |
+| `unlock`        | `false`      | every level open in the level menu, for takes on levels a fresh start keeps locked (the races are untouched) |
+| `jar`           | the original | another build of the game to run (the `k790-*` scripts play the 1.0.4 build, not in the repository)          |
+| `frame-method`  | `t`          | the game's once-a-frame method the pace hooks: `t` in the 1.0.8 build kept here, `s` in 1.0.4                |
+| **The picture** |              |                                                                                                              |
+| `layout`        | `phone`      | `phone`: the phone alone; `side`: the phone with its screen enlarged beside it; `screen`: the screen alone   |
+| `scale`         | `3`          | pixels per pixel of the phone and of the game on its screen (1: a 335 × 825 phone)                           |
+| `zoom`          | `3`          | pixels per game pixel of the enlarged screen (layouts `side` and `screen`)                                   |
+| `screen-side`   | `right`      | where the enlarged screen stands in layout `side`: `right` or `left`                                         |
+| `gap`           | `120`        | space between the phone and the enlarged screen                                                              |
+| `border`        | `6`          | width of the frame around the enlarged screen (0: none)                                                      |
+| `border-color`  | `#2a313b`    | colour of that frame                                                                                         |
+| `pad`           | `48`         | space around the picture                                                                                     |
+| `bg`            | `#0b0e13`    | the background                                                                                               |
+| `frame`         | `none`       | put the picture in the middle of a frame of that size (`1920x1080`), made smaller only if it does not fit    |
+| `glow`          | `#8fd3ff`    | the colour a pressed key lights up in                                                                        |
+| `glow-tail`     | `0.08`       | seconds a key stays lit after its release, so that a tap shows                                               |
+| `keys`          | `true`       | light up the pressed keys                                                                                    |
+| `glass`         | `true`       | the reflection on the phone's glass                                                                          |
+| **The edit**    |              |                                                                                                              |
+| `cut`           | `none`       | the parts of the take to keep, in seconds of the take: `1.2-9.6,14.6-31,52.8-` (the last may stay open)      |
+| `xfade`         | `0.4`        | crossfade between the parts, seconds (0: hard cuts)                                                          |
+| `fade-in`       | `0`          | fade in from the background at the start, seconds                                                            |
+| `fade-out`      | `0`          | fade out to the background at the end, seconds                                                               |
+| `speed`         | `1`          | playback speed; `1.0254` (35 / 34.133) runs the game at the remake's pace, for side-by-side shots            |
+| **The file**    |              |                                                                                                              |
+| `out`           | `out/…mp4`   | the video; the `.json` goes beside it                                                                        |
+| `crf`           | `14`         | x264 quality: lower is better and bigger, 0 is lossless                                                      |
+| `preset`        | `slow`       | x264 speed against size, `ultrafast` … `veryslow`                                                            |
+| `tune`          | `animation`  | x264 tuning (`none`, `animation`, `film`, `grain`, `stillimage`); `animation` suits pixel art                |
+| `pix-fmt`       | `yuv420p`    | `yuv420p` plays everywhere; `yuv444p` keeps colour edges sharp, for masters to edit                          |
+| `reuse`         | `false`      | compose the script's last take again instead of recording anew                                               |
 
 Screens are scaled by whole pixels without smoothing, so the original's pixels stay sharp; the
 phone is painted at its `scale`, not stretched. With `frame`, pick a `scale` (and `zoom`) at
@@ -140,7 +143,7 @@ Russian. Leave the game a moment for each screen to come up. The game reacts to 
 digits and the joystick alike: 2 8 4 6 are up, down, left and right, and 5, the joystick's
 centre or the left soft key confirm (notes/08, key groups).
 
-**Routes.** `route packages/tools/tas-out/0-sprint.json` plays that route's `presses`
+**Routes.** `route docs/tas-records/01-mill-brook-sprint.json` plays that route's `presses`
 (`step:key`, `U` `D` `L` `R` for up, down, left, right) on the jar, on the digits 2 8 4 6, the
 way phones were mostly played (`arrows` plays them on the joystick). The press before the
 `route` line is the one that starts the race (`5` on the flyover); the route's press for step
@@ -149,9 +152,25 @@ race's step 0 (found by trying: started one frame earlier, the Mill Brook route 
 wall halfway). `shift` moves all the presses by that many more steps, for experiments. Routes
 need `game-frame 35`: one physics step a frame.
 
-The routes in `packages/tools/tas-out/` stay on the author's computer (the folder is ignored by
-git, like the input of the bosses' records), so elsewhere the example stops at the `route` line:
-give it a route file of your own, or write the race's presses by hand.
+The 24 records are in `docs/tas-records/`, and the search's own output in
+`packages/tools/tas-out/` (git-ignored) has the same shape. The stylish runs the bosses race
+(`tas-out/style-15/`) stay with the machine that searched them, so elsewhere the two takes that
+play them stop at the `route` line.
+
+## The scripts
+
+| Script                                                         | Take                                                                                         |
+| -------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `mill-brook-sprint`                                            | from the sound prompt through the menus to Mill Brook's sprint, played to the results screen |
+| `moves-menu`                                                   | the original's Moves menu, every demo in turn                                                |
+| `bird-bay-sprint`                                              | Bird Bay's sprint on the boss's stylish run (needs `tas-out/style-15/`; `unlock`)            |
+| `level5-sprint-b2`                                             | Juniper Point's sprint on B-2's stylish run: the fall beside the ladder (notes/06)           |
+| `k790-mill-brook-sprint`                                       | the Mill Brook route on the 1.0.4 build: does it finish on the same frame?                   |
+| `k790-air-run`, `k790-sky-lift`, `k790-zip-up`, `k790-flicker` | the glitches of `notes/10-optimal.md` on the 1.0.4 build (routes in `tas-out/routes/`)       |
+
+The `k790-*` takes need `PER_K790_1.0.4.jar` in `packages/content/playman/original/` (git
+ignores every jar there but the 1.0.8 one); their glitch routes are the recipes of
+`packages/tools/src/optimal/recipe.ts` turned into routes by `toRoute.ts`.
 
 ## How it works
 

@@ -97,5 +97,5 @@ way).
 | `azure.py`        | `fx.json` (`az_fx.py`); looks `scholar`, `broker`, `leather`, `illium` (`az_looks.py`, `az_heads.py`, `az_parts.py`); the whole `boss.json`                                                                                                                                                         |
 | `stages.py`       | `stage.json` of every boss, or of the bosses named                                                                                                                                                                                                                                                  |
 
-Petra's and Grove's `boss.json`, `bosses.json`, `contests.json` and `theme.json` are written by
+Petra's and Grove's `boss.json`, `bosses.json` and `contests.json` are written by
 nothing here.

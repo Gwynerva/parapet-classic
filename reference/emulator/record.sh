@@ -23,7 +23,7 @@ javac -nowarn --release 8 -cp "$CP" -d /tmp/pace /emu/Pace.java 2> $S/pace.log
 printf 'Premain-Class: Pace\n' > /tmp/pace/manifest.txt
 (cd /tmp/pace && jar cfm /tmp/pace.jar manifest.txt Pace*.class)
 # `S` is the original's MIDlet class: started directly, without the emulator's launcher.
-java -javaagent:/tmp/pace.jar="${GAME_FRAME:-35}" -cp "$CP" org.microemu.app.Main --device org/microemu/device/large/device.xml S > $S/emulator.log 2>&1 &
+java -javaagent:/tmp/pace.jar="${GAME_FRAME:-35},frame=${FRAME_METHOD:-t}$([ "${UNLOCK:-0}" = 1 ] && echo ,unlock)" -cp "$CP" org.microemu.app.Main --device org/microemu/device/large/device.xml S > $S/emulator.log 2>&1 &
 for _ in $(seq 200); do xdotool search --name MicroEmulator >/dev/null 2>&1 && break; sleep 0.05; done
 sleep "${BOOT:-2}"
 xdotool mousemove 319 699

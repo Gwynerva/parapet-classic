@@ -2,13 +2,15 @@
 
 `/dev/reel.html` on the dev server plays a boss's record the way a tool-assisted search finds
 it: the boss runs its record through the real level while hundreds of pale attempts run with
-it, branch off and go wrong. It is made for footage (a video about the bosses' records) and
-records itself in 4K.
+it, branch off and go wrong. It is made for footage of the records (the videos about the game)
+and records itself in 4K.
 
 ![A frame of the reel: a boss on a rooftop at night among pale attempts that fell, stumbled or ran off](tas-poster.png)
 
-It reads the records' inputs from `packages/tools/tas-out/`, which stay on the machine that
-searched them (git ignores the folder), so it works on the dev server only and never ships.
+It reads the records' inputs from `packages/tools/tas-out/`, which git ignores, so it works on
+the dev server only and never ships. The optimal runs are public in `docs/tas-records` (copy
+one to `tas-out/<level>-<mode>.json`, levels from 0, to play it); the stylish runs the bosses
+race stay with the machine that searched them.
 
 ## What it shows
 
@@ -62,14 +64,19 @@ The canvas is 3840 × 2160 and fits the window, letterboxed. Some useful address
 | `mode`    | `sprint`    | `sprint` or `flags`                                                       |
 | `run`     | `optimal`   | which stored run: the optimal one, or a stylish one (`style-05`, …)       |
 | `size`    | `3840x2160` | the canvas in screen pixels, and of the videos                            |
-| `scale`   | height/360  | screen pixels per game pixel (6 in 4K: the view is 640 × 360 game pixels) |
-| `n`       | `80`        | attempts in a flag's wave (half as many between flags)                    |
+| `scale`   | see below   | screen pixels per game pixel: 6 in 4K (the view is 640 × 360 game pixels) |
+| `n`       | `80`        | attempts in a flag's wave (half as many between flags); `0`: none         |
 | `hud`     | off         | `1` shows the attempt count and the record's clock                        |
 | `render`  | off         | `1` renders every level into a video, frame by frame (below)              |
 | `record`  | off         | `1` records every level in real time and saves it when it ends            |
 | `mbps`    | 100 / 60    | bit rate of a render / of a real-time recording, in Mbit/s                |
 | `outfit`  | `0`         | the boss's outfit                                                         |
 | `plain`   | off         | `1` shows the boss without its effect                                     |
+| `pace`    | video       | `live` steps at the game's own pace (34.13 ms a step) instead of 30 ms    |
+| `tag`     | none        | added to the video's name, so variants of a level keep apart              |
+
+The default `scale` is the largest whole number that fits 360 game pixels into the height and
+270 into the width: 6 in 4K, 8 for a portrait 2160 × 3840 canvas (the game's own portrait view).
 
 ### Keys
 
@@ -94,7 +101,10 @@ The encoder is the GPU's H.264 or HEVC where the browser offers it in that size,
 browser's own H.264 (the desktop app's browser offers its GPU encoder up to 1080p only; its own
 does 4K at about 30 frames a second, so a level renders in about twice its length). The stream
 goes to the dev server in parts and ffmpeg muxes it into
-`packages/tools/tas-out/reel/L01-sprint.mp4` (`L01-sprint-style-15.mp4` for a stylish run):
+`packages/tools/tas-out/reel/L01-sprint.mp4` (`L01-sprint-style-15.mp4` for a stylish run;
+every setting away from its default joins the name, `L01-sprint-2160x3840-n250-hud.mp4`, and
+the `tag` last; `PARAPET_FOOTAGE` in the dev server's environment sends the videos to another
+folder):
 H.264 High, 60 frames a second, from the fade-in to the end of the fade-out. ffmpeg must be on
 the dev server's `PATH`, or named by the `FFMPEG` environment variable. With `level=all` the
 page renders the levels one after another and says when it is done.
@@ -130,8 +140,8 @@ scanlines of the holograms start to smear.
 ## Keep in mind
 
 - The reel shows the whole route of a record. The game ships only two seconds of it around each
-  flag (the glimpses) and keeps the rest secret, so think before publishing footage of a record
-  the players race against.
+  flag (the glimpses) and keeps the rest of a stylish run to itself, so think before publishing
+  footage of a run the players race against (the optimal runs are public in `docs/tas-records`).
 - It plays the records stored now: record the footage after the records are final (searched and
   published), or the video shows a route the game no longer races.
 - The attempts are made up from the record, not taken from the search's history: the search

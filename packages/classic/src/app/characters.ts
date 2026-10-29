@@ -8,7 +8,7 @@ import type { GameContent } from '@parapet/runtime/content/types.ts';
 import type { Skin } from './Context.ts';
 
 /** Characters open from the start: Blaise (0) and Playman (1). */
-export const STARTER_CHARACTERS: readonly number[] = [0, 1];
+const STARTER_CHARACTERS: readonly number[] = [0, 1];
 
 /** Levels where a rival races (the sprint's ghost), in level order. */
 export function rivalLevels(content: Pick<GameContent, 'missions'>, character: number): number[] {

@@ -1,0 +1,30 @@
+# The original on level 10, Bird Bay (the night city with its street lamps), Blaise playing the
+# stylish record of its sprint (packages/tools/tas-out/style-15/9-sprint.json, not in the repository) to
+# the results screen: a later, showier level than Mill Brook for the same "phone beside its
+# screen" shot. Level 10 is locked on a fresh start, so the take opens every level (`unlock`);
+# its first mission is the sprint.
+
+set unlock true
+boot 2
+wait 2.5
+press soft2      # the "turn sound on?" prompt
+wait 2.8
+press select     # skip the publisher's splash
+wait 2.6
+press select     # main menu: single game
+wait 2.2
+press right      # character: Blaise
+wait 0.8
+press select
+wait 2.2
+repeat 9 0.6 right   # levels 2 … 10
+wait 1.0
+press select     # level 10: its first mission is the sprint
+wait 2.0
+press select     # the briefing
+wait 2.5
+press select     # the flyover over the checkpoints
+wait 3.0
+press 5          # go
+route packages/tools/tas-out/style-15/9-sprint.json
+tail 4

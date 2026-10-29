@@ -79,7 +79,10 @@ async function main(): Promise<void> {
   sceneSelect.append(new Option('world', 'world'));
   for (const key of MOVE_KEYS) sceneSelect.append(new Option(key, key));
   const zoomSelect = $<HTMLSelectElement>('zoom');
-  for (const z of [1, 2, 3, 4, 5, 6]) zoomSelect.append(new Option(`${z}×`, String(z)));
+  // Up to 15: the 256 × 144 view then fills a 4K frame (3840 × 2160) for footage.
+  for (const z of [1, 2, 3, 4, 5, 6, 8, 10, 12, 15]) {
+    zoomSelect.append(new Option(`${z}×`, String(z)));
+  }
   const fxBox = $<HTMLInputElement>('fx');
   const forceBox = $<HTMLInputElement>('force');
 

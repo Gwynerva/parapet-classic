@@ -9,7 +9,15 @@ import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { dirname, extname, join } from 'node:path';
 import type { Connect, Plugin } from 'vite';
-import { ART_FILES, BOSSES, DEV_PAGES, LOUDNESS_FILE, PLAYMAN, REEL_DIR } from './paths.ts';
+import {
+  ART_FILES,
+  BOSSES,
+  DEV_PAGES,
+  LIVE_LOUDNESS_FILE,
+  LOUDNESS_FILE,
+  PLAYMAN,
+  REEL_DIR,
+} from './paths.ts';
 
 /** A request the handler cannot take: answered with `status` and the message. */
 class Refused extends Error {
@@ -164,26 +172,31 @@ const ENDPOINTS = [
     if (!REEL_STREAM.test(name)) throw new Refused(400, 'not a video stream');
     return muxVideo(join(REEL_DIR, name), Number(q.get('fps')) || 60);
   }),
-  // The loudness page saves its table (dev/loudness.html).
-  post('/dev/loudness', async (req) => {
-    const table = JSON.parse(await bodyOf(req)) as {
-      synth?: unknown;
-      target?: unknown;
-      tracks?: unknown;
-    };
-    if (
-      typeof table.synth !== 'string' ||
-      typeof table.target !== 'number' ||
-      typeof table.tracks !== 'object'
-    ) {
-      throw new Refused(400, 'not a loudness table');
-    }
-    const data = { synth: table.synth, target: table.target, tracks: table.tracks };
-    await mkdir(dirname(LOUDNESS_FILE), { recursive: true });
-    await writeFile(LOUDNESS_FILE, await prettyJson(LOUDNESS_FILE, data));
-    return 'saved';
-  }),
+  // The loudness pages save their tables: the original's tracks (dev/loudness.html) and our
+  // scores (dev/live.html).
+  post('/dev/loudness', (req) => saveLoudness(req, LOUDNESS_FILE)),
+  post('/dev/live-loudness', (req) => saveLoudness(req, LIVE_LOUDNESS_FILE)),
 ];
+
+/** Writes the loudness table in the request's body to `file`, after a look at its shape. */
+async function saveLoudness(req: IncomingMessage, file: string): Promise<string> {
+  const table = JSON.parse(await bodyOf(req)) as {
+    synth?: unknown;
+    target?: unknown;
+    tracks?: unknown;
+  };
+  if (
+    typeof table.synth !== 'string' ||
+    typeof table.target !== 'number' ||
+    typeof table.tracks !== 'object'
+  ) {
+    throw new Refused(400, 'not a loudness table');
+  }
+  const data = { synth: table.synth, target: table.target, tracks: table.tracks };
+  await mkdir(dirname(file), { recursive: true });
+  await writeFile(file, await prettyJson(file, data));
+  return 'saved';
+}
 
 const DEV_TYPES: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',

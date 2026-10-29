@@ -51,6 +51,12 @@ export function pressBits(key: ArrowKey, facingRight: boolean): number {
 export interface ConditionContext {
   level: Level;
   tables: PhysicsTables;
+  /**
+   * Which input conditions (6–13, bit `id - 6`) were evaluated since `mask` was last cleared.
+   * Search tools set it to tell which presses could have changed a step; the physics never
+   * reads it.
+   */
+  inputReads?: { mask: number };
 }
 
 /** `int_n(int)`: tile id relative to the runner, see 03-physics.md for the bit layout. */
@@ -184,20 +190,28 @@ export function evalCondition(r: RunnerState, ctx: ConditionContext, id: number)
     case 5:
       return !feet.hit;
     case 6:
+      if (ctx.inputReads) ctx.inputReads.mask |= 1;
       return (r.pressedBits & Input.BACK) !== 0;
     case 7:
+      if (ctx.inputReads) ctx.inputReads.mask |= 2;
       return (r.pressedBits & Input.FORWARD) !== 0;
     case 8:
+      if (ctx.inputReads) ctx.inputReads.mask |= 4;
       return (r.pressedBits & Input.UP) !== 0;
     case 9:
+      if (ctx.inputReads) ctx.inputReads.mask |= 8;
       return (r.pressedBits & Input.DOWN) !== 0;
     case 10:
+      if (ctx.inputReads) ctx.inputReads.mask |= 16;
       return bufferedPress(r, Input.BACK);
     case 11:
+      if (ctx.inputReads) ctx.inputReads.mask |= 32;
       return bufferedPress(r, Input.FORWARD);
     case 12:
+      if (ctx.inputReads) ctx.inputReads.mask |= 64;
       return bufferedPress(r, Input.UP);
     case 13:
+      if (ctx.inputReads) ctx.inputReads.mask |= 128;
       return bufferedPress(r, Input.DOWN);
     case 14:
       return (

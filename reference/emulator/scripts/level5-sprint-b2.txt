@@ -1,0 +1,37 @@
+# The original on level 5's sprint, Blaise playing B-2's record (the stylish route,
+# packages/tools/tas-out/style-15/4-sprint.json, not in the repository): the wall flip off the building
+# at about 23 s turns into a second-long fall beside the ladder, which the jar draws as the
+# flip's last frame held and mirrored every step (the runner turns round every step of state
+# 53), just as the remake does. Level 5 is locked on a fresh start, so the take opens every
+# level (`unlock`).
+
+set unlock true
+boot 2
+wait 2.5
+press soft2      # the "turn sound on?" prompt
+wait 2.8
+press select     # skip the publisher's splash
+wait 2.6
+press select     # main menu: single game
+wait 2.2
+press right      # character: Blaise
+wait 0.8
+press select
+wait 2.2
+press right      # level 2
+wait 0.6
+press right      # level 3
+wait 0.6
+press right      # level 4
+wait 0.6
+press right      # level 5
+wait 1.0
+press select     # level 5: its first mission is the sprint
+wait 2.0
+press select     # the briefing
+wait 2.5
+press select     # the flyover over the checkpoints
+wait 3.0
+press 5          # go
+route packages/tools/tas-out/style-15/4-sprint.json
+tail 4

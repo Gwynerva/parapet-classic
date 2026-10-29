@@ -18,6 +18,9 @@ A running list of how the 2007 developers did things, and where they slipped. Ap
 
 ## Bugs and oddities
 
+- **The air run.** Ground moves can carry on in the air (a tiger jump's landing roll over an edge ends in a run, 60 → 2; so can running off onto a lower roof, a roll, a turn); a jump from such a run takes the length of the whole velocity, fall included, and leaves at up to 10,055 units of horizontal speed. Turning in mid-air first makes the runner fall straight down and throws it back the other way. ([10](10-optimal.md))
+- **The sky lift.** The pit check lifts a runner to two tiles above its column's lowest floor, which is the top of the map in the floorless edge columns of six levels and beyond the map: rolled under an edge wall, the runner is thrown above the map and drifts off it for ever. ([10](10-optimal.md))
+- **Through the floor and back.** In the air-run's landing grip (45) the body can sink below a roof and is snapped back onto it, up to 4.6 tiles in one step. ([10](10-optimal.md))
 - The crash combo penalty (`f.g`, computed in `aF`) is **never subtracted** from the score: the score never decreases. ([13](../findings/13-the-score-never-drops/))
 - The jump-power regeneration timer `O` is never decreased, so the "scale jump by `O`" in z-type 0 is a no-op.
 - One UP press at the start of a wall run stays buffered (state 33 keeps `Q`), so **one press yields two kicks**, but only when it starts the wall run on contact: pressed earlier it arms state 30, which has no `0x40`, and the press is spent; that wall run kicks once. ([03](../findings/03-one-press-two-kicks/))
@@ -32,6 +35,8 @@ A running list of how the 2007 developers did things, and where they slipped. Ap
 - Half slopes (surface types 2–5, tiles 9–12) and tiles 15, 16, 23–26 have tables but no collision code — leftovers of a richer tile set; no map uses them.
 - There are no sound effects at all — the phone vibrates instead; the music is 14 MIDI files glued into one resource.
 - Wall contact by the feet counts as airborne for `onSurface`.
+- "Face against the velocity" (`0x800`) is a flip of the facing every step (line 7877), undone by the step's own "face the velocity" only while `q != 0`. A wall flip that drops straight down a wall (DOWN into state 53 while pressed to it, `q = 0`) turns the runner round on every step until it lands; states 49 and 53 have no clip, so the flip's last frame hangs there, mirrored 29 times a second. B-2's stylish Sprint record on level 5 falls like that for a second beside the ladder at 23.8 s; the jar draws it the same.
+- The spider jump (UP during a tiger jump → 66/67, +250) is meant to fire as the hands pass an obstacle's far edge, but its test (55 solid behind the head, 76 air below it, 77 the hands crossing a tile line, with the unscaled `q` of about 2000 that is two tiles a step) holds on flat ground too: the floor is the "obstacle". A tiger jump on an open floor plus UP three steps later throws the runner into the spider jump's flip off nothing. The same record does it at 26.3 s, right after the fall above.
 - The original build ships a Russian `l` file with an untranslated placeholder string 141: "remember to replace this text (RLI_HELPTEXT in %GAMENAME%.lng)".
 
 ## Found while writing the extractor

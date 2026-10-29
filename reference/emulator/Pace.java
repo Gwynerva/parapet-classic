@@ -31,19 +31,38 @@ import org.objectweb.asm.Opcodes;
  * game advances `35 * 900 >> 10 = 30` ms a frame, exactly one physics step, so a route's step n
  * is read n frames after the press that started the race.
  *
+ * With `unlock` it also makes `j(int)`, the level menu's lock check (`boolean_j`, d.java
+ * 10355: enough missions done for the level), always answer yes, so a take can go to any level
+ * from a fresh start. Nothing else of the game changes: the check is the menu's only use of it.
+ *
+ * The once-a-frame method is `t()` in the original kept here (1.0.8) and `s()` in the 1.0.4
+ * build (the obfuscator named them apart; the code is the same): `frame=<name>` picks it.
+ *
  * The jar itself is not changed. The ASM used here (the 3.x API) comes with MicroEmulator,
- * which rewrites MIDlets with it too. Started with `-javaagent:pace.jar=<frame ms>`.
+ * which rewrites MIDlets with it too. Started with
+ * `-javaagent:pace.jar=<frame ms>[,frame=<method>][,unlock]`.
  */
 public final class Pace implements ClassFileTransformer {
   private final long period;
+  private final boolean unlock;
+  private final String frameMethod;
 
-  private Pace(long period) {
+  private Pace(long period, boolean unlock, String frameMethod) {
     this.period = period;
+    this.unlock = unlock;
+    this.frameMethod = frameMethod;
   }
 
   public static void premain(String args, Instrumentation instrumentation) {
-    double ms = args == null || args.isEmpty() ? 35 : Double.parseDouble(args);
-    instrumentation.addTransformer(new Pace(Math.round(ms * 1_000_000)));
+    String[] parts = args == null || args.isEmpty() ? new String[] {"35"} : args.split(",");
+    double ms = Double.parseDouble(parts[0]);
+    boolean unlock = false;
+    String frame = "t";
+    for (int i = 1; i < parts.length; i++) {
+      if ("unlock".equals(parts[i])) unlock = true;
+      else if (parts[i].startsWith("frame=")) frame = parts[i].substring(6);
+    }
+    instrumentation.addTransformer(new Pace(Math.round(ms * 1_000_000), unlock, frame));
   }
 
   private static long now() {
@@ -81,16 +100,23 @@ public final class Pace implements ClassFileTransformer {
     ClassReader reader = new ClassReader(bytes);
     ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS);
     final Long length = period;
+    final boolean open = unlock;
+    final String framed = frameMethod;
     reader.accept(
         new ClassAdapter(writer) {
           @Override
           public MethodVisitor visitMethod(
               int access, String method, String desc, String signature, String[] exceptions) {
-            final boolean paced = "t".equals(method) && "()V".equals(desc);
+            final boolean paced = framed.equals(method) && "()V".equals(desc);
+            final boolean lock = open && "j".equals(method) && "(I)Z".equals(desc);
             return new MethodAdapter(super.visitMethod(access, method, desc, signature, exceptions)) {
               @Override
               public void visitCode() {
                 super.visitCode();
+                if (lock) {
+                  super.visitInsn(Opcodes.ICONST_1);
+                  super.visitInsn(Opcodes.IRETURN);
+                }
                 if (!paced) return;
                 super.visitLdcInsn(length);
                 super.visitMethodInsn(Opcodes.INVOKESTATIC, "Pace", "frame", "(J)V");
@@ -111,7 +137,13 @@ public final class Pace implements ClassFileTransformer {
           }
         },
         0);
-    System.err.println("pace: d runs on a " + period / 1e6 + " ms frame grid");
+    System.err.println(
+        "pace: d."
+            + frameMethod
+            + "() runs on a "
+            + period / 1e6
+            + " ms frame grid"
+            + (unlock ? ", every level open" : ""));
     return writer.toByteArray();
   }
 }

@@ -23,13 +23,14 @@ site, an anonymous visit count).
   bosses' records; draws and checks looks; the bosses' art generators (`art/`).
 - `packages/content` — `playman/`: the original jar and everything extracted from it, and
   nothing else; next to it our own fonts, translations (`i18n/`, one folder per language) and
-  the bosses: records, looks, effects, worlds and theme (`bosses/`).
+  the bosses: records, looks, effects and worlds (`bosses/`), and our scores (`music/`).
 - `reference/` — everything learned about the original game: notes on its formats, physics,
   flow, menus, curiosities and bugs (`notes/`), the findings told and animated for everyone
-  (`findings/`), and a headless Java oracle that runs the original class files and produces the
-  reference traces.
-- `docs/` — this page and the README's pictures. The release history is
-  [`CHANGELOG.md`](../CHANGELOG.md).
+  (`findings/`), a headless Java oracle that runs the original class files and produces the
+  reference traces, and the emulator that films the original on a painted phone (`emulator/`).
+- `docs/` — this page, the guide for speedrunners (`SPEEDRUN.md`), the TAS reel
+  (`TAS-REEL.md`), the 24 machine records (`tas-records/`) and the pictures of the README and
+  the releases. The release history is [`CHANGELOG.md`](../CHANGELOG.md).
 
 ## Architecture
 
@@ -69,16 +70,27 @@ to `main` that pass them are published to GitHub Pages.
 - `npm run i18n -- check` checks every translation against English (keys, `{arguments}`,
   characters the fonts lack); `npm run i18n -- new <code>` starts a language. See
   [`packages/content/i18n`](../packages/content/i18n/README.md).
-- `npm run tas -- run | verify | publish | report` searches and publishes the bosses' records
-  (runs stay in the git-ignored `packages/tools/tas-out`); `npm run look -- atlas | import |
+- `npm run tas -- run | tidy | verify | publish | report | analyze | campaign` searches and
+  publishes the bosses' records (runs stay in the git-ignored `packages/tools/tas-out`; the
+  optimal ones are published in [`docs/tas-records`](tas-records/README.md)); `npm run look -- atlas | import |
 sheet | poses | lineup | rotate` draws and checks the bosses' looks (see
   [`packages/content/bosses`](../packages/content/bosses/README.md)). The looks, effects and
   worlds were drawn by the Python scripts in [`packages/tools/art`](../packages/tools/art).
+- `packages/tools/src/optimal/` searches for the perfect run without human limits (every state
+  of a step merged exactly, segments between flags searched to the end, a glitch hunt with
+  recipes to reproduce what it finds) and `packages/tools/native/` is a bit-exact C port of
+  the step for it (gcc or MinGW; not built in CI). The folder's
+  [README](../packages/tools/src/optimal/README.md) lists the scripts, what each needs and
+  writes, and [`reference/notes/10-optimal.md`](../reference/notes/10-optimal.md) tells what
+  they found.
 - `npm run demo -- check | show <move> | search <move> <key@a..b>…` authors the Moves menu's
   demos (`packages/content/moves/demos.json`); `npm run icons` redraws the app icons and the
   favicons.
 - `npm run decompile` reproduces the decompiled source under `reference/decompiled/` (Docker or
   a local JDK).
+- `npm run emulator -- <script>` records the original playing in an emulator, laid into a
+  painted phone, driven by a script of presses or by a record's route
+  ([`reference/emulator`](../reference/emulator/README.md); Docker, Chrome and ffmpeg).
 - `npm run findings -- [<page>…] [--no-video] [--check]` measures the findings about the original
   again, writes their charts, pictures and numbers into `reference/findings/<page>/` and encodes
   the animations that changed (ffmpeg 6 or newer on the PATH, or `FFMPEG`): a GIF at 25 frames a
@@ -92,18 +104,22 @@ sheet | poses | lineup | rotate` draws and checks the bosses' looks (see
 
 ## The dev server
 
-Shortcuts of the client (dev server only): `?level=N&mode=M` jumps into a run, `?touch=1` shows
-the touch buttons,
-`?tas=<level>-<mode>` plays a local TAS run (`?tas=style-15/<level>-<mode>` the stylish one
-the boss races; `&autopilot=1` races the boss with it), `?contestTime=<ms>` makes the boss's
-time beatable, `?vp=292x633` lays the game out for a phone's screen and `?coarse=1` treats
-the mouse as a finger.
+Shortcuts of the client (dev server only):
 
-The Lab is at `/lab/`. Pages of the dev server, never published:
+- `?level=N&mode=M` jumps into a run (`M` one of `free`, `sprint`, `flags`, `score`,
+  `challenge`, `warmup1`, `warmup2`; `&rival=1` for the rival);
+- `?tas=<level>-<mode>` plays a local TAS run (the optimal one in `packages/tools/tas-out`,
+  levels from 0; `?tas=style-15/<level>-<mode>` the stylish one the boss races; `&autopilot=1`
+  races the boss with it), and `?contestTime=<ms>` makes the boss's time beatable;
+- `?touch=1` shows the touch buttons on a desktop, `?vp=292x633` lays the game out for a
+  phone's screen, `?coarse=1` treats the mouse as a finger, and `?backdrop=1` shows the menus'
+  backdrop alone, bright and without any menu.
 
-- `debug.html` — a bare level viewer (built too, but left out of offline play and of search
-  engines) (`C` cycles the characters, `O` a boss's outfits, `G` the
-  echo looks, `V` a magnified sheet of poses).
+The Lab is at `/lab/`. `debug.html` is a bare level viewer, the one dev page the build keeps
+(left out of offline play and of search engines): `C` cycles the characters, `O` a boss's
+outfits, `G` the echo looks, `V` a magnified sheet of poses. The pages of the dev server, never
+published:
+
 - `/dev/looks.html` — a boss's outfit running both ways with its effect in its world, a sheet
   of poses and its atlas; drop a painted atlas on it to see it at once, Save writes the look.
 - `/dev/showcase.html` — a boss's outfit with its effect running through its world or doing any
@@ -115,9 +131,17 @@ The Lab is at `/lab/`. Pages of the dev server, never published:
   previews (`packages/classic/public/og-*.png`).
 - `/dev/reel.html` — footage of how the bosses' records were found: a boss runs its local TAS
   record through the level among hundreds of pale attempts that went wrong, and the page
-  records itself in 4K. See [TAS-REEL.md](TAS-REEL.md).
+  records itself in 4K. See [TAS-REEL.md](TAS-REEL.md) (`PARAPET_FOOTAGE` in the server's
+  environment sends the videos to a folder of one's own).
 - `/dev/sprites.html` — a gallery of the extracted sprites.
-- `/dev/loudness.html` — measures the music tracks and saves the levels they are played at.
+- `/dev/loudness.html` — measures the original's music tracks and saves the levels they are
+  played at (`packages/content/audio/loudness.json`).
+- `/dev/live.html` — renders our scores (`packages/content/music`) as the menus and the runs
+  with a boss play them, measures them and saves `packages/content/audio/live-loudness.json`.
+
+The tools made for the videos about the game (the infographics, the offline music renderer)
+are not in the repository: a dev page stays only while it makes or checks something the game
+or its documentation keeps.
 
 ## The published site
 

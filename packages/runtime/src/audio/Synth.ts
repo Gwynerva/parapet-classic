@@ -1,9 +1,11 @@
 /**
  * A small polyphonic Web Audio synthesiser driven by resolved MIDI notes: every note becomes
  * one or two oscillators (or a noise burst for drums) with an envelope, scheduled at an
- * absolute audio-context time. There is no per-sample processing, so hundreds of short notes
- * cost nothing noticeable. Each MIDI channel ends in a gain of its own that follows the song's
- * channel volume changes, so a held chord swells and fades as written.
+ * absolute audio-context time; a patch may add a filter sweep, a pitch slide, a vibrato or a
+ * layer of noise (`Instruments.ts`). There is no per-sample processing, so hundreds of short
+ * notes cost nothing noticeable. Each MIDI channel ends in a gain of its own that follows the
+ * song's channel volume changes, so a held chord swells and fades as written, and a channel
+ * can be routed into a track's own effects (`route`, for our scores).
  */
 import { drumFor, songPatch, type DrumPatch, type Patch, type PatchSet } from './Instruments.ts';
 import { DEFAULT_CHANNEL_VOLUME, type MidiControl, type MidiNote } from './MidiFile.ts';
@@ -15,7 +17,8 @@ const MIN_GAIN = 0.0005;
 const CONTROL_SMOOTHING = 0.012;
 /**
  * Bump when the synthesiser's sound changes (patches, envelopes, channel handling): the
- * measured loudness of the tracks (`content/audio/loudness.json`) must then be measured again.
+ * measured loudness of the tracks (`content/audio/loudness.json`, `live-loudness.json`) must
+ * then be measured again.
  */
 export const SYNTH_VERSION = 2;
 

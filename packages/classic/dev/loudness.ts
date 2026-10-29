@@ -1,19 +1,20 @@
 /**
- * The loudness page (dev server only): measures every track on the synthesiser, with the patches
- * of its own a track has (`trackPatches`), and saves the table through the dev server
- * (`vite.config.ts`, POST /dev/loudness). A track's trim (`trackTrim`) is left out: the table
- * levels the tracks, the trim then keeps one below the rest on purpose.
+ * The loudness page (dev server only): measures every track of the original on the
+ * synthesiser, with the patches of its own a track has (`trackPatches`), and saves the table
+ * through the dev server (`build/devEndpoints.ts`, POST /dev/loudness). A track's trim
+ * (`trackTrim`) is left out: the table levels the tracks, the trim then keeps one below the
+ * rest on purpose. Our scores are measured on `live.html`.
  */
 import { parseMidi, stripEndMarker, type MidiSong } from '@parapet/runtime/audio/MidiFile.ts';
-import { scoreToSong, type Score } from '@parapet/runtime/audio/Score.ts';
-import { CONTEST_TRACK, trackPatches } from '@parapet/runtime/audio/MusicDirector.ts';
+import { trackPatches } from '@parapet/runtime/audio/MusicDirector.ts';
 import {
   integratedLoudness,
   renderSong,
   synthFingerprint,
+  tableGain,
   type LoudnessTable,
 } from '@parapet/runtime/audio/LoudnessMeter.ts';
-import themeJson from '@content/bosses/theme.json';
+import { $ } from './dom.ts';
 
 const musicModules = import.meta.glob('@playman/music/*.mid', {
   eager: true,
@@ -29,7 +30,6 @@ async function tracks(): Promise<Map<number, MidiSong>> {
     const bytes = await (await fetch(url)).arrayBuffer();
     out.set(id, stripEndMarker(parseMidi(bytes)));
   }
-  out.set(CONTEST_TRACK, scoreToSong(themeJson as unknown as Score));
   for (const [id, song] of out) song.patches = trackPatches(id);
   return out;
 }
@@ -41,9 +41,9 @@ function median(values: number[]): number {
 }
 
 async function main(): Promise<void> {
-  const status = document.getElementById('status')!;
-  const table = document.getElementById('out') as HTMLTableElement;
-  const save = document.getElementById('save') as HTMLButtonElement;
+  const status = $<HTMLParagraphElement>('status');
+  const table = $<HTMLTableElement>('out');
+  const save = $<HTMLButtonElement>('save');
   table.innerHTML = '<tr><th>track</th><th>LUFS</th><th>gain</th></tr>';
   const measured: Record<string, number> = {};
   for (const [id, song] of [...(await tracks())].sort((a, b) => a[0] - b[0])) {
@@ -61,7 +61,7 @@ async function main(): Promise<void> {
     tracks: measured,
   };
   for (const [id, lufs] of Object.entries(measured)) {
-    const gain = Math.pow(10, (result.target - lufs) / 20);
+    const gain = tableGain(result, id) ?? 1;
     table.insertAdjacentHTML(
       'beforeend',
       `<tr><td>${id}</td><td>${lufs.toFixed(2)}</td><td>${gain.toFixed(2)}</td></tr>`,
@@ -77,5 +77,5 @@ async function main(): Promise<void> {
 }
 
 main().catch((err: unknown) => {
-  document.getElementById('status')!.textContent = `Failed: ${String(err)}`;
+  $('status').textContent = `Failed: ${String(err)}`;
 });

@@ -26,13 +26,18 @@ new, a readable reference for this kind of game.
 
 - **The original, complete.** Twelve levels with their missions (warm-ups with the coach,
   Sprint against the rival, Flag hunt, Score run, the Challenges), unlocks and the Prize, the
-  Moves menu and the original music.
+  Moves menu and the original's music in its runs.
 - **Ghost races.** Every record keeps its run. Race your best as a ghost, or send a run as a
   challenge link: whoever opens it (or pastes it into "Open replay") races your ghost, and
   their browser re-runs it, so a link cannot claim a time the run did not make.
 - **Twelve bosses.** A character on every level with a record far below the original's. Beat
   one of its two records and it is yours to play; beat both and it brings its effect. See
   [`packages/content/bosses`](packages/content/bosses/README.md).
+- **Music of our own.** Ten chiptune scores, written for the videos about the game ([the
+  OST](https://youtu.be/Lg_kdO6bmiw)), play live
+  on the game's synthesiser: a calm one in the menus and an energetic one in every run with a
+  boss, another each time; every other run keeps the original's track. See
+  [`packages/content/music`](packages/content/music/README.md).
 - **At home anywhere.** Wide screens, tablets and phones in either orientation, full screen
   and installable as an app; keyboard, touch and gamepad; English and Russian.
 
@@ -57,6 +62,14 @@ curious how a 2007 phone game worked:
   drops, and what the fast tricks and the showy ones cost.
 
 Or play with the experiments in the browser: [the Lab](https://gwynerva.github.io/parapet-classic/lab/).
+
+Is there a perfect run, one no player and no machine can beat? [`reference/notes/10-optimal.md`](reference/notes/10-optimal.md)
+works it out, and finds three more glitches of the original on the way. The 24 machine
+records of the game, with links to watch each one, are in [`docs/tas-records`](docs/tas-records/README.md).
+
+**Videos** (in Russian): [the story of how the game was made](https://youtu.be/OMVIEZjs5S4)
+(English subtitles), [the TAS, all 24 records in one run](https://youtu.be/c0hCbcx41Ds) and
+[the OST, the ten scores](https://youtu.be/Lg_kdO6bmiw).
 
 ## Development
 

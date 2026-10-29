@@ -77,7 +77,7 @@ function contentHashOf(content: RunContent, levelId: number): ContentHash {
 }
 
 /** Checks a replay against this build and re-runs it for its verified result and splits. */
-export function prepareGhost(
+function prepareGhost(
   ctx: GameContext,
   replay: Replay,
   kind: GhostKind,
@@ -267,7 +267,7 @@ function openRun(ctx: GameContext, setup: RunSetup): void {
  * Shows the replay in a file's text, a link or a bare code on its card (or what is wrong);
  * `check` when the text was checked already (a replay is re-run to check it).
  */
-export function openReplayText(ctx: GameContext, text: string, check?: ReplayCheck): void {
+function openReplayText(ctx: GameContext, text: string, check?: ReplayCheck): void {
   ctx.screens.push(new OpenReplayScreen(ctx, text, check));
 }
 
@@ -343,14 +343,15 @@ export function copyChallengeLink(ctx: GameContext, replay: Replay, onCopied: ()
 
 /** Offers the replay as a `.parapet-replay` file; call from a gesture. */
 export function saveReplayFile(replay: Replay, result: { time: number; score: number }): void {
-  const text = replayFileText(encodeReplay(replay), {
+  const code = encodeReplay(replay);
+  const text = replayFileText(code, {
     level: replay.levelId + 1,
     mode: replay.mode,
     name: replay.playerName,
     time: result.time,
     score: result.score,
   });
-  downloadText(replayFileName(replay.levelId, replay.mode, replay.playerName), text);
+  downloadText(replayFileName(replay.levelId, replay.mode, replay.playerName, code), text);
 }
 
 /** Opens the file dialog and hands the chosen file's text on (null: unreadable); a gesture. */
@@ -366,7 +367,7 @@ interface ReplayTaker {
 }
 
 /**
- * Replays dropped onto the window or pasted (Ctrl+V) open their card from any menu; during a
+ * Replays dropped onto the window or pasted open their card from any menu; during a
  * run they are ignored. (A challenge link opens a page of its own: `takeReplayFromLocation`.)
  */
 export function installReplayInputs(ctx: GameContext): void {

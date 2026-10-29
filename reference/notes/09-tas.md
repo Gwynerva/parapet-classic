@@ -3,8 +3,9 @@
 The boss contests (Flag hunt and Sprint without the rival, on every level) are raced against
 times found by a search over the simulation (`packages/tools/src/tas`). Only the times reach
 the game, with two seconds of poses around each flag (the glimpses a boss shows of its route,
-`packages/content/bosses/glimpses.json`); the inputs stay local. What the search taught about
-the game:
+`packages/content/bosses/glimpses.json`); the inputs of the stylish runs the bosses race stay
+local, the optimal runs are published in `docs/tas-records`. What the search taught about the
+game:
 
 ## How the developers played
 
@@ -25,8 +26,8 @@ These habits became the search's limits: single presses of one key, at least 3 s
 - The archive keeps, per cell (progress, tile, footing, facing, speed), the earliest moment
   any run reached it. Picking cells by "clock + lower bound of what is left" and playing a few
   random presses from there finds Mill Brook's flag hunt within five million steps.
-- The lower bound is the horizontal tour through the remaining flags at top speed (about 3.7
-  units per ms, with a margin for the snaps of ledge grabs). Mill Brook's flags lie on one
+- The lower bound is the horizontal tour through the remaining flags at top speed (4.6 units
+  per ms: 3.7 of running, plus a margin for the snaps of ledge grabs). Mill Brook's flags lie on one
   line west of the start: the bound says 10.4 s, the best run takes 14.37 s.
 - A finished run only counts when no press is frame-perfect: moved one step early or late
   (the later presses unchanged or moved along), it must still finish within 300 ms. Turned

@@ -11,6 +11,8 @@
  * travels as a file.
  */
 
+import { fnv1a } from '@parapet/sim';
+
 export const REPLAY_FILE_FORMAT = 'parapet-classic-replay';
 export const REPLAY_FILE_VERSION = 1;
 export const REPLAY_FILE_EXTENSION = '.parapet-replay';
@@ -44,7 +46,7 @@ export interface ReplayFileInfo {
   score?: number;
 }
 
-/** The folder challenge links open, under the game's own (see `vite.config.ts`). */
+/** The folder challenge links open, under the game's own (`build/site.ts` writes its page). */
 export const RACE_FOLDER = 'r/';
 
 /**
@@ -76,15 +78,32 @@ export function replayFileText(code: string, info: ReplayFileInfo): string {
   )}\n`;
 }
 
-/** A file name such as `parapet-l3-sprint-blaise.parapet-replay`. */
-export function replayFileName(levelId: number, mode: string, name: string): string {
+/** Characters of the run's key in a file name. */
+const RUN_KEY_LENGTH = 6;
+
+/**
+ * A short key of a run for its file name: the first characters of the FNV-1a hash of its code
+ * in base 36. The code holds the level, the mode and every press, so another run of the same
+ * level by the same player gets another key, and the same run always the same one.
+ */
+export function replayRunKey(code: string): string {
+  return fnv1a(code).toString(36).padStart(7, '0').slice(0, RUN_KEY_LENGTH);
+}
+
+/**
+ * A file name such as `parapet-l3-sprint-blaise-1k2x9q.parapet-replay`: the level, the mode,
+ * the player and the run's key, so saving another run never overwrites an earlier file or gets
+ * a browser's "(1)".
+ */
+export function replayFileName(levelId: number, mode: string, name: string, code: string): string {
   const slug = name
     .normalize('NFKD')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 24);
-  return `parapet-l${levelId + 1}-${mode}${slug ? `-${slug}` : ''}${REPLAY_FILE_EXTENSION}`;
+    .slice(0, 24)
+    .replace(/^-+|-+$/g, '');
+  const parts = [`parapet-l${levelId + 1}`, mode, slug, replayRunKey(code)].filter(Boolean);
+  return `${parts.join('-')}${REPLAY_FILE_EXTENSION}`;
 }
 
 /**

@@ -2,7 +2,7 @@
  * Client bootstrap: platform objects, fonts, dictionaries, content, renderers, then the title
  * screen and the frame loop.
  */
-import { decodeReplay } from '@parapet/sim';
+import { decodeReplay, isRunMode, LEVEL_COUNT } from '@parapet/sim';
 import { loadContent } from './assets/content.ts';
 import { loadFonts } from './assets/fonts.ts';
 import { createRenderers } from './app/renderers.ts';
@@ -16,7 +16,6 @@ import { registerOffline } from './app/offline.ts';
 import { MenuBackdrop } from './app/ui/MenuBackdrop.ts';
 import { drawSpeedrunOverlay } from './app/speedrun.ts';
 import { PlayScreen } from './app/screens/PlayScreen.ts';
-import type { RunMode } from '@parapet/sim';
 import { Viewport } from '@parapet/runtime/render/Viewport.ts';
 import { upgradeCharacter } from './app/bosses.ts';
 import { createI18n, startLocale } from './i18n/locales.ts';
@@ -55,7 +54,8 @@ async function main(): Promise<void> {
   const playerInfo = loadPlayer();
   // A boss is played in the version the player has: with its effect once both records fall.
   playerInfo.character = upgradeCharacter(playerInfo.character, loadContestProgress());
-  const viewport = new Viewport({ scaleMode: options.scaleMode, ...devViewport() });
+  const params = new URLSearchParams(location.search);
+  const viewport = new Viewport({ scaleMode: options.scaleMode, ...devViewport(params) });
   const i18n = createI18n(start.locale);
   document.documentElement.lang = i18n.locale;
   i18n.onChange((locale) => {
@@ -68,8 +68,8 @@ async function main(): Promise<void> {
   // The name field is an HTML input; it uses the bundled Terminus so no system font shows.
   installWebFont('Terminus', terminusUrl);
 
-  // `?touch=1` forces the on-screen buttons (handy for looking at them on a desktop).
-  const forceTouch = new URLSearchParams(location.search).get('touch') === '1';
+  // Development: `?touch=1` forces the on-screen buttons (to look at them on a desktop).
+  const forceTouch = import.meta.env.DEV && params.get('touch') === '1';
   const touch = new TouchControls(viewport, {
     layout: options.touchLayout,
     enabled:
@@ -83,7 +83,7 @@ async function main(): Promise<void> {
   const music = new MusicDirector({
     player,
     loadTrack: async (id) => {
-      // The main menus' and the contests' music: the promo video's scores, levelled already.
+      // The main menus' music and a run with a boss's: our scores, levelled already.
       const live = await loadLiveSong(id);
       if (live) {
         live.gain = (live.gain ?? 1) * trackTrim(id);
@@ -94,8 +94,8 @@ async function main(): Promise<void> {
       const res = await fetch(url);
       if (!res.ok) throw new Error(`music track ${id}: HTTP ${res.status}`);
       const song: MidiSong = stripEndMarker(parseMidi(await res.arrayBuffer()));
-      // The menu's own mellow patches; every track at the same measured loudness
-      // (packages/content/audio/loudness.json), then the menu's kept lower.
+      // The warm-ups' menu track with its own mellow patches; every track at the same measured
+      // loudness (packages/content/audio/loudness.json), then that one kept lower.
       song.patches = trackPatches(id);
       const level = tableGain(loudnessJson as LoudnessTable, id) ?? 1;
       song.gain = level * trackTrim(id);
@@ -132,8 +132,8 @@ async function main(): Promise<void> {
   };
   ctx.input = new InputManager({ viewport, facingRight: () => ctx.facingRight(), touch });
   ctx.backdrop = new MenuBackdrop(ctx);
-  // `?backdrop=1` shows only the menus' backdrop, bright and without any menu (demonstrations).
-  const backdropOnly = new URLSearchParams(location.search).get('backdrop') === '1';
+  // Development: `?backdrop=1` shows only the menus' backdrop, bright and without any menu.
+  const backdropOnly = import.meta.env.DEV && params.get('backdrop') === '1';
   ctx.backdrop.bright = backdropOnly;
   ctx.platform = createPlatform(ctx, {
     isAtRoot: () => screens.size === 1 && screens.top instanceof TitleScreen,
@@ -192,19 +192,18 @@ async function main(): Promise<void> {
   // Development: a run straight from the address. The title screen is up already, so a run
   // that cannot start leaves the game as it is.
   if (!shared && !backdropOnly)
-    await startFromQuery(ctx).catch((err: unknown) => console.error(err));
+    await startFromQuery(ctx, params).catch((err: unknown) => console.error(err));
 }
 
 /**
  * Development: `?vp=292x633` fixes the logical size (a phone's layout on a desktop) and
  * `?coarse=1` treats the mouse as a finger.
  */
-function devViewport(): {
+function devViewport(params: URLSearchParams): {
   forceLogical?: { width: number; height: number };
   forceCoarse?: boolean;
 } {
   if (!import.meta.env.DEV) return {};
-  const params = new URLSearchParams(location.search);
   const vp = /^(\d+)x(\d+)$/.exec(params.get('vp') ?? '');
   return {
     ...(vp ? { forceLogical: { width: Number(vp[1]), height: Number(vp[2]) } } : {}),
@@ -217,9 +216,8 @@ function devViewport(): {
  * `?tas=<level>-<mode>` plays a boss's local run (packages/tools/tas-out, never published), and
  * with `&autopilot=1` drives a contest as if the player ran it.
  */
-async function startFromQuery(ctx: GameContext): Promise<void> {
+async function startFromQuery(ctx: GameContext, params: URLSearchParams): Promise<void> {
   if (!import.meta.env.DEV) return;
-  const params = new URLSearchParams(location.search);
   const tas = params.get('tas');
   if (tas) {
     const res = await fetch(`/@fs/${TAS_OUT}/${tas}.json`);
@@ -237,10 +235,16 @@ async function startFromQuery(ctx: GameContext): Promise<void> {
     return;
   }
   if (!params.has('level') && !params.has('mode')) return;
+  const levelId = Number(params.get('level') ?? '0');
+  const mode = params.get('mode') ?? 'free';
+  if (!Number.isInteger(levelId) || levelId < 0 || levelId >= LEVEL_COUNT) {
+    throw new Error(`no level ${params.get('level')}`);
+  }
+  if (!isRunMode(mode)) throw new Error(`no mode ${mode}`);
   ctx.screens.push(
     new PlayScreen(ctx, {
-      levelId: Number(params.get('level') ?? '0'),
-      mode: (params.get('mode') ?? 'free') as RunMode,
+      levelId,
+      mode,
       withRival: params.get('rival') === '1',
       playerName: ctx.player.name || 'dev',
       character: ctx.player.character,

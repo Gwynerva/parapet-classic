@@ -3,8 +3,8 @@
 The faithful port of Playman Extreme Running as a Vite app: the original's twelve levels,
 missions (warm-ups with the coach, Sprint against the rival, Flag hunt, Score run,
 Challenges), unlock progression (a level opens once the one before is complete), the Prize
-ending, the Moves menu and the music, plus our
-own Free run and races against ghosts: your record, or anyone's run shared as a link or file.
+ending, the Moves menu and the original's music (with scores of our own in the menus and the
+runs with a boss), plus our own Free run and races against ghosts: your record, or anyone's run shared as a link or file.
 
 - `src/main.ts` boots the runtime (viewport, fonts, dictionaries, content, music) and the
   screen stack.
@@ -15,8 +15,8 @@ own Free run and races against ghosts: your record, or anyone's run shared as a 
   (`GhostOverlay`) and the sprite ids of the menu graphics.
 - `src/app/ghosts.ts` checks incoming replays, re-runs them and starts ghost races and the
   boss contests; it also sends runs out as challenge links and replay files.
-  `screens/OpenReplayScreen.ts` takes a link or code pasted into a real text field (phones have
-  no Ctrl+V), the clipboard or a file, and shows the challenger's card (name, level, mission,
+  `screens/OpenReplayScreen.ts` takes a link or code pasted into a real text field (so the
+  system's own paste works, on phones too), the clipboard or a file, and shows the challenger's card (name, level, mission,
   character, the verified time) before the race.
 - `src/app/bosses.ts` is the bosses' data (`packages/content/bosses`): their records per level
   and mode, outfits, effects and worlds, which character number each version is (with its
@@ -27,20 +27,10 @@ own Free run and races against ghosts: your record, or anyone's run shared as a 
 - `src/i18n/locales.ts` finds the languages (`packages/content/i18n/<code>/`) at build time.
 - `src/assets/content.ts` loads the generated content through the `@playman` alias.
 
-Development shortcuts (dev server only): `?level=N&mode=M` jumps into a run (`M` is one of
-`free`, `sprint`, `flags`, `score`, `challenge`, `warmup1`, `warmup2`; add `&rival=1` for the
-ghost), `?touch=1` shows the touch buttons on a desktop, `?tas=<level>-<mode>` plays the boss's local run from
-`packages/tools/tas-out` (`&autopilot=1` races it with it, counting as the player's run) and
-`?contestTime=<ms>` replaces its time; `?vp=WxH` fixes the logical size (a phone's layout on a
-desktop) and `?coarse=1` treats the mouse as a finger. `debug.html` is a bare-bones level
-viewer: `C` cycles the characters, `O` a boss's outfits, `G` the echo looks, `V` a magnified
-sheet of poses. `/dev/looks.html` shows a boss's outfit running both ways with its effect, its
-poses and its atlas, takes a painted atlas dropped on it and saves the look;
-`/dev/art.html` draws the promotional pictures (the README's banner and Play button, the link
-preview); `/dev/sprites.html?ids=141-150&scale=4` shows extracted sprites magnified and
-`/dev/loudness.html` measures the music tracks on the synthesiser (its Save writes
-`packages/content/audio/loudness.json`). The helpers in `dev/` are served by a dev-server
-middleware (`build/devEndpoints.ts`), which also takes their saves, and never reach the build.
+The dev server's shortcuts (`?level=…`, `?tas=…`, `?vp=…`) and pages (`debug.html`,
+`/dev/*.html`) are listed in [`docs/DEVELOPMENT.md`](../../docs/DEVELOPMENT.md). The helpers in
+`dev/` are served by a dev-server middleware (`build/devEndpoints.ts`), which also takes their
+saves, and never reach the build.
 
 - `lab/index.html` and `src/lab/` are the Lab: the experiments of `packages/lab` on the game's
   own content, as cards to play with (`cards.ts`), in English and Russian (`text.ts`).

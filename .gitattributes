@@ -3,6 +3,9 @@
 
 # Binary assets.
 *.png binary
+*.gif binary
+*.ico binary
+*.mp4 binary
 *.jar binary
 *.mid binary
 *.gz binary

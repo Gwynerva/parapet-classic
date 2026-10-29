@@ -3,15 +3,9 @@
  * a player's keyboard produces them (no holding, no chords; sim's `pressBits`). The
  * original's own rival recordings, made by its developers on a phone, look exactly like that.
  */
-import { pressBits, type ArrowKey, type RunMode } from '@parapet/sim';
+import { pressBits, type ArrowKey } from '@parapet/sim';
 
-/** The modes Gwynerva is raced in. */
-export const CONTEST_MODES = ['flags', 'sprint'] as const satisfies readonly RunMode[];
-export type ContestMode = (typeof CONTEST_MODES)[number];
-
-export function isContestMode(mode: string): mode is ContestMode {
-  return (CONTEST_MODES as readonly string[]).includes(mode);
-}
+export { CONTEST_MODES, contestCharacter, isContestMode, type ContestMode } from '@parapet/sim';
 
 /** The direction keys; left and right turn into FORWARD or BACK by the facing at the press. */
 export const Key = { UP: 1, DOWN: 2, RIGHT: 3, LEFT: 4 } as const;
@@ -57,9 +51,4 @@ export function parsePresses(text: string): Press[] {
     out.push({ step: n, key });
   }
   return out;
-}
-
-/** The look a contest's winner unlocks doubles as the character of Gwynerva's replays. */
-export function contestCharacter(levelId: number, mode: ContestMode): number {
-  return 10 + 2 * levelId + (mode === 'sprint' ? 1 : 0);
 }

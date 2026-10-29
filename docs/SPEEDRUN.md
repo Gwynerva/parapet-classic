@@ -3,8 +3,8 @@
 Parapet Classic plays Playman Extreme Running (Mr. Goodliving, 2007) in a browser. The
 simulation is a port of the original's own code: every step uses the same rules, the same
 integer maths and the same data. The test suite compares it step by step against traces
-recorded from the original running in an emulator. So a route found in Parapet works on a
-phone, and the other way round. This page is for runners and for the moderators of
+recorded by running the original's own class files (`reference/oracle`). So a route found in
+Parapet works on a phone, and the other way round. This page is for runners and for the moderators of
 [speedrun.com/playman_extreme_running](https://www.speedrun.com/playman_extreme_running).
 
 ## How time works
@@ -64,7 +64,7 @@ challenge link.
   - **Race it** runs the same mission against it as a ghost.
 - **Studying a run.** Watching shows a bar along the bottom:
 
-  ![Watching the developers' run of Bird Bay: the timeline along the bottom with every press marked as a chevron pointing its way, and the presses just played rising over the play head](replay-bar.png)
+  ![Watching the developers' run of Bird Bay: the timeline along the bottom with every press marked as a chevron pointing its way, and the presses just played rising from their places on it](replay-bar.png)
 
   - the whole run as a timeline with every press marked on it, and each press popping up as it
     plays;
@@ -78,8 +78,8 @@ challenge link.
   top centre while the timer is hidden).
 
 The version stands at the bottom of the results screen and in About → Credits (for example
-`Parapet 1.1.0 · parapet-sim@0.2.0`). Put it in a submission: a replay plays only on its own
-simulation version.
+`Parapet 1.2.0 · sim 0.2.0`: the game's release and the simulation's version). Put it in a
+submission: a replay plays only on its own simulation version.
 
 ## Suggested rules for the remake
 
@@ -93,7 +93,7 @@ simulation version.
    runs from the first mission to the last. A video that shows the timer on screen is enough
    to check it.
 4. Note the version in the submission. Runs on different versions are comparable as long as
-   the simulation version (`parapet-sim@…`) is the same.
+   the simulation version (`sim …`) is the same.
 
 ## Not in the original
 

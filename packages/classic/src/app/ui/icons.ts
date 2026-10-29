@@ -14,7 +14,7 @@ import { ANCHOR_TOP_LEFT } from '@parapet/runtime/render/SpriteSheet.ts';
 import type { SpriteDrawer } from '@parapet/runtime/ui/widgets.ts';
 
 /** Colours of the original's menu cards (reference/notes/08 §7-9). */
-export const CARD_LIGHT = '#dcd4d0';
+const CARD_LIGHT = '#dcd4d0';
 export const CARD_BORDER = '#2a1815';
 export const CARD_WHITE = '#ffffff';
 
@@ -28,7 +28,7 @@ const MISSION_ICON: Record<number, number> = {
   [MissionType.WARM_UP_2]: 141,
 };
 
-export function missionIconSprite(missionType: number, done: boolean): number {
+function missionIconSprite(missionType: number, done: boolean): number {
   return (MISSION_ICON[missionType] ?? 145) + (done ? 1 : 0);
 }
 

@@ -5,6 +5,7 @@
  * table, animation clips, physics tables, level tile maps, the mission table and the rival
  * input recordings.
  */
+import { LEVEL_COUNT } from '@parapet/sim';
 import { BinaryReader, readI16Array, readI32Array } from './binary.ts';
 import type { BlobLocation, GameIndex } from './decodeIndex.ts';
 import { at } from './util.ts';
@@ -31,7 +32,7 @@ export const BLOB = {
   MISSIONS: 39,
 } as const;
 
-export const LEVEL_COUNT = 12;
+export { LEVEL_COUNT };
 
 export function blobLocation(index: GameIndex, id: number): BlobLocation {
   return at(index.blobs, id, 'blobs');

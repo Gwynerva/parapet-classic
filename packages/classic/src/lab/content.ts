@@ -2,13 +2,12 @@
  * The Lab's sources in the browser: the game's own content (`assets/content.ts`) and fonts,
  * their pictures read back into bytes, and the Moves menu's demos.
  */
-import demosJson from '@content/moves/demos.json';
 import { Lab } from '@parapet/lab/lab.ts';
-import type { MoveDemoData } from '@parapet/runtime/moves/MoveDemo.ts';
 import type { RgbaImage } from '@parapet/runtime/render/Raster.ts';
 import type { BitmapFont } from '@parapet/runtime/text/BitmapFont.ts';
 import type { RasterFont } from '@parapet/runtime/text/RasterText.ts';
 import { loadContent } from '../assets/content.ts';
+import { MOVE_DEMOS } from '../assets/demos.ts';
 import { loadFonts } from '../assets/fonts.ts';
 import { createI18n } from '../i18n/locales.ts';
 
@@ -43,7 +42,7 @@ export async function loadLab(locale: string): Promise<Lab> {
     rivals: content.rivals,
     atlas: { image: pixels(content.atlas.image), frames: content.atlas.frames },
     fonts: { small: rasterFont(fonts.small), text: rasterFont(fonts.text) },
-    demos: (demosJson as { demos: MoveDemoData[] }).demos,
+    demos: MOVE_DEMOS,
     levelNames: content.levels.map((_, id) => i18n.t(`level.names.${id}`)),
   });
 }

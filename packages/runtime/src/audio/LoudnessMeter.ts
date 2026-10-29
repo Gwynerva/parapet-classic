@@ -130,21 +130,24 @@ export async function renderSong(song: MidiSong, tailSeconds = 1.5): Promise<Flo
   return out;
 }
 
-/** The measured loudness of the tracks: what `loudness.json` holds. */
+/**
+ * The measured loudness of the tracks: what `loudness.json` (the original's tracks, by id) and
+ * `live-loudness.json` (our scores, by `<name>/<kind>`) hold.
+ */
 export interface LoudnessTable {
   /** `synthFingerprint()` at the time of measuring. */
   synth: string;
   /** Loudness every track is levelled to (LUFS). */
   target: number;
-  /** Track id → integrated loudness (LUFS) at gain 1. */
+  /** Track → integrated loudness (LUFS) at gain 1. */
   tracks: Record<string, number>;
 }
 
 export const MIN_TRACK_GAIN = 0.25;
 export const MAX_TRACK_GAIN = 8;
 
-/** Gain that brings a measured track to the table's target. */
-export function tableGain(table: LoudnessTable, trackId: number): number | null {
+/** Gain that brings a measured track to the table's target (null: not measured). */
+export function tableGain(table: LoudnessTable, trackId: number | string): number | null {
   const lufs = table.tracks[String(trackId)];
   if (lufs === undefined || !Number.isFinite(lufs)) return null;
   const gain = Math.pow(10, (table.target - lufs) / 20);

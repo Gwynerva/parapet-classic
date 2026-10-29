@@ -78,15 +78,14 @@ export class BossContest {
     mode: RunMode,
     levelId: number,
     world: World,
-    /** The boss's outfit: picked at random, or kept from the run started over (a replay sought). */
-    outfit = pickOutfit(contest.character),
   ) {
+    const outfit = pickOutfit(contest.character);
     this.ctx = ctx;
     this.contest = contest;
     this.mode = mode;
     this.levelId = levelId;
     const found = contestOfCharacter(contest.character);
-    this.tracks = found ? contestGlimpses(found.levelId, found.kind) : null;
+    this.tracks = found ? contestGlimpses(found.levelId, found.mode) : null;
     this.outfit = outfit;
     const { render } = ctx;
     const boss = bossOfLevel(levelId);

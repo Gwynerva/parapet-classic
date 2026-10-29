@@ -5,7 +5,7 @@
  * of the Moves menu with every flourish of its effect (a shot, a singularity, a hologram chain);
  * a card shows a piece of a level or the boss's own world. The README's banner, its Play button
  * and a collage of tricks without the logo go to `docs/`, the link previews (Open Graph) to
- * `packages/classic/public/og-*.png`; Save sends them to the dev server (`vite.config.ts`, POST
+ * `packages/classic/public/og-*.png`; Save sends them to the dev server (`build/devEndpoints.ts`, POST
  * /dev/save-art). `?scout=1` draws every place a shot can stand on (the start and the flags of
  * every mission) and the keyframes.
  */
@@ -25,7 +25,6 @@ import type { ResolvedLook } from '@parapet/runtime/render/Look.ts';
 import { SceneRenderer } from '@parapet/runtime/render/SceneRenderer.ts';
 import { StageRenderer } from '@parapet/runtime/render/Stage.ts';
 import { DemoRun } from '@parapet/runtime/moves/MoveDemo.ts';
-import { BitmapFont, type BitmapFontData } from '@parapet/runtime/text/BitmapFont.ts';
 import { Theme } from '@parapet/runtime/ui/theme.ts';
 import {
   allBosses,
@@ -35,13 +34,8 @@ import {
   type Boss,
 } from '../src/app/bosses.ts';
 import { loadContent } from '../src/assets/content.ts';
+import { loadFonts } from '../src/assets/fonts.ts';
 import { forced } from './flourishes.ts';
-import text12 from '../../content/fonts/text-12.json';
-import text12Png from '../../content/fonts/text-12.png';
-import display16 from '../../content/fonts/display-16.json';
-import display16Png from '../../content/fonts/display-16.png';
-import display24 from '../../content/fonts/display-24.json';
-import display24Png from '../../content/fonts/display-24.png';
 import { UNITS_PER_PX } from '@parapet/runtime/render/View.ts';
 import { createRenderers } from '../src/app/renderers.ts';
 import { $ } from './dom.ts';
@@ -382,12 +376,8 @@ const COLLAGE_ROWS: Shot[][] = [
 ];
 
 async function main(): Promise<void> {
-  const content = await loadContent();
-  const [small, display, title] = await Promise.all([
-    BitmapFont.fromData(text12 as BitmapFontData, text12Png),
-    BitmapFont.fromData(display16 as BitmapFontData, display16Png),
-    BitmapFont.fromData(display24 as BitmapFontData, display24Png),
-  ]);
+  const [content, fonts] = await Promise.all([loadContent(), loadFonts()]);
+  const { small, display, title } = fonts;
   const image = (src: string): Promise<HTMLImageElement> =>
     new Promise((done, fail) => {
       const img = new Image();

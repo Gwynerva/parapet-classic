@@ -14,7 +14,15 @@
  * (`upgradeCharacter`). Wins are kept per level and mode, so a boss drawn later opens by itself
  * for whoever already beat its record.
  */
-import { LEVEL_COUNT, RULESET_ID, SIM_VERSION, STEP } from '@parapet/sim';
+import {
+  CONTEST_MODES,
+  contestCharacter,
+  contestOfCharacter,
+  FIRST_BOSS_CHARACTER,
+  RULESET_ID,
+  SIM_VERSION,
+  STEP,
+} from '@parapet/sim';
 import { bossProblems, type BossData, type BossRoster } from '@parapet/runtime/content/bosses.ts';
 import {
   lookDataProblems,
@@ -64,9 +72,8 @@ const stageFiles = import.meta.glob('@content/bosses/*/stage.json', {
 
 /** The silhouette of a boss still in the workshop. */
 export const WORKSHOP_COLOR: EchoColor = makeEchoColor('workshop', '#7d2a63');
-export const CONTEST_KINDS: readonly ContestKind[] = ['flags', 'sprint'];
-/** First character number of the bosses (the original's are 0..9). */
-export const FIRST_BOSS_CHARACTER = 10;
+// The contests' modes and the bosses' character numbers are the simulation's (`ranking.ts`).
+export { CONTEST_MODES, contestCharacter, contestOfCharacter, FIRST_BOSS_CHARACTER };
 
 /**
  * The colours of a boss's rows in the menus (its contests, the challenge to it): a band of its
@@ -91,24 +98,6 @@ export interface Boss {
   looks: ResolvedLook[];
   fx: FxFile | null;
   stage: StageFile | null;
-}
-
-/**
- * The two characters of a level's boss, in level order: with its effect (both records beaten)
- * and plain (one of them). The numbers keep the contest they once belonged to (`flags`: the
- * one with the effect) because recorded runs name them.
- */
-export function contestCharacter(levelId: number, kind: ContestKind): number {
-  return FIRST_BOSS_CHARACTER + 2 * levelId + (kind === 'sprint' ? 1 : 0);
-}
-
-/** The contest behind a boss character, or null for the original's characters. */
-export function contestOfCharacter(
-  character: number,
-): { levelId: number; kind: ContestKind } | null {
-  const i = character - FIRST_BOSS_CHARACTER;
-  if (!Number.isInteger(i) || i < 0 || i >= 2 * LEVEL_COUNT) return null;
-  return { levelId: i >> 1, kind: (i & 1) === 0 ? 'flags' : 'sprint' };
 }
 
 export interface ContestRecord {
@@ -257,7 +246,7 @@ export function bossOfCharacter(
   if (!contest) return null;
   const boss = bossOfLevel(contest.levelId);
   if (!boss) return null;
-  return { boss, ...contest, effects: contest.kind === 'flags' };
+  return { boss, levelId: contest.levelId, kind: contest.mode, effects: contest.mode === 'flags' };
 }
 
 /** The effect variants a boss wears in an outfit. */
@@ -278,7 +267,7 @@ export function isDrawn(boss: Boss | null | undefined): boolean {
 /** Puts every boss's outfits on its two characters. */
 export function registerBosses(skins: SkinLibrary): void {
   for (const boss of BOSSES) {
-    for (const kind of CONTEST_KINDS) {
+    for (const kind of CONTEST_MODES) {
       skins.setOutfits(contestCharacter(boss.levelId, kind), boss.looks);
     }
   }
@@ -290,8 +279,8 @@ export function registerBosses(skins: SkinLibrary): void {
  */
 export function bossCharacterFor(levelId: number, progress: ContestProgress): number | null {
   if (!isDrawn(bossOfLevel(levelId))) return null;
-  const wins = CONTEST_KINDS.filter((kind) => isContestBeaten(progress, levelId, kind)).length;
-  if (wins >= CONTEST_KINDS.length) return contestCharacter(levelId, 'flags');
+  const wins = CONTEST_MODES.filter((kind) => isContestBeaten(progress, levelId, kind)).length;
+  if (wins >= CONTEST_MODES.length) return contestCharacter(levelId, 'flags');
   if (wins > 0) return contestCharacter(levelId, 'sprint');
   return null;
 }

@@ -1,30 +1,32 @@
 /**
- * The live scores page (dev server only): renders a live score of the menus or the contests
- * (`content/music`, `LiveScore.ts`) offline exactly as the player plays it — one synthesiser
- * with a voice pool per channel, the tracks' effects (`TrackEffects.ts`) — and measures its
- * loudness. A driver (or the console) calls `window.live.render(name, kind, passes)`; the
- * buttons render one to listen to here. `window.live.measureAll()` returns the table of
- * `content/audio/live-loudness.json`.
+ * The live scores page (dev server only): renders a score of ours as the menus or a run with a
+ * boss plays it (`content/music`, `LiveScore.ts`), offline, on one synthesiser with the tracks'
+ * effects built as the player builds them (`TrackEffects.ts`), and measures its loudness. The
+ * buttons render one score to listen to here; **Measure all** measures every score and plan
+ * and **Save** writes `content/audio/live-loudness.json` through the dev server
+ * (`build/devEndpoints.ts`, POST /dev/live-loudness). A script can use `window.live.render`.
  */
 import {
-  contestPlan,
   liveSong,
-  menuPlan,
+  planFor,
+  type LiveKind,
   type LiveScore,
 } from '@parapet/runtime/audio/LiveScore.ts';
 import {
   integratedLoudness,
   METER_RATE,
+  synthFingerprint,
   type LoudnessTable,
 } from '@parapet/runtime/audio/LoudnessMeter.ts';
 import type { MidiSong } from '@parapet/runtime/audio/MidiFile.ts';
 import { LIVE_SCORES } from '@parapet/runtime/audio/MusicDirector.ts';
 import { Synth } from '@parapet/runtime/audio/Synth.ts';
 import { buildSongEffects } from '@parapet/runtime/audio/TrackEffects.ts';
-import { loadLiveScore, type LiveLoudness } from '../src/app/liveMusic.ts';
+import { loadLiveScore } from '../src/app/liveMusic.ts';
+import { $ } from './dom.ts';
 import mainLoudness from '@content/audio/loudness.json';
 
-type Kind = 'menu' | 'contest';
+const KINDS: readonly LiveKind[] = ['menu', 'boss'];
 
 /** Seconds the effects and the last notes ring after the end. */
 const TAIL_S = 3;
@@ -79,9 +81,9 @@ async function renderPasses(song: MidiSong, passes: number): Promise<Float32Arra
   return [buffer.getChannelData(0), buffer.getChannelData(1)];
 }
 
-async function songOf(name: string, kind: Kind): Promise<MidiSong> {
+async function songOf(name: string, kind: LiveKind): Promise<MidiSong> {
   const score: LiveScore = await loadLiveScore(name);
-  return liveSong(score, kind === 'menu' ? menuPlan(score) : contestPlan(score));
+  return liveSong(score, planFor(score, kind));
 }
 
 /** 16-bit PCM at `gain` (headroom: the synthesiser peaks above 1), interleaved, base64. */
@@ -99,9 +101,10 @@ function pcm16(channels: Float32Array[], gain: number): string {
   return btoa(bin);
 }
 
+/** One pass of a score's plan rendered and measured (its loudness over the pass alone). */
 async function render(
   name: string,
-  kind: Kind,
+  kind: LiveKind,
   passes = 1,
   wav = false,
 ): Promise<{ lufs: number; seconds: number; peak: number; pcm?: string }> {
@@ -119,42 +122,61 @@ async function render(
   return { lufs, seconds: song.durationMs / 1000, peak, ...(wav ? { pcm: pcm16(ch, 0.5) } : {}) };
 }
 
-/** Every score and plan measured; the level is the original's game tracks' (`audio/loudness.json`). */
-async function measureAll(): Promise<LiveLoudness> {
+/**
+ * Every score and plan measured: the table of `live-loudness.json`. The level is the one the
+ * original's game tracks are brought to (`loudness.json`), so our scores stand with them.
+ */
+async function measureAll(onProgress: (text: string) => void): Promise<LoudnessTable> {
   const tracks: Record<string, number> = {};
   for (const name of LIVE_SCORES) {
-    for (const kind of ['menu', 'contest'] as const) {
+    for (const kind of KINDS) {
+      onProgress(`Measuring ${name} · ${kind}…`);
       tracks[`${name}/${kind}`] = Math.round((await render(name, kind)).lufs * 100) / 100;
     }
   }
-  return { target: (mainLoudness as LoudnessTable).target, tracks };
+  return { synth: synthFingerprint(), target: (mainLoudness as LoudnessTable).target, tracks };
 }
 
 (window as unknown as { live: unknown }).live = { render, measureAll };
 
-const list = document.getElementById('list')!;
-const status = document.getElementById('status')!;
+const status = $<HTMLParagraphElement>('status');
+const list = $<HTMLDivElement>('list');
+const measure = $<HTMLButtonElement>('measure');
+const save = $<HTMLButtonElement>('save');
+/** One output context for listening; a new source each time. */
+let listening: AudioContext | null = null;
 let playing: AudioBufferSourceNode | null = null;
 for (const name of LIVE_SCORES) {
-  for (const kind of ['menu', 'contest'] as const) {
+  for (const kind of KINDS) {
     const button = document.createElement('button');
     button.textContent = `${name} · ${kind}`;
     button.onclick = async () => {
       status.textContent = `Rendering ${name} · ${kind}…`;
       const song = await songOf(name, kind);
       const ch = await renderPasses(song, 1);
-      const ctx = new AudioContext({ sampleRate: METER_RATE });
-      const buffer = ctx.createBuffer(2, ch[0]!.length, METER_RATE);
+      listening ??= new AudioContext({ sampleRate: METER_RATE });
+      const buffer = listening.createBuffer(2, ch[0]!.length, METER_RATE);
       buffer.copyToChannel(ch[0]! as Float32Array<ArrayBuffer>, 0);
       buffer.copyToChannel(ch[1]! as Float32Array<ArrayBuffer>, 1);
       playing?.stop();
-      playing = ctx.createBufferSource();
+      playing = listening.createBufferSource();
       playing.buffer = buffer;
-      playing.connect(ctx.destination);
+      playing.connect(listening.destination);
       playing.start();
       status.textContent = `${name} · ${kind}: ${integratedLoudness(ch).toFixed(2)} LUFS`;
     };
     list.appendChild(button);
   }
 }
+measure.onclick = async () => {
+  measure.disabled = true;
+  const table = await measureAll((text) => (status.textContent = text));
+  status.textContent = `Measured ${Object.keys(table.tracks).length} tracks at target ${table.target} LUFS.`;
+  save.disabled = false;
+  save.onclick = async () => {
+    const res = await fetch('/dev/live-loudness', { method: 'POST', body: JSON.stringify(table) });
+    status.textContent = res.ok ? 'Saved.' : `Save failed: HTTP ${res.status}`;
+  };
+  measure.disabled = false;
+};
 status.textContent = 'Ready.';

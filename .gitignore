@@ -12,8 +12,14 @@ reference/emulator/build/
 reference/emulator/out/
 # intermediate extraction (unpacked jar)
 packages/tools/.work/
-# TAS runs: the input of Gwynerva's records stays local (only times are published)
+# TAS runs: the searches' output; the optimal records are published in docs/tas-records, the
+# stylish runs the bosses race stay local (the game ships only their times and glimpses)
 packages/tools/tas-out/
+# other builds of the original jar (the emulator can play them); only the 1.0.8 jar is tracked
+packages/content/playman/original/*
+!packages/content/playman/original/Playman_Extreme_Running_240x320.jar
+# worktrees of the Claude Code desktop app
+.claude/worktrees/
 # previews drawn by the boss art scripts
 packages/tools/art/out/
 # Python bytecode of the art scripts

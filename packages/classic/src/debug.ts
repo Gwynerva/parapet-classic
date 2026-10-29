@@ -23,7 +23,7 @@ import {
 import { Particles } from '@parapet/runtime/render/Particles.ts';
 import { CHARACTER_OBJECT } from '@parapet/runtime/render/SceneRenderer.ts';
 import { CharacterFx } from '@parapet/runtime/render/fx/CharacterFx.ts';
-import { allBosses, characterFx, CONTEST_KINDS, contestCharacter, isDrawn } from './app/bosses.ts';
+import { allBosses, characterFx, CONTEST_MODES, contestCharacter, isDrawn } from './app/bosses.ts';
 import type { ViewSize } from '@parapet/runtime/render/View.ts';
 import { canvasPainter, drawTileOutlines } from '@parapet/runtime/render/PlaceholderTiles.ts';
 import { createRenderers } from './app/renderers.ts';
@@ -119,7 +119,7 @@ async function main(): Promise<void> {
   const characterIds = Array.from({ length: 10 }, (_, i) => i);
   for (const boss of allBosses()) {
     if (!isDrawn(boss)) continue;
-    for (const kind of CONTEST_KINDS) characterIds.push(contestCharacter(boss.levelId, kind));
+    for (const kind of CONTEST_MODES) characterIds.push(contestCharacter(boss.levelId, kind));
   }
   const theme = themeOfLevel(LEVEL_ID);
   const artFrame = defaultLevelArtFrame(LEVEL_ID);

@@ -2,7 +2,7 @@
  * Records: the local bests of a level, one row per mode that has records. Left/right (or a
  * tap on the header) change the level; a record opens its actions (watch, race it as a
  * ghost, share it as a challenge link or a file). "Open replay" races a replay file; files
- * can also be dropped onto the window and links pasted with Ctrl+V.
+ * can also be dropped onto the window and links pasted.
  */
 import { isRankedMode, LEVEL_COUNT, modeForMissionType, type RunMode } from '@parapet/sim';
 import { formatResult, Theme, type GameContext } from '../Context.ts';

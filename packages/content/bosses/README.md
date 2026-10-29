@@ -3,8 +3,8 @@
 Every level has a boss, a character of its own with a name, a look (or several), an effect and
 a little world. On its level the boss holds a record in Flag hunt and in Sprint (without the
 original's rival): "Boss: Flag hunt" and "Boss: Sprint" in the mission list, open once every
-mission of the level is complete. A boss does not race in sight, so its routes stay secret but
-for two seconds around each flag (`glimpses.json`), which loop as a hologram by the player's
+mission of the level is complete. A boss does not race in sight: of its route the game shows
+two seconds around each flag (`glimpses.json`), which loop as a hologram by the player's
 next flag: it waits by the start in a haze of its own particles, vanishes in a burst of them
 when the run starts and appears again when its time is up, where the player's run will end: at
 the goal in a sprint, by the flag the player is to take next in a flag hunt (moving on with
@@ -44,9 +44,9 @@ then have to be searched again.
 The runs come from a tool-assisted search (`packages/tools/src/tas`) under human limits:
 
 - single presses of the four direction keys, like a keyboard (no held keys, no chords), at
-  least 3 steps (≈ 100 ms) apart;
-- no frame-perfect presses: every press also works one step early or late (the presses after
-  it unchanged, or moved along), losing at most 300 ms. A run with such a press is never kept
+  least 3 steps (90 ms of game time, about 100 ms real) apart;
+- no frame-perfect presses: every press also works one step early or one step late, at least
+  one of the two (the presses after it unchanged, or moved along), losing at most 300 ms. A run with such a press is never kept
   over one without and never published (`verify` and `publish` turn it down).
 
 Since 0.5.0 a boss races its **stylish** run: the showiest found within 15 % of the fastest
@@ -64,8 +64,10 @@ enough as they are). Each
 stretch between flags gives in proportion to its length, and the screens show only the stretched
 times. `contests.json` keeps the found ones.
 
-The inputs of the runs stay in `packages/tools/tas-out/`, which git ignores: of the runs, only
-two seconds around each flag are published, as poses (below). `reference/notes/09-tas.md` tells
+The inputs of the stylish runs stay in `packages/tools/tas-out/`, which git ignores: of them,
+only two seconds around each flag are published, as poses (below). The optimal runs they are
+measured against are public, with their inputs, in
+[`docs/tas-records`](../../../docs/tas-records/README.md). `reference/notes/09-tas.md` tells
 how the records were found.
 
 ```bash
@@ -233,10 +235,3 @@ The character screen's preview: the character runs through a strip of its boss's
   flying cars), fade (`alpha`) or come `front`.
 - `ground` — the strip under the feet; `tint` — a colour over everything (dusk, night).
 - `ambient` — the place's own particles (`emitters`): leaves, rain, sand, spores.
-
-## `theme.json` — the music
-
-The contests' theme: a small tracker score (`packages/runtime/src/audio/Score.ts`) played by
-the same synthesiser as the original's MIDI music. D minor with the Phrygian E♭ and the
-harmonic minor's C♯, 168 BPM, 32 bars that loop: a heartbeat intro, the theme, a rising climb
-with guitar stabs, a break with a snare roll, the theme an octave up.

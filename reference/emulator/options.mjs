@@ -54,6 +54,28 @@ export const OPTIONS = [
     take: true,
     help: 'seconds recorded after the last command',
   },
+  {
+    name: 'unlock',
+    kind: 'bool',
+    def: false,
+    take: true,
+    help: "every level open in the level menu (the menu's lock check says yes; the races are untouched)",
+  },
+  {
+    name: 'jar',
+    kind: 'path',
+    def: null,
+    take: true,
+    help: 'the game jar (default: the original in packages/content/playman/original)',
+  },
+  {
+    name: 'frameMethod',
+    kind: 'enum',
+    values: ['t', 's'],
+    def: 't',
+    take: true,
+    help: "the game's once-a-frame method the pace hooks: t in 1.0.8 (the original here), s in 1.0.4",
+  },
 
   // The picture.
   {

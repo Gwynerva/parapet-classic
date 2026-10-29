@@ -35,7 +35,7 @@ import {
   bossName,
   bossOfLevel,
   bossTint,
-  CONTEST_KINDS,
+  CONTEST_MODES,
   contestCharacter,
   contestRecord,
   isDrawn,
@@ -150,7 +150,7 @@ export class MissionSelectScreen implements Screen {
     const boss = bossOfLevel(this.levelId);
     const name = bossName(i18n, boss);
     const locked = i18n.t('contest.locked', { boss: name });
-    for (const kind of CONTEST_KINDS) {
+    for (const kind of CONTEST_MODES) {
       const record = contestRecord(this.levelId, kind);
       if (!record || !boss) continue;
       const beaten = isContestBeaten(this.contests, this.levelId, kind);

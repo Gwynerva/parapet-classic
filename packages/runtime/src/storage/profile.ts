@@ -4,6 +4,7 @@
  * last player name/character. Every entry is wrapped in `{ v, data }` so the schema can evolve; every
  * read is guarded, because storage may be disabled, full or hold garbage.
  */
+import type { ContestMode } from '@parapet/sim';
 import {
   compareRuns,
   isRankedMode,
@@ -392,8 +393,8 @@ export function resetProgress(): void {
 // Contests with the bosses (not part of the original's progress)
 // ---------------------------------------------------------------------------------------------
 
-/** The modes the bosses are raced in. */
-export type ContestKind = 'flags' | 'sprint';
+/** The modes the bosses are raced in (`CONTEST_MODES`). */
+export type ContestKind = ContestMode;
 
 export interface ContestProgress {
   /** Per kind, bit `level` set once the level's boss was beaten in it. */

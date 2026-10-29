@@ -16,7 +16,7 @@
  * there is one) and the dev server muxes the stream into an MP4 with ffmpeg. The same
  * parameters always give the same attempts.
  */
-import { createRun, MoveTable, STEP, type World, type WorldState } from '@parapet/sim';
+import { createRun, LEVEL_COUNT, MoveTable, STEP, type World, type WorldState } from '@parapet/sim';
 import { GameLoop } from '@parapet/runtime/app/GameLoop.ts';
 import { Camera } from '@parapet/runtime/render/Camera.ts';
 import { CharacterRenderer, drawPose } from '@parapet/runtime/render/CharacterRenderer.ts';
@@ -26,8 +26,8 @@ import { CharacterFx } from '@parapet/runtime/render/fx/CharacterFx.ts';
 import { defaultLevelArtFrame, themeOfLevel } from '@parapet/runtime/render/LevelRenderer.ts';
 import { Particles } from '@parapet/runtime/render/Particles.ts';
 import { screenPixels, worldGrid, type CameraPos } from '@parapet/runtime/render/View.ts';
-import { BitmapFont, type BitmapFontData } from '@parapet/runtime/text/BitmapFont.ts';
 import { outlined } from '@parapet/runtime/ui/draw.ts';
+import { formatTime } from '@parapet/runtime/ui/theme.ts';
 import {
   isContestMode,
   keyBits,
@@ -37,12 +37,10 @@ import {
 } from '../../tools/src/tas/model.ts';
 import { bossOfLevel, characterFx, contestCharacter } from '../src/app/bosses.ts';
 import { loadContent } from '../src/assets/content.ts';
-import display16 from '../../content/fonts/display-16.json';
-import display16Png from '../../content/fonts/display-16.png';
+import { loadFonts } from '../src/assets/fonts.ts';
 import { createRenderers } from '../src/app/renderers.ts';
 import { $ } from './dom.ts';
 
-const LEVELS = 12;
 /** The leader stands at the start this long before it runs, and at the end after it. */
 const INTRO_MS = 1200;
 const OUTRO_MS = 2500;
@@ -79,6 +77,8 @@ interface Options {
   scale: number;
   batch: number;
   hud: boolean;
+  /** Step at the live game's pace (34.13 ms a step) instead of one step per 30 ms of video. */
+  live: boolean;
   record: boolean;
   /** Render frame by frame into a video instead of playing in real time. */
   render: boolean;
@@ -87,6 +87,16 @@ interface Options {
   run: string;
   outfit: number;
   plain: boolean;
+  /** Added to the video's name, so variants of a level do not overwrite each other. */
+  tag: string;
+}
+
+/**
+ * Screen pixels per game pixel by default: 360 game pixels of height on a landscape canvas, at
+ * least 270 of width on a portrait one (the game's own portrait view), whole numbers only.
+ */
+function defaultScale(width: number, height: number): number {
+  return Math.max(1, Math.floor(Math.min(height / 360, width / 270)));
 }
 
 function readOptions(): Options {
@@ -94,29 +104,50 @@ function readOptions(): Options {
   const level = q.get('level') ?? 'all';
   const levels =
     level === 'all'
-      ? Array.from({ length: LEVELS }, (_, i) => i)
+      ? Array.from({ length: LEVEL_COUNT }, (_, i) => i)
       : level
           .split(',')
           .map(Number)
-          .filter((l) => Number.isInteger(l) && l >= 0 && l < LEVELS);
+          .filter((l) => Number.isInteger(l) && l >= 0 && l < LEVEL_COUNT);
   const mode = q.get('mode') ?? 'sprint';
   const size = /^(\d+)x(\d+)$/.exec(q.get('size') ?? '') ?? [null, '3840', '2160'];
   const width = Number(size[1]);
   const height = Number(size[2]);
+  const hud = q.get('hud') === '1';
+  const n = q.has('n') ? Math.max(0, Number(q.get('n')) || 0) : 80;
+  const scale = Number(q.get('scale')) || defaultScale(width, height);
+  const live = q.get('pace') === 'live';
+  const outfit = Number(q.get('outfit')) || 0;
+  const plain = q.get('plain') === '1';
+  // Every setting that changes the picture goes into the name, beside a tag of one's own.
+  const tag = [
+    width === 3840 && height === 2160 ? '' : `${width}x${height}`,
+    scale === defaultScale(width, height) ? '' : `s${scale}`,
+    n === 80 ? '' : `n${n}`,
+    hud ? 'hud' : '',
+    live ? 'live' : '',
+    outfit ? `o${outfit}` : '',
+    plain ? 'plain' : '',
+    /^[\w-]+$/.test(q.get('tag') ?? '') ? q.get('tag')! : '',
+  ]
+    .filter(Boolean)
+    .join('-');
   return {
     levels: levels.length > 0 ? levels : [0],
     mode: isContestMode(mode) ? mode : 'sprint',
     width,
     height,
-    scale: Number(q.get('scale')) || Math.max(1, Math.floor(height / 360)),
-    batch: Number(q.get('n')) || 80,
-    hud: q.get('hud') === '1',
+    scale,
+    batch: n,
+    hud,
+    live,
     record: q.get('record') === '1',
     render: q.get('render') === '1',
     mbps: Number(q.get('mbps')) || (q.get('render') === '1' ? 100 : 60),
     run: /^[\w-]+$/.test(q.get('run') ?? '') && q.get('run') !== 'optimal' ? q.get('run')! : '',
-    outfit: Number(q.get('outfit')) || 0,
-    plain: q.get('plain') === '1',
+    outfit,
+    plain,
+    tag,
   };
 }
 
@@ -336,12 +367,6 @@ function opacity(a: Live, t: number): number {
   return o;
 }
 
-function formatClock(ms: number): string {
-  const s = Math.max(0, ms) / 1000;
-  const m = Math.floor(s / 60);
-  return `${m}:${(s - m * 60).toFixed(2).padStart(5, '0')}`;
-}
-
 async function main(): Promise<void> {
   const options = readOptions();
   const statusBox = $<HTMLDivElement>('status');
@@ -353,10 +378,8 @@ async function main(): Promise<void> {
     if (!stay) statusTimer = window.setTimeout(() => statusBox.classList.add('hidden'), 3000);
   };
 
-  const [content, font] = await Promise.all([
-    loadContent(),
-    BitmapFont.fromData(display16 as BitmapFontData, display16Png),
-  ]);
+  const [content, fonts] = await Promise.all([loadContent(), loadFonts()]);
+  const font = fonts.display;
   const { sheet, scene, sine, level: levels, skins, echo, clips, moves } = createRenderers(content);
 
   const canvas = $<HTMLCanvasElement>('view');
@@ -472,7 +495,7 @@ async function main(): Promise<void> {
     );
     const total = plan.batches.reduce((n, b) => n + b.attempts.length, 0);
     status(
-      `level ${levelId} ${options.mode}: ${formatClock(plan.timeMs)}, ${total} attempts ` +
+      `level ${levelId} ${options.mode}: ${formatTime(plan.timeMs)}, ${total} attempts ` +
         `(${Math.round(performance.now() - started)} ms)`,
     );
     for (const a of live) release(a);
@@ -602,7 +625,7 @@ async function main(): Promise<void> {
     c.restore();
     if (fullHud) {
       outlined(c, font, `attempts ${spawned}`, 8, 8, { color: '#ffffff' });
-      outlined(c, font, formatClock(clock), view.width - 8, 8, {
+      outlined(c, font, formatTime(clock), view.width - 8, 8, {
         align: 'right',
         color: '#ffffff',
       });
@@ -656,9 +679,14 @@ async function main(): Promise<void> {
   };
 
   // ------------------------------------------------------------------ frame-exact rendering
-  /** A level's video name: `L01-sprint` (with the stylish variant: `L01-sprint-style-15`). */
+  /**
+   * A level's video name: `L01-sprint` (with the stylish variant: `L01-sprint-style-15`, with
+   * other settings their tag: `L01-sprint-style-15-2160x3840-n250-hud`).
+   */
   const videoName = (levelId: number): string =>
-    `L${String(levelId + 1).padStart(2, '0')}-${options.mode}${options.run ? `-${options.run}` : ''}`;
+    [`L${String(levelId + 1).padStart(2, '0')}`, options.mode, options.run, options.tag]
+      .filter(Boolean)
+      .join('-');
 
   /** The first encoder setting the browser takes: H.264 High, else HEVC, the GPU's if any. */
   const encoderSetting = async (): Promise<{ config: VideoEncoderConfig; ext: string } | null> => {
@@ -821,11 +849,14 @@ async function main(): Promise<void> {
     e.preventDefault();
   });
 
-  /** Moves the reel on by `dt` ms of page time: the wait at the start, then the steps. */
+  /**
+   * Moves the reel on by `dt` ms of page time: the wait at the start, then the steps (one per
+   * `STEP` ms, or at the live game's pace: game time runs at 900/1024 of real time).
+   */
   function advance(dt: number): void {
     pageMs += dt;
     if (pageMs < INTRO_MS) return;
-    acc += dt;
+    acc += options.live ? (dt * 900) / 1024 : dt;
     while (acc >= STEP) {
       acc -= STEP;
       step();

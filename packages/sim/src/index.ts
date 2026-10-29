@@ -94,13 +94,18 @@ export {
 export type { ContentHash } from './content/hash.ts';
 export {
   LEVEL_COUNT,
+  CONTEST_MODES,
+  isContestMode,
+  FIRST_BOSS_CHARACTER,
+  contestCharacter,
+  contestOfCharacter,
   SCORE_CHALLENGE_LEVELS,
   RANKED_MODES,
   isRankedMode,
   rankingSort,
   compareRuns,
 } from './ranking.ts';
-export type { RankingSort, RankedOutcome } from './ranking.ts';
+export type { RankingSort, RankedOutcome, ContestMode } from './ranking.ts';
 export {
   REPLAY_FORMAT,
   MAX_REPLAY_NAME_LENGTH,

@@ -1,6 +1,6 @@
 /**
  * The race page (`r/?<code>`) as search engines and screen readers see it. The page is one for
- * every race (`vite.config.ts`, `racePage`), and chat previews only ever read that: a static
+ * every race (`build/site.ts`, `racePage`), and chat previews only ever read that: a static
  * host cannot serve a picture per run. Engines that run the page's script do see more: once a
  * link's replay has been re-run, the title, the description and the canonical address become
  * the race's own, and a line of text over the canvas (visible to screen readers only) says

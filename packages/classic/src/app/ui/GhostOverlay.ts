@@ -56,7 +56,7 @@ export function drawMarkerLabel(
  * the point, `margin` inside its edge, with the unit vector of that line; null while the point
  * is inside.
  */
-export function edgePoint(
+function edgePoint(
   area: Rect,
   x: number,
   y: number,

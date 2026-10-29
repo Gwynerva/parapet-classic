@@ -1,25 +1,28 @@
 /**
- * The layered scores of the promo video's episodes (`content/music/*.json`) played live in the
- * game. They are written in the same text format as the bosses' old theme (`Score.ts`), with a
- * few fields of their own:
+ * Our layered scores (`content/music/*.json`, written for the videos about the game) played
+ * live by the synthesiser. They are in the text format of `Score.ts`, with a few fields of
+ * their own (`packages/content/music/README.md` tells how to write one):
  *
  * - `patches`: GM program → patch, sounds of the score's own (as `MidiSong.patches`);
  * - `layers`: every track belongs to one layer of fullness, `base` (the motif alone), `more`
- *   and `max`; a module played with some layers only leaves the others' tracks out;
+ *   and `max`; a section played with some layers only leaves the others' tracks out;
  * - a track's `echo`: the chip way of an echo, every note repeated later and softer;
  * - a track's `fx`: effects on its sound (`TrackEffects.ts`), and `events` at places in
- *   sections. For the video these were applied to rendered samples; here the tape stops,
- *   reversed slices and stutters become notes (the closest a synthesiser gets), mutes stay
- *   with the effects.
+ *   sections. For the videos these were applied to rendered samples; here the tape stops,
+ *   reversed slices, stutters and fast-forwards become notes (the closest a synthesiser
+ *   gets), and mutes stay with the effects.
  *
- * A score is cut into modules of a few bars (`intro1`, `build1`, `peak2`, …), any of which may
- * follow any other; a plan picks the modules to loop and the layers to play.
+ * A score's sections are modules of a few bars (`intro1`, `build1`, `peak2`, …), any of which
+ * may follow any other; a plan picks the sections to loop and the layers to play.
  */
 import type { Patch, PatchSet } from './Instruments.ts';
 import type { MidiNote, MidiSong } from './MidiFile.ts';
 import { scoreToSong, type Score, type ScoreTrack } from './Score.ts';
 
-/** Every note again `delay` steps later, `repeats` times, each `feedback` times softer. */
+/**
+ * Every note again `delay` steps later, `repeats` times, each `feedback` times softer; a
+ * repeat that would start past the end of the pass is left out.
+ */
 export interface Echo {
   delay: number;
   repeats: number;
@@ -36,9 +39,9 @@ export interface FxEvent {
   /**
    * `tape`: slows down to a stop; `flip`: the slice backwards; `stutter`: its first `slice`
    * steps over and over; `mute`: silence; `fast`: the slice twice over at double speed, an
-   * octave up. (The video's `rise`, `slow` and `crush` are not used by the game's scores.)
+   * octave up.
    */
-  kind: 'tape' | 'flip' | 'stutter' | 'mute' | 'fast' | 'rise' | 'slow' | 'crush';
+  kind: 'tape' | 'flip' | 'stutter' | 'mute' | 'fast';
   slice?: number;
 }
 
@@ -100,31 +103,43 @@ function pick(score: LiveScore, ...names: string[]): string | null {
   return names.find((n) => score.sections[n]) ?? null;
 }
 
+/** Where a score plays: the main menus, or a run with a boss. */
+export type LiveKind = 'menu' | 'boss';
+
 /**
- * The bosses' contests: the score's energetic modules round and round, every layer —
- * build-up A, peak A, wind-down A, build-up B, peak B, wind-down B (whatever the score has).
+ * The sections of a plan: for each [module, variant] pair the section `<module><variant>`, or
+ * the module's only section when it has no variants (then once, not again for variant 2).
+ * Every plan plays every layer; the director keeps the menus' softer.
  */
-export function contestPlan(score: LiveScore): LivePlan {
+function pickSections(score: LiveScore, pairs: readonly [string, string][]): LivePlan {
   const out: string[] = [];
-  for (const v of ['1', '2']) {
-    for (const m of ['build', 'peak', 'fall']) {
-      const name = pick(score, m + v, m);
-      if (name && !(v === '2' && name === m)) out.push(name);
-    }
+  for (const [m, v] of pairs) {
+    const name = pick(score, m + v, m);
+    if (name && !(v === '2' && name === m)) out.push(name);
   }
   return { sections: out, layers: LAYERS };
 }
 
-/** The main menus: the calm opening modules, every layer (the director plays them softly). */
+/**
+ * A run with a boss: the score's energetic sections round and round, build-up A, peak A,
+ * wind-down A, then the B variants (whatever the score has).
+ */
+export function bossPlan(score: LiveScore): LivePlan {
+  const pairs: [string, string][] = [];
+  for (const v of ['1', '2']) for (const m of ['build', 'peak', 'fall']) pairs.push([m, v]);
+  return pickSections(score, pairs);
+}
+
+/** The main menus: the calm opening and middle sections, both variants of each. */
 export function menuPlan(score: LiveScore): LivePlan {
-  const out: string[] = [];
-  for (const m of ['intro', 'mid']) {
-    for (const v of ['1', '2']) {
-      const name = pick(score, m + v, m);
-      if (name && !(v === '2' && name === m)) out.push(name);
-    }
-  }
-  return { sections: out, layers: LAYERS };
+  const pairs: [string, string][] = [];
+  for (const m of ['intro', 'mid']) for (const v of ['1', '2']) pairs.push([m, v]);
+  return pickSections(score, pairs);
+}
+
+/** The plan of a kind of track. */
+export function planFor(score: LiveScore, kind: LiveKind): LivePlan {
+  return kind === 'menu' ? menuPlan(score) : bossPlan(score);
 }
 
 /** What is wrong with a score for the game, or an empty list. */
@@ -139,7 +154,7 @@ export function liveScoreProblems(score: LiveScore): string[] {
     if (other) out.push(`tracks ${other} and ${name} share channel ${track.channel}`);
     channels.set(track.channel, name);
   }
-  for (const plan of [contestPlan(score), menuPlan(score)]) {
+  for (const plan of [bossPlan(score), menuPlan(score)]) {
     if (plan.sections.length === 0) out.push('no modules for a plan');
   }
   return out;
@@ -240,9 +255,12 @@ export function liveSong(score: LiveScore, plan: LivePlan): MidiSong {
     notes.push(n);
     const echo = track.echo;
     for (let k = 1; echo && k <= echo.repeats; k++) {
+      // A repeat past the end of the pass is dropped: the next pass starts on time.
+      const time = n.time + k * echo.delay * stepMs;
+      if (time >= song.durationMs) break;
       notes.push({
         ...n,
-        time: n.time + k * echo.delay * stepMs,
+        time,
         volume: n.volume * Math.pow(echo.feedback, k),
         ...(echo.pingpong ? { pan: k % 2 ? -0.8 : 0.8 } : {}),
       });

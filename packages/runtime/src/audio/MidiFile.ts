@@ -45,7 +45,7 @@ export interface MidiSong {
   notes: MidiNote[];
   /** Level the loader chose for the song (from measured loudness); estimated when absent. */
   gain?: number;
-  /** Patches of the song's own in place of the synthesiser's (`MusicDirector.trackPatches`). */
+  /** Patches of the song's own in place of the synthesiser's (`trackPatches`, a score's `patches`). */
   patches?: PatchSet;
   /**
    * Channel volume changes in time order. When present the synthesiser applies them to the

@@ -6,7 +6,7 @@ The data of Parapet Classic, split by where it comes from.
 
 Everything in this folder comes from _Playman Extreme Running_ (2007, Mr.Goodliving /
 RealNetworks) and belongs to its rights holders. Nothing else does: should the original ever
-have to go, deleting this folder (and having players bring their own jar) leaves only our work.
+have to go, deleting this folder leaves only our work.
 
 - `playman/original/` — the original J2ME jar.
 - `playman/extracted/` — produced by `npm run extract` from the jar: sprites and the atlas,
@@ -32,7 +32,7 @@ The client imports these through the `@content` alias.
 - `skins/skins.json` — the original's ten characters as data: each entry maps to the character
   index used by the body-part swap rules (0 Blaise, 1 Playman, 2–9 the rivals).
 - `bosses/` — the bosses of the contests, one per level: their records, outfits, effects,
-  little worlds and the contests' theme; see [`bosses/README.md`](bosses/README.md).
+  little worlds; see [`bosses/README.md`](bosses/README.md).
 - `moves/demos.json` — the demos of the Moves menu: for each move a little level written as
   text (`#` block, `=` floor, `[` `]` ledges, `|` `!` walls, `H` `h` ladders, `P` pole, `n` `m`
   posts, `x` stone without collision, `S` the start; see `runtime/src/moves/demoLevel.ts`),
@@ -41,10 +41,13 @@ The client imports these through the `@content` alias.
 <move>` prints a demo step by step, `npm run demo -- search <move> up@100..130 …` finds
   press timings that work (and keep working one or two steps off), `npm run demo -- check`
   (and the tests) prove every demo shows its move without a fall.
-- `music/` — the layered scores written for the promo video's episodes, played live on our
-  synthesiser (`runtime/src/audio/LiveScore.ts`): a random one's calm opening, softly, in the
-  main menus, and another one's energetic modules round and round in every contest.
-  `audio/live-loudness.json` holds their measured loudness (`/dev/live.html`).
+- `music/` — our ten scores, written for the videos about the game and played live on the
+  synthesiser (`runtime/src/audio/LiveScore.ts`): a random one's opening and middle sections,
+  softly, in the main menus, and another one's energetic sections round and round in every
+  run with a boss (a contest, or a boss played or watched); every other run keeps the
+  original's track. How to write one: [`music/README.md`](music/README.md).
+  `audio/live-loudness.json` holds their measured loudness (`/dev/live.html`), checked by a
+  test like `loudness.json`.
 - `audio/loudness.json` — the loudness of every music track measured on our synthesiser
   (`/dev/loudness.html` on the dev server); the game plays each at the same level. A test
   fails when the synthesiser changes, so the table is measured again.

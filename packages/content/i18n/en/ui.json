@@ -76,7 +76,7 @@
   "replayFile.save": "Save replay file",
   "replayFile.saved": "Replay file saved",
   "replayFile.open": "Open replay",
-  "replayFile.dropHint": "Drop a replay file onto the window or paste a challenge link (Ctrl+V) to watch or race it.",
+  "replayFile.dropHint": "Drop a replay file onto the window or paste a challenge link to watch or race it.",
   "replayOpen.hint": "Paste a challenge link or a replay code into the field below, or open a replay file.",
   "replayOpen.placeholder": "Link or code",
   "replayOpen.watch": "Watch the run",

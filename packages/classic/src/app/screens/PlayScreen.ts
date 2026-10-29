@@ -51,7 +51,7 @@ import { FrameUnits } from '@parapet/runtime/app/GameLoop.ts';
 import { completeMission, loadProgress } from '@parapet/runtime/storage/profile.ts';
 import { COACH_IDLE_KEYFRAME, COACH_TALK_CLIP } from '../ui/sprites.ts';
 import { drawEdgeSign, formatGap, type EdgePicture } from '../ui/GhostOverlay.ts';
-import { characterFx, pickOutfit } from '../bosses.ts';
+import { characterFx, contestOfCharacter, pickOutfit } from '../bosses.ts';
 import { showsFinishPointer } from '../ui/finishPointer.ts';
 import { HEAD_HEIGHT } from '../ui/BossPresence.ts';
 import { holdLevelNews, levelCompletion, type LevelCompletion } from './LevelCompleteScreen.ts';
@@ -165,10 +165,11 @@ export class PlayScreen implements Screen, WatchHost {
   /**
    * Start the run from scratch (also used by the pause and results screens). `quick` (the
    * restart button, R) goes straight to "get ready": no pages, briefing or flyover again, and
-   * the music plays on. `same` (a replay sought back to an earlier moment) keeps the outfits:
-   * the same run, not a new one.
+   * the music plays on. `same` keeps the outfits: the same run, not a new one (a replay is
+   * always the same run, sought back or started over).
    */
   restart(opts: { quick?: boolean; same?: boolean } = {}): void {
+    const same = opts.same ?? this.setup.script !== undefined;
     const { content, render } = this.ctx;
     const mission = content.missions.levels[this.setup.levelId];
     const data = runContent(this.ctx, this.setup.levelId);
@@ -182,7 +183,7 @@ export class PlayScreen implements Screen, WatchHost {
     this.characters = new CharacterRenderer(render.scene, render.moves, render.clips, render.skins);
     this.echo = new EchoRenderer(this.characters, render.echo);
     this.fx = new CharacterFx(render.echo, { reducedMotion: prefersReducedMotion() });
-    if (!opts.same) this.outfit = pickOutfit(this.setup.character);
+    if (!same) this.outfit = pickOutfit(this.setup.character);
     world.runners.forEach((runner, i) => {
       const isPlayer = runner === world.player;
       const character = isPlayer ? this.setup.character : mission.rivalCharacter;
@@ -218,14 +219,7 @@ export class PlayScreen implements Screen, WatchHost {
       });
     }
     this.contest = this.setup.contest
-      ? new BossContest(
-          this.ctx,
-          this.setup.contest,
-          this.setup.mode,
-          this.setup.levelId,
-          world,
-          opts.same ? this.contest?.outfit : undefined,
-        )
+      ? new BossContest(this.ctx, this.setup.contest, this.setup.mode, this.setup.levelId, world)
       : null;
     this.particles = new Particles(render.sheet, render.sine);
     this.particles.setLevel(world.level);
@@ -273,7 +267,8 @@ export class PlayScreen implements Screen, WatchHost {
     // The keys pop out: over a replay's play head, or by the timer in the player's run.
     const bits = this.session.lastBits;
     if (bits && this.watch) {
-      if (!this.seeking) this.watch.pressed(bits);
+      // The step just run read these bits: the one before the count.
+      if (!this.seeking) this.watch.pressed(bits, world.stepCount - 1);
     } else if (bits && this.ctx.options.inputDisplay) {
       runPresses.pressed(bits);
     }
@@ -426,11 +421,12 @@ export class PlayScreen implements Screen, WatchHost {
         this.ctx.input.clear();
         this.echo.reveal(performance.now());
         this.contest?.start(world);
-        // `a(true)` at the start of play: the menu track in the warm-ups, else the theme's (a
-        // contest: a live score of ours).
+        // `a(true)` at the start of play: the menu track in the warm-ups, else the theme's; a
+        // run with a boss (a contest, or a boss played or watched) gets a score of ours.
         if (world.rules.missionType >= MissionType.WARM_UP_1) this.ctx.music.warmUp();
-        else if (this.setup.contest) this.ctx.music.contest();
-        else if (!this.quickStart) this.ctx.music.game(this.theme);
+        else if (this.setup.contest || contestOfCharacter(this.setup.character)) {
+          this.ctx.music.boss();
+        } else if (!this.quickStart) this.ctx.music.game(this.theme);
         return;
       default:
         return;
@@ -766,7 +762,7 @@ export class PlayScreen implements Screen, WatchHost {
   seek(step: number): void {
     if (!this.watch || this.covered) return;
     if (step < this.stepsRun) {
-      this.restart({ quick: true, same: true });
+      this.restart({ quick: true });
       // Straight on with the replay, without "get ready".
       this.flow.skipToPlay();
     }

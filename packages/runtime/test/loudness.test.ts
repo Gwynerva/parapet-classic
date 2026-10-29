@@ -9,10 +9,13 @@ import {
   tableGain,
   type LoudnessTable,
 } from '../src/audio/LoudnessMeter.ts';
-import { CONTEST_TRACK } from '../src/audio/MusicDirector.ts';
+import { LIVE_SCORES } from '../src/audio/MusicDirector.ts';
 import { CONTENT_DIR, hasContent } from './helpers/content.ts';
 
 const TABLE_FILE = fileURLToPath(new URL('../../content/audio/loudness.json', import.meta.url));
+const LIVE_TABLE_FILE = fileURLToPath(
+  new URL('../../content/audio/live-loudness.json', import.meta.url),
+);
 
 function sine(seconds: number, amplitude: number, hz = 997): Float32Array {
   const out = new Float32Array(Math.round(seconds * METER_RATE));
@@ -48,15 +51,33 @@ describe.skipIf(!hasContent())('loudness table', () => {
     expect(table.synth).toBe(synthFingerprint());
   });
 
-  it('covers every bundled track and the contest theme', () => {
+  it('covers every bundled track', () => {
     const ids = readdirSync(join(CONTENT_DIR, 'music'))
       .map((f) => /^(\d+)\.mid$/.exec(f)?.[1])
       .filter((id): id is string => id !== undefined);
     expect(ids.length).toBeGreaterThan(0);
-    for (const id of [...ids, String(CONTEST_TRACK)]) {
+    for (const id of ids) {
       expect(Number.isFinite(table.tracks[id])).toBe(true);
       expect(tableGain(table, Number(id))).not.toBeNull();
     }
     expect(existsSync(TABLE_FILE)).toBe(true);
+  });
+});
+
+describe('live loudness table', () => {
+  const table = JSON.parse(readFileSync(LIVE_TABLE_FILE, 'utf8')) as LoudnessTable;
+
+  it('was measured on the current synthesiser (re-measure on dev/live.html)', () => {
+    expect(table.synth).toBe(synthFingerprint());
+  });
+
+  it('covers every score in the menus and in a run with a boss', () => {
+    for (const name of LIVE_SCORES) {
+      for (const kind of ['menu', 'boss']) {
+        const key = `${name}/${kind}`;
+        expect(Number.isFinite(table.tracks[key]), key).toBe(true);
+        expect(tableGain(table, key), key).not.toBeNull();
+      }
+    }
   });
 });

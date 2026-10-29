@@ -1,6 +1,6 @@
 /**
  * Opening a replay from the menus: a real text field to paste a challenge link or a bare replay
- * code into (so the system's own paste works on phones, where there is no Ctrl+V), the
+ * code into (so the system's own paste works on phones, which have no paste key), the
  * clipboard read at a press where the browser allows it, and the file dialog. Whatever comes in
  * is re-run at once and shown as a card: who challenges, on which level and mission, as which
  * character, with what time (the result this device computed, not one the link claims). From

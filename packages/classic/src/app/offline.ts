@@ -1,6 +1,6 @@
 /**
  * Offline play. The build writes a service worker, `sw.js` at the site's root
- * (`offlinePlugin` in `vite.config.ts`), that keeps every file the game needs, the music and
+ * (`offlinePlugin` in `build/offline.ts`), that keeps every file the game needs, the music and
  * the name field's font included, though they load only when wanted. Once the site has been
  * opened, it starts with no connection: the game itself needs no network (the visit counter
  * simply misses what it cannot send).
@@ -10,6 +10,7 @@
  * the files it started with (the build before is kept for it, the music it has not loaded yet
  * included).
  */
+import { RACE_FOLDER } from '@parapet/runtime/app/replayFile.ts';
 
 /** What offline play does without: the debug page, search engines' files, link previews. */
 const LEFT_OUT = [
@@ -37,8 +38,8 @@ export function precacheFiles(paths: readonly string[]): string[] {
 const PAGES: Readonly<Record<string, string>> = {
   '': 'index.html',
   'index.html': 'index.html',
-  'r/': 'r/index.html',
-  'r/index.html': 'r/index.html',
+  [RACE_FOLDER]: `${RACE_FOLDER}index.html`,
+  [`${RACE_FOLDER}index.html`]: `${RACE_FOLDER}index.html`,
   'lab/': 'lab/index.html',
   'lab/index.html': 'lab/index.html',
 };

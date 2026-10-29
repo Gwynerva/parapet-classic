@@ -2,7 +2,7 @@
  * The looks page (dev server only, `dev/looks.html`): a boss's outfit running both ways with
  * its effect in its world, a sheet of poses and its atlas. A painted atlas dropped on the page is
  * read back at once, as `npm run look -- import` reads it (`importAtlas`); Save sends the outfit
- * to the dev server (`vite.config.ts`, POST /dev/save-look), which writes the look's file.
+ * to the dev server (`build/devEndpoints.ts`, POST /dev/save-look), which writes the look's file.
  */
 import { buildClipTable } from '@parapet/runtime/anim/Animator.ts';
 import { drawPose, type CharacterPose } from '@parapet/runtime/render/CharacterRenderer.ts';

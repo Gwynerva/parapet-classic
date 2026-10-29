@@ -1,6 +1,6 @@
 /**
  * Files in and out of the page without a server: saving a text file, picking one with the
- * system dialog, files dropped onto the window and text pasted with Ctrl+V. Saving and the
+ * system dialog, files dropped onto the window and text pasted. Saving and the
  * dialog need user activation (call them from a gesture); drops and pastes are gestures
  * themselves.
  */

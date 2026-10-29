@@ -249,7 +249,8 @@ export function songPatch(patches: PatchSet | null | undefined, program: number)
 }
 
 /**
- * The menu track's own sound. Its chords are held for up to eleven seconds by a string section
+ * The original's menu track's own sound (it plays in the warm-ups). Its chords are held for up
+ * to eleven seconds by a string section
  * (program 50) and two synth leads (81) a second apart; the leads' square and saw, unfiltered
  * and held flat, grate over that long. Here they are mellow (triangles under a low-pass) and
  * every chord swells in and slowly settles.

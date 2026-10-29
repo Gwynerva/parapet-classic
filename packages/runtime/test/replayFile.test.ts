@@ -4,6 +4,7 @@ import {
   extractReplayCode,
   MAX_LINK_LENGTH,
   replayFileName,
+  replayRunKey,
   replayFileText,
   replayLink,
 } from '../src/app/replayFile.ts';
@@ -57,8 +58,22 @@ describe('replay links and files', () => {
     expect(extractReplayCode(`{"format":"parapet-classic-replay","code":"a b"}`)).toBeNull();
   });
 
-  it('names files after the level, mode and runner', () => {
-    expect(replayFileName(2, 'sprint', 'Blaise!')).toBe('parapet-l3-sprint-blaise.parapet-replay');
-    expect(replayFileName(0, 'flags', 'Вася')).toBe('parapet-l1-flags.parapet-replay');
+  it('names files after the level, mode, runner and a key of the run', () => {
+    const name = replayFileName(2, 'sprint', 'Blaise!', 'AnUaDAR50gQKCEd3eW5lcnZh');
+    expect(name).toMatch(/^parapet-l3-sprint-blaise-[0-9a-z]{6}\.parapet-replay$/);
+    expect(replayFileName(0, 'flags', 'Вася', 'AnUaDAR50gQKCEd3eW5lcnZh')).toMatch(
+      /^parapet-l1-flags-[0-9a-z]{6}\.parapet-replay$/,
+    );
+    // The key follows the run: the same code gives the same name, another code another one.
+    expect(replayFileName(2, 'sprint', 'Blaise', 'AnUaDAR50gQKCEd3eW5lcnZh')).toBe(
+      replayFileName(2, 'sprint', 'Blaise', 'AnUaDAR50gQKCEd3eW5lcnZh'),
+    );
+    expect(replayRunKey('AnUaDAR50gQKCEd3eW5lcnZh')).not.toBe(
+      replayRunKey('AnUaDAR50gQKCEd3eW5lcnZi'),
+    );
+    // A name cut at one of its separators leaves no double hyphen before the key.
+    expect(
+      replayFileName(0, 'sprint', 'twenty-three-characters-xyz', 'AnUaDAR50gQKCEd3eW5lcnZh'),
+    ).toMatch(/^parapet-l1-sprint-twenty-three-characters-[0-9a-z]{6}\.parapet-replay$/);
   });
 });

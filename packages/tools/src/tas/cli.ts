@@ -56,8 +56,9 @@ const USAGE = `usage: npm run tas -- <command> [options]
 
 Finds the bosses' records: fast runs of every level's Flag hunt and Sprint (no rival) under
 human limits (single key presses, at least --min-gap steps apart, no press that only works
-on its exact step). Runs are kept in packages/tools/tas-out (git-ignored, the routes stay
-secret); only the times are published, and two seconds around each flag as poses (glimpses).
+on its exact step). Runs are kept in packages/tools/tas-out (git-ignored); the optimal runs
+are published in docs/tas-records, and of the stylish runs the bosses race only the times and
+two seconds around each flag as poses (glimpses).
 A run with a frame-perfect press is never kept over one without, and never published.
 With --style the runs sought are the showiest within a cap over the optimal run (style.ts),
 kept in tas-out/style-<cap>; they are studied, not published.
