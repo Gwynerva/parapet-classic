@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Live scores</title>
+    <style>
+      body {
+        background: #101418;
+        color: #ddd;
+        font-family: monospace;
+        margin: 16px;
+      }
+      button {
+        font: inherit;
+        margin: 2px;
+        padding: 4px 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <p>
+      Development helper: renders the promo video's scores as the game plays them in the main menus
+      and the contests (<code>packages/content/music</code>), offline, and measures their loudness.
+    </p>
+    <p id="status">Loading…</p>
+    <div id="list"></div>
+    <script type="module" src="./live.ts"></script>
+  </body>
+</html>

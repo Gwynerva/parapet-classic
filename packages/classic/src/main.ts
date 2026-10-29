@@ -42,14 +42,8 @@ import { parseMidi, stripEndMarker, type MidiSong } from '@parapet/runtime/audio
 import { tableGain, type LoudnessTable } from '@parapet/runtime/audio/LoudnessMeter.ts';
 import loudnessJson from '@content/audio/loudness.json';
 import { MusicPlayer, unlockOnGesture } from '@parapet/runtime/audio/MusicPlayer.ts';
-import {
-  CONTEST_TRACK,
-  MusicDirector,
-  trackPatches,
-  trackTrim,
-} from '@parapet/runtime/audio/MusicDirector.ts';
-import { scoreToSong, type Score } from '@parapet/runtime/audio/Score.ts';
-import themeJson from '@content/bosses/theme.json';
+import { MusicDirector, trackPatches, trackTrim } from '@parapet/runtime/audio/MusicDirector.ts';
+import { loadLiveSong } from './app/liveMusic.ts';
 import terminusUrl from '../../content/fonts/src/terminus/TerminusTTF-4.49.3.ttf';
 import skinsJson from '../../content/skins/skins.json';
 
@@ -89,17 +83,17 @@ async function main(): Promise<void> {
   const music = new MusicDirector({
     player,
     loadTrack: async (id) => {
-      let song: MidiSong;
-      if (id === CONTEST_TRACK) {
-        // The contests' theme is a score of ours, not one of the original's MIDI files.
-        song = scoreToSong(themeJson as unknown as Score);
-      } else {
-        const url = content.music.get(id);
-        if (!url) throw new Error(`music track ${id} is not bundled`);
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`music track ${id}: HTTP ${res.status}`);
-        song = stripEndMarker(parseMidi(await res.arrayBuffer()));
+      // The main menus' and the contests' music: the promo video's scores, levelled already.
+      const live = await loadLiveSong(id);
+      if (live) {
+        live.gain = (live.gain ?? 1) * trackTrim(id);
+        return live;
       }
+      const url = content.music.get(id);
+      if (!url) throw new Error(`music track ${id} is not bundled`);
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`music track ${id}: HTTP ${res.status}`);
+      const song: MidiSong = stripEndMarker(parseMidi(await res.arrayBuffer()));
       // The menu's own mellow patches; every track at the same measured loudness
       // (packages/content/audio/loudness.json), then the menu's kept lower.
       song.patches = trackPatches(id);

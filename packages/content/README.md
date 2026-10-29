@@ -41,6 +41,10 @@ The client imports these through the `@content` alias.
 <move>` prints a demo step by step, `npm run demo -- search <move> up@100..130 …` finds
   press timings that work (and keep working one or two steps off), `npm run demo -- check`
   (and the tests) prove every demo shows its move without a fall.
+- `music/` — the layered scores written for the promo video's episodes, played live on our
+  synthesiser (`runtime/src/audio/LiveScore.ts`): a random one's calm opening, softly, in the
+  main menus, and another one's energetic modules round and round in every contest.
+  `audio/live-loudness.json` holds their measured loudness (`/dev/live.html`).
 - `audio/loudness.json` — the loudness of every music track measured on our synthesiser
   (`/dev/loudness.html` on the dev server); the game plays each at the same level. A test
   fails when the synthesiser changes, so the table is measured again.

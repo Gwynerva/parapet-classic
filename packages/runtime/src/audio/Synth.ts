@@ -20,6 +20,7 @@ const CONTROL_SMOOTHING = 0.012;
 export const SYNTH_VERSION = 2;
 
 interface Voice {
+  channel: number;
   /** Audio time the voice is silent again. */
   until: number;
   sources: AudioScheduledSourceNode[];
@@ -39,6 +40,13 @@ export class Synth {
   channelVolumes = false;
   /** The song's own patches for some programs (`MidiSong.patches`). */
   patches: PatchSet | null = null;
+  /**
+   * `MAX_VOICES` for each channel instead of for the whole song: our dense layered scores
+   * (`content/music`) would otherwise run out of voices in their loudest bars.
+   */
+  voicesPerChannel = false;
+  /** Where a channel goes instead of the synthesiser's output (a track's own effects). */
+  private readonly routes: (AudioNode | null)[] = new Array<AudioNode | null>(16).fill(null);
 
   constructor(ctx: BaseAudioContext, output: AudioNode) {
     this.ctx = ctx;
@@ -50,10 +58,15 @@ export class Synth {
     if (!gain) {
       gain = this.ctx.createGain();
       gain.gain.value = this.channelVolumes ? DEFAULT_CHANNEL_VOLUME : 1;
-      gain.connect(this.output);
+      gain.connect(this.routes[index & 15] ?? this.output);
       this.channels[index & 15] = gain;
     }
     return gain;
+  }
+
+  /** Sends `channel` into `node` instead of the output; call before its first note. */
+  route(channel: number, node: AudioNode): void {
+    this.routes[channel & 15] = node;
   }
 
   /** A channel volume change at audio time `when`. */
@@ -72,7 +85,10 @@ export class Synth {
   /** Schedule a note at audio time `when` (seconds). Drops the note when the polyphony is full. */
   noteAt(note: MidiNote, when: number): void {
     this.prune(when);
-    if (this.voices.length >= MAX_VOICES) return;
+    const busy = this.voicesPerChannel
+      ? this.voices.reduce((n, v) => n + (v.channel === note.channel ? 1 : 0), 0)
+      : this.voices.length;
+    if (busy >= MAX_VOICES) return;
     if (note.channel === 9) this.drumAt(note, when, drumFor(note.note));
     else this.toneAt(note, when, songPatch(this.patches, note.program));
   }
@@ -138,23 +154,51 @@ export class Synth {
     if (patch.lowpass) {
       const filter = this.ctx.createBiquadFilter();
       filter.type = 'lowpass';
-      filter.frequency.value = patch.lowpass;
+      if (patch.lowpassFrom) {
+        filter.frequency.setValueAtTime(patch.lowpassFrom, when);
+        filter.frequency.exponentialRampToValueAtTime(
+          patch.lowpass,
+          when + (patch.filterTime ?? patch.decay),
+        );
+      } else filter.frequency.value = patch.lowpass;
+      if (patch.q) filter.Q.value = patch.q;
       filter.connect(gain);
       target = filter;
     }
     const sources: AudioScheduledSourceNode[] = [];
-    const osc = this.ctx.createOscillator();
-    osc.type = patch.wave;
-    osc.frequency.value = freq;
-    osc.connect(target);
-    osc.start(when);
-    osc.stop(stopAt);
-    sources.push(osc);
-    if (patch.wave2) {
+    // The optional slide and vibrato act on every oscillator's detune.
+    const bend = (osc: OscillatorNode, cents: number): void => {
+      if (patch.pitchFrom) {
+        osc.detune.setValueAtTime(cents + patch.pitchFrom * 100, when);
+        osc.detune.linearRampToValueAtTime(cents, when + (patch.pitchTime ?? 0.08));
+      } else osc.detune.value = cents;
+      if (patch.vibrato) {
+        const lfo = this.ctx.createOscillator();
+        lfo.frequency.value = patch.vibrato[0];
+        const depth = this.ctx.createGain();
+        depth.gain.value = patch.vibrato[1];
+        lfo.connect(depth);
+        depth.connect(osc.detune);
+        lfo.start(when);
+        lfo.stop(stopAt);
+        sources.push(lfo);
+      }
+    };
+    if (!patch.noiseOnly) {
+      const osc = this.ctx.createOscillator();
+      osc.type = patch.wave;
+      osc.frequency.value = freq;
+      bend(osc, 0);
+      osc.connect(target);
+      osc.start(when);
+      osc.stop(stopAt);
+      sources.push(osc);
+    }
+    if (patch.wave2 && !patch.noiseOnly) {
       const osc2 = this.ctx.createOscillator();
       osc2.type = patch.wave2;
       osc2.frequency.value = freq;
-      osc2.detune.value = patch.detune ?? 0;
+      bend(osc2, patch.detune ?? 0);
       const mix = this.ctx.createGain();
       mix.gain.value = 0.5;
       osc2.connect(mix);
@@ -163,7 +207,19 @@ export class Synth {
       osc2.stop(stopAt);
       sources.push(osc2);
     }
-    this.voices.push({ until: stopAt, sources });
+    if (patch.noise) {
+      const src = this.ctx.createBufferSource();
+      src.buffer = this.noiseBuffer();
+      src.loop = true;
+      const mix = this.ctx.createGain();
+      mix.gain.value = patch.noise;
+      src.connect(mix);
+      mix.connect(target);
+      src.start(when);
+      src.stop(stopAt);
+      sources.push(src);
+    }
+    this.voices.push({ channel: note.channel, until: stopAt, sources });
   }
 
   private noiseBuffer(): AudioBuffer {
@@ -239,6 +295,6 @@ export class Synth {
         sources.push(body);
       }
     }
-    this.voices.push({ until: stopAt, sources });
+    this.voices.push({ channel: note.channel, until: stopAt, sources });
   }
 }

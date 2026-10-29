@@ -1,4 +1,5 @@
 import type { PatchSet } from './Instruments.ts';
+import type { SongEffects } from './LiveScore.ts';
 
 /**
  * Standard MIDI file parser (formats 0 and 1) that resolves everything the synthesiser needs
@@ -54,6 +55,10 @@ export interface MidiSong {
   controls?: MidiControl[];
   /** Events the parser skipped (unknown status bytes); for diagnostics. */
   unknownEvents: number;
+  /** `MAX_VOICES` per channel, not per song (`Synth.voicesPerChannel`): the dense live scores. */
+  voicesPerChannel?: boolean;
+  /** The tracks' own effects (live scores, `LiveScore.ts`), built by `TrackEffects.ts`. */
+  effects?: SongEffects;
 }
 
 interface RawEvent {

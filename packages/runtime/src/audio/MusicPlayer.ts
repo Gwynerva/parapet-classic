@@ -11,6 +11,7 @@
  */
 import { songEvents, type MidiControl, type MidiNote, type MidiSong } from './MidiFile.ts';
 import { Synth } from './Synth.ts';
+import { buildSongEffects, type SongEffectsGraph } from './TrackEffects.ts';
 
 /** Seconds of notes scheduled ahead of the audio clock. */
 export const LOOKAHEAD_S = 0.25;
@@ -96,9 +97,10 @@ export class SongCursor {
   }
 }
 
-/** One synthesiser and its output gain. */
+/** One synthesiser, its tracks' effects (live scores) and its output gain. */
 interface Bus {
   synth: Synth;
+  fx: SongEffectsGraph | null;
   gain: GainNode;
   /** The pass whose notes it plays now (-1: none yet). */
   pass: number;
@@ -204,7 +206,13 @@ export class MusicPlayer {
       const synth = new Synth(ctx, gain);
       synth.channelVolumes = (song.controls?.length ?? 0) > 0;
       synth.patches = song.patches ?? null;
-      return { synth, gain, pass: -1 };
+      synth.voicesPerChannel = song.voicesPerChannel ?? false;
+      const fx = song.effects ? buildSongEffects(ctx, song.effects, gain) : null;
+      for (const t of song.effects?.tracks ?? []) {
+        const input = fx?.input(t.channel);
+        if (input) synth.route(t.channel, input);
+      }
+      return { synth, fx, gain, pass: -1 };
     };
     const cursor = new SongCursor(song, loop, start);
     if (positionMs > 0) cursor.seek(positionMs, start);
@@ -234,7 +242,13 @@ export class MusicPlayer {
     gain.linearRampToValueAtTime(0, now + seconds);
     const end = now + seconds + 0.02;
     for (const bus of playback.buses) bus.synth.silence(end);
-    setTimeout(() => playback.songGain.disconnect(), (seconds + 0.2) * 1000);
+    setTimeout(
+      () => {
+        playback.songGain.disconnect();
+        for (const bus of playback.buses) bus.fx?.dispose();
+      },
+      (seconds + 0.2) * 1000,
+    );
   }
 
   pause(): void {
@@ -268,6 +282,7 @@ export class MusicPlayer {
       if (bus.pass !== d.pass) {
         bus.pass = d.pass;
         bus.synth.resetChannels(d.at);
+        bus.fx?.schedule(d.start);
         bus.gain.gain.cancelScheduledValues(d.start);
         bus.gain.gain.setValueAtTime(1, d.start);
         if (d.pass > 0) {

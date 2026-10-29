@@ -4,7 +4,15 @@ import { describe, expect, it } from 'vitest';
 import { parseMidi, songEvents, stripEndMarker, type MidiSong } from '../src/audio/MidiFile.ts';
 import { drumFor, PATCH_COUNT, patchFor, songPatch } from '../src/audio/Instruments.ts';
 import { SongCursor, type DueEvent } from '../src/audio/MusicPlayer.ts';
-import { MENU_TRACK, MusicDirector, trackPatches, trackTrim } from '../src/audio/MusicDirector.ts';
+import {
+  LIVE_CONTEST,
+  LIVE_MENU,
+  LIVE_SCORES,
+  MENU_TRACK,
+  MusicDirector,
+  trackPatches,
+  trackTrim,
+} from '../src/audio/MusicDirector.ts';
 import type { MusicPlayer } from '../src/audio/MusicPlayer.ts';
 import { CONTENT_DIR, hasContent } from './helpers/content.ts';
 
@@ -231,7 +239,7 @@ describe('MusicDirector', () => {
     } as unknown as MusicPlayer & { played: number[] };
   }
 
-  it('rotates the game tracks per theme and keeps the menu track going', async () => {
+  it("rotates the game tracks per theme and keeps the warm-ups' menu track going", async () => {
     const player = fakePlayer();
     const requested: number[] = [];
     const director = new MusicDirector({
@@ -241,9 +249,9 @@ describe('MusicDirector', () => {
         return Promise.resolve(parseMidi(tinyMidi()));
       },
     });
-    director.menu();
+    director.warmUp();
     await Promise.resolve();
-    director.menu();
+    director.warmUp();
     expect(requested).toEqual([MENU_TRACK]);
     director.game(0);
     director.game(0);
@@ -251,6 +259,34 @@ describe('MusicDirector', () => {
     director.game(1);
     expect(requested.slice(1)).toEqual([2, 3, 4, 5]);
     expect(director.current).toBe(5);
+  });
+
+  it('keeps one live score through the menus and picks another for every contest', async () => {
+    const player = fakePlayer();
+    const requested: number[] = [];
+    const rolls = [0.45, 0.45, 0.45, 0.99];
+    const director = new MusicDirector({
+      player,
+      loadTrack: (id) => {
+        requested.push(id);
+        return Promise.resolve(parseMidi(tinyMidi()));
+      },
+      random: () => rolls.shift() ?? 0,
+    });
+    director.menu();
+    await Promise.resolve();
+    director.menu();
+    expect(requested).toEqual([LIVE_MENU + 4]);
+    director.contest();
+    director.contest();
+    director.contest();
+    // Never the same score twice in a row: the second roll skips over the first's.
+    expect(requested.slice(1)).toEqual([LIVE_CONTEST + 4, LIVE_CONTEST + 5, LIVE_CONTEST + 9]);
+    director.menu();
+    expect(director.current).toBe(LIVE_MENU + 0);
+    expect(trackTrim(LIVE_MENU + 3)).toBe(trackTrim(MENU_TRACK));
+    expect(trackTrim(LIVE_CONTEST + 3)).toBe(1);
+    expect(LIVE_SCORES).toHaveLength(10);
   });
 
   it('stops at volume zero and restarts when the volume comes back', async () => {

@@ -6,3 +6,4 @@ packages/sim/test/fixtures
 packages/content/fonts/*.json
 packages/content/bosses/contests.json
 packages/content/bosses/glimpses.json
+packages/content/music/*.json

@@ -418,8 +418,9 @@ export class PlayScreen implements Screen, WatchHost {
         this.ctx.input.clear();
         this.echo.reveal(performance.now());
         this.contest?.start(world);
-        // `a(true)` at the start of play: the menu track in the warm-ups, else the theme's.
-        if (world.rules.missionType >= MissionType.WARM_UP_1) this.ctx.music.menu();
+        // `a(true)` at the start of play: the menu track in the warm-ups, else the theme's (a
+        // contest: a live score of ours).
+        if (world.rules.missionType >= MissionType.WARM_UP_1) this.ctx.music.warmUp();
         else if (this.setup.contest) this.ctx.music.contest();
         else if (!this.quickStart) this.ctx.music.game(this.theme);
         return;

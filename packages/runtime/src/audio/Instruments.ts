@@ -22,6 +22,22 @@ export interface Patch {
   gain: number;
   /** Low-pass cut-off in Hz, when the patch is filtered. */
   lowpass?: number;
+  /** Cut-off at the note's start, Hz, closing (or opening) to `lowpass` over `filterTime`. */
+  lowpassFrom?: number;
+  /** Seconds of the cut-off's sweep (default: the decay). */
+  filterTime?: number;
+  /** Resonance of the low-pass. */
+  q?: number;
+  /** Semitones the note starts away from its pitch, sliding home over `pitchTime`. */
+  pitchFrom?: number;
+  /** Seconds of the slide (default 0.08). */
+  pitchTime?: number;
+  /** [rate Hz, depth cents]: a vibrato on the oscillators. */
+  vibrato?: [number, number];
+  /** Level of white noise mixed in under the same envelope and filter (0..1). */
+  noise?: number;
+  /** Only the noise sounds: the oscillators are left out (hiss, crackle, breath). */
+  noiseOnly?: boolean;
 }
 
 export type DrumKind = 'kick' | 'snare' | 'hat' | 'openHat' | 'tom' | 'cymbal' | 'clap' | 'noise';

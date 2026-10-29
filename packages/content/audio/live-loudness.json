@@ -1,0 +1,25 @@
+{
+  "target": -6.43,
+  "tracks": {
+    "teaser/contest": -12.66,
+    "teaser/menu": -14.02,
+    "idea/contest": -11.04,
+    "idea/menu": -12.75,
+    "day1/contest": -14.24,
+    "day1/menu": -14.94,
+    "day2/contest": -13.8,
+    "day2/menu": -15.04,
+    "day3/contest": -11.37,
+    "day3/menu": -13.23,
+    "day4/contest": -11.92,
+    "day4/menu": -13.94,
+    "day5/contest": -11.28,
+    "day5/menu": -14.07,
+    "day6/contest": -14.5,
+    "day6/menu": -15.24,
+    "speedrun/contest": -15.42,
+    "speedrun/menu": -17.83,
+    "finale/contest": -13.03,
+    "finale/menu": -14.68
+  }
+}
