@@ -67,7 +67,7 @@ Is there a perfect run, one no player and no machine can beat? [`reference/notes
 works it out, and finds three more glitches of the original on the way. The 24 machine
 records of the game, with links to watch each one, are in [`docs/tas-records`](docs/tas-records/README.md).
 
-**Videos** (in Russian): [the story of how the game was made](https://youtu.be/OMVIEZjs5S4)
+**Videos** (in Russian): [the story of how the game was made](https://www.youtube.com/watch?v=UPW5fNUvD14)
 (English subtitles), [the TAS, all 24 records in one run](https://youtu.be/c0hCbcx41Ds) and
 [the OST, the ten scores](https://youtu.be/Lg_kdO6bmiw).
 

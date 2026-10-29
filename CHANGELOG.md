@@ -7,7 +7,7 @@ make the game more comfortable to play and never where they would change how it 
 ## 1.2.0 (2026-10-29)
 
 **Music of our own.** The ten chiptune scores written for the videos about the game
-([the story of how it was made](https://youtu.be/OMVIEZjs5S4), [the TAS](https://youtu.be/c0hCbcx41Ds),
+([the story of how it was made](https://www.youtube.com/watch?v=UPW5fNUvD14), [the TAS](https://youtu.be/c0hCbcx41Ds),
 [the OST](https://youtu.be/Lg_kdO6bmiw)) play live
 on the game's synthesiser (`packages/content/music`, `packages/runtime/src/audio/LiveScore.ts`),
 the way the videos' music was made: synthesised, not recorded.
